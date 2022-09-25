@@ -1,14 +1,14 @@
 <template>
   <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+    <div id="nav">
+      <router-link to="/">Home</router-link> |
+      <router-link to="/projects">Projects</router-link>
+    </div>
   </nav>
-  <router-view/>
+  <router-view />
 </template>
 
 <style lang="scss">
-
-
 #app {
   background-color: $test-variable;
   font-family: Avenir, Helvetica, Arial, sans-serif;
