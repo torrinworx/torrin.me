@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from "react";
 import { Canvas, useFrame } from 'react-three-fiber';
 
 export const
