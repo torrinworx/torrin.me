@@ -2,7 +2,6 @@ import React, { useRef, useState } from 'react'
 
 import { AppBar, Box, Toolbar, IconButton, Typography, Menu, Container, Button, Link, MenuItem } from "@mui/material/";
 import MenuIcon from "@mui/icons-material/Menu";
-import { keyframes } from '@mui/system';
 
 import FloatingBox from "./FloatingBox";
 import { tertiary } from "../Theme"
