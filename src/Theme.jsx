@@ -13,7 +13,8 @@ export const tertiary = "#F8F9FA" // Text
 
 export const shadow = "0px 4px 6px rgba(0, 0, 0, 0.1)"
 export const bevelRadius = "20px"
-
+export const pagePadding = "4%"
+export const contentMargin = "4%"
 
 const theme = createTheme({
   palette: {
@@ -35,7 +36,7 @@ const theme = createTheme({
       "'Poppins', 'Inter', 'Fira Sans', 'Roboto', 'Helvetica', 'Arial', sans-serif",
     h1: {
       fontWeight: 700,
-      fontSize: "2.5rem",
+      fontSize: "3.5rem",
       color: tertiary,
     },
     h2: {
@@ -85,7 +86,7 @@ const ThemeWrapper = ({ children }) => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       {/* Apply padding to the ThemeWrapper and margin to its children */}
-      <Box padding="1.5em">
+      <Box padding={pagePadding}>
         {children}
       </Box>
     </ThemeProvider>

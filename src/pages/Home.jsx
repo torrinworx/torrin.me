@@ -1,18 +1,20 @@
 import React from "react";
 import { Grid, Box, Typography } from "@mui/material";
-import FloatingBox from "../components/FloatingBox";
+import FloatingCard from "../components/FloatingBox";
+
+import { contentMargin } from "../Theme";
 
 const Home = () => {
   return (
-    <Grid container spacing={3} justifyContent="center">
+    <Grid container spacing={contentMargin} justifyContent="center">
       <Grid item xs={12}>
-        <FloatingBox bgColor="transparent">
+        <FloatingCard type="invisible" size="large">
           <Grid container alignItems="center">
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={12}>
               <Box p={3}>
-                <Typography variant="h2" gutterBottom>
-                  Custom 3D <br />
-                  NFT Generation
+                <Typography variant="h1" gutterBottom>
+                  Full Stack <br />
+                  Software Developer
                 </Typography>
               </Box>
             </Grid>
@@ -22,12 +24,12 @@ const Home = () => {
               </Box>
             </Grid>
           </Grid>
-        </FloatingBox>
+        </FloatingCard>
       </Grid>
 
       {/* Big element at the top of the grid with custom height */}
       <Grid item xs={12} md={12}>
-        <FloatingBox bgColor="transparent">
+        <FloatingCard type="translucentSecondary">
           <Box
             sx={{
               textAlign: "center",
@@ -40,11 +42,11 @@ const Home = () => {
           >
             {/* Content */}
           </Box>
-        </FloatingBox>
+        </FloatingCard>
       </Grid>
       {/* First 1x2 element with custom height */}
       <Grid item xs={12} md={6}>
-        <FloatingBox>
+        <FloatingCard type="translucentSecondary">
           <Box
             sx={{
               textAlign: "center",
@@ -57,11 +59,11 @@ const Home = () => {
           >
             {/* Content */}
           </Box>
-        </FloatingBox>
+        </FloatingCard>
       </Grid>
       {/* Second 1x2 element with custom height */}
       <Grid item xs={12} md={6}>
-        <FloatingBox>
+        <FloatingCard type="translucentSecondary">
           <Box
             sx={{
               textAlign: "center",
@@ -74,7 +76,7 @@ const Home = () => {
           >
             {/* Content */}
           </Box>
-        </FloatingBox>
+        </FloatingCard>
       </Grid>
       {/* Add more Grid items with FloatingBox cards as needed */}
     </Grid>

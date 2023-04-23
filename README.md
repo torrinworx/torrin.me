@@ -5,17 +5,21 @@ torrinleonard.com
 ├─ package-lock.json
 ├─ package.json
 ├─ public
-│  ├─ favicon.ico
+│  ├─ favicon_dark.svg
+│  ├─ favicon_light.svg
 │  ├─ index.html
-│  ├─ logo192.png
-│  ├─ logo512.png
 │  ├─ manifest.json
-│  └─ robots.txt
+│  ├─ robots.txt
+│  └─ torrin-profile.png
 └─ src
    ├─ App.jsx
    ├─ Routes.jsx
    ├─ Theme.jsx
    ├─ components
+   │  ├─ FloatingBox.jsx
+   │  ├─ Footer.jsx
+   │  ├─ Header.jsx
+   │  └─ ModelViewer.jsx
    ├─ index.jsx
    └─ pages
       ├─ Home.jsx

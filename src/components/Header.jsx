@@ -1,10 +1,10 @@
 import React, { useRef, useState } from 'react'
 
-import { AppBar, Box, Toolbar, IconButton, Typography, Menu, Container, Button, Link, MenuItem } from "@mui/material/";
+import { AppBar, Box, Toolbar, IconButton, Typography, Menu, Container, Button, Link, MenuItem, useMediaQuery } from "@mui/material/";
 import MenuIcon from "@mui/icons-material/Menu";
 
-import FloatingBox from "./FloatingBox";
-import { tertiary } from "../Theme"
+import FloatingCard from "./FloatingBox";
+import { tertiary, contentMargin } from "../Theme"
 
 const pages = ["About", "Services", "Contact"];
 
@@ -19,8 +19,9 @@ const HeaderProfileImage = () => {
     setIsHovered(false);
   };
 
-  const profileImage = "./torrin-profile.png";
+  const profileImage = './torrin-profile.png';
   const linkRef = useRef(null);
+  const isMobile = useMediaQuery((theme) => theme.breakpoints.down('sm'));
 
   return (
     <Link
@@ -30,19 +31,18 @@ const HeaderProfileImage = () => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       sx={{
-        
-        display: "inline-flex",
-        alignItems: "center", // Horizontally align the image and text
+        display: 'inline-flex',
+        alignItems: 'center', // Horizontally align the image and text
         textDecoration: 'none', // Remove default link underline
       }}
     >
       <Box
         sx={{
-          height: "80px",
-          width: "80px", // Set a fixed width
-          marginRight: "20px",
-          borderRadius: "50%", // Crop container into a circle
-          overflow: "hidden", // Hide any overflow outside the borderRadius
+          height: '80px',
+          width: '80px', // Set a fixed width
+          marginRight: '20px',
+          borderRadius: '50%', // Crop container into a circle
+          overflow: 'hidden', // Hide any overflow outside the borderRadius
         }}
       >
         <Box
@@ -50,37 +50,39 @@ const HeaderProfileImage = () => {
           src={profileImage}
           alt="Logo"
           sx={{
-            height: "90px", // Set a larger height for the image
-            width: "auto",
-            position: "relative",
-            top: "-5px", // Adjust the position accordingly
-            left: "-2px", // Adjust the position accordingly
+            height: '90px', // Set a larger height for the image
+            width: 'auto',
+            position: 'relative',
+            top: '-5px', // Adjust the position accordingly
+            left: '-2px', // Adjust the position accordingly
           }}
         />
       </Box>
-    <Typography
-      variant="h2"
-      style={{
-        display: "inline-block",
-        position: "relative",
-      }}
-    >
+      <Typography
+        variant="h2"
+        style={{
+          display: isMobile ? 'none' : 'inline-block',
+          position: 'relative',
+        }}
+      >
         Torrin Leonard
-        <Box style={{
-          width: isHovered ? "100%" : "0%",
-          height: "4px",
-          backgroundColor: tertiary,
-          position: "absolute",
-          bottom: "-2px",
-          left: 0,
-          transition: "width 0.6s cubic-bezier(0.2,0.5,0.6,1)",
-        }} />
+        <Box
+          style={{
+            width: isMobile || !isHovered ? '0%' : '100%',
+            height: '4px',
+            backgroundColor: tertiary,
+            position: 'absolute',
+            bottom: '-2px',
+            left: 0,
+            transition: 'width 0.6s cubic-bezier(0.2,0.5,0.6,1)',
+          }}
+        />
       </Typography>
     </Link>
   );
 };
 
-function Header() {
+const Header = () => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   // const theme = useTheme();
   // const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -94,11 +96,11 @@ function Header() {
   };
 
   return (
-    <FloatingBox
-      bgColor="translucentSecondary"
+    <FloatingCard
+      type="translucentSecondary"
       component={AppBar}
       position="static"
-      marginBottom="1.5em"
+      marginBottom={contentMargin}
       elevation={0}
     >
       <Container maxWidth="xl">
@@ -170,7 +172,7 @@ function Header() {
           </Menu>
         </Toolbar>
       </Container>
-    </FloatingBox>
+    </FloatingCard>
   );
 }
 
