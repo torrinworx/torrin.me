@@ -1,6 +1,6 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
-import { primary, secondary } from "../Theme";
+import { primary, secondary, shadow, bevelRadius } from "../Theme";
 
 const FloatingBox = ({ children, bgColor, ...props }) => {
   const hexToRgba = (hex, alpha) => {
@@ -22,8 +22,8 @@ const FloatingBox = ({ children, bgColor, ...props }) => {
     <Box
       sx={{
         backgroundColor, // Use the determined background color
-        borderRadius: "20px", // Beveled corners
-        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)", // Add shadow style
+        borderRadius: bevelRadius, // Beveled corners
+        boxShadow: shadow, // Add shadow style
         ...props.sx, // Allow for additional styles to be passed
       }}
       {...props} // Pass through any additional props

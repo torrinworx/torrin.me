@@ -8,6 +8,10 @@ export const primary = "#212529"
 export const secondary = "#ADB5BD"
 export const tertiary = "#F8F9FA" // Text
 
+
+export const shadow = "0px 4px 6px rgba(0, 0, 0, 0.1)"
+export const bevelRadius = "20px"
+
 // https://coolors.co/f8f9fa-e9ecef-dee2e6-ced4da-adb5bd-6c757d-495057-343a40-212529
 // https://coolors.co/03071e-370617-6a040f-9d0208-d00000-dc2f02-e85d04-f48c06-faa307-ffba08
 

@@ -1,27 +1,116 @@
-import * as React from "react";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import Menu from "@mui/material/Menu";
+import React, { useRef } from 'react'
+
+import { AppBar, Box, Toolbar, IconButton, Typography, Menu, Container, Button, Link, MenuItem } from "@mui/material/";
 import MenuIcon from "@mui/icons-material/Menu";
-import Container from "@mui/material/Container";
-import Button from "@mui/material/Button";
-import Link from "@mui/material/Link";
-import MenuItem from "@mui/material/MenuItem";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import { useTheme } from "@mui/material/styles";
+import { keyframes } from '@mui/system';
 
 import FloatingBox from "./FloatingBox";
 import { tertiary } from "../Theme"
 
 const pages = ["About", "Services", "Contact"];
 
+const HeaderProfileImage = () => {
+  const underlineHoverExpand = keyframes`
+    from {
+      width: 0;
+    }
+    to {
+      width: 100%;
+    }
+  `;
+
+  const underlineHoverContract = keyframes`
+    from {
+      width: 100%;
+    }
+    to {
+      width: 0;
+    }
+  `;
+
+  const profileImage = "./torrin-profile.png";
+  const linkRef = useRef(null);
+
+  const handleMouseLeave = () => {
+    linkRef.current.classList.add('hovered');
+    setTimeout(() => {
+      linkRef.current.classList.remove('hovered');
+    }, 600);
+  };
+
+  return (
+    <Link
+      ref={linkRef}
+      href="/"
+      underline="none"
+      sx={{
+        display: "inline-flex",
+        alignItems: "center", // Horizontally align the image and text
+        textDecoration: 'none', // Remove default link underline
+        '& .underline': {
+          position: "relative",
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            width: '0',
+            height: '2px',
+            background: tertiary,
+          },
+        },
+        '&:hover .underline': {
+          '&::before': {
+            animation: `${underlineHoverExpand} 0.6s forwards`,
+          },
+        },
+        '&.hovered .underline': {
+          '&::before': {
+            animation: `${underlineHoverContract} 0.6s forwards`,
+          },
+        },
+      }}
+      onMouseLeave={handleMouseLeave}
+    >
+      <Box
+        sx={{
+          height: "80px",
+          width: "80px", // Set a fixed width
+          marginRight: "20px",
+          borderRadius: "50%", // Crop container into a circle
+          overflow: "hidden", // Hide any overflow outside the borderRadius
+        }}
+      >
+        <Box
+          component="img"
+          src={profileImage}
+          alt="Logo"
+          sx={{
+            height: "90px", // Set a larger height for the image
+            width: "auto",
+            position: "relative",
+            top: "-5px", // Adjust the position accordingly
+            left: "-2px", // Adjust the position accordingly
+          }}
+        />
+      </Box>
+      <Typography
+        variant="h2"
+        className="underline"
+        sx={{
+          position: "relative",
+        }}
+      >
+        Torrin Leonard
+      </Typography>
+    </Link>
+  );
+};
+
 function Header() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  // const theme = useTheme();
+  // const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -30,10 +119,6 @@ function Header() {
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
-
-  // Set the correct paths to the logo images
-  const logoImagePath = "/Logo.png";
-  const smallScreenLogoImagePath = "/icon-512x512.png";
 
   return (
     <FloatingBox
@@ -46,23 +131,7 @@ function Header() {
       <Container maxWidth="xl">
         {/* Set a fixed height for the Toolbar (twice as large) */}
         <Toolbar disableGutters sx={{ height: "96px" }}>
-          {/* Wrap the logo image with a button and set the onClick handler */}
-          <Link
-            href="/"
-            underline="none"
-            sx={{ padding: 0, display: "inline-flex" }}
-          >
-            <img
-              src={isSmallScreen ? smallScreenLogoImagePath : logoImagePath}
-              alt="Logo"
-              style={{
-                // Set different heights for the regular logo and smaller icon
-                height: isSmallScreen ? "64px" : "80px",
-                marginRight: "8px",
-                width: "auto",
-              }}
-            />
-          </Link>
+          <HeaderProfileImage />
 
           {/* Use flexGrow to push buttons and Hamburger to the right */}
           <Box sx={{ flexGrow: 1 }}></Box>
