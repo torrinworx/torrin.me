@@ -1,6 +1,6 @@
 import React from "react";
 import { Grid, Box, Typography } from "@mui/material";
-import FloatingCard from "../components/FloatingBox";
+import FloatingCard from "../components/FloatingCard";
 
 import { contentMargin } from "../Theme";
 

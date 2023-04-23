@@ -1,8 +1,31 @@
 import React, { useRef } from 'react';
-import { Canvas, useFrame } from 'react-three-fiber';
+import { extend, Canvas, useFrame } from '@react-three/fiber';
 
-export const SphereCanvas = () => {
+extend({ Canvas });
 
-    return
-    <div className="canvas-container" style={{zIndex:"1"}}></div>
-}
+const Main = () => {
+  const meshRef = useRef();
+
+  useFrame(() => {
+    meshRef.current.rotation.x += 0.01;
+    meshRef.current.rotation.y += 0.01;
+  });
+
+  return (
+    <mesh ref={meshRef}>
+      <icosahedronBufferGeometry args={[1, 0]} />
+      <meshBasicMaterial color={0x00ff00} />
+    </mesh>
+  );
+};
+
+// Wrapper to resolve issue with Canvas usage in sup components:
+const SphereCanvas = () => {
+  return (
+    <Canvas>
+      <Main />
+    </Canvas>
+  );
+};
+
+export default SphereCanvas;

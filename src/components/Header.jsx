@@ -3,7 +3,7 @@ import React, { useRef, useState } from 'react'
 import { AppBar, Box, Toolbar, IconButton, Typography, Menu, Container, Button, Link, MenuItem, useMediaQuery } from "@mui/material/";
 import MenuIcon from "@mui/icons-material/Menu";
 
-import FloatingCard from "./FloatingBox";
+import FloatingCard from "./FloatingCard";
 import { tertiary, contentMargin } from "../Theme"
 
 const pages = ["About", "Services", "Contact"];
