@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 
 import { AppBar, Box, Toolbar, IconButton, Typography, Menu, Container, Button, Link, MenuItem } from "@mui/material/";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -10,67 +10,32 @@ import { tertiary } from "../Theme"
 const pages = ["About", "Services", "Contact"];
 
 const HeaderProfileImage = () => {
-  const underlineHoverExpand = keyframes`
-    from {
-      width: 0;
-    }
-    to {
-      width: 100%;
-    }
-  `;
+  const [isHovered, setIsHovered] = useState(false);
 
-  const underlineHoverContract = keyframes`
-    from {
-      width: 100%;
-    }
-    to {
-      width: 0;
-    }
-  `;
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
 
   const profileImage = "./torrin-profile.png";
   const linkRef = useRef(null);
-
-  const handleMouseLeave = () => {
-    linkRef.current.classList.add('hovered');
-    setTimeout(() => {
-      linkRef.current.classList.remove('hovered');
-    }, 600);
-  };
 
   return (
     <Link
       ref={linkRef}
       href="/"
       underline="none"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       sx={{
+        
         display: "inline-flex",
         alignItems: "center", // Horizontally align the image and text
         textDecoration: 'none', // Remove default link underline
-        '& .underline': {
-          position: "relative",
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            width: '0',
-            height: '2px',
-            background: tertiary,
-          },
-        },
-        '&:hover .underline': {
-          '&::before': {
-            animation: `${underlineHoverExpand} 0.6s forwards`,
-          },
-        },
-        '&.hovered .underline': {
-          '&::before': {
-            animation: `${underlineHoverContract} 0.6s forwards`,
-          },
-        },
       }}
-      onMouseLeave={handleMouseLeave}
     >
       <Box
         sx={{
@@ -94,14 +59,23 @@ const HeaderProfileImage = () => {
           }}
         />
       </Box>
-      <Typography
-        variant="h2"
-        className="underline"
-        sx={{
-          position: "relative",
-        }}
-      >
+    <Typography
+      variant="h2"
+      style={{
+        display: "inline-block",
+        position: "relative",
+      }}
+    >
         Torrin Leonard
+        <Box style={{
+          width: isHovered ? "100%" : "0%",
+          height: "4px",
+          backgroundColor: tertiary,
+          position: "absolute",
+          bottom: "-2px",
+          left: 0,
+          transition: "width 0.6s cubic-bezier(0.2,0.5,0.6,1)",
+        }} />
       </Typography>
     </Link>
   );
