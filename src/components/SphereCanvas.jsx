@@ -1,31 +1,45 @@
-import React, { useRef } from 'react';
-import { extend, Canvas, useFrame } from '@react-three/fiber';
+import React from 'react';
+
+import * as THREE from 'three';
+import { extend, Canvas } from '@react-three/fiber';
 
 extend({ Canvas });
 
-const Main = () => {
-  const meshRef = useRef();
+const WebGLRendererWrapper = () => {
+  const { gl } = useThree();
 
-  useFrame(() => {
-    meshRef.current.rotation.x += 0.01;
-    meshRef.current.rotation.y += 0.01;
-  });
+  React.useLayoutEffect(() => {
+    const renderer = new WebGLRenderer({
+      alpha: true,
+      premultipliedAlpha: false,
+      powerPreference: "high-performance",
+      precision: "lowp",
+      depth: false,
+      antialias: true,
+      canvas: gl.domElement,
+    });
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.BasicShadowMap;
+    renderer.toneMapping = THREE.ReinhardToneMapping;
+    renderer.toneMappingExposure = 3;
+    renderer.physicallyCorrectLights = true;
 
-  return (
-    <mesh ref={meshRef}>
-      <icosahedronBufferGeometry args={[1, 0]} />
-      <meshBasicMaterial color={0x00ff00} />
-    </mesh>
-  );
+    return () => {
+      renderer.dispose();
+    };
+  }, [gl]);
+
+  return null;
 };
 
-// Wrapper to resolve issue with Canvas usage in sup components:
 const SphereCanvas = () => {
   return (
-    <Canvas>
-      <Main />
+    <Canvas pixelRatio={window.devicePixelRatio}>
+      <WebGLRendererWrapper />
+      {/* your scene content */}
     </Canvas>
   );
 };
+
 
 export default SphereCanvas;
