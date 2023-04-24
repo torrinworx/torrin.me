@@ -1,10 +1,12 @@
 import * as THREE from 'three';
 
+// Done in React:
 const isOnTouchScreen = 'ontouchstart' in window;
 
 // Not needed in React:
 const container = document.querySelector('.canvas-container') as HTMLElement;
 
+// Done in React:
 interface Skin {
     material: any,
     uniforms?: any,
@@ -13,6 +15,7 @@ interface Skin {
     update(target?: any): void
 }
 
+// Done in React:
 class PBRSkin implements Skin {
 
     shaders = {
@@ -46,12 +49,12 @@ class PBRSkin implements Skin {
     }
 }
 
-// Create Scene - Done in React
+// Create Scene - Done in React:
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera( 10, window.innerWidth / container.offsetHeight, 10, 50 );
 camera.position.z = 30;
 
-// Create Renderer - Done in React
+// Create Renderer - Done in React:
 var renderer = new THREE.WebGLRenderer({
     alpha: true,
     premultipliedAlpha: false,
@@ -160,6 +163,7 @@ function makeSphere() {
     spheres.push(1);
 }
 
+// Adding light:
 var topLight = new THREE.DirectionalLight( 0xffffff, 3 );
 topLight.color.setHSL( 0.1, 1, 0.95 );
 topLight.position.set( - 1, 1.75, 1 );
@@ -174,6 +178,7 @@ topLight.shadow.camera.top = d;
 topLight.shadow.camera.bottom = - d;
 topLight.shadow.camera.far = 8;
 
+// ??
 let timeSinceLast = 0;
 let maxTime = 5;
 var doc = document.documentElement;
