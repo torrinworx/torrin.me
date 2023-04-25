@@ -163,7 +163,7 @@ function makeSphere() {
     spheres.push(1);
 }
 
-// Adding light:
+// Adding light: Done in React:
 var topLight = new THREE.DirectionalLight( 0xffffff, 3 );
 topLight.color.setHSL( 0.1, 1, 0.95 );
 topLight.position.set( - 1, 1.75, 1 );

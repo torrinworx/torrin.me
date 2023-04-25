@@ -1,7 +1,9 @@
 import React, { useRef } from 'react';
 
+import { Box } from '@mui/system';
+
 import * as THREE from 'three';
-import { extend, Canvas, useThree, useFrame } from '@react-three/fiber';
+import { extend, Canvas, useThree, useFrame, directionalLight } from '@react-three/fiber';
 
 extend({ Canvas });
 
@@ -67,7 +69,7 @@ const WebGLRendererWrapper = () => {
   return null;
 };
 
-const Sphere = ({ mouse, isOnTouchScreen }) => {
+const Spheres = ({ mouse, isOnTouchScreen }) => {
   const mesh = useRef(null);
   const instanceScaleAttribute = useRef(null);
 
@@ -86,57 +88,42 @@ const Sphere = ({ mouse, isOnTouchScreen }) => {
 };
 
 const SphereCanvas = () => {
+  // Create a reference to the container div
+  const container = useRef(null);
+
+  // Check if the device has a touch screen
   const isOnTouchScreen = 'ontouchstart' in window;
-  const mouse = new THREE.Vector2(0, -2);
 
-  const onMove = (e) => {
-    if (isOnTouchScreen) {
-      mouseTarget.set(0, 0);
-      return e;
-    } else {
-      mosueOverLink = !!(e.target.nodeName.toLowerCase() === 'a');
-      mouseTarget.set(
-        (e.clientX / window.innerWidth) * 2 - 1,
-        (-(e.clientY / container.offsetHeight) * 2 + 1)
-      );
-    }
-  };
 
-  useEffect(() => {
-    if (window.PointerEvent) {
-      document.addEventListener('pointermove', onMove, false);
-    } else {
-      document.addEventListener('mousemove', onMove, false);
-    }
-    return () => {
-      document.removeEventListener('pointermove', onMove, false);
-      document.removeEventListener('mousemove', onMove, false);
-    };
-  }, []);
-
-  const onResize = () => {
-    const windowAspect = window.innerWidth / container.offsetHeight;
-    cachedClientHeight = doc.clientHeight;
-    cachedScrollHeight = doc.scrollHeight;
-    camera.aspect = windowAspect;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, container.offsetHeight);
-  };
-
-  useEffect(() => {
-    window.addEventListener('resize', onResize);
-
-    return () => {
-      window.removeEventListener('resize', onResize);
-    };
-  }, []);
-
+  // Render the Canvas component with the WebGLRendererWrapper and your scene content
   return (
-    <Canvas pixelRatio={window.devicePixelRatio}>
-      <WebGLRendererWrapper />
-      <Sphere mouse={mouse} isOnTouchScreen={isOnTouchScreen} />
-      {/* your scene content */}
-    </Canvas>
+    <Box ref={container} className="canvas-container">
+      <Canvas
+        pixelRatio={window.devicePixelRatio}
+        camera={{
+          fov: 50,
+          aspect: window.innerWidth / container.current.offsetHeight,
+          near: 0.1,
+          far: 100,
+        }}
+      >
+        <WebGLRendererWrapper />
+        <ambientLight intensity={0.2} />
+        <directionalLight
+          color={0xffffff}
+          intensity={3}
+          position={[-1, 1.75, 1]}
+          castShadow={true}
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
+          shadow-camera-left={-4}
+          shadow-camera-right={4}
+          shadow-camera-top={4}
+          shadow-camera-bottom={-4}
+          shadow-camera-far={8}
+        />
+      </Canvas>
+    </Box>
   );
 };
 
