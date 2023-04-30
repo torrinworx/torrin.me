@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 // Pages
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
-import SphereCanvas from './components/SphereCanvas';
+import SphereTest from './components/SphereTest';
 
 const AppRoutes = () => {
   return (
@@ -12,7 +12,7 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         {/* Add more routes here */}
-        <Route path="/test" element={<SphereCanvas />} />
+        <Route path="/test" element={<SphereTest />} />
 
         {/* Catch-all route for undefined paths */}
         <Route path="*" element={<NotFound />} />
