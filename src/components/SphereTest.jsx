@@ -1,7 +1,7 @@
 import * as THREE from "three"
 import { Canvas, extend, useFrame, useThree } from "@react-three/fiber"
 import { Physics, useSphere } from "@react-three/cannon"
-import { Sky, Environment, Effects as EffectComposer, useTexture } from "@react-three/drei"
+import { useTexture } from "@react-three/drei"
 import { SSAOPass } from "three-stdlib"
 
 extend({ SSAOPass })
@@ -14,18 +14,14 @@ export const SphereTest = () => (
   <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 0, 20], fov: 35, near: 1, far: 40 }}>
     <ambientLight intensity={0.25} />
     <spotLight intensity={1} angle={0.2} penumbra={1} position={[30, 30, 30]} castShadow shadow-mapSize={[512, 512]} />
-    <directionalLight intensity={5} position={[-10, -10, -10]} color="purple" />
     <Physics gravity={[0, 2, 0]} iterations={10}>
       <Pointer />
       <Clump />
     </Physics>
-    <Environment files="./adamsbridge.hdr" />
-    <Effects />
-    <Sky />
   </Canvas>
 )
 
-function Clump({ mat = new THREE.Matrix4(), vec = new THREE.Vector3(), ...props }) {
+const Clump = ({ mat = new THREE.Matrix4(), vec = new THREE.Vector3(), ...props }) => {
   const texture = useTexture("./cross.jpg")
   const [ref, api] = useSphere(() => ({ args: [1], mass: 1, angularDamping: 0.1, linearDamping: 0.65, position: [rfs(20), rfs(20), rfs(20)] }))
   useFrame((state) => {
@@ -40,19 +36,10 @@ function Clump({ mat = new THREE.Matrix4(), vec = new THREE.Vector3(), ...props 
   return <instancedMesh ref={ref} castShadow receiveShadow args={[null, null, 40]} geometry={sphereGeometry} material={baubleMaterial} material-map={texture} />
 }
 
-function Pointer() {
+const Pointer = () => {
   const viewport = useThree((state) => state.viewport)
   const [, api] = useSphere(() => ({ type: "Kinematic", args: [3], position: [0, 0, 0] }))
   return useFrame((state) => api.position.set((state.mouse.x * viewport.width) / 2, (state.mouse.y * viewport.height) / 2, 0))
-}
-
-function Effects(props) {
-  const { scene, camera } = useThree()
-  return (
-    <EffectComposer {...props}>
-      <sSAOPass args={[scene, camera, 100, 100]} kernelRadius={1.2} kernelSize={0} />
-    </EffectComposer>
-  )
 }
 
 export default SphereTest;
