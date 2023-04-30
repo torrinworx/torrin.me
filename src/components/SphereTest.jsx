@@ -1,3 +1,4 @@
+import React, { useEffect } from "react"
 import * as THREE from "three"
 import { Canvas, extend, useFrame, useThree } from "@react-three/fiber"
 import { Physics, useSphere } from "@react-three/cannon"
@@ -10,14 +11,26 @@ const rfs = THREE.MathUtils.randFloatSpread
 const sphereGeometry = new THREE.SphereGeometry(1, 32, 32)
 const baubleMaterial = new THREE.MeshStandardMaterial({ color: "red", roughness: 0, envMapIntensity: 0.2, emissive: "#370037" })
 
+const Camera = () => {
+  const { set, size } = useThree();
+
+  useEffect(() => {
+    let camera = new THREE.PerspectiveCamera(10, size.width / size.height, 10, 50);
+    camera.position.z = 50;
+    set({ camera });
+  }, [size, set]);
+  return null;
+};
+
 export const SphereTest = () => (
-  <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 0, 20], fov: 35, near: 1, far: 40 }}>
+  <Canvas shadows dpr={[1, 2]} style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", zIndex: "0" }}>
     <ambientLight intensity={0.25} />
     <spotLight intensity={1} angle={0.2} penumbra={1} position={[30, 30, 30]} castShadow shadow-mapSize={[512, 512]} />
     <Physics gravity={[0, 2, 0]} iterations={10}>
       <Pointer />
       <Clump />
     </Physics>
+    <Camera />
   </Canvas>
 )
 
@@ -30,7 +43,7 @@ const Clump = ({ mat = new THREE.Matrix4(), vec = new THREE.Vector3(), ...props 
       ref.current.getMatrixAt(i, mat)
       // Normalize the position and multiply by a negative force.
       // This is enough to drive it towards the center-point.
-      api.at(i).applyForce(vec.setFromMatrixPosition(mat).normalize().multiplyScalar(-50).toArray(), [0, 0, 0])
+      api.at(i).applyForce(vec.setFromMatrixPosition(mat).normalize().multiplyScalar(-10).toArray(), [0, 0, 0])
     }
   })
   return <instancedMesh ref={ref} castShadow receiveShadow args={[null, null, 40]} geometry={sphereGeometry} material={baubleMaterial} material-map={texture} />
