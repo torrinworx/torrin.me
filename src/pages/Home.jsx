@@ -1,15 +1,14 @@
 import React from "react";
 import { Grid, Box, Typography } from "@mui/material";
 import FloatingCard from "../components/FloatingCard";
-import SphereTest from "../components/InteractiveSpheres";
+import InteractiveSpheres from "../components/InteractiveSpheres";
 
 import { contentMargin } from "../Theme";
 
 const Home = () => {
   return <>
-
     <Grid container spacing={contentMargin} justifyContent="center">
-      <Grid item xs={12}>
+      <Grid item xs={12} sx={{ zIndex: '0' }}> 
         <FloatingCard type="invisible" size="large">
           <Grid container alignItems="center">
             <Grid item xs={12} md={12}>
@@ -30,7 +29,7 @@ const Home = () => {
       </Grid>
 
       {/* Big element at the top of the grid with custom height */}
-      <Grid item xs={12} md={12}>
+      <Grid item xs={12} md={12} zIndex={1}>
         <FloatingCard type="translucentSecondary">
           <Box
             sx={{
@@ -47,7 +46,7 @@ const Home = () => {
         </FloatingCard>
       </Grid>
       {/* First 1x2 element with custom height */}
-      <Grid item xs={12} md={6}>
+      <Grid item xs={12} md={6} zIndex={1}>
         <FloatingCard type="translucentSecondary">
           <Box
             sx={{
@@ -64,7 +63,7 @@ const Home = () => {
         </FloatingCard>
       </Grid>
       {/* Second 1x2 element with custom height */}
-      <Grid item xs={12} md={6}>
+      <Grid item xs={12} md={6} zIndex={1}>
         <FloatingCard type="translucentSecondary">
           <Box
             sx={{
@@ -82,9 +81,8 @@ const Home = () => {
       </Grid>
       {/* Add more Grid items with FloatingBox cards as needed */}
     </Grid>
-    <SphereTest />
-
-    </>
+    <InteractiveSpheres />
+  </>
 };
 
 export default Home;

@@ -1,15 +1,12 @@
-import React, { useRef } from "react"
-import * as THREE from "three"
-import { useFrame, useThree } from "@react-three/fiber"
-import { useSphere } from "@react-three/cannon"
-
-import { isOnTouchScreen } from "./InteractiveSpheres"
+import React, { useRef } from "react";
+import * as THREE from "three";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useSphere } from "@react-three/cannon";
+import { isOnTouchScreen } from "./InteractiveSpheres";
 
 export const MouseBall = () => {
   // Get viewport and clock from Three.js context
   const { viewport, clock } = useThree();
-
-  // Create refs for mesh, mouse3D, mouseTarget, and mouseScaleTarget
   const mesh = useRef();
   const mouse3D = useRef(new THREE.Vector3());
   const mouseTarget = useRef(new THREE.Vector3());
@@ -19,38 +16,44 @@ export const MouseBall = () => {
   const mouseInteractionSphereRadius = 1
 
   // Create a sphere using cannon physics engine
-  const [, api] = useSphere(() => ({ type: "Kinematic", args: [mouseInteractionSphereRadius], position: [0, 0, 0] }));
+  const [, api] = useSphere(() => ({
+    type: "Kinematic",
+    args: [mouseInteractionSphereRadius],
+    position: [0, 0, 0],
+  }));
 
   // Set mouseOverLink to false
   const mouseOverLink = false;
 
-  // On each frame, update the position and rotation of the mesh based on mouse position and other factors
-  useFrame((state) => {
-    // Set mouse3D ref to the current mouse position in Three.js coordinates
+  useFrame((state, delta) => {
     mouse3D.current.set(
       (state.mouse.x * viewport.width) / 2,
       (state.mouse.y * viewport.height) / 2,
       0
     );
 
-    // Set the position of the sphere to match the current mouse position in Three.js coordinates
-    api.position.set((state.mouse.x * viewport.width) / 2, (state.mouse.y * viewport.height) / 2, 0);
+    api.position.set(
+      (state.mouse.x * viewport.width) / 2,
+      (state.mouse.y * viewport.height) / 2,
+      0
+    );
 
     // If the device has touch capability, set the mouseTarget ref to a value that changes over time
     // Otherwise, set mouseTarget ref to match the current mouse position in Three.js coordinates
     if (isOnTouchScreen) {
-      mouseTarget.current.set(
-        Math.cos(clock.getElapsedTime() * Math.PI) * 5,
-        Math.cos(clock.getElapsedTime()) * 5,
+      meshPosition.current.set(
+        Math.cos(clock.getElapsedTime() * Math.PI) * 1.5,
+        Math.cos(clock.getElapsedTime()) * 1,
         0
       );
     } else {
       mouseTarget.current.copy(mouse3D.current);
     }
 
-    // Use linear interpolation (lerp) to gradually move the mesh toward the mouseTarget position
-    mouse3D.current.lerp(mouseTarget.current, 0.3);
-    mesh.current.position.copy(mouse3D.current);
+    // Use lerp to gradually move the mesh towards the mouse position
+    meshPosition.current.lerp(mouse3D.current, 5 * delta);
+
+    mesh.current.position.copy(meshPosition.current);
 
     // Set the scale of the mesh based on the mouseOverLink value and the distance between the current and target mouse positions
     mouseScaleTarget.current.setScalar(
@@ -82,7 +85,7 @@ export const MouseBall = () => {
     }
 
     geometry.setAttribute(
-      'position',
+      "position",
       new THREE.Float32BufferAttribute(vertices, 3)
     );
 
@@ -91,15 +94,17 @@ export const MouseBall = () => {
 
   // Get the value of a CSS color variable as a string
   const getCssColor = (variable) => {
-    if (typeof window === 'undefined') return '#ffffff'
-    return getComputedStyle(document.documentElement).getPropertyValue(variable).trim()
-  }
+    if (typeof window === "undefined") return "#ffffff";
+    return getComputedStyle(document.documentElement)
+      .getPropertyValue(variable)
+      .trim();
+  };
 
   // Return a line loop with a circle geometry and a line basic material with a color based on a CSS variable
   return (
     <lineLoop ref={mesh}>
-      {isOnTouchScreen ? "none" : <primitive object={createCircleGeometry(2, 10)} />}
-      <lineBasicMaterial color={getCssColor('--c-primary')} />
+      {isOnTouchScreen ? "none" : <primitive object={createCircleGeometry(3, 10)} />}
+      <lineBasicMaterial color={getCssColor('--c-primary')} depthTest={false} transparent opacity={1} renderOrder={1} />
     </lineLoop>
   );
 };

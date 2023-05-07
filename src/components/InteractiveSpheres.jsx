@@ -2,26 +2,12 @@ import React, { useEffect, useState, useRef } from "react"
 import * as THREE from "three"
 import { Canvas, useFrame, useThree } from "@react-three/fiber"
 import { Physics, useSphere } from "@react-three/cannon"
-import { useTexture } from "@react-three/drei"
+import { useTexture, Html } from "@react-three/drei"
 
 import MouseBall from "./MouseBall"
 
 export const isOnTouchScreen = "ontouchstart" in window;
 
-const rfs = THREE.MathUtils.randFloatSpread
-const sphereGeometry = new THREE.SphereGeometry(1, 32, 32)
-const sphereMaterial = new THREE.MeshStandardMaterial({ color: "red", roughness: 0, envMapIntensity: 0.2, emissive: "#370037" })
-
-// Utility function to map a value from one range to another
-const mapAndRound = (
-  value,
-  min1,
-  max1,
-  min2,
-  max2
-) => {
-  return Math.round(min2 + ((value - min1) * (max2 - min2)) / (max1 - min1));
-};
 
 const Camera = () => {
   const { set, size } = useThree();
@@ -35,7 +21,22 @@ const Camera = () => {
 };
 
 const Spheres = () => {
+  const sphereGeometry = new THREE.SphereGeometry(1, 32, 32)
+  const sphereMaterial = new THREE.MeshStandardMaterial({ color: "red", roughness: 0, envMapIntensity: 0.2, emissive: "#370037" })
   const texture = useTexture("./cross.jpg");
+
+  const rfs = THREE.MathUtils.randFloatSpread
+
+  // Utility function to map a value from one range to another
+  const mapAndRound = (
+    value,
+    min1,
+    max1,
+    min2,
+    max2
+  ) => {
+    return Math.round(min2 + ((value - min1) * (max2 - min2)) / (max1 - min1));
+  };
 
   // Calculate the number of spheres based on the screen width
   const numberOfSpheres = mapAndRound(window.innerWidth, 300, 2000, 10, 30);
@@ -80,8 +81,8 @@ const Spheres = () => {
   );
 };
 
-export const SphereTest = () => {
-  return <Canvas shadows dpr={[1, 2]} style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh" }}>
+export const InteractiveSpheres = () => {
+  return <Canvas gl={{ alpha: true }} shadows dpr={[1, 2]} style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh" }}>
     <ambientLight intensity={0.25} />
     <spotLight intensity={1} angle={0.2} penumbra={1} position={[30, 30, 30]} castShadow shadow-mapSize={[512, 512]} />
     <Camera />
@@ -92,4 +93,4 @@ export const SphereTest = () => {
   </Canvas>
 };
 
-export default SphereTest;
+export default InteractiveSpheres;
