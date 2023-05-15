@@ -6,9 +6,9 @@ import InteractiveSpheres from "../components/InteractiveSpheres";
 import { contentMargin } from "../Theme";
 
 const Home = () => {
-  return <>
+  return <InteractiveSpheres>
     <Grid container spacing={contentMargin} justifyContent="center">
-      <Grid item xs={12} sx={{ zIndex: '0' }}> 
+      <Grid item xs={12} sx={{ zIndex: '0' }}>
         <FloatingCard type="invisible" size="large">
           <Grid container alignItems="center">
             <Grid item xs={12} md={12}>
@@ -81,8 +81,14 @@ const Home = () => {
       </Grid>
       {/* Add more Grid items with FloatingBox cards as needed */}
     </Grid>
-    <InteractiveSpheres />
-  </>
+  </InteractiveSpheres>
 };
 
 export default Home;
+
+/*
+When InteractiveSpheres is used here we need to find a way
+to pass in other elements like the Header, and the global styles
+like the side margins so that it looks the same as the non
+three.js scenes. 
+*/
