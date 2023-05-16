@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { Physics } from "@react-three/cannon";
 import { Html, Mask, useMask } from "@react-three/drei";
+import { BrowserRouter as useRoutesMatch } from "react-router-dom";
 
 import MouseBall from "./MouseBall";
 import Spheres from "./Spheres";
@@ -49,6 +50,11 @@ const Plane = ({ children }) => {
 export const InteractiveSpheres = ({ children }) => {
   const container = useRef();
   const domContent = useRef();
+  const match = useRoutesMatch("/");
+
+  if (!match) {
+    return children;
+  }
 
   return (
     <div ref={container} style={{ position: "relative", width: "100%", height: "100%" }}>

@@ -3,14 +3,16 @@ import React from "react";
 import Routes from "./Routes";
 import ThemeWrapper from "./Theme";
 import Header from "./components/Header";
+import InteractiveSpheres from "./components/InteractiveSpheres";
 
 export const App = () => {
-
   return <div>
-    <ThemeWrapper>
+    <InteractiveSpheres>
+      <ThemeWrapper>
         <Header />
         <Routes />
-    </ThemeWrapper>
+      </ThemeWrapper>
+    </InteractiveSpheres>
   </div>
 };
 

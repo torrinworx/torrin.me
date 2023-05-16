@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 
-const AppRoutes = () => {
+const AppRoutes = () => {  
   return (
     <Router>
       <Routes>
