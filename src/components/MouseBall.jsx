@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useSphere } from "@react-three/cannon";
@@ -25,16 +25,31 @@ export const MouseBall = () => {
   // Set mouseOverLink to false
   const mouseOverLink = false;
 
+  const mousePos = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const updateMousePos = (event) => {
+      // Convert to normalized device coordinates
+      mousePos.current.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mousePos.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    };
+
+    window.addEventListener('mousemove', updateMousePos);
+
+    // Remove the event listener on unmount
+    return () => window.removeEventListener('mousemove', updateMousePos);
+  }, []);
+
   useFrame((state, delta) => {
     mouse3D.current.set(
-      (state.mouse.x * viewport.width) / 2,
-      (state.mouse.y * viewport.height) / 2,
+      (mousePos.current.x * viewport.width) / 2,
+      (mousePos.current.y * viewport.height) / 2,
       0
     );
 
     api.position.set(
-      (state.mouse.x * viewport.width) / 2,
-      (state.mouse.y * viewport.height) / 2,
+      (mousePos.current.x * viewport.width) / 2,
+      (mousePos.current.y * viewport.height) / 2,
       0
     );
 
@@ -51,7 +66,7 @@ export const MouseBall = () => {
     }
 
     // Use lerp to gradually move the mesh towards the mouse position
-    meshPosition.current.lerp(mouse3D.current, 5 * delta);
+    meshPosition.current.lerp(mouse3D.current, 10 * delta);
 
     mesh.current.position.copy(meshPosition.current);
 

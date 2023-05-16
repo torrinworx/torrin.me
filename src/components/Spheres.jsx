@@ -1,11 +1,13 @@
 
-import { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import * as THREE from "three"
-import { useFrame } from "react-three-fiber";
+import { useFrame, useThree } from "react-three-fiber";
 import { useTexture } from "@react-three/drei"
 import { useSphere } from "@react-three/cannon";
 
 export const Spheres = () => {
+    const { viewport } = useThree();
+
     const sphereGeometry = new THREE.SphereGeometry(1, 32, 32)
     const sphereMaterial = new THREE.MeshStandardMaterial({ color: "red", roughness: 0, envMapIntensity: 0.2, emissive: "#370037" })
     const texture = useTexture("./cross.jpg");
@@ -38,11 +40,24 @@ export const Spheres = () => {
     const vec = useRef(new THREE.Vector3());
 
     const mouse = useRef(new THREE.Vector3(0, 0, 0));
+    const mousePos = useRef({ x: 0, y: 0 });
 
+    useEffect(() => {
+        const updateMousePos = (event) => {
+            // Convert to normalized device coordinates
+            mousePos.current.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mousePos.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        };
+
+        window.addEventListener('mousemove', updateMousePos);
+
+        // Remove the event listener on unmount
+        return () => window.removeEventListener('mousemove', updateMousePos);
+    }, []);
     useFrame((state) => {
         mouse.current.set(
-            (state.mouse.x * state.viewport.width) / 2,
-            (state.mouse.y * state.viewport.height) / 2,
+            (mousePos.current.x * viewport.width) / 2,
+            (mousePos.current.y * viewport.height) / 2,
             0
         );
 
