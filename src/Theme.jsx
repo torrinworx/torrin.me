@@ -10,7 +10,6 @@ export const primary = "#212529"
 export const secondary = "#ADB5BD"
 export const tertiary = "#F8F9FA" // Text
 
-
 export const shadow = "0px 4px 6px rgba(0, 0, 0, 0.1)"
 export const bevelRadius = "20px"
 export const pagePadding = "4%"

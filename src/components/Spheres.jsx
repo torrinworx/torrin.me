@@ -5,6 +5,20 @@ import { useFrame, useThree } from "react-three-fiber";
 import { useTexture } from "@react-three/drei"
 import { useSphere } from "@react-three/cannon";
 
+// Utility function to map a value from one range to another
+const mapAndRound = (
+    value,
+    min1,
+    max1,
+    min2,
+    max2
+) => {
+    return Math.round(min2 + ((value - min1) * (max2 - min2)) / (max1 - min1));
+};
+
+// Calculate the number of spheres based on the screen width
+const numberOfSpheres = mapAndRound(window.innerWidth, 300, 2000, 10, 30);
+
 export const Spheres = () => {
     const { viewport } = useThree();
 
@@ -13,20 +27,6 @@ export const Spheres = () => {
     const texture = useTexture("./cross.jpg");
 
     const rfs = THREE.MathUtils.randFloatSpread
-
-    // Utility function to map a value from one range to another
-    const mapAndRound = (
-        value,
-        min1,
-        max1,
-        min2,
-        max2
-    ) => {
-        return Math.round(min2 + ((value - min1) * (max2 - min2)) / (max1 - min1));
-    };
-
-    // Calculate the number of spheres based on the screen width
-    const numberOfSpheres = mapAndRound(window.innerWidth, 300, 2000, 10, 30);
 
     const [ref, api] = useSphere((index) => ({
         args: [1],
@@ -54,6 +54,7 @@ export const Spheres = () => {
         // Remove the event listener on unmount
         return () => window.removeEventListener('mousemove', updateMousePos);
     }, []);
+    
     useFrame((state) => {
         mouse.current.set(
             (mousePos.current.x * viewport.width) / 2,
@@ -64,7 +65,12 @@ export const Spheres = () => {
         for (let i = 0; i < numberOfSpheres; i++) {
             ref.current.getMatrixAt(i, mat.current);
             const direction = new THREE.Vector3().subVectors(mouse.current, vec.current.setFromMatrixPosition(mat.current)).normalize();
-            api.at(i).applyForce(direction.multiplyScalar(10).toArray(), [0, 0, 0]);
+            const body = api.at(i); // Get the body at index i
+            if (body) { // Check if body is not undefined
+                body.applyForce(direction.multiplyScalar(10).toArray(), [0, 0, 0]);
+            } else {
+                console.warn(`No body at index ${i}`);
+            }
         }
     });
 
