@@ -67,6 +67,20 @@ const theme = createTheme({
           backgroundImage:
             `linear-gradient(to top right, ${secondary}, ${primary})`,
           minHeight: "100vh",
+          // Add this to customize scrollbar
+          '&::-webkit-scrollbar': {
+            width: '10px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: tertiary,
+            borderRadius: '10px',
+          },
+          '&::-webkit-scrollbar-track-piece': {
+            background: primary, 
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            background: secondary,
+          },
         },
       },
     },
@@ -84,7 +98,6 @@ const ThemeWrapper = ({ children }) => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      {/* Apply padding to the ThemeWrapper and margin to its children */}
       <Box padding={pagePadding}>
         {children}
       </Box>

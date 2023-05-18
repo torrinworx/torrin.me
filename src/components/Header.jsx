@@ -99,7 +99,7 @@ const Header = () => {
     <FloatingCard
       type="translucentSecondary"
       component={AppBar}
-      position="static"
+      position="relative"
       marginBottom={contentMargin}
       elevation={0}
     >

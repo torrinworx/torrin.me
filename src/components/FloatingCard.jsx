@@ -5,9 +5,9 @@ import { primary, secondary, shadow, bevelRadius } from "../Theme";
 
 const FloatingCard = ({ children, type, size, ...props }) => {
   /*
-  types: translucentPrimary, trnalsucentSecondary, invisible
+  types: translucentPrimary, translucentSecondary, invisible
   
-  sizes: large, medium, small, haldWidth
+  sizes: large, medium, small, halfWidth
   */
   const hexToRgba = (hex, alpha) => {
     const [r, g, b] = hex.match(/\w\w/g).map((x) => parseInt(x, 16));
@@ -15,9 +15,18 @@ const FloatingCard = ({ children, type, size, ...props }) => {
   };
 
   const colorMap = {
-    translucentPrimary: hexToRgba(primary, 0.3),
-    translucentSecondary: hexToRgba(secondary, 0.3),
-    invisible: "rgba(255, 255, 255, 0.0)",
+    translucentPrimary: {
+      color: hexToRgba(primary, 0.3),
+      zIndex: 1,
+    },
+    translucentSecondary: {
+      color: hexToRgba(secondary, 0.3),
+      zIndex: 1,
+    },
+    invisible: {
+      color: "rgba(255, 255, 255, 0.0)",
+      zIndex: -1,
+    },
   };
 
   const sizeConfig = {
@@ -27,14 +36,14 @@ const FloatingCard = ({ children, type, size, ...props }) => {
     halfWidth: { height: "200px", xs: 12, sm: 12, md: 6 },
   };
 
-  const backgroundColor = colorMap[type];
+  const { color, zIndex } = colorMap[type] || {};
   const { height, xs, sm, md } = sizeConfig[size] || {};
 
   return (
-    <Grid item xs={xs} sm={sm} md={md}>
+    <Grid item xs={xs} sm={sm} md={md} zIndex={zIndex}>
       <Box
         sx={{
-          backgroundColor,
+          backgroundColor: color,
           borderRadius: bevelRadius,
           boxShadow: type === "invisible" ? "none" : shadow,
           height,

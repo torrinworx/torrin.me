@@ -5,89 +5,72 @@ import FloatingCard from "../components/FloatingCard";
 import { contentMargin } from "../Theme";
 
 const Home = () => {
-  return <>
-  <Grid container spacing={contentMargin} justifyContent="center">
-    <Grid item xs={12} sx={{ zIndex: '0' }}>
-      <FloatingCard type="invisible" size="large">
-        <Grid container alignItems="center">
-          <Grid item xs={12} md={12}>
-            <Box p={3}>
-              <Typography variant="h1" gutterBottom>
-                Full Stack <br />
-                Software Developer
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Box sx={{ height: "400px", width: "100%" }}>
-              {/* Set explicit height here */}
-            </Box>
-          </Grid>
+  return <Grid container spacing={contentMargin} justifyContent="center">
+    <FloatingCard type="invisible" size="large">
+      <Grid container alignItems="center">
+        <Grid item xs={12} md={12}>
+          <Box p={3}>
+            <Typography variant="h1" gutterBottom>
+              Full Stack <br />
+              Software Developer
+            </Typography>
+          </Box>
         </Grid>
-      </FloatingCard>
-    </Grid>
+        <Grid item xs={12} md={6}>
+          <Box sx={{ height: "400px", width: "100%" }}>
+            {/* Set explicit height here */}
+          </Box>
+        </Grid>
+      </Grid>
+    </FloatingCard>
 
     {/* Big element at the top of the grid with custom height */}
-    <Grid item xs={12} md={12} zIndex={1}>
-      <FloatingCard type="translucentSecondary">
-        <Box
-          sx={{
-            textAlign: "center",
-            padding: "2rem",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            height: "800px", // Set custom height
-          }}
-        >
-          {/* Content */}
-        </Box>
-      </FloatingCard>
-    </Grid>
+    <FloatingCard type="translucentSecondary" size="large">
+      <Box
+        sx={{
+          textAlign: "center",
+          padding: "2rem",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          height: "800px", // Set custom height
+        }}
+      >
+        {/* Content */}
+      </Box>
+    </FloatingCard>
     {/* First 1x2 element with custom height */}
-    <Grid item xs={12} md={6} zIndex={1}>
-      <FloatingCard type="translucentSecondary">
-        <Box
-          sx={{
-            textAlign: "center",
-            padding: "2rem",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            height: "200px", // Set custom height
-          }}
-        >
-          {/* Content */}
-        </Box>
-      </FloatingCard>
-    </Grid>
+    <FloatingCard type="translucentSecondary" size="halfWidth">
+      <Box
+        sx={{
+          textAlign: "center",
+          padding: "2rem",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          height: "200px", // Set custom height
+        }}
+      >
+        {/* Content */}
+      </Box>
+    </FloatingCard>
     {/* Second 1x2 element with custom height */}
-    <Grid item xs={12} md={6} zIndex={1}>
-      <FloatingCard type="translucentSecondary">
-        <Box
-          sx={{
-            textAlign: "center",
-            padding: "2rem",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            height: "200px", // Set custom height
-          }}
-        >
-          {/* Content */}
-        </Box>
-      </FloatingCard>
-    </Grid>
+    <FloatingCard type="translucentSecondary" size="halfWidth">
+      <Box
+        sx={{
+          textAlign: "center",
+          padding: "2rem",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          height: "200px", // Set custom height
+        }}
+      >
+        {/* Content */}
+      </Box>
+    </FloatingCard>
     {/* Add more Grid items with FloatingBox cards as needed */}
   </Grid>
-  </>
 };
 
 export default Home;
-
-/*
-When InteractiveSpheres is used here we need to find a way
-to pass in other elements like the Header, and the global styles
-like the side margins so that it looks the same as the non
-three.js scenes. 
-*/
