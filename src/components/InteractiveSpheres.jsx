@@ -24,29 +24,28 @@ export const InteractiveSpheres = ({ children }) => {
   const match = useRoutesMatch("/");
 
   // Not working??
-  if (!match) {
-    return children;
-  } else {
-    return (
-      <div ref={container} style={{ position: "relative", width: "100%", height: "100%" }}>
-        <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", overflow: "hidden" }} ref={domContent} />
-        <Canvas
-          gl={{ alpha: true }}
-          shadows
-          dpr={[1, 2]}
-          style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%" }}
-          eventSource={container}
-          eventPrefix="page"
-        >
-          <ambientLight intensity={0.25} />
-          <spotLight intensity={1} angle={0.2} penumbra={1} position={[30, 30, 30]} castShadow shadow-mapSize={[512, 512]} />
-          <Camera />
-          <Objects />
-        </Canvas>
-        {children}
-      </div>
-    );
-  }
+  // if (!match) {
+  //   return children;
+  // } else {
+  return (
+    <div ref={container} style={{ position: "relative", width: "100%", height: "100%" }}>
+      <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", overflow: "hidden" }} ref={domContent} />
+      <Canvas
+        gl={{ alpha: true }}
+        shadows
+        dpr={[1, 2]}
+        style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%" }}
+        eventSource={container}
+        eventPrefix="page"
+      >
+        <ambientLight intensity={0.25} />
+        <spotLight intensity={1} angle={0.2} penumbra={1} position={[30, 30, 30]} castShadow shadow-mapSize={[512, 512]} />
+        <Camera />
+        <Objects />
+      </Canvas>
+      {children}
+    </div>
+  );
 };
 
 export default InteractiveSpheres;

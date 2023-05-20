@@ -1,8 +1,62 @@
-import React, { useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useSphere } from "@react-three/cannon";
 import { isOnTouchScreen } from "./InteractiveSpheres";
+
+// Create a circle geometry with a given radius and number of segments
+const createCircleGeometry = (radius, segments) => {
+  const geometry = new THREE.BufferGeometry();
+  const vertices = [];
+
+  for (let i = 0; i <= segments; i++) {
+    const segment = (i * Math.PI * 2) / segments;
+    vertices.push(radius * Math.cos(segment), radius * Math.sin(segment), 0);
+  }
+
+  geometry.setAttribute(
+    "position",
+    new THREE.Float32BufferAttribute(vertices, 3)
+  );
+
+  return geometry;
+};
+
+// Get the value of a CSS color variable as a string
+const getCssColor = (variable) => {
+  if (typeof window === "undefined") return "#ffffff";
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue(variable)
+    .trim();
+};
+
+export const useIsHovered = () => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  useEffect(() => {
+    const mouseEnterHandler = (event) => {
+      if (event.target.tagName === 'A' || event.target.tagName === 'BUTTON') {
+        setIsHovered(true);
+      }
+    };
+
+    const mouseLeaveHandler = (event) => {
+      if (event.target.tagName === 'A' || event.target.tagName === 'BUTTON') {
+        setIsHovered(false);
+      }
+    };
+
+    document.addEventListener('mouseenter', mouseEnterHandler, true);
+    document.addEventListener('mouseleave', mouseLeaveHandler, true);
+
+    return () => {
+      document.removeEventListener('mouseenter', mouseEnterHandler, true);
+      document.removeEventListener('mouseleave', mouseLeaveHandler, true);
+    };
+  }, []);
+
+  return isHovered;
+};
 
 export const MouseBall = () => {
   // Get viewport and clock from Three.js context
@@ -13,7 +67,9 @@ export const MouseBall = () => {
   const mouseScaleTarget = useRef(new THREE.Vector3(1, 1, 1));
   const meshPosition = useRef(new THREE.Vector3());
 
-  const mouseInteractionSphereRadius = 1
+  const mouseInteractionSphereRadius = 2
+
+  const mouseHover = useIsHovered();
 
   // Create a sphere using cannon physics engine
   const [, api] = useSphere(() => ({
@@ -21,9 +77,6 @@ export const MouseBall = () => {
     args: [mouseInteractionSphereRadius],
     position: [0, 0, 0],
   }));
-
-  // Set mouseOverLink to false
-  const mouseOverLink = false;
 
   const mousePos = useRef({ x: 0, y: 0 });
 
@@ -72,7 +125,7 @@ export const MouseBall = () => {
 
     // Set the scale of the mesh based on the mouseOverLink value and the distance between the current and target mouse positions
     mouseScaleTarget.current.setScalar(
-      mouseOverLink
+      mouseHover
         ? 0.25 + mouse3D.current.distanceToSquared(mouseTarget.current) * 0.5
         : 0.1
     );
@@ -89,36 +142,10 @@ export const MouseBall = () => {
     api.position.copy(meshPosition.current);
   });
 
-  // Create a circle geometry with a given radius and number of segments
-  const createCircleGeometry = (radius, segments) => {
-    const geometry = new THREE.BufferGeometry();
-    const vertices = [];
-
-    for (let i = 0; i <= segments; i++) {
-      const segment = (i * Math.PI * 2) / segments;
-      vertices.push(radius * Math.cos(segment), radius * Math.sin(segment), 0);
-    }
-
-    geometry.setAttribute(
-      "position",
-      new THREE.Float32BufferAttribute(vertices, 3)
-    );
-
-    return geometry;
-  };
-
-  // Get the value of a CSS color variable as a string
-  const getCssColor = (variable) => {
-    if (typeof window === "undefined") return "#ffffff";
-    return getComputedStyle(document.documentElement)
-      .getPropertyValue(variable)
-      .trim();
-  };
-
   // Return a line loop with a circle geometry and a line basic material with a color based on a CSS variable
   return (
     <lineLoop ref={mesh}>
-      {isOnTouchScreen ? "none" : <primitive object={createCircleGeometry(3, 10)} />}
+      {isOnTouchScreen ? "none" : <primitive object={createCircleGeometry(3, 6)} />}
       <lineBasicMaterial color={getCssColor('--c-primary')} depthTest={false} transparent opacity={1} renderOrder={1} />
     </lineLoop>
   );

@@ -1,8 +1,8 @@
 import React, { useRef, useEffect, useMemo } from "react";
 import * as THREE from "three"
 import { useFrame, useThree } from "react-three-fiber";
-import { useTexture, useGLTF } from "@react-three/drei"
-import { Physics, useSphere, useTrimesh } from "@react-three/cannon";
+import { useGLTF } from "@react-three/drei"
+import { Physics, useSphere } from "@react-three/cannon";
 
 import MouseBall from "./MouseBall";
 
@@ -43,7 +43,7 @@ export const ObjectWrangler = ({ glb, material, numberOfObjects, ...props }) => 
             rotation: [rfs(20), rfs(20), rfs(20)]
         }),
     );
-
+    
     const mat = useRef(new THREE.Matrix4());
     const vec = useRef(new THREE.Vector3());
 
@@ -86,8 +86,8 @@ export const ObjectWrangler = ({ glb, material, numberOfObjects, ...props }) => 
             castShadow
             receiveShadow
             args={[
-                mesh.geometry, 
-                useMemo(() => new THREE.MeshStandardMaterial({ color: "purple", roughness: 0, envMapIntensity: 0.2, emissive: "#000037" }), []), 
+                mesh.geometry,
+                useMemo(() => new THREE.MeshStandardMaterial({ color: "purple", roughness: 0, envMapIntensity: 0.2, emissive: "#000037" }), []),
                 numberOfObjects
             ]}
         />
@@ -98,7 +98,7 @@ export const Objects = () => {
     const models = [
         "models/cone.glb",
         "models/cube.glb",
-        "models/cylinder.glb",
+        // "models/cylinder.glb",
         "models/sphere.glb",
         "models/suzanne.glb",
         "models/torus.glb",
