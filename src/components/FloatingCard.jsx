@@ -1,7 +1,7 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import { primary, secondary, shadow, bevelRadius } from "../Theme";
+import { primary, secondary, quaternary, shadow, bevelRadius } from "../Theme";
 
 const FloatingCard = ({ children, type, size, ...props }) => {
   /*

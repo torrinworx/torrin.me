@@ -3,9 +3,18 @@ import * as THREE from "three"
 import { useFrame, useThree } from "react-three-fiber";
 import { useGLTF } from "@react-three/drei"
 import { Physics, useSphere } from "@react-three/cannon";
+import { primary, secondary, quaternary, shadow, bevelRadius } from "../Theme";
 
 import MouseBall from "./MouseBall";
 
+const models = [
+    "models/cone.glb",
+    "models/cube.glb",
+    // "models/cylinder.glb",
+    "models/sphere.glb",
+    "models/suzanne.glb",
+    "models/torus.glb",
+];
 
 // Utility function to map a value from one range to another
 const mapAndRound = (
@@ -87,7 +96,7 @@ export const ObjectWrangler = ({ glb, material, numberOfObjects, ...props }) => 
             receiveShadow
             args={[
                 mesh.geometry,
-                useMemo(() => new THREE.MeshStandardMaterial({ color: "purple", roughness: 0, envMapIntensity: 0.2, emissive: "#000037" }), []),
+                useMemo(() => material, []),
                 numberOfObjects
             ]}
         />
@@ -95,19 +104,25 @@ export const ObjectWrangler = ({ glb, material, numberOfObjects, ...props }) => 
 };
 
 export const Objects = () => {
-    const models = [
-        "models/cone.glb",
-        "models/cube.glb",
-        // "models/cylinder.glb",
-        "models/sphere.glb",
-        "models/suzanne.glb",
-        "models/torus.glb",
-    ];
-
     const objectsPerModel = Math.floor(totalNumObjects / models.length);
-    let remainingObjects = totalNumObjects % models.length;  // Change `const` to `let`
+    let remainingObjects = totalNumObjects % models.length;
 
     let extra = 0;
+    let primaryAssigned = false;
+    let primaryIndex = Math.floor(Math.random() * models.length);
+
+    const primaryMaterial = new THREE.MeshStandardMaterial({ 
+        color: primary, 
+        roughness: 0.5, 
+        metalness: 0.8
+    })
+    const secondaryMaterial = new THREE.MeshStandardMaterial({
+        color: secondary,
+        roughness: 0.8,
+        metalness: 0.5,
+        emissiveIntensity: 0,
+        emissive: secondary
+    });
 
     return <Physics gravity={[0, 2, 0]} iterations={10}>
         <MouseBall />
@@ -116,12 +131,17 @@ export const Objects = () => {
                 // If there are remaining objects, assign one to the current model and decrease the count
                 if (remainingObjects > 0) {
                     extra = 1;
-                    remainingObjects--;  // Reassign value to `remainingObjects` is now legal
+                    remainingObjects--;
                 } else {
                     extra = 0;
                 }
 
-                return <ObjectWrangler glb={`/${model}`} numberOfObjects={objectsPerModel + extra} key={index} />
+                // Determine which material to use
+                let material = (index === primaryIndex && !primaryAssigned) ? secondaryMaterial : primaryMaterial;
+                if (index === primaryIndex) primaryAssigned = true;
+
+                // Pass the selected material to the ObjectWrangler component
+                return <ObjectWrangler glb={`/${model}`} material={material} numberOfObjects={objectsPerModel + extra} />
             })
         }
     </Physics>

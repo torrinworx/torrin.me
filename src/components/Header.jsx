@@ -4,7 +4,7 @@ import { AppBar, Box, Toolbar, IconButton, Typography, Menu, Container, Button, 
 import MenuIcon from "@mui/icons-material/Menu";
 
 import FloatingCard from "./FloatingCard";
-import { tertiary, contentMargin } from "../Theme"
+import { text, contentMargin } from "../Theme"
 
 const pages = ["About", "Services", "Contact"];
 
@@ -70,7 +70,7 @@ const HeaderProfileImage = () => {
           style={{
             width: isMobile || !isHovered ? '0%' : '100%',
             height: '4px',
-            backgroundColor: tertiary,
+            backgroundColor: text,
             position: 'absolute',
             bottom: '-2px',
             left: 0,
@@ -119,10 +119,11 @@ const Header = () => {
                 onClick={handleCloseNavMenu}
                 sx={{
                   my: 2,
-                  display: "block",
+                  mx: 0.5, // Apply horizontal margin
+                  display: "inline-block", // Change display to inline-block
                   fontSize: "18px", // Increase font size
                   padding: "8px 16px", // Increase padding
-                  color: tertiary, // Apply text color
+                  color: text, // Apply text color
                 }}
               >
                 {page}
