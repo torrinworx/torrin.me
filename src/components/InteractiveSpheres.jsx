@@ -21,30 +21,6 @@ const Camera = () => {
   return null;
 };
 
-// const Plane = ({ children }) => {
-//   const plane = useRef();
-//   const { camera } = useThree();
-
-//   useFrame((state) => {
-//     plane.current.position.copy(state.camera.position);
-//     plane.current.position.z -= 50;
-//     plane.current.lookAt(state.camera.position);
-//   });
-
-//   const fovInRadians = (camera.fov * Math.PI) / 180;
-//   const distanceToPlane = 50;
-//   const planeHeight = 2 * Math.tan(fovInRadians / 2) * distanceToPlane;
-//   const planeWidth = planeHeight * camera.aspect;
-
-//   return (<>
-//     <Mask id={1} colorWrite={false} depthWrite={false} castShadow receiveShadow ref={plane} geometry={new THREE.PlaneGeometry(planeWidth, planeHeight)}>
-//       <Html fullscreen>{children}</Html>
-//       <mesh ref={plane} geometry={new THREE.PlaneGeometry(planeWidth, planeHeight)}></mesh>
-//       </Mask>
-//   </>
-//   );
-// };
-
 export const InteractiveSpheres = ({ children }) => {
   const container = useRef();
   const domContent = useRef();

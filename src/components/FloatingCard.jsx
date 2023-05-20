@@ -18,10 +18,12 @@ const FloatingCard = ({ children, type, size, ...props }) => {
     translucentPrimary: {
       color: hexToRgba(primary, 0.3),
       zIndex: 1,
+      blur: "10px",  // blur amount for translucentPrimary
     },
     translucentSecondary: {
       color: hexToRgba(secondary, 0.3),
       zIndex: 1,
+      blur: "25px",  // blur amount for translucentSecondary
     },
     invisible: {
       color: "rgba(255, 255, 255, 0.0)",
@@ -36,7 +38,7 @@ const FloatingCard = ({ children, type, size, ...props }) => {
     halfWidth: { height: "200px", xs: 12, sm: 12, md: 6 },
   };
 
-  const { color, zIndex } = colorMap[type] || {};
+  const { color, zIndex, blur } = colorMap[type] || {};
   const { height, xs, sm, md } = sizeConfig[size] || {};
 
   return (
@@ -47,6 +49,7 @@ const FloatingCard = ({ children, type, size, ...props }) => {
           borderRadius: bevelRadius,
           boxShadow: type === "invisible" ? "none" : shadow,
           height,
+          backdropFilter: blur ? `blur(${blur})` : "none",  // add blur effect if blur is defined
           ...props.sx,
         }}
         {...props}
