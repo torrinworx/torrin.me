@@ -3,7 +3,7 @@ import * as THREE from "three"
 import { useFrame, useThree } from "react-three-fiber";
 import { useGLTF } from "@react-three/drei"
 import { Physics, useSphere } from "@react-three/cannon";
-import { primary, tertiary } from "../Theme";
+import { selectedPallet } from "../Theme";
 
 import MouseBall from "./MouseBall";
 
@@ -78,13 +78,15 @@ export const ObjectWrangler = ({ glb, material, numberOfObjects, ...props }) => 
         );
 
         for (let i = 0; i < numberOfObjects; i++) {
-            ref.current.getMatrixAt(i, mat.current);
-            const direction = new THREE.Vector3().subVectors(mouse.current, vec.current.setFromMatrixPosition(mat.current)).normalize();
-            const body = api.at(i);
-            if (body) {
-                body.applyForce(direction.multiplyScalar(10).toArray(), [0, 0, 0]);
-            } else {
-                console.warn(`No body at index ${i}`);
+            if (ref.current && ref.current.count > i) {
+                ref.current.getMatrixAt(i, mat.current);
+                const direction = new THREE.Vector3().subVectors(mouse.current, vec.current.setFromMatrixPosition(mat.current)).normalize();
+                const body = api.at(i);
+                if (body) {
+                    body.applyForce(direction.multiplyScalar(10).toArray(), [0, 0, 0]);
+                } else {
+                    console.warn(`No body at index ${i}`);
+                }
             }
         }
     });
@@ -111,18 +113,12 @@ export const Objects = () => {
     let primaryAssigned = false;
     let primaryIndex = Math.floor(Math.random() * models.length);
 
-    const primaryMaterial = new THREE.MeshStandardMaterial({
-        color: primary,
-        roughness: 0.5,
-        metalness: 0.8
+    const primaryMat = new THREE.MeshStandardMaterial({
+        ...selectedPallet.materials.primaryMaterial
     })
 
-    const tertiaryMaterial = new THREE.MeshStandardMaterial({
-        color: tertiary,
-        roughness: 0.8,
-        metalness: 0.5,
-        emissiveIntensity: 0,
-        emissive: tertiary
+    const secondaryMat = new THREE.MeshStandardMaterial({
+        ...selectedPallet.materials.secondaryMaterial
     });
 
     return <Physics gravity={[0, 2, 0]} iterations={10}>
@@ -138,11 +134,11 @@ export const Objects = () => {
                 }
 
                 // Determine which material to use
-                let material = (index === primaryIndex && !primaryAssigned) ? tertiaryMaterial : primaryMaterial;
+                let material = (index === primaryIndex && !primaryAssigned) ? secondaryMat : primaryMat;
                 if (index === primaryIndex) primaryAssigned = true;
 
                 // Pass the selected material to the ObjectWrangler component
-                return <ObjectWrangler glb={`/${model}`} material={material} numberOfObjects={objectsPerModel + extra} />
+                return <ObjectWrangler key={index} glb={`/${model}`} material={material} numberOfObjects={objectsPerModel + extra} />
             })
         }
     </Physics>
