@@ -28,9 +28,9 @@ const mapAndRound = (
 };
 
 // Calculate the number of spheres based on the screen width
-const totalNumObjects = mapAndRound(window.innerWidth, 300, 2000, 10, 30);
+var totalNumObjects = mapAndRound(window.innerWidth, 300, 2000, 10, 30);
 
-export const ObjectWrangler = ({ glb, material, numberOfObjects, ...props }) => {
+export const ObjectWranglerInstanced = ({ glb, material, numberOfObjects, ...props }) => {
     const { scene } = useGLTF(glb);
     const { viewport } = useThree();
     // const texture = useTexture("./cross.jpg");
@@ -91,57 +91,115 @@ export const ObjectWrangler = ({ glb, material, numberOfObjects, ...props }) => 
         }
     });
 
+    return <instancedMesh
+        ref={ref}
+        castShadow
+        receiveShadow
+        args={[
+            mesh.geometry,
+            material,
+            numberOfObjects
+        ]}
+    />
+};
+
+const ObjectWranglerIndividual = ({ glb, material, ...props }) => {
+    const { scene } = useGLTF(glb);
+    const { viewport } = useThree();
+
+    const rfs = THREE.MathUtils.randFloatSpread  // Randomize spawn position of objects
+
+    const mesh = useMemo(() => {
+        return scene.children.find((child) => child instanceof THREE.Mesh);
+    }, [scene]);
+
+    const vec = useRef(new THREE.Vector3());
+
+    const [ref, api] = useSphere(() => ({
+        mass: 1,
+        angularDamping: 0.1,
+        linearDamping: 0.65,
+        position: [rfs(20), rfs(20), rfs(20)],
+        rotation: [rfs(20), rfs(20), rfs(20)]
+    }));
+
+    const mouse = useRef(new THREE.Vector3(0, 0, 0));
+    const mousePos = useRef({ x: 0, y: 0 });
+
+    useEffect(() => {
+        const updateMousePos = (event) => {
+            mousePos.current.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mousePos.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        };
+
+        window.addEventListener('mousemove', updateMousePos);
+
+        return () => window.removeEventListener('mousemove', updateMousePos);
+    }, []);
+
+    useFrame(() => {
+        mouse.current.set(
+            (mousePos.current.x * viewport.width) / 2,
+            (mousePos.current.y * viewport.height) / 2,
+            0
+        );
+
+        ref.current.getWorldPosition(vec.current);
+        const direction = new THREE.Vector3().subVectors(mouse.current, vec.current).normalize();
+        api.applyForce(direction.multiplyScalar(10).toArray(), [0, 0, 0]);
+    });
+
     return (
-        <instancedMesh
+        <mesh
             ref={ref}
             castShadow
             receiveShadow
-            args={[
-                mesh.geometry,
-                useMemo(() => material, [material]),
-                numberOfObjects
-            ]}
+            geometry={mesh.geometry}
+            material={material}
         />
     );
-};
+}
 
 export const Objects = () => {
-    const objectsPerModel = Math.floor(totalNumObjects / models.length);
-    let remainingObjects = totalNumObjects % models.length;
-
-    let extra = 0;
-    let primaryAssigned = false;
-    let primaryIndex = Math.floor(Math.random() * models.length);
-
     const primaryMat = new THREE.MeshStandardMaterial({
         ...selectedPallet.materials.primaryMaterial
-    })
+    });
 
     const secondaryMat = new THREE.MeshStandardMaterial({
         ...selectedPallet.materials.secondaryMaterial
     });
 
-    return <Physics gravity={[0, 2, 0]} iterations={10}>
-        <MouseBall />
-        {
-            models.map((model, index) => {
-                // If there are remaining objects, assign one to the current model and decrease the count
-                if (remainingObjects > 0) {
-                    extra = 1;
-                    remainingObjects--;
-                } else {
-                    extra = 0;
-                }
+    // Deduct the number of ObjectWranglerIndividual components from the total number of objects
+    const totalInstancedObjects = totalNumObjects - models.length;
+    const objectsPerModel = Math.floor(totalInstancedObjects / models.length);
+    let remainingObjects = totalInstancedObjects % models.length;
 
-                // Determine which material to use
-                let material = (index === primaryIndex && !primaryAssigned) ? secondaryMat : primaryMat;
-                if (index === primaryIndex) primaryAssigned = true;
+    let extra = 0;
 
-                // Pass the selected material to the ObjectWrangler component
-                return <ObjectWrangler key={index} glb={`/${model}`} material={material} numberOfObjects={objectsPerModel + extra} />
-            })
-        }
-    </Physics>
+    return (
+        <Physics gravity={[0, 2, 0]} iterations={10}>
+            <MouseBall />
+            {
+                models.map((model, index) => {
+                    // If there are remaining objects, assign one to the current model and decrease the count
+                    if (remainingObjects > 0) {
+                        extra = 1;
+                        remainingObjects--;
+                    } else {
+                        extra = 0;
+                    }
+
+                    // Pass the selected material to the ObjectWrangler component
+                    return (
+                        <React.Fragment key={index}>
+                            <ObjectWranglerInstanced key={`${index}-instanced`} glb={`/${model}`} material={primaryMat} numberOfObjects={objectsPerModel + extra} />
+                            <ObjectWranglerIndividual key={`${index}-individual`} glb={model} material={secondaryMat} />
+                        </React.Fragment>
+                    );
+                })
+            }
+        </Physics>
+    );
 };
 
 export default Objects;

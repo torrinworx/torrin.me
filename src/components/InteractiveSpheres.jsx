@@ -10,7 +10,7 @@ const Camera = () => {
   const { set, size } = useThree();
 
   useEffect(() => {
-    let camera = new THREE.PerspectiveCamera(10, size.width / size.height, 10, 60);
+    let camera = new THREE.PerspectiveCamera(12, size.width / size.height, 10, 60);
     camera.position.z = 50;
     set({ camera });
   }, [size, set]);
