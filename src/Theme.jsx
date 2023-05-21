@@ -32,6 +32,7 @@ const pallets = {
       },
     },
   },
+
   // https://coolors.co/141414-6021c0-46188c-666666-d6d6d6
   purple: {
     colors: {
@@ -84,7 +85,7 @@ const pallets = {
   },
 };
  
-export const selectedPallet = pallets.crimson_red
+export const selectedPallet = pallets.purple
 
 // Other tweakables
 export const shadow = "0px 4px 6px rgba(0, 0, 0, 0.1)"
