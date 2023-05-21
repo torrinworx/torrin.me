@@ -1,5 +1,4 @@
 import React from "react";
-// import "@google/model-viewer";
 
 const ModelViewer = ({ src, alt = "3D Model" }) => {
   return (

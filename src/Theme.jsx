@@ -79,7 +79,7 @@ const theme = createTheme({
             borderRadius: '10px',
           },
           '&::-webkit-scrollbar-track-piece': {
-            background: primary, 
+            background: primary,
           },
           '&::-webkit-scrollbar-thumb:hover': {
             background: secondary,

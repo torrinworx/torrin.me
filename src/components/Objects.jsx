@@ -3,7 +3,7 @@ import * as THREE from "three"
 import { useFrame, useThree } from "react-three-fiber";
 import { useGLTF } from "@react-three/drei"
 import { Physics, useSphere } from "@react-three/cannon";
-import { primary, secondary, quaternary, shadow, bevelRadius } from "../Theme";
+import { primary, tertiary } from "../Theme";
 
 import MouseBall from "./MouseBall";
 
@@ -52,7 +52,7 @@ export const ObjectWrangler = ({ glb, material, numberOfObjects, ...props }) => 
             rotation: [rfs(20), rfs(20), rfs(20)]
         }),
     );
-    
+
     const mat = useRef(new THREE.Matrix4());
     const vec = useRef(new THREE.Vector3());
 
@@ -96,7 +96,7 @@ export const ObjectWrangler = ({ glb, material, numberOfObjects, ...props }) => 
             receiveShadow
             args={[
                 mesh.geometry,
-                useMemo(() => material, []),
+                useMemo(() => material, [material]),
                 numberOfObjects
             ]}
         />
@@ -111,17 +111,18 @@ export const Objects = () => {
     let primaryAssigned = false;
     let primaryIndex = Math.floor(Math.random() * models.length);
 
-    const primaryMaterial = new THREE.MeshStandardMaterial({ 
-        color: primary, 
-        roughness: 0.5, 
+    const primaryMaterial = new THREE.MeshStandardMaterial({
+        color: primary,
+        roughness: 0.5,
         metalness: 0.8
     })
-    const secondaryMaterial = new THREE.MeshStandardMaterial({
-        color: secondary,
+
+    const tertiaryMaterial = new THREE.MeshStandardMaterial({
+        color: tertiary,
         roughness: 0.8,
         metalness: 0.5,
         emissiveIntensity: 0,
-        emissive: secondary
+        emissive: tertiary
     });
 
     return <Physics gravity={[0, 2, 0]} iterations={10}>
@@ -137,7 +138,7 @@ export const Objects = () => {
                 }
 
                 // Determine which material to use
-                let material = (index === primaryIndex && !primaryAssigned) ? secondaryMaterial : primaryMaterial;
+                let material = (index === primaryIndex && !primaryAssigned) ? tertiaryMaterial : primaryMaterial;
                 if (index === primaryIndex) primaryAssigned = true;
 
                 // Pass the selected material to the ObjectWrangler component

@@ -1,63 +1,28 @@
-import React from 'react';
-import { AppBar, Toolbar, IconButton, Typography, Hidden, Drawer, List, ListItem, ListItemText } from '@material-ui/core';
-import { Menu as MenuIcon, Close as CloseIcon } from '@material-ui/icons';
+import React, { useRef, useState } from 'react'
 
-const Header = () => {
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+import { AppBar, Box, Toolbar, IconButton, Typography, Container, Button, Link } from "@mui/material/";
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+import FloatingCard from "./FloatingCard";
+import { text, contentMargin } from "../Theme"
 
-  const drawer = (
-    <div>
-      <List>
-        {['Home', 'About', 'Services', 'Contact'].map((text, index) => (
-          <ListItem button key={text}>
-            <ListItemText primary={text} />
-          </ListItem>
-        ))}
-      </List>
-    </div>
-  );
 
+const Footer = () => {
   return (
-    <div>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" style={{ flexGrow: 1 }}>
-            Logo
-          </Typography>
-          <Hidden smDown>
-            <List style={{ display: 'flex' }}>
-              {['Home', 'About', 'Services', 'Contact'].map((text) => (
-                <ListItem button key={text}>
-                  <ListItemText primary={text} />
-                </ListItem>
-              ))}
-            </List>
-          </Hidden>
-          <Hidden mdUp>
-            <IconButton edge="end" color="inherit" aria-label="menu" onClick={handleDrawerToggle}>
-              {mobileOpen ? <CloseIcon /> : <MenuIcon />}
-            </IconButton>
-          </Hidden>
+    <FloatingCard
+      type="translucentSecondary"
+      component={AppBar}
+      position="relative"
+      marginTop={contentMargin}
+      elevation={0}
+    >
+      <Container maxWidth="xl">
+        {/* Set a fixed height for the Toolbar (twice as large) */}
+        <Toolbar disableGutters sx={{ height: "96px" }}>
+          Footer tbd
         </Toolbar>
-      </AppBar>
-      <Hidden mdUp>
-        <Drawer
-          anchor="right"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
-          }}
-        >
-          {drawer}
-        </Drawer>
-      </Hidden>
-    </div>
+      </Container>
+    </FloatingCard>
   );
-};
+}
 
-export default Header;
+export default Footer;

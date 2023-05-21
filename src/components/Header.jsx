@@ -84,8 +84,6 @@ const HeaderProfileImage = () => {
 
 const Header = () => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
-  // const theme = useTheme();
-  // const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
