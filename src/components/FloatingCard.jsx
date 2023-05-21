@@ -1,7 +1,7 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import { primary, secondary, shadow, bevelRadius } from "../Theme";
+import { selectedPallet, shadow, bevelRadius } from "../Theme";
 
 const FloatingCard = ({ children, type, size, ...props }) => {
   /*
@@ -16,12 +16,12 @@ const FloatingCard = ({ children, type, size, ...props }) => {
 
   const colorMap = {
     translucentPrimary: {
-      color: hexToRgba(primary, 0.3),
+      color: hexToRgba(selectedPallet.colors.primary, 0.3),
       zIndex: 1,
       blur: "10px",  // blur amount for translucentPrimary
     },
     translucentSecondary: {
-      color: hexToRgba(secondary, 0.3),
+      color: hexToRgba(selectedPallet.colors.secondary, 0.3),
       zIndex: 1,
       blur: "25px",  // blur amount for translucentSecondary
     },
