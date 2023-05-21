@@ -7,7 +7,7 @@ import { text, contentMargin } from "../Theme"
 
 
 const Footer = () => {
-  return (
+  return <>
     <FloatingCard
       type="translucentSecondary"
       component={AppBar}
@@ -22,7 +22,17 @@ const Footer = () => {
         </Toolbar>
       </Container>
     </FloatingCard>
-  );
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: contentMargin,
+      }}
+    >
+      © Torrin Leonard {new Date().getFullYear()}
+    </Box>
+  </>
 }
 
 export default Footer;
