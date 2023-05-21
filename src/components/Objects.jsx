@@ -1,10 +1,11 @@
-import React, { useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import * as THREE from "three"
 import { useFrame, useThree } from "react-three-fiber";
 import { useGLTF } from "@react-three/drei"
 import { Physics, useSphere } from "@react-three/cannon";
-import { selectedPallet } from "../Theme";
+import { gsap } from "gsap";
 
+import { selectedPallet } from "../Theme";
 import MouseBall from "./MouseBall";
 
 const models = [
@@ -103,7 +104,14 @@ export const ObjectWranglerInstanced = ({ glb, material, numberOfObjects, ...pro
     />
 };
 
-const ObjectWranglerIndividual = ({ glb, material, ...props }) => {
+const ObjectWranglerIndividual = ({ glb, material, scalingOn = true, ...props }) => {
+
+    const minSize = 0.5;
+    const maxSize = 1.5;
+
+    const scale = useRef(1);  // Current scale
+    const targetScale = useRef(1);  // Target scale
+
     const { scene } = useGLTF(glb);
     const { viewport } = useThree();
 
@@ -120,7 +128,8 @@ const ObjectWranglerIndividual = ({ glb, material, ...props }) => {
         angularDamping: 0.1,
         linearDamping: 0.65,
         position: [rfs(20), rfs(20), rfs(20)],
-        rotation: [rfs(20), rfs(20), rfs(20)]
+        rotation: [rfs(20), rfs(20), rfs(20)],
+        args: [2]
     }));
 
     const mouse = useRef(new THREE.Vector3(0, 0, 0));
@@ -137,7 +146,44 @@ const ObjectWranglerIndividual = ({ glb, material, ...props }) => {
         return () => window.removeEventListener('mousemove', updateMousePos);
     }, []);
 
-    useFrame(() => {
+    useEffect(() => {
+        if (!scalingOn) return;
+
+        const grow = () => {
+            // Grow to a random size within the specified range
+            const newSize = Math.random() * (maxSize - minSize) + minSize;
+
+            gsap.to(ref.current.scale, {
+                x: newSize,
+                y: newSize,
+                z: newSize,
+                duration: 1,
+                ease: "Power2.easeOut",
+                onComplete: () => {
+                    setTimeout(shrink, 2000);  // Wait 2 seconds then shrink
+                }
+            });
+        };
+
+        const shrink = () => {
+            // Shrink to nothing
+            gsap.to(ref.current.scale, {
+                x: 0,
+                y: 0,
+                z: 0,
+                duration: 1,
+                ease: "Power2.easeIn",
+                onComplete: () => {
+                    setTimeout(grow, 2000);  // Wait 2 seconds then grow
+                }
+            });
+        };
+
+        grow();  // Start the cycle
+    }, [scalingOn]);
+
+
+    useFrame((state, delta) => {
         mouse.current.set(
             (mousePos.current.x * viewport.width) / 2,
             (mousePos.current.y * viewport.height) / 2,
