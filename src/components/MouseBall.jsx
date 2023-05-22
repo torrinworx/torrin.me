@@ -67,6 +67,9 @@ export const MouseBall = () => {
   const mouseScaleTarget = useRef(new THREE.Vector3(1, 1, 1));
   const meshPosition = useRef(new THREE.Vector3());
 
+  const [speed, setSpeed] = useState(2); // Adjust the initial speed as per your requirements
+  const [scale, setScale] = useState(8); // Adjust the initial scale as per your requirements
+
   const mouseInteractionSphereRadius = 2
 
   const mouseHover = useIsHovered();
@@ -106,6 +109,18 @@ export const MouseBall = () => {
       0
     );
 
+    // Infinity symbol path
+    const t = clock.getElapsedTime() * speed;
+    const infinityX = scale * Math.sin(t) / (1 + Math.pow(Math.cos(t), 2));
+    const infinityY = scale * Math.sin(t) * Math.cos(t) / (1 + Math.pow(Math.cos(t), 2));
+
+    // Combine the mouse position and the infinity symbol path
+    const combinedX = mouse3D.current.x + infinityX;
+    const combinedY = mouse3D.current.y + infinityY;
+
+    // Update the mesh position
+    mesh.current.position.set(combinedX, combinedY, 0);
+
     // If the device has touch capability, set the mouseTarget ref to a value that changes over time
     // Otherwise, set mouseTarget ref to match the current mouse position in Three.js coordinates
     if (isOnTouchScreen) {
@@ -139,8 +154,9 @@ export const MouseBall = () => {
     mesh.current.getWorldPosition(meshPosition.current);
 
     // Set the position of the sphere to match the current position of the mesh.current object
-    api.position.copy(meshPosition.current);
+    api.position.set(combinedX, combinedY, 0);
   });
+
 
   // Return a line loop with a circle geometry and a line basic material with a color based on a CSS variable
   return (

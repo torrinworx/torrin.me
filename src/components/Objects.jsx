@@ -11,7 +11,6 @@ import MouseBall from "./MouseBall";
 const models = [
     "models/cone.glb",
     "models/cube.glb",
-    // "models/cylinder.glb",
     "models/sphere.glb",
     "models/suzanne.glb",
     "models/torus.glb",
@@ -107,10 +106,7 @@ export const ObjectWranglerInstanced = ({ glb, material, numberOfObjects, ...pro
 const ObjectWranglerIndividual = ({ glb, material, scalingOn = true, ...props }) => {
 
     const minSize = 0.5;
-    const maxSize = 1.5;
-
-    const scale = useRef(1);  // Current scale
-    const targetScale = useRef(1);  // Target scale
+    const maxSize = 1;
 
     const { scene } = useGLTF(glb);
     const { viewport } = useThree();
@@ -124,12 +120,12 @@ const ObjectWranglerIndividual = ({ glb, material, scalingOn = true, ...props })
     const vec = useRef(new THREE.Vector3());
 
     const [ref, api] = useSphere(() => ({
-        mass: 1,
+        mass: 1.5,
         angularDamping: 0.1,
-        linearDamping: 0.65,
+        linearDamping: 0.1,
         position: [rfs(20), rfs(20), rfs(20)],
         rotation: [rfs(20), rfs(20), rfs(20)],
-        args: [2]
+        // args: [2]
     }));
 
     const mouse = useRef(new THREE.Vector3(0, 0, 0));
@@ -150,7 +146,6 @@ const ObjectWranglerIndividual = ({ glb, material, scalingOn = true, ...props })
         if (!scalingOn) return;
 
         const grow = () => {
-            // Grow to a random size within the specified range
             const newSize = Math.random() * (maxSize - minSize) + minSize;
 
             gsap.to(ref.current.scale, {
@@ -166,7 +161,6 @@ const ObjectWranglerIndividual = ({ glb, material, scalingOn = true, ...props })
         };
 
         const shrink = () => {
-            // Shrink to nothing
             gsap.to(ref.current.scale, {
                 x: 0,
                 y: 0,
@@ -174,14 +168,18 @@ const ObjectWranglerIndividual = ({ glb, material, scalingOn = true, ...props })
                 duration: 1,
                 ease: "Power2.easeIn",
                 onComplete: () => {
-                    setTimeout(grow, 2000);  // Wait 2 seconds then grow
+                    setTimeout(grow, 1000);  // Wait 2 seconds then grow
                 }
             });
         };
 
-        grow();  // Start the cycle
-    }, [scalingOn]);
+        // Add a random delay before the first grow
+        const delay = Math.random() * 3000;  // Delay up to 2 seconds
+        setTimeout(() => {
+            grow();  // Start the cycle
+        }, delay);
 
+    }, [scalingOn]);
 
     useFrame((state, delta) => {
         mouse.current.set(
@@ -238,7 +236,10 @@ export const Objects = () => {
                     // Pass the selected material to the ObjectWrangler component
                     return (
                         <React.Fragment key={index}>
-                            <ObjectWranglerInstanced key={`${index}-instanced`} glb={`/${model}`} material={primaryMat} numberOfObjects={objectsPerModel + extra} />
+                            {/* <ObjectWranglerInstanced key={`${index}-instanced`} glb={`/${model}`} material={primaryMat} numberOfObjects={objectsPerModel + extra} /> */}
+                            <ObjectWranglerIndividual key={`${index}-individual0`} glb={model} material={primaryMat} />
+                            <ObjectWranglerIndividual key={`${index}-individual1`} glb={model} material={primaryMat} />
+                            <ObjectWranglerIndividual key={`${index}-individual2`} glb={model} material={primaryMat} />
                             <ObjectWranglerIndividual key={`${index}-individual`} glb={model} material={secondaryMat} />
                         </React.Fragment>
                     );
