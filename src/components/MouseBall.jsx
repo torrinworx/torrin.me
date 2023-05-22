@@ -4,6 +4,8 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useSphere } from "@react-three/cannon";
 import { isOnTouchScreen } from "./InteractiveSpheres";
 
+import { selectedPallet } from "../Theme";
+
 // Create a circle geometry with a given radius and number of segments
 const createCircleGeometry = (radius, segments) => {
   const geometry = new THREE.BufferGeometry();
@@ -20,14 +22,6 @@ const createCircleGeometry = (radius, segments) => {
   );
 
   return geometry;
-};
-
-// Get the value of a CSS color variable as a string
-const getCssColor = (variable) => {
-  if (typeof window === "undefined") return "#ffffff";
-  return getComputedStyle(document.documentElement)
-    .getPropertyValue(variable)
-    .trim();
 };
 
 export const useIsHovered = () => {
@@ -157,12 +151,11 @@ export const MouseBall = () => {
     api.position.set(combinedX, combinedY, 0);
   });
 
-
   // Return a line loop with a circle geometry and a line basic material with a color based on a CSS variable
   return (
     <lineLoop ref={mesh}>
       {isOnTouchScreen ? "none" : <primitive object={createCircleGeometry(3, 6)} />}
-      <lineBasicMaterial color={getCssColor('--c-primary')} depthTest={false} transparent opacity={1} renderOrder={1} />
+      <lineBasicMaterial color={selectedPallet.colors.text} depthTest={false} transparent opacity={1} renderOrder={1} />
     </lineLoop>
   );
 };
