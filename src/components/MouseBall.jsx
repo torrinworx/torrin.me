@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useSphere } from "@react-three/cannon";
 import { isOnTouchScreen } from "./InteractiveSpheres";
 
-import { selectedPallet } from "../Theme";
+import { PalletContext } from "../Theme";
 
 // Create a circle geometry with a given radius and number of segments
 const createCircleGeometry = (radius, segments) => {
@@ -60,9 +60,10 @@ export const MouseBall = () => {
   const mouseTarget = useRef(new THREE.Vector3());
   const mouseScaleTarget = useRef(new THREE.Vector3(1, 1, 1));
   const meshPosition = useRef(new THREE.Vector3());
+  const selectedPallet = useContext(PalletContext);
 
-  const [speed, setSpeed] = useState(2); // Adjust the initial speed as per your requirements
-  const [scale, setScale] = useState(8); // Adjust the initial scale as per your requirements
+  const speed = 2; // Adjust the initial speed as per your requirements
+  const scale = 8; // Adjust the initial scale as per your requirements
 
   const mouseInteractionSphereRadius = 2
 

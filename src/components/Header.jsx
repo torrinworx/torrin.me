@@ -1,14 +1,15 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useContext } from 'react'
 
 import { AppBar, Box, Toolbar, IconButton, Typography, Menu, Container, Button, Link, MenuItem, useMediaQuery } from "@mui/material/";
 import MenuIcon from "@mui/icons-material/Menu";
 
 import FloatingCard from "./FloatingCard";
-import { selectedPallet, contentMargin } from "../Theme"
+import { PalletContext, contentMargin } from "../Theme"
 
 const pages = ["About", "Services", "Contact"];
 
 const HeaderProfileImage = () => {
+  const selectedPallet = useContext(PalletContext);
   const [isHovered, setIsHovered] = useState(false);
 
   const handleMouseEnter = () => {
@@ -83,7 +84,8 @@ const HeaderProfileImage = () => {
 };
 
 const Header = () => {
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
+  const selectedPallet = useContext(PalletContext);
+  const [anchorElNav, setAnchorElNav] = useState(null);
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
