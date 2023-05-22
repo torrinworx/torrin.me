@@ -1,7 +1,7 @@
-import * as React from "react";
+import React, { useContext } from "react";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import { selectedPallet, shadow, bevelRadius } from "../Theme";
+import { PalletContext, shadow, bevelRadius } from "../Theme";
 
 const FloatingCard = ({ children, type, size, ...props }) => {
   /*
@@ -9,6 +9,8 @@ const FloatingCard = ({ children, type, size, ...props }) => {
   
   sizes: large, medium, small, halfWidth
   */
+  const selectedPallet = useContext(PalletContext);
+
   const hexToRgba = (hex, alpha) => {
     const [r, g, b] = hex.match(/\w\w/g).map((x) => parseInt(x, 16));
     return `rgba(${r},${g},${b},${alpha})`;

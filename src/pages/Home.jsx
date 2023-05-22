@@ -1,11 +1,13 @@
 import React from "react";
 import { Grid, Box, Typography } from "@mui/material";
 import FloatingCard from "../components/FloatingCard";
+import InteractiveSpheres from "../components/InteractiveSpheres";
 
 import { contentMargin } from "../Theme";
 
 const Home = () => {
-  return <Grid container spacing={contentMargin} justifyContent="center">
+  return <InteractiveSpheres>
+    <Grid container spacing={contentMargin} justifyContent="center">
     <FloatingCard type="invisible" size="large">
       <Grid container alignItems="center">
         <Grid item xs={12} md={12}>
@@ -71,6 +73,7 @@ const Home = () => {
     </FloatingCard>
     {/* Add more Grid items with FloatingBox cards as needed */}
   </Grid>
+  </InteractiveSpheres>
 };
 
 export default Home;
