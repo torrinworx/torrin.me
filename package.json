@@ -23,13 +23,14 @@
     "three-stdlib": "^2.21.10",
     "web-vitals": "^2.1.4"
   },
-  "scripts": {
-    "heroku-postbuild": "npm install && npm run build",
-    "start": "node server.js",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
+"scripts": {
+  "heroku-postbuild": "npm install && npm run build",
+  "start": "react-scripts start",
+  "start-prod": "node server.js",
+  "build": "react-scripts build",
+  "test": "react-scripts test",
+  "eject": "react-scripts eject"
+},
   "eslintConfig": {
     "extends": [
       "react-app",
