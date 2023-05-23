@@ -15,6 +15,14 @@ const pages = {
 
 const HeaderProfileImage = () => {
   const selectedPallet = useContext(PalletContext);
+
+  // const { selectedThemeMode } = useContext(ThemeModeContext);
+
+  // const profileImage = selectedThemeMode === themeModes.dark ? './torrin-profile.dark-mode.png' : './torrin-profile.light-mode.png';
+
+  const profileImage = "";
+
+
   const [isHovered, setIsHovered] = useState(false);
 
   const handleMouseEnter = () => {
@@ -25,7 +33,6 @@ const HeaderProfileImage = () => {
     setIsHovered(false);
   };
 
-  const profileImage = './torrin-profile.png';
   const linkRef = useRef(null);
   const isMobile = useMediaQuery((theme) => theme.breakpoints.down('sm'));
 
