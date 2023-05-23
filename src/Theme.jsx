@@ -23,7 +23,7 @@ const themeModes = {
 const selectedThemeMode = themeModes.dark
 
 // Colours:
-const pallets = (selectedThemeMode) = {
+const pallets = {
 
   // ### Dark Themes ###
   // https://coolors.co/141414-a30029-660019-666666-d6d6d6
