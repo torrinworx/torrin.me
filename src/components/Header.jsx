@@ -6,7 +6,11 @@ import MenuIcon from "@mui/icons-material/Menu";
 import FloatingCard from "./FloatingCard";
 import { PalletContext, contentMargin } from "../Theme"
 
-const pages = ["About", "Services", "Contact"];
+const pages = {
+  "About": "about",
+  "Games": "games",
+  "Contact": "contact"
+};
 
 const HeaderProfileImage = () => {
   const selectedPallet = useContext(PalletContext);
@@ -51,11 +55,11 @@ const HeaderProfileImage = () => {
           src={profileImage}
           alt="Logo"
           sx={{
-            height: '90px', // Set a larger height for the image
+            height: '130px', // Set a larger height for the image
             width: 'auto',
             position: 'relative',
-            top: '-5px', // Adjust the position accordingly
-            left: '-2px', // Adjust the position accordingly
+            top: '-15px', // Adjust the position accordingly
+            left: '-4px', // Adjust the position accordingly
           }}
         />
       </Box>
@@ -113,9 +117,8 @@ const Header = () => {
 
           {/* Render larger buttons on larger screens */}
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
-            {pages.map((page) => (
+            {Object.entries(pages).map(([name, path]) => (
               <Button
-                key={page}
                 onClick={handleCloseNavMenu}
                 sx={{
                   my: 2,
@@ -125,8 +128,9 @@ const Header = () => {
                   padding: "8px 16px", // Increase padding
                   color: selectedPallet.colors.text, // Apply text color
                 }}
+                href={`/${path}`}
               >
-                {page}
+                {name}
               </Button>
             ))}
           </Box>
@@ -165,15 +169,15 @@ const Header = () => {
               display: { xs: "block", md: "none" },
             }}
           >
-            {pages.map((page) => (
-              <MenuItem key={page} onClick={handleCloseNavMenu}>
-                <Typography textAlign="center">{page}</Typography>
+            {Object.entries(pages).map(([name, path]) => (
+              <MenuItem href={`/${path}`} onClick={handleCloseNavMenu}>
+                <Typography textAlign="center">{name}</Typography>
               </MenuItem>
             ))}
           </Menu>
         </Toolbar>
       </Container>
-    </FloatingCard>
+    </FloatingCard >
   );
 }
 

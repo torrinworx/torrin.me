@@ -4,24 +4,24 @@ import { useNavigate } from 'react-router-dom';
 
 import FloatingCard from '../components/FloatingCard';
 
-const NotFound = () => {
+const ComingSoon = () => {
   const navigate = useNavigate();
 
   return (
     <Box textAlign="center" py={5} zIndex={1}>
       <FloatingCard type="invisible" size="small" />
       <Typography variant="h2" gutterBottom>
-        404: Page Not Found
+        Coming Soon!
       </Typography>
       <Typography variant="body1" gutterBottom>
-        Sorry, the page you are looking for does not exist.
+        More stuff is in the works!
       </Typography>
       <Button variant="contained" color="primary" onClick={() => navigate('/')}>
         Return Home
       </Button>
-      <FloatingCard type="invisible" size="small"/>
+      <FloatingCard type="invisible" size="small" />
     </Box>
   );
 };
 
-export default NotFound;
+export default ComingSoon;
