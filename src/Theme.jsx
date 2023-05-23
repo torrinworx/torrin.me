@@ -126,7 +126,7 @@ export const PalletRadioSelector = ({ onChange, palletOptions, pallets }) => {
         justifyContent: "center",
       }}>
         <RadioGroup
-          defaultValue={"purple"}
+          defaultValue={localStorage.getItem('selectedPallet') || "purple"}
           onChange={onChange}
           row
         >
@@ -145,14 +145,17 @@ export const PalletRadioSelector = ({ onChange, palletOptions, pallets }) => {
   );
 }
 
-
-
-
 export const ThemeWrapper = ({ children }) => {
-  const [selectedPallet, setSelectedPallet] = useState(pallets.purple);
+  // Attempt to retrieve the previously selected pallet from localStorage
+  const initialPallet = localStorage.getItem('selectedPallet') ? pallets[localStorage.getItem('selectedPallet')] : pallets.purple;
+
+  const [selectedPallet, setSelectedPallet] = useState(initialPallet);
 
   const handlePalletChange = (event) => {
-    setSelectedPallet(pallets[event.target.value]);
+    const newPallet = pallets[event.target.value];
+    setSelectedPallet(newPallet);
+    // Store the selected pallet name in localStorage
+    localStorage.setItem('selectedPallet', event.target.value);
   };
 
   const theme = createTheme({
