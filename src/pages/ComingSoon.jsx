@@ -19,7 +19,7 @@ const ComingSoon = () => {
       <Button variant="contained" color="primary" onClick={() => navigate('/')}>
         Return Home
       </Button>
-      <FloatingCard type="invisible" size="small" />
+      <FloatingCard type="invisible" size="medium" />
     </Box>
   );
 };

@@ -9,12 +9,11 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 export const PalletContext = createContext();
 
 // Colours:
-// https://coolors.co/000000-800020-660019-666666-d6d6d6-ffffff
 const pallets = {
 
   // ### Dark Themes ###
   // https://coolors.co/141414-a30029-660019-666666-d6d6d6
-  crimson_red: {
+  red: {
     colors: {
       primary: "#141414",
       secondary: "#A30029",
@@ -64,27 +63,52 @@ const pallets = {
   },
 
   // ### Light Themes ###
-  // https://coolors.co/fdffff-b10f2e-570000-280000-de7c5a
-  madder: {
+  // https://coolors.co/141414-368f8b-246a73-666666-d6d6d6
+  cyan: {
     colors: {
-      primary: "#fdffff",
-      secondary: "#b10f2e",
-      tertiary: "#570000",
-      quinary: "#280000",
-      text: "#280000",
+      primary: "#D6D6D6",
+      secondary: "#368F8B",
+      tertiary: "#246A73",
+      quinary: "#666666",
+      text: "#141414",
     },
     materials: {
       primaryMaterial: {
-        color: "#fdffff",
+        color: "#D6D6D6",
         roughness: 0.5,
         metalness: 0.2,
       },
       secondaryMaterial: {
-        color: "#b10f2e",
+        color: "#368F8B",
         roughness: 0.8,
         metalness: 0,
         emissiveIntensity: 0.1,
-        emissive: "#b10f2e",
+        emissive: "#368F8B",
+      },
+    },
+  },
+
+  // https://coolors.co/141414-fabc2a-db9b06-666666-d6d6d6
+  gold: {
+    colors: {
+      primary: "#D6D6D6",
+      secondary: "#FABC2A",
+      tertiary: "#DB9B06",
+      quinary: "#666666",
+      text: "#141414",
+    },
+    materials: {
+      primaryMaterial: {
+        color: "#D6D6D6",
+        roughness: 0.5,
+        metalness: 0.2,
+      },
+      secondaryMaterial: {
+        color: "#FABC2A",
+        roughness: 0.8,
+        metalness: 0,
+        emissiveIntensity: 0.1,
+        emissive: "#FABC2A",
       },
     },
   },
@@ -96,13 +120,18 @@ export const bevelRadius = "20px"
 export const pagePadding = "4%"
 export const contentMargin = "4%"
 
-export const PalletRadioSelector = ({ onChange, palletOptions, pallets }) => {
-  const selectedPallet = useContext(PalletContext);
+export const PalletRadioSelector = ({ onChange, palletOptions, pallets, selectedPallet }) => {
+  const selectedPalletData = useContext(PalletContext);
 
   const hexToRgba = (hex, alpha) => {
     const [r, g, b] = hex.match(/\w\w/g).map((x) => parseInt(x, 16));
     return `rgba(${r},${g},${b},${alpha})`;
   };
+
+  // Check if selectedPalletData and selectedPalletData.colors exist before using them
+  const backgroundColor = selectedPalletData && selectedPalletData.colors
+    ? hexToRgba(selectedPalletData.colors.secondary, 0.3)
+    : 'rgba(0,0,0,0.3)';  // Provide a default value
 
   return (
     <Box sx={{
@@ -113,7 +142,7 @@ export const PalletRadioSelector = ({ onChange, palletOptions, pallets }) => {
         position: "relative",
         top: "0",
         zIndex: 2,
-        backgroundColor: hexToRgba(selectedPallet.colors.secondary, 0.3),
+        backgroundColor: backgroundColor,
         borderRadius: bevelRadius,
         boxShadow: shadow,
         backdropFilter: "blur(25px)",
@@ -126,7 +155,7 @@ export const PalletRadioSelector = ({ onChange, palletOptions, pallets }) => {
         justifyContent: "center",
       }}>
         <RadioGroup
-          defaultValue={localStorage.getItem('selectedPallet') || "purple"}
+          value={selectedPallet}
           onChange={onChange}
           row
         >
@@ -146,17 +175,16 @@ export const PalletRadioSelector = ({ onChange, palletOptions, pallets }) => {
 }
 
 export const ThemeWrapper = ({ children }) => {
-  // Attempt to retrieve the previously selected pallet from localStorage
-  const initialPallet = localStorage.getItem('selectedPallet') ? pallets[localStorage.getItem('selectedPallet')] : pallets.purple;
-
-  const [selectedPallet, setSelectedPallet] = useState(initialPallet);
+  const localStoragePallet = localStorage.getItem('selectedPallet');
+  const [selectedPalletName, setSelectedPalletName] = useState(localStoragePallet || "purple");
 
   const handlePalletChange = (event) => {
-    const newPallet = pallets[event.target.value];
-    setSelectedPallet(newPallet);
-    // Store the selected pallet name in localStorage
+    setSelectedPalletName(event.target.value);
     localStorage.setItem('selectedPallet', event.target.value);
   };
+
+  const selectedPallet = pallets[selectedPalletName];
+
 
   const theme = createTheme({
     palette: {
@@ -246,11 +274,9 @@ export const ThemeWrapper = ({ children }) => {
   return (
     <PalletContext.Provider value={selectedPallet}>
       <ThemeProvider theme={theme}>
-        <PalletRadioSelector onChange={handlePalletChange} palletOptions={palletOptions} pallets={pallets} />
+        <PalletRadioSelector onChange={handlePalletChange} palletOptions={palletOptions} pallets={pallets} selectedPallet={selectedPalletName} />
         <CssBaseline />
         <Box padding={pagePadding}>
-          {/* Pallet Radio Selector */}
-          {/* Site Content */}
           {children}
         </Box>
       </ThemeProvider>

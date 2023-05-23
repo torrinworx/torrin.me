@@ -1,4 +1,5 @@
 import React, { useRef, useState, useContext } from 'react'
+import { useNavigate } from 'react-router-dom';
 
 import { AppBar, Box, Toolbar, IconButton, Typography, Menu, Container, Button, Link, MenuItem, useMediaQuery } from "@mui/material/";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -58,16 +59,20 @@ const HeaderProfileImage = () => {
             height: '130px', // Set a larger height for the image
             width: 'auto',
             position: 'relative',
-            top: '-15px', // Adjust the position accordingly
+            top: '-18px', // Adjust the position accordingly
             left: '-4px', // Adjust the position accordingly
           }}
         />
       </Box>
       <Typography
         variant="h2"
-        style={{
-          display: isMobile ? 'none' : 'inline-block',
+        sx={{
           position: 'relative',
+          fontSize: {
+            xs: 'clamp(1rem, 5vw, 2rem)', // Adjust the values as per your need
+            sm: 'clamp(1.5rem, 2vw, 3rem)', // Adjust the values as per your need
+            md: '2rem', // Fixed size for larger screens
+          },
         }}
       >
         Torrin Leonard
@@ -88,6 +93,8 @@ const HeaderProfileImage = () => {
 };
 
 const Header = () => {
+  const navigate = useNavigate();
+
   const selectedPallet = useContext(PalletContext);
   const [anchorElNav, setAnchorElNav] = useState(null);
 
@@ -119,7 +126,8 @@ const Header = () => {
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
             {Object.entries(pages).map(([name, path]) => (
               <Button
-                onClick={handleCloseNavMenu}
+                key={path}
+                onClick={() => navigate(`/${path}`)}
                 sx={{
                   my: 2,
                   mx: 0.5, // Apply horizontal margin
@@ -128,7 +136,6 @@ const Header = () => {
                   padding: "8px 16px", // Increase padding
                   color: selectedPallet.colors.text, // Apply text color
                 }}
-                href={`/${path}`}
               >
                 {name}
               </Button>
@@ -169,15 +176,23 @@ const Header = () => {
               display: { xs: "block", md: "none" },
             }}
           >
-            {Object.entries(pages).map(([name, path]) => (
-              <MenuItem href={`/${path}`} onClick={handleCloseNavMenu}>
-                <Typography textAlign="center">{name}</Typography>
-              </MenuItem>
-            ))}
+            {
+              Object.entries(pages).map(([name, path]) => (
+                <MenuItem
+                  key={path}
+                  onClick={() => {
+                    navigate(`/${path}`);
+                    handleCloseNavMenu();
+                  }}
+                >
+                  <Typography textAlign="center">{name}</Typography>
+                </MenuItem>
+              ))
+            }
           </Menu>
         </Toolbar>
       </Container>
-    </FloatingCard >
+    </FloatingCard>
   );
 }
 
