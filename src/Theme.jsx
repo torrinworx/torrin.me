@@ -1,29 +1,43 @@
 import React, { createContext, useContext, useState } from "react";
+
+import { Box, Radio, RadioGroup, FormControlLabel, Switch } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import Box from "@mui/material/Box";
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
 
+export const ThemeModeContext = createContext();
 export const PalletContext = createContext();
 
+const themeModes = {
+  light: {
+    primary: "#D6D6D6",
+
+    text: "#141414",
+  },
+  dark: {
+    primary: "#141414",
+    text: "#D6D6D6",
+
+  }
+}
+
+const selectedThemeMode = themeModes.dark
+
 // Colours:
-const pallets = {
+const pallets = (selectedThemeMode) = {
 
   // ### Dark Themes ###
   // https://coolors.co/141414-a30029-660019-666666-d6d6d6
   red: {
     colors: {
-      primary: "#141414",
+      primary: selectedThemeMode.primary,
       secondary: "#A30029",
       tertiary: "#660019",
       quinary: "#666666",
-      text: "#D6D6D6",
+      text: selectedThemeMode.text,
     },
     materials: {
       primaryMaterial: {
-        color: "#141414",
+        color: selectedThemeMode.primary,
         roughness: 0.5,
         metalness: 0.2,
       },
@@ -40,15 +54,15 @@ const pallets = {
   // https://coolors.co/141414-6021c0-46188c-666666-d6d6d6
   purple: {
     colors: {
-      primary: "#141414",
+      primary: selectedThemeMode.primary,
       secondary: "#6021c0",
       tertiary: "#46188c",
       quinary: "#666666",
-      text: "#d6d6d6",
+      text: selectedThemeMode.text,
     },
     materials: {
       primaryMaterial: {
-        color: "#141414",
+        color: selectedThemeMode.primary,
         roughness: 0.5,
         metalness: 0.2,
       },
@@ -66,15 +80,15 @@ const pallets = {
   // https://coolors.co/141414-368f8b-246a73-666666-d6d6d6
   cyan: {
     colors: {
-      primary: "#D6D6D6",
+      primary: selectedThemeMode.primary,
       secondary: "#368F8B",
       tertiary: "#246A73",
       quinary: "#666666",
-      text: "#141414",
+      text: selectedThemeMode.text,
     },
     materials: {
       primaryMaterial: {
-        color: "#D6D6D6",
+        color: selectedThemeMode.primary,
         roughness: 0.5,
         metalness: 0.2,
       },
@@ -91,22 +105,22 @@ const pallets = {
   // https://coolors.co/141414-fabc2a-db9b06-666666-d6d6d6
   gold: {
     colors: {
-      primary: "#D6D6D6",
+      primary: selectedThemeMode.primary,
       secondary: "#FABC2A",
       tertiary: "#DB9B06",
       quinary: "#666666",
-      text: "#141414",
+      text: selectedThemeMode.text,
     },
     materials: {
       primaryMaterial: {
-        color: "#D6D6D6",
+        color: selectedThemeMode.primary,
         roughness: 0.5,
         metalness: 0.2,
       },
       secondaryMaterial: {
         color: "#FABC2A",
-        roughness: 0.8,
-        metalness: 0,
+        roughness: 0.5,
+        metalness: 1,
         emissiveIntensity: 0.1,
         emissive: "#FABC2A",
       },
@@ -121,6 +135,7 @@ export const pagePadding = "4%"
 export const contentMargin = "4%"
 
 export const PalletRadioSelector = ({ onChange, palletOptions, pallets, selectedPallet }) => {
+  const { selectedThemeMode, setSelectedThemeMode } = useContext(ThemeModeContext);
   const selectedPalletData = useContext(PalletContext);
 
   const hexToRgba = (hex, alpha) => {
@@ -128,15 +143,16 @@ export const PalletRadioSelector = ({ onChange, palletOptions, pallets, selected
     return `rgba(${r},${g},${b},${alpha})`;
   };
 
-  // Check if selectedPalletData and selectedPalletData.colors exist before using them
   const backgroundColor = selectedPalletData && selectedPalletData.colors
     ? hexToRgba(selectedPalletData.colors.secondary, 0.3)
-    : 'rgba(0,0,0,0.3)';  // Provide a default value
+    : 'rgba(0,0,0,0.3)';
 
   return (
     <Box sx={{
       display: "flex",
-      justifyContent: "center",
+      justifyContent: "flex-start", // changed from space-between to flex-start
+      alignItems: "center",
+      flexDirection: "column",
     }}>
       <Box sx={{
         position: "relative",
@@ -150,9 +166,9 @@ export const PalletRadioSelector = ({ onChange, palletOptions, pallets, selected
         marginBottom: "-3%",
         paddingLeft: "1.5rem",
         display: "flex",
-        flexDirection: "column",
+        flexDirection: "row", // changed from column to row
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "space-between", // added to provide space between RadioGroup and Switch
       }}>
         <RadioGroup
           value={selectedPallet}
@@ -169,6 +185,23 @@ export const PalletRadioSelector = ({ onChange, palletOptions, pallets, selected
             />
           ))}
         </RadioGroup>
+        <Switch
+          checked={selectedThemeMode === themeModes.dark}
+          onChange={() => {
+            setSelectedThemeMode(selectedThemeMode === themeModes.dark ? themeModes.light : themeModes.dark);
+          }}
+          sx={{
+            '&.MuiSwitch-switchBase.Mui-checked': {
+              color: 'white',
+            },
+            '&.MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+              backgroundColor: 'white',
+            },
+            '&.Mui-checked + .MuiSwitch-track': {
+              backgroundColor: 'black',
+            },
+          }}
+        />
       </Box>
     </Box>
   );
@@ -177,13 +210,21 @@ export const PalletRadioSelector = ({ onChange, palletOptions, pallets, selected
 export const ThemeWrapper = ({ children }) => {
   const localStoragePallet = localStorage.getItem('selectedPallet');
   const [selectedPalletName, setSelectedPalletName] = useState(localStoragePallet || "purple");
+  const [selectedThemeMode, setSelectedThemeMode] = useState(themeModes.dark || "dark");
 
   const handlePalletChange = (event) => {
     setSelectedPalletName(event.target.value);
     localStorage.setItem('selectedPallet', event.target.value);
   };
 
-  const selectedPallet = pallets[selectedPalletName];
+  const selectedPallet = {
+    ...pallets[selectedPalletName],
+    colors: {
+      ...pallets[selectedPalletName].colors,
+      primary: selectedThemeMode.primary,
+      text: selectedThemeMode.text
+    }
+  };
 
 
   const theme = createTheme({
@@ -272,6 +313,7 @@ export const ThemeWrapper = ({ children }) => {
   const palletOptions = Object.keys(pallets);
 
   return (
+    <ThemeModeContext.Provider value={{ selectedThemeMode, setSelectedThemeMode }}>
     <PalletContext.Provider value={selectedPallet}>
       <ThemeProvider theme={theme}>
         <PalletRadioSelector onChange={handlePalletChange} palletOptions={palletOptions} pallets={pallets} selectedPallet={selectedPalletName} />
@@ -281,6 +323,7 @@ export const ThemeWrapper = ({ children }) => {
         </Box>
       </ThemeProvider>
     </PalletContext.Provider>
+  </ThemeModeContext.Provider>
   );
 };
 
