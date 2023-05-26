@@ -9,7 +9,6 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { PalettesOptions, themeModes } from "./Palettes";
 import ThemeDefinition from "./ThemeDefinition";
 
-
 const defaultThemeMode = themeModes.dark
 const defaultPalette = PalettesOptions(defaultThemeMode).red;
 
@@ -34,8 +33,13 @@ const hexToRgba = (hex, alpha) => {
 const ThemeSelector = () => {
   const { selectedThemeMode, selectedPalette, setSelectedThemeMode, setSelectedPalette } = useContext(ThemeContext);
 
-  const handleThemeChange = (selectedThemeMode) => {
-    setSelectedThemeMode(selectedThemeMode);
+  // Update palettes when themeMode changes
+  const handleThemeChange = (newThemeMode) => {
+    setSelectedThemeMode(newThemeMode);
+    // Also update the palette for the new theme mode
+    const newPalettes = PalettesOptions(newThemeMode);
+    const newPalette = newPalettes[Object.keys(newPalettes).find(key => _.isEqual(selectedPalette.name, newPalettes[key].name))];
+    setSelectedPalette(newPalette);
   };
 
   const handlePaletteChange = (palette) => {
@@ -44,13 +48,6 @@ const ThemeSelector = () => {
 
   const palettes = PalettesOptions(selectedThemeMode)
 
-  // Update palette when theme mode changes
-  useEffect(() => {
-    const newPalettes = PalettesOptions(selectedThemeMode);
-    // Set the palette to the first one in the new palette options
-    setSelectedPalette(newPalettes[Object.keys(newPalettes)[0]]);
-  }, [selectedThemeMode, setSelectedPalette]);
-
   const backgroundColor = selectedPalette?.colors?.secondary
     ? hexToRgba(selectedPalette.colors.secondary, 0.3)
     : 'rgba(0,0,0,0.3)';
@@ -58,7 +55,7 @@ const ThemeSelector = () => {
   return (
     <Box sx={{
       display: "flex",
-      justifyContent: "flex-start", // changed from space-between to flex-start
+      justifyContent: "flex-start",
       alignItems: "center",
       flexDirection: "column",
     }}>
@@ -74,9 +71,9 @@ const ThemeSelector = () => {
         marginBottom: "-3%",
         paddingLeft: "1.5rem",
         display: "flex",
-        flexDirection: "row", // changed from column to row
+        flexDirection: "row",
         alignItems: "center",
-        justifyContent: "space-between", // added to provide space between RadioGroup and Switch
+        justifyContent: "space-between",
       }}>
         <RadioGroup
           value={selectedPalette}
@@ -119,8 +116,16 @@ const ThemeSelector = () => {
 }
 
 export const ThemeWrapper = ({ children }) => {
-  const [selectedThemeMode, setSelectedThemeMode] = useState(defaultThemeMode);
-  const [selectedPalette, setSelectedPalette] = useState(defaultPalette);
+  const [selectedThemeMode, setSelectedThemeMode] = useState(themeModes[localStorage.getItem('themeMode')] || defaultThemeMode);
+  const [selectedPalette, setSelectedPalette] = useState(PalettesOptions(selectedThemeMode)[localStorage.getItem('palette')] || defaultPalette);
+
+  useEffect(() => {
+    localStorage.setItem('themeMode', selectedThemeMode.name);
+  }, [selectedThemeMode]);
+
+  useEffect(() => {
+    localStorage.setItem('palette', selectedPalette.name);
+  }, [selectedPalette]);
 
   const contextValue = useMemo(() => ({
     selectedThemeMode,
