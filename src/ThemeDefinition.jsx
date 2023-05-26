@@ -51,6 +51,7 @@ export const ThemeDefinition = (selectedPalette) => {
                     body: {
                         backgroundImage:
                             `linear-gradient(to top right, ${selectedPalette.colors.secondary}, ${selectedPalette.colors.primary}, ${selectedPalette.colors.primary})`,
+                        backgroundAttachment: 'fixed',
                         minHeight: "100vh",
                         '&::-webkit-scrollbar': {
                             width: '10px',
