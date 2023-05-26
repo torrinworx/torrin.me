@@ -3,20 +3,22 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import Collision from "./components/Collision/Collision"
 
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import ComingSoon from "./pages/ComingSoon";
+import { Test1 } from "./pages/Test1";
 
 const AppRoutes = () => {
   return (
     <Router>
       <Header />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<ComingSoon />} />
-        <Route path="/games" element={<ComingSoon />} />
-        <Route path="/contact" element={<ComingSoon />} />
+        <Route path="/" element={<Collision children={<Home />} />} />
+        <Route path="/games" element={<Collision children={<ComingSoon />} />} />
+        <Route path="/contact" element={<Collision children={<ComingSoon />} />} />
+        <Route path="/test1" element={<Test1 />} />
 
         {/* Add more routes here */}
 

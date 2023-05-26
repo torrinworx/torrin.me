@@ -5,7 +5,7 @@ import { useGLTF } from "@react-three/drei"
 import { Physics, useSphere } from "@react-three/cannon";
 import { gsap } from "gsap";
 
-import { ThemeContext } from "../Theme";
+import { ThemeContext } from "../../Theme";
 import MouseBall from "./MouseBall";
 
 const models = [
