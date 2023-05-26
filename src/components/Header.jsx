@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 import React, { useRef, useState, useContext } from 'react'
 import { useNavigate } from 'react-router-dom';
 
@@ -5,7 +7,8 @@ import { AppBar, Box, Toolbar, IconButton, Typography, Menu, Container, Button, 
 import MenuIcon from "@mui/icons-material/Menu";
 
 import FloatingCard from "./FloatingCard";
-import { ThemeContext, contentMargin } from "../Theme"
+import { ThemeContext, contentMargin } from "../Theme";
+import { themeModes } from "../Palettes";
 
 const pages = {
   "About": "about",
@@ -16,7 +19,7 @@ const pages = {
 const HeaderProfileImage = () => {
   const { selectedThemeMode, selectedPalette } = useContext(ThemeContext);
 
-  const profileImage = selectedThemeMode === 'dark' ? './torrin-profile.dark-mode.png' : './torrin-profile.light-mode.png';
+  const profileImage = _.isEqual(selectedThemeMode, themeModes.dark) ? './torrin-profile.dark-mode.png' : './torrin-profile.light-mode.png';
 
   const [isHovered, setIsHovered] = useState(false);
 
