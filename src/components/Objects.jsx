@@ -5,7 +5,7 @@ import { useGLTF } from "@react-three/drei"
 import { Physics, useSphere } from "@react-three/cannon";
 import { gsap } from "gsap";
 
-import { PalletContext } from "../Theme";
+import { ThemeContext } from "../Theme";
 import MouseBall from "./MouseBall";
 
 const models = [
@@ -132,20 +132,19 @@ const ObjectWrangler = ({ glb, material, scalingOn = true, ...props }) => {
 }
 
 export const Objects = () => {
-    const selectedPallet = useContext(PalletContext);
+    const { selectedPalette } = useContext(ThemeContext);
     
     const primaryMat = new THREE.MeshStandardMaterial({
-        ...selectedPallet.materials.primaryMaterial
+        ...selectedPalette.materials.primaryMaterial
     });
 
     const secondaryMat = new THREE.MeshStandardMaterial({
-        ...selectedPallet.materials.secondaryMaterial
+        ...selectedPalette.materials.secondaryMaterial
     });
 
     // Deduct the number of ObjectWranglerIndividual components from the total number of objects
     // const totalInstancedObjects = totalNumObjects - models.length;
     // let remainingObjects = totalInstancedObjects % models.length;
-
     // let extra = 0;
 
     return (
