@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 import React, { useRef, useState, useContext } from 'react'
 import { useNavigate } from 'react-router-dom';
 
@@ -5,7 +7,8 @@ import { AppBar, Box, Toolbar, IconButton, Typography, Menu, Container, Button, 
 import MenuIcon from "@mui/icons-material/Menu";
 
 import FloatingCard from "./FloatingCard";
-import { PalletContext, contentMargin } from "../Theme"
+import { ThemeContext, contentMargin } from "../Theme";
+import { themeModes } from "../Palettes";
 
 const pages = {
   "About": "about",
@@ -14,14 +17,9 @@ const pages = {
 };
 
 const HeaderProfileImage = () => {
-  const selectedPallet = useContext(PalletContext);
+  const { selectedThemeMode, selectedPalette } = useContext(ThemeContext);
 
-  // const { selectedThemeMode } = useContext(ThemeModeContext);
-
-  // const profileImage = selectedThemeMode === themeModes.dark ? './torrin-profile.dark-mode.png' : './torrin-profile.light-mode.png';
-
-  const profileImage = "";
-
+  const profileImage = _.isEqual(selectedThemeMode, themeModes.dark) ? './torrin-profile.dark-mode.png' : './torrin-profile.light-mode.png';
 
   const [isHovered, setIsHovered] = useState(false);
 
@@ -87,7 +85,7 @@ const HeaderProfileImage = () => {
           style={{
             width: isMobile || !isHovered ? '0%' : '100%',
             height: '4px',
-            backgroundColor: selectedPallet.colors.text,
+            backgroundColor: selectedPalette.colors.text,
             position: 'absolute',
             bottom: '-2px',
             left: 0,
@@ -102,7 +100,7 @@ const HeaderProfileImage = () => {
 const Header = () => {
   const navigate = useNavigate();
 
-  const selectedPallet = useContext(PalletContext);
+  const { selectedPalette } = useContext(ThemeContext);
   const [anchorElNav, setAnchorElNav] = useState(null);
 
   const handleOpenNavMenu = (event) => {
@@ -141,7 +139,7 @@ const Header = () => {
                   display: "inline-block", // Change display to inline-block
                   fontSize: "18px", // Increase font size
                   padding: "8px 16px", // Increase padding
-                  color: selectedPallet.colors.text, // Apply text color
+                  color: selectedPalette.colors.text, // Apply text color
                 }}
               >
                 {name}

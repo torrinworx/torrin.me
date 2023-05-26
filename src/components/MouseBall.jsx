@@ -4,7 +4,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useSphere } from "@react-three/cannon";
 import { isOnTouchScreen } from "./InteractiveSpheres";
 
-import { PalletContext } from "../Theme";
+import { ThemeContext } from "../Theme";
 
 // Create a circle geometry with a given radius and number of segments
 const createCircleGeometry = (radius, segments) => {
@@ -60,7 +60,7 @@ export const MouseBall = () => {
   const mouseTarget = useRef(new THREE.Vector3());
   const mouseScaleTarget = useRef(new THREE.Vector3(1, 1, 1));
   const meshPosition = useRef(new THREE.Vector3());
-  const selectedPallet = useContext(PalletContext);
+  const { selectedPalette } = useContext(ThemeContext);
 
   const speed = 2; // Adjust the initial speed as per your requirements
   const scale = 8; // Adjust the initial scale as per your requirements
@@ -156,7 +156,7 @@ export const MouseBall = () => {
   return (
     <lineLoop ref={mesh}>
       {isOnTouchScreen ? "none" : <primitive object={createCircleGeometry(3, 6)} />}
-      <lineBasicMaterial color={selectedPallet.colors.text} depthTest={false} transparent opacity={1} renderOrder={1} />
+      <lineBasicMaterial color={selectedPalette.colors.text} depthTest={false} transparent opacity={1} renderOrder={1} />
     </lineLoop>
   );
 };
