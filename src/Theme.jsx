@@ -32,25 +32,21 @@ const hexToRgba = (hex, alpha) => {
 };
 
 export const ThemeSelector = () => {
-  const { setSelectedThemeMode, setSelectedPalette } = useContext(ThemeContext);
+  const { selectedThemeMode, selectedPalette, setSelectedThemeMode, setSelectedPalette } = useContext(ThemeContext);
 
-  const handleThemeChange = (e) => {
-    setSelectedThemeMode(e.target.value);
+  const handleThemeChange = (selectedThemeMode) => {
+    setSelectedThemeMode(selectedThemeMode);
   };
 
   const handlePaletteChange = (palette) => {
     setSelectedPalette(palette);
   };
 
-  const { selectedThemeMode, selectedPalette } = useContext(ThemeContext);
-
   const palettes = PalettesOptions(selectedThemeMode)
 
   const backgroundColor = selectedPalette?.colors?.secondary
     ? hexToRgba(selectedPalette.colors.secondary, 0.3)
     : 'rgba(0,0,0,0.3)';
-
-  // console.log(JSON.stringify(selectedPalette))
 
   return (
     <Box sx={{
@@ -76,13 +72,11 @@ export const ThemeSelector = () => {
         justifyContent: "space-between", // added to provide space between RadioGroup and Switch
       }}>
         <RadioGroup
-          value={Object.keys(palettes).find(key => _.isEqual(palettes[key], selectedPalette))}
-          onChange={handlePaletteChange}
+          value={selectedPalette}
+          onChange={(event) => handlePaletteChange(palettes[event.target.value])}
           row
         >
           {Object.keys(palettes).map((option) => {
-            const handlePaletteChangeWithOption = () => handlePaletteChange(palettes[option]);
-
             return (
               <FormControlLabel
                 value={option}
@@ -91,7 +85,6 @@ export const ThemeSelector = () => {
                 }
                 checked={_.isEqual(selectedPalette, palettes[option])}
                 key={option}
-                onChange={handlePaletteChangeWithOption}
               />
             );
           })}
@@ -129,18 +122,17 @@ export const ThemeWrapper = ({ children }) => {
     setSelectedPalette
   }), [selectedThemeMode, selectedPalette]);
 
-  console.log(JSON.stringify(selectedPalette))
   const theme = ThemeDefinition(selectedPalette)
 
   return (
     <ThemeContext.Provider value={contextValue}>
       <ThemeProvider theme={theme}>
         <ThemeSelector />
-          <CssBaseline />
-          <Box padding={pagePadding}>
-            {children}
-          </Box>
-        </ThemeProvider>
+        <CssBaseline />
+        <Box padding={pagePadding}>
+          {children}
+        </Box>
+      </ThemeProvider>
     </ThemeContext.Provider>
   );
 };
