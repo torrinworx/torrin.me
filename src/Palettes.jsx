@@ -1,9 +1,11 @@
 export const themeModes = {
     light: {
+        name: "light",
         primary: "#D6D6D6",
         text: "#141414",
     },
     dark: {
+        name: "dark",
         primary: "#141414",
         text: "#D6D6D6",
     }
@@ -16,6 +18,7 @@ export const PalettesOptions = (selectedThemeMode) => {
         // ### Dark Themes ###
         // https://coolors.co/141414-a30029-660019-666666-d6d6d6
         red: {
+            name: "red",
             colors: {
                 primary: selectedThemeMode.primary,
                 secondary: "#A30029",
@@ -41,6 +44,7 @@ export const PalettesOptions = (selectedThemeMode) => {
 
         // https://coolors.co/141414-6021c0-46188c-666666-d6d6d6
         purple: {
+            name: "purple",
             colors: {
                 primary: selectedThemeMode.primary,
                 secondary: "#6021c0",
@@ -67,6 +71,7 @@ export const PalettesOptions = (selectedThemeMode) => {
         // ### Light Themes ###
         // https://coolors.co/141414-368f8b-246a73-666666-d6d6d6
         cyan: {
+            name: "cyan",
             colors: {
                 primary: selectedThemeMode.primary,
                 secondary: "#368F8B",
@@ -92,6 +97,7 @@ export const PalettesOptions = (selectedThemeMode) => {
 
         // https://coolors.co/141414-fabc2a-db9b06-666666-d6d6d6
         gold: {
+            name: "gold",
             colors: {
                 primary: selectedThemeMode.primary,
                 secondary: "#FABC2A",
