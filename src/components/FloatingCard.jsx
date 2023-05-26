@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import { PalletContext, shadow, bevelRadius } from "../Theme";
+import { ThemeContext, shadow, bevelRadius } from "../Theme";
 
 const FloatingCard = ({ children, type, size, ...props }) => {
   /*
@@ -9,7 +9,7 @@ const FloatingCard = ({ children, type, size, ...props }) => {
   
   sizes: large, medium, small, halfWidth
   */
-  const selectedPallet = useContext(PalletContext);
+  const { selectedPalette } = useContext(ThemeContext);
 
   const hexToRgba = (hex, alpha) => {
     const [r, g, b] = hex.match(/\w\w/g).map((x) => parseInt(x, 16));
@@ -18,12 +18,12 @@ const FloatingCard = ({ children, type, size, ...props }) => {
 
   const colorMap = {
     translucentPrimary: {
-      color: hexToRgba(selectedPallet.colors.primary, 0.3),
+      color: hexToRgba(selectedPalette.colors.primary, 0.3),
       zIndex: 1,
       blur: "10px",  // blur amount for translucentPrimary
     },
     translucentSecondary: {
-      color: hexToRgba(selectedPallet.colors.secondary, 0.3),
+      color: hexToRgba(selectedPalette.colors.secondary, 0.3),
       zIndex: 1,
       blur: "25px",  // blur amount for translucentSecondary
     },
