@@ -1,6 +1,6 @@
-import React, { useMemo, createContext, useContext, useState } from "react";
-
 import _ from 'lodash';
+
+import React, { useEffect, useMemo, createContext, useContext, useState } from "react";
 
 import { Box, Radio, RadioGroup, FormControlLabel, Switch } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
@@ -31,7 +31,7 @@ const hexToRgba = (hex, alpha) => {
   return `rgba(${r},${g},${b},${alpha})`;
 };
 
-export const ThemeSelector = () => {
+const ThemeSelector = () => {
   const { selectedThemeMode, selectedPalette, setSelectedThemeMode, setSelectedPalette } = useContext(ThemeContext);
 
   const handleThemeChange = (selectedThemeMode) => {
@@ -43,6 +43,13 @@ export const ThemeSelector = () => {
   };
 
   const palettes = PalettesOptions(selectedThemeMode)
+
+  // Update palette when theme mode changes
+  useEffect(() => {
+    const newPalettes = PalettesOptions(selectedThemeMode);
+    // Set the palette to the first one in the new palette options
+    setSelectedPalette(newPalettes[Object.keys(newPalettes)[0]]);
+  }, [selectedThemeMode, setSelectedPalette]);
 
   const backgroundColor = selectedPalette?.colors?.secondary
     ? hexToRgba(selectedPalette.colors.secondary, 0.3)
