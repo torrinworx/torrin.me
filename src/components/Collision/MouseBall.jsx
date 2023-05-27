@@ -2,9 +2,9 @@ import React, { useState, useRef, useEffect, useContext } from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useSphere } from "@react-three/cannon";
-import { isOnTouchScreen } from "./InteractiveSpheres";
+import { isOnTouchScreen } from "./Collision";
 
-import { ThemeContext } from "../Theme";
+import { ThemeContext } from "../../Theme";
 
 // Create a circle geometry with a given radius and number of segments
 const createCircleGeometry = (radius, segments) => {

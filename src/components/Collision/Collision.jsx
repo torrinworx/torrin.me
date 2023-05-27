@@ -17,7 +17,7 @@ const Camera = () => {
   return null;
 };
 
-export const InteractiveSpheres = ({ children }) => {
+export const Collision = ({ children }) => {
   const container = useRef();
   const domContent = useRef();
 
@@ -40,4 +40,4 @@ export const InteractiveSpheres = ({ children }) => {
   </div>
 };
 
-export default InteractiveSpheres;
+export default Collision;
