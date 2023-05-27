@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import React, { useContext, useRef, useEffect, useMemo } from "react";
 import * as THREE from "three"
 import { useFrame, useThree } from "react-three-fiber";
@@ -17,18 +19,18 @@ const models = [
 ];
 
 // Utility function to map a value from one range to another
-// const mapAndRound = (
-//     value,
-//     min1,
-//     max1,
-//     min2,
-//     max2
-// ) => {
-//     return Math.round(min2 + ((value - min1) * (max2 - min2)) / (max1 - min1));
-// };
+const mapAndRound = (
+    value,
+    min1,
+    max1,
+    min2,
+    max2
+) => {
+    return Math.round(min2 + ((value - min1) * (max2 - min2)) / (max1 - min1));
+};
 
 // Calculate the number of spheres based on the screen width
-// var totalNumObjects = mapAndRound(window.innerWidth, 300, 2000, 10, 30);
+const totalNumObjects = mapAndRound(window.innerWidth, 300, 2000, 10, 30);
 
 const ObjectWrangler = ({ glb, material, scalingOn = true, ...props }) => {
 
@@ -52,7 +54,6 @@ const ObjectWrangler = ({ glb, material, scalingOn = true, ...props }) => {
         linearDamping: 0.1,
         position: [rfs(20), rfs(20), rfs(20)],
         rotation: [rfs(20), rfs(20), rfs(20)],
-        // args: [2]
     }));
 
     const mouse = useRef(new THREE.Vector3(0, 0, 0));
@@ -131,9 +132,11 @@ const ObjectWrangler = ({ glb, material, scalingOn = true, ...props }) => {
     );
 }
 
+const modelsWithIds = models.map(model => ({ model, id: uuidv4() }));
+
 export const Objects = () => {
     const { selectedPalette } = useContext(ThemeContext);
-    
+
     const primaryMat = new THREE.MeshStandardMaterial({
         ...selectedPalette.materials.primaryMaterial
     });
@@ -142,35 +145,24 @@ export const Objects = () => {
         ...selectedPalette.materials.secondaryMaterial
     });
 
-    // Deduct the number of ObjectWranglerIndividual components from the total number of objects
-    // const totalInstancedObjects = totalNumObjects - models.length;
-    // let remainingObjects = totalInstancedObjects % models.length;
-    // let extra = 0;
+    let remainingObjects = totalNumObjects - models.length; // Each model will have one secondary object
 
     return (
         <Physics gravity={[0, 2, 0]} iterations={10}>
             <MouseBall />
             {
-                models.map((model, index) => {
-                    // If there are remaining objects, assign one to the current model and decrease the count
-                    // if (remainingObjects > 0) {
-                    //     extra = 1;
-                    //     remainingObjects--;
-                    // } else {
-                    //     extra = 0;
-                    // }
-
-                    // Pass the selected material to the ObjectWrangler component
-                    return (
-                        <React.Fragment key={index}>
-                            {/* Needs to be fixed so that the number of models correctly matches screen size: */}
-                            <ObjectWrangler key={`${index}-individual0`} glb={model} material={primaryMat} />
-                            <ObjectWrangler key={`${index}-individual1`} glb={model} material={primaryMat} />
-                            <ObjectWrangler key={`${index}-individual2`} glb={model} material={primaryMat} />
-                            <ObjectWrangler key={`${index}-individual`} glb={model} material={secondaryMat} />
-                        </React.Fragment>
-                    );
-                })
+                modelsWithIds.map(({ model, id }, index) => (
+                    <React.Fragment key={id}>
+                        <ObjectWrangler key={`${id}-individual-secondary`} glb={model} material={secondaryMat} />
+                        {
+                            Array(remainingObjects >= index ? index + 1 : remainingObjects)
+                                .fill()
+                                .map((_, i) =>
+                                    <ObjectWrangler key={`${id}-individual${i}`} glb={model} material={primaryMat} />
+                                )
+                        }
+                    </React.Fragment>
+                ))
             }
         </Physics>
     );
