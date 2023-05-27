@@ -11,7 +11,6 @@ import { ThemeContext, contentMargin } from "../Theme";
 import { themeModes } from "../Palettes";
 
 const pages = {
-  "About": "about",
   "Games": "games",
   "Contact": "contact"
 };

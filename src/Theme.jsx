@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 import React, { useEffect, useMemo, createContext, useContext, useState } from "react";
 
-import { Box, Radio, RadioGroup, FormControlLabel, Switch } from "@mui/material";
+import { Box, Radio, RadioGroup, FormControlLabel, Switch, Link } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
@@ -53,7 +53,7 @@ const ThemeSelector = () => {
     : 'rgba(0,0,0,0.3)';
 
   return (
-    <Box sx={{
+    <Link sx={{
       display: "flex",
       justifyContent: "flex-start",
       alignItems: "center",
@@ -111,9 +111,9 @@ const ThemeSelector = () => {
           }}
         />
       </Box>
-    </Box>
+    </Link>
   );
-}
+};
 
 export const ThemeWrapper = ({ children }) => {
   const [selectedThemeMode, setSelectedThemeMode] = useState(themeModes[localStorage.getItem('themeMode')] || defaultThemeMode);

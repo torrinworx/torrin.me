@@ -1,10 +1,9 @@
-import React, { useRef, useState } from 'react'
+import React from 'react'
 
-import { AppBar, Box, Toolbar, IconButton, Typography, Container, Button, Link } from "@mui/material/";
+import { AppBar, Box, Toolbar, Container } from "@mui/material/";
 
 import FloatingCard from "./FloatingCard";
-import { text, contentMargin } from "../Theme"
-
+import { contentMargin } from "../Theme"
 
 const Footer = () => {
   return <>
@@ -13,7 +12,6 @@ const Footer = () => {
       component={AppBar}
       position="relative"
       marginTop={contentMargin}
-      elevation={0}
     >
       <Container maxWidth="xl">
         {/* Set a fixed height for the Toolbar (twice as large) */}
