@@ -117,6 +117,7 @@ const Header = () => {
       position="relative"
       marginBottom={contentMargin}
       elevation={0}
+      style={{ padding: 0 }}
     >
       <Container maxWidth="xl">
         {/* Set a fixed height for the Toolbar (twice as large) */}
