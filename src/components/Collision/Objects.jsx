@@ -150,19 +150,18 @@ export const Objects = () => {
     return (
         <Physics gravity={[0, 2, 0]} iterations={10}>
             <MouseBall />
-            {
-                modelsWithIds.map(({ model, id }, index) => (
-                    <React.Fragment key={id}>
-                        <ObjectWrangler key={`${id}-individual-secondary`} glb={model} material={secondaryMat} />
-                        {
-                            Array(remainingObjects >= index ? index + 1 : remainingObjects)
-                                .fill()
-                                .map((_, i) =>
-                                    <ObjectWrangler key={`${id}-individual${i}`} glb={model} material={primaryMat} />
-                                )
-                        }
-                    </React.Fragment>
-                ))
+            {modelsWithIds.map(({ model, id }, index) => (
+                <React.Fragment key={id}>
+                    <ObjectWrangler key={`${id}-individual-secondary`} glb={model} material={secondaryMat} />
+                    {
+                        Array(remainingObjects >= index ? index + 1 : remainingObjects)
+                            .fill()
+                            .map((_, i) =>
+                                <ObjectWrangler key={`${id}-individual-${uuidv4()}`} glb={model} material={primaryMat} />
+                            )
+                    };
+                </React.Fragment>
+            ))
             }
         </Physics>
     );
