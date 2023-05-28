@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import { ThemeContext, shadow, bevelRadius } from "../Theme";
+import { ThemeContext, shadow, bevelRadius, contentPadding } from "../Theme";
 
 const FloatingCard = ({ children, type, size, ...props }) => {
   /*
@@ -20,7 +20,7 @@ const FloatingCard = ({ children, type, size, ...props }) => {
     translucentPrimary: {
       color: hexToRgba(selectedPalette.colors.primary, 0.3),
       zIndex: 1,
-      blur: "10px",  // blur amount for translucentPrimary
+      blur: "25px",  // blur amount for translucentPrimary
     },
     translucentSecondary: {
       color: hexToRgba(selectedPalette.colors.secondary, 0.3),
@@ -52,6 +52,7 @@ const FloatingCard = ({ children, type, size, ...props }) => {
           boxShadow: type === "invisible" ? "none" : shadow,
           height,
           backdropFilter: blur ? `blur(${blur})` : "none",  // add blur effect if blur is defined
+          padding: contentPadding,
           ...props.sx,
         }}
         {...props}
