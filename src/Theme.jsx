@@ -23,6 +23,7 @@ export const ThemeContext = createContext({
 export const shadow = "0px 4px 6px rgba(0, 0, 0, 0.1)"
 export const bevelRadius = "20px"
 export const pagePadding = "4%"
+export const contentPadding = "4%"
 export const contentMargin = "4%"
 
 const hexToRgba = (hex, alpha) => {
