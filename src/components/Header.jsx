@@ -116,7 +116,6 @@ const Header = () => {
       component={AppBar}
       position="relative"
       marginBottom={contentMargin}
-      elevation={0}
       style={{ padding: 0 }}
     >
       <Container maxWidth="xl">
