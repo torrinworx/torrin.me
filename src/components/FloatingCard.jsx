@@ -34,10 +34,10 @@ const FloatingCard = ({ children, type, size, ...props }) => {
   };
 
   const sizeConfig = {
-    large: { height: "800px", xs: 12, sm: 12, md: 12 },
-    medium: { height: "400px", xs: 12, sm: 12, md: 12 },
-    small: { height: "200px", xs: 12, sm: 12, md: 12 },
-    halfWidth: { height: "200px", xs: 12, sm: 12, md: 6 },
+    large: { height: "40rem", xs: 12, sm: 12, md: 12 },
+    medium: { height: "30rem", xs: 12, sm: 12, md: 12 },
+    small: { height: "10rem", xs: 12, sm: 12, md: 12 },
+    halfWidth: { height: "10rem", xs: 12, sm: 12, md: 6 },
   };
 
   const { color, zIndex, blur } = colorMap[type] || {};
