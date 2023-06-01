@@ -4,9 +4,9 @@ import FloatingCard from "../components/FloatingCard";
 
 import { contentMargin } from "../Theme";
 
-const Home = () => {
+export const Home = () => {
   return <Grid container spacing={contentMargin} justifyContent="center">
-    <FloatingCard type="invisible" size="large">
+    <FloatingCard type="invisible" size="medium">
       <Grid container direction="column" sx={{ minHeight: '100%' }}>
         <Grid item xs={12}>
           <Typography variant="h1" gutterBottom>
