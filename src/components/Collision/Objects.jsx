@@ -83,7 +83,7 @@ const ObjectWrangler = ({ glb, material, scalingOn = true, ...props }) => {
                 duration: 1,
                 ease: "Power2.easeOut",
                 onComplete: () => {
-                    setTimeout(shrink, 2000);  // Wait 2 seconds then shrink
+                    setTimeout(shrink, 1000);  // Wait 2 seconds then shrink
                 }
             });
         };
@@ -102,7 +102,7 @@ const ObjectWrangler = ({ glb, material, scalingOn = true, ...props }) => {
         };
 
         // Add a random delay before the first grow
-        const delay = Math.random() * 3000;  // Delay up to 2 seconds
+        const delay = Math.random() * 6000;  // Delay up to 2 seconds
         setTimeout(() => {
             grow();  // Start the cycle
         }, delay);
