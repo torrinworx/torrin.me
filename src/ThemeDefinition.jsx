@@ -1,6 +1,11 @@
 import { createTheme } from "@mui/material/styles";
+import { bevelRadius, shadow, hexToRgba } from "./Theme";
 
 export const ThemeDefinition = (selectedPalette) => {
+    const backgroundColor = selectedPalette?.colors?.secondary
+        ? hexToRgba(selectedPalette.colors.secondary, 0.3)
+        : 'rgba(0,0,0,0.3)';
+
     return createTheme({
         palette: {
             primary: {
@@ -80,6 +85,16 @@ export const ThemeDefinition = (selectedPalette) => {
                     },
                 },
             },
+            MuiMenu: {
+                styleOverrides: {
+                    paper: {
+                        backgroundColor: backgroundColor,
+                        borderRadius: bevelRadius,
+                        boxShadow: shadow,
+                        backdropFilter: "blur(25px)",
+                    }
+                }
+            }
         },
     });
 };
