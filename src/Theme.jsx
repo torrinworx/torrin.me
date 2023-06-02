@@ -26,7 +26,7 @@ export const pagePadding = "4%"
 export const contentPadding = "4%"
 export const contentMargin = "4%"
 
-const hexToRgba = (hex, alpha) => {
+export const hexToRgba = (hex, alpha) => {
   const [r, g, b] = hex.match(/\w\w/g).map((x) => parseInt(x, 16));
   return `rgba(${r},${g},${b},${alpha})`;
 };

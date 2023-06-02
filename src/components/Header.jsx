@@ -154,9 +154,7 @@ const Header = () => {
             aria-haspopup="true"
             onClick={handleOpenNavMenu}
             color="inherit"
-            height="80px"
-            width="auto"
-            sx={{ display: { xs: "flex", md: "none" } }}
+            sx={{display: { xs: "flex", md: "none" }}}
           >
             <MenuIcon />
           </IconButton>
@@ -167,12 +165,12 @@ const Header = () => {
             anchorEl={anchorElNav}
             anchorOrigin={{
               vertical: "bottom",
-              horizontal: "left",
+              horizontal: "right",
             }}
             keepMounted
             transformOrigin={{
               vertical: "top",
-              horizontal: "left",
+              horizontal: "right",
             }}
             open={Boolean(anchorElNav)}
             onClose={handleCloseNavMenu}
