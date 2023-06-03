@@ -7,8 +7,7 @@ import { AppBar, Box, Toolbar, IconButton, Typography, Menu, Container, Button, 
 import MenuIcon from "@mui/icons-material/Menu";
 
 import FloatingCard from "./FloatingCard";
-import { ThemeContext, contentMargin } from "../Theme";
-import { themeModes } from "../Palettes";
+import { ThemeContext, contentMargin, themeModes } from "../Theme";
 
 const pages = {
   "Games": "games",
