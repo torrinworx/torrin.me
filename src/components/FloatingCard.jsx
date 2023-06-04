@@ -38,10 +38,11 @@ const FloatingCard = ({ children, type, size, ...props }) => {
     medium: { height: "30rem", xs: 12, sm: 12, md: 12 },
     small: { height: "10rem", xs: 12, sm: 12, md: 12 },
     halfWidth: { height: "10rem", xs: 12, sm: 12, md: 6 },
+    default: { xs: 12, sm: 12, md: 12 }, // default size with no fixed height
   };
 
   const { color, zIndex, blur } = colorMap[type] || {};
-  const { height, xs, sm, md } = sizeConfig[size] || {};
+  const { height, xs, sm, md } = size ? sizeConfig[size] : sizeConfig.default;
 
   return (
     <Grid item xs={xs} sm={sm} md={md} zIndex={zIndex}>
@@ -50,7 +51,7 @@ const FloatingCard = ({ children, type, size, ...props }) => {
           backgroundColor: color,
           borderRadius: bevelRadius,
           boxShadow: type === "invisible" ? "none" : shadow,
-          height,
+          ...(height && { height }), // apply height only when it is defined
           backdropFilter: blur ? `blur(${blur})` : "none",  // add blur effect if blur is defined
           padding: contentPadding,
           ...props.sx,
