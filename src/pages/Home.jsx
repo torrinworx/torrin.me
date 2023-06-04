@@ -3,6 +3,7 @@ import { Grid, Box, Typography } from "@mui/material";
 import FloatingCard from "../components/FloatingCard";
 
 import { contentMargin } from "../Theme";
+import CustomizedTimeline from "../components/ExperienceTimeline";
 
 export const Home = () => {
   return <Grid container spacing={contentMargin} justifyContent="center">
@@ -23,19 +24,8 @@ export const Home = () => {
       </Grid>
     </FloatingCard>
     {/* Big element at the top of the grid with custom height */}
-    <FloatingCard type="translucentSecondary" size="large">
-      <Box
-        sx={{
-          textAlign: "center",
-          padding: "2rem",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          height: "800px", // Set custom height
-        }}
-      >
-        {/* Content */}
-      </Box>
+    <FloatingCard type="translucentSecondary">
+        <CustomizedTimeline />
     </FloatingCard>
     {/* First 1x2 element with custom height */}
     <FloatingCard type="translucentSecondary" size="halfWidth">
