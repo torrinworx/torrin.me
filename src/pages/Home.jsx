@@ -25,7 +25,21 @@ export const Home = () => {
     </FloatingCard>
     {/* Big element at the top of the grid with custom height */}
     <FloatingCard type="translucentSecondary">
-        <CustomizedTimeline />
+      <CustomizedTimeline />
+    </FloatingCard>
+    <FloatingCard type="translucentSecondary" size="large">
+      <Box
+        sx={{
+          textAlign: "center",
+          padding: "2rem",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          height: "200px", // Set custom height
+        }}
+      >
+        {/* Content */}
+      </Box>
     </FloatingCard>
     {/* First 1x2 element with custom height */}
     <FloatingCard type="translucentSecondary" size="halfWidth">

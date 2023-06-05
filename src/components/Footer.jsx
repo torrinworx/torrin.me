@@ -12,6 +12,7 @@ const Footer = () => {
       component={AppBar}
       position="relative"
       marginTop={contentMargin}
+      style={{ padding: 0 }}
     >
       <Container maxWidth="xl">
         {/* Set a fixed height for the Toolbar (twice as large) */}
