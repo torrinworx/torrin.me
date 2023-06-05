@@ -30,7 +30,7 @@ const experience = [
         "imageStyle": { "height": "5rem" },
         "header": "This Cozy Studio Inc.",
         "position": "Co-Founder, CEO, Lead Software Engineer and Web Developer",
-        "content": "As the Co-Founder, CEO, and Lead Software Engineer of This Cozy Studio Inc, I've driven the company's growth through my diverse technical abilities, leadership, and management skills. My contributions include the development of 'Blend_My_NFTs', a popular 3D model NFT generator operating as a Blender add-on, and the creation of multiple NFT collections for our clients, among them Cozy Place, Vox Coodles, Omni Coin, Metapanda, and AKidCalledBeast. Additionally, I designed and developed our company's website, ThisCozyStudio.com, and implemented a cloud rendering, storage, and NFT minting platform, making it easier for 3D graphical artists to launch their own 3D NFT collections"
+        "content": "As the Co-Founder, CEO, and Lead Software Engineer of This Cozy Studio Inc, I've driven the company's growth through my diverse technical abilities, leadership, and management skills. My contributions include the development of 'Blend_My_NFTs', a popular 3D model NFT generator operating as a Blender add-on, and the creation of multiple NFT collections for our clients, among them Cozy Place, Vox Coodles, Omni Coin, Metapanda, and AKidCalledBeast. Additionally, I designed and developed our company's website, ThisCozyStudio.com, and implemented a cloud rendering, storage, and NFT minting platform, making it easier for 3D graphical artists to launch their own 3D NFT collections."
     },
     {
         "id": 3,
@@ -103,7 +103,7 @@ export const CustomizedTimeline = () => {
                 </TimelineSeparator>
                 <TimelineContent sx={{ py: '12px', px: 2 }}>
                     <Typography variant="h1">{item.header}</Typography>
-                    <Typography variant="body1">{item.content}</Typography>
+                    <Typography variant="body1" align="left">{item.content}</Typography>
                 </TimelineContent>
             </TimelineItem>
         ))}
