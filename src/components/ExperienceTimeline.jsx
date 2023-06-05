@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 
-import { Box } from '@mui/material';
+import { Box, Link } from '@mui/material';
 
 import Timeline from '@mui/lab/Timeline';
 import TimelineItem from '@mui/lab/TimelineItem';
@@ -98,7 +98,9 @@ export const CustomizedTimeline = () => {
                 </TimelineOppositeContent>
                 <TimelineSeparator>
                     <TimelineConnector />
-                    <Box component="img" src={item.image} sx={item.imageStyle} />
+                    <Link href={item.image_url} target="_blank" rel="noopener noreferrer">
+                        <Box component="img" src={item.image} sx={item.imageStyle} />
+                    </Link>
                     <TimelineConnector />
                 </TimelineSeparator>
                 <TimelineContent sx={{ py: '12px', px: 2 }}>

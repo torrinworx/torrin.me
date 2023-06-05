@@ -23,7 +23,7 @@ const AppRoutes = () => {
         {/* Add more routes here */}
 
         {/* Catch-all route for undefined paths */}
-        <Route path="*" element={<NotFound />} />
+        <Route path="*" element={<Collision children={<NotFound />} />} />
       </Routes>
       <Footer />
     </Router>
