@@ -34,10 +34,10 @@ const FloatingCard = ({ children, type, size, ...props }) => {
   };
 
   const sizeConfig = {
-    large: { height: "40rem", xs: 12, sm: 12, md: 12 },
-    medium: { height: "30rem", xs: 12, sm: 12, md: 12 },
-    small: { height: "10rem", xs: 12, sm: 12, md: 12 },
-    halfWidth: { height: "10rem", xs: 12, sm: 12, md: 6 },
+    large: { height: "75vh", xs: 12, sm: 12, md: 12 },
+    medium: { height: "50rem", xs: 12, sm: 12, md: 12 },
+    small: { height: "25rem", xs: 12, sm: 12, md: 12 },
+    halfWidth: { height: "25rem", xs: 12, sm: 12, md: 6 },
     default: { xs: 12, sm: 12, md: 12 }, // default size with no fixed height
   };
 

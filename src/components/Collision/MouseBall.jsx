@@ -155,7 +155,7 @@ export const MouseBall = () => {
   // Return a line loop with a circle geometry and a line basic material with a color based on a CSS variable
   return (
     <lineLoop ref={mesh}>
-      {isOnTouchScreen ? null :<primitive object={createCircleGeometry(3, 6)} />}
+      {isOnTouchScreen ? null : <primitive object={createCircleGeometry(3, 6)} />}
       <lineBasicMaterial color={selectedPalette.colors.text} depthTest={false} transparent opacity={1} renderOrder={1} />
     </lineLoop>
   );

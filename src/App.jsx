@@ -5,7 +5,7 @@ import { ThemeWrapper } from "./Theme";
 
 export const App = () => {
   return <ThemeWrapper>
-      <Routes />
+    <Routes />
   </ThemeWrapper>
 };
 
