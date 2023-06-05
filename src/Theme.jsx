@@ -194,8 +194,8 @@ const ThemeDefinition = (selectedPalette) => {
         color: selectedPalette.colors.text,
       },
       body1: {
-        fontWeight: 400,
-        fontSize: "1rem",
+        fontWeight: 500,
+        fontSize: "1.25rem",
         color: selectedPalette.colors.text,
       },
       body2: {
