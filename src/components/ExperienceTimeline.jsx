@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { Box, Link } from '@mui/material';
 
@@ -58,6 +59,8 @@ const experience = [
 export const CustomizedTimeline = () => {
     const [data, setData] = useState([]);
 
+    const isSmallScreen = useMediaQuery('(max-width:800px)');
+
     const calculatePeriod = (startDate, endDate) => {
         const start = new Date(startDate);
         const end = endDate ? new Date(endDate) : new Date();
@@ -85,31 +88,52 @@ export const CustomizedTimeline = () => {
         setData(enrichedData);
     }, []);
 
-    return <Timeline position="alternate">
-        {data.map((item) => (
-            <TimelineItem key={item.id}>
-                <TimelineOppositeContent
-                    sx={{ m: 'auto 0' }}
-                    align="right"
-                    variant="body2"
-                    color="text.secondary"
-                >
-                    <Typography variant="body1">{item.period}</Typography>
-                </TimelineOppositeContent>
-                <TimelineSeparator>
-                    <TimelineConnector />
-                    <Link href={item.image_url} target="_blank" rel="noopener noreferrer">
-                        <Box component="img" src={item.image} sx={item.imageStyle} />
-                    </Link>
-                    <TimelineConnector />
-                </TimelineSeparator>
-                <TimelineContent sx={{ py: '12px', px: 2 }}>
-                    <Typography variant="h1">{item.header}</Typography>
-                    <Typography variant="body1" align="left">{item.content}</Typography>
-                </TimelineContent>
-            </TimelineItem>
-        ))}
-    </Timeline>
+    if (isSmallScreen) {
+        return (
+            <Box>
+                {data.map((item) => (
+                    <Box key={item.id} sx={{ p: 2 }} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+                        <Link href={item.image_url} target="_blank" rel="noopener noreferrer">
+                            <Box component="img" src={item.image} sx={item.imageStyle} />
+                        </Link>
+                        <Typography variant="h6" align="center">{item.header}</Typography>
+                        <Typography variant="subtitle1" align="center">{item.period}</Typography>
+                        <Typography variant="subtitle1" align="center">{item.position}</Typography>
+                        {/* <Typography variant="body1">{item.content}</Typography> */}
+                    </Box>
+                ))}
+            </Box>
+        );
+    } else {
+        return (
+            <Timeline position="alternate">
+                {data.map((item) => (
+                    <TimelineItem key={item.id}>
+                        <TimelineOppositeContent
+                            sx={{ m: 'auto 0' }}
+                            align="right"
+                            variant="body2"
+                            color="text.secondary"
+                        >
+                            <Typography variant="body1">{item.period}</Typography>
+                        </TimelineOppositeContent>
+                        <TimelineSeparator>
+                            <TimelineConnector />
+                            <Link href={item.image_url} target="_blank" rel="noopener noreferrer">
+                                <Box component="img" src={item.image} sx={item.imageStyle} />
+                            </Link>
+                            <TimelineConnector />
+                        </TimelineSeparator>
+                        <TimelineContent>
+                            <Typography variant="h1" align="left" marginBottom={"1vw"}>{item.header}</Typography>
+                            <Typography variant="h2" align="left" marginBottom={"1vw"}>{item.position}</Typography>
+                            <Typography variant="body1" align="left">{item.content}</Typography>
+                        </TimelineContent>
+                    </TimelineItem>
+                ))}
+            </Timeline>
+        );
+    }
 };
 
 export default CustomizedTimeline;
