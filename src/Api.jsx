@@ -2,15 +2,13 @@ import axios from 'axios';
 
 const BASE_PATH = '/api';
 
-const api = {
-  example: async (param1, param2) => {
-    try {
-      const response = await axios.get(`${BASE_PATH}/example/${param1}/${param2}`);
-      return response.data;
-    } catch (error) {
-      throw new Error(error.message);
-    }
-  },
+const Api = {
+  add: (param1, param2) => {
+    return axios
+      .get(`${BASE_PATH}/add/${param1}/${param2}`)
+      .then(response => response.data)
+      .catch(error => { throw error; });
+    },
 };
 
-export default api;
+export default Api;
