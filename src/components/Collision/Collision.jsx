@@ -1,8 +1,10 @@
-import React, { useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { Canvas, useThree } from "@react-three/fiber";
 
 import Objects from "./Objects";
+import GetRenderingSettings from "./BenchMark";
+import { Typography } from "@mui/material";
 
 export const isOnTouchScreen = "ontouchstart" in window;
 
@@ -17,27 +19,54 @@ const Camera = () => {
   return null;
 };
 
-export const Collision = ({ children }) => {
+const Collision = ({ children }) => {
+  const [isLoaded, setIsLoaded] = useState(false);
   const container = useRef();
   const domContent = useRef();
 
-  return <div ref={container} style={{ position: "relative", width: "100%", height: "100%" }}>
-    <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", overflow: "hidden" }} ref={domContent} />
-    <Canvas
-      gl={{ alpha: true }}
-      shadows
-      dpr={[1, 2]}
-      style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%" }}
-      eventSource={container}
-      eventPrefix="page"
-    >
-      <ambientLight intensity={0.25} />
-      <spotLight intensity={1} angle={0.2} penumbra={1} position={[30, 30, 30]} castShadow shadow-mapSize={[512, 512]} />
-      <Camera />
-      <Objects />
-    </Canvas>
-    {children}
-  </div>
+  // If the benchmark data is not on the window object, it means the benchmark hasn't been run yet
+  if (!window.globalDeviceSettingsAndInfo) {
+    window.globalDeviceSettingsAndInfo = GetRenderingSettings();
+
+    // Logs will appear only when the benchmark runs
+    console.log("Device Information:", window.globalDeviceSettingsAndInfo.deviceInfo);
+    console.log("Rendering Settings:", window.globalDeviceSettingsAndInfo.renderingSettings);
+  }
+
+  const { renderingSettings } = window.globalDeviceSettingsAndInfo;
+
+  // Callback to set isLoaded to true, indicating that the canvas has loaded.
+  const onCanvasLoaded = () => {
+    setIsLoaded(true);
+  };
+
+  const LoadingScreen = (
+    <Typography variant="h2" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+      Loading...
+    </Typography>
+  );
+
+  return (
+    <div ref={container} style={{ position: "relative", width: "100%", height: "100%" }}>
+      {!isLoaded && LoadingScreen}
+      {children}
+      <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", overflow: "hidden" }} ref={domContent} />
+      <Canvas
+        gl={{ alpha: true, antialias: renderingSettings.antialias }}
+        shadows={renderingSettings.useShadows}
+        dpr={renderingSettings.dpr}
+        style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", visibility: isLoaded ? 'visible' : 'hidden' }}
+        eventSource={container}
+        eventPrefix="page"
+        onCreated={onCanvasLoaded}
+      >
+        <ambientLight intensity={0.25} />
+        <spotLight intensity={1} angle={0.2} penumbra={1} position={[30, 30, 30]} castShadow={renderingSettings.useShadows} shadow-mapSize={renderingSettings.shadowMapSize} />
+        <Camera />
+        <Objects textureQuality={renderingSettings.textureQuality} />
+      </Canvas>
+    </div>
+  );
 };
 
 export default Collision;
