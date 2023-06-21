@@ -1,12 +1,11 @@
-// src/pages/AresMarketMaster.jsx
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Grid, Typography } from "@mui/material";
 import FloatingCard from "../components/FloatingCard";
-import { ThemeContext, contentMargin } from "../Theme";
+import { contentMargin } from "../Theme";
 import Api from '../Api';
 
 export const AresMarketMaster = () => {
-    const { selectedPalette } = useContext(ThemeContext);
+    // const { selectedPalette } = useContext(ThemeContext);
 
     // State to hold the API response and error
     const [apiData, setApiData] = useState(null);
@@ -16,11 +15,17 @@ export const AresMarketMaster = () => {
     useEffect(() => {
         Api.add(1, 2)
             .then(data => setApiData(data))
+            .catch(error => {
+                const errorMessage = error.status
+                    ? `Error ${error.status}: ${error.statusText}`
+                    : "An unknown error occurred";
+                setApiError(errorMessage);
+            });
     }, []);
 
     return (
         <Grid container spacing={contentMargin} justifyContent="center">
-            <FloatingCard type="invisible" size="medium">
+            <FloatingCard type="translucentSecondary" size="medium">
                 {/* Display the API response or error */}
                 {apiData && (
                     <Typography>
@@ -29,7 +34,7 @@ export const AresMarketMaster = () => {
                 )}
                 {apiError && (
                     <Typography color="error">
-                        Error: {apiError}
+                        {apiError}
                     </Typography>
                 )}
             </FloatingCard>
