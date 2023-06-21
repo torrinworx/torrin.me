@@ -2,7 +2,6 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 import Header from "./components/Header";
-import Footer from "./components/Footer";
 import Collision from "./components/Collision/Collision"
 
 import Home from "./pages/Home";
@@ -28,7 +27,6 @@ const AppRoutes = () => {
         {/* Catch-all route for undefined paths */}
         <Route path="*" element={<Collision children={<NotFound />} />} />
       </Routes>
-      <Footer />
     </Router>
   );
 };
