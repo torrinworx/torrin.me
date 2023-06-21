@@ -49,7 +49,6 @@ const Collision = ({ children }) => {
   return (
     <div ref={container} style={{ position: "relative", width: "100%", height: "100%" }}>
       {!isLoaded && LoadingScreen}
-      {children}
       <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", overflow: "hidden" }} ref={domContent} />
       <Canvas
         gl={{ alpha: true, antialias: renderingSettings.antialias }}
@@ -65,6 +64,7 @@ const Collision = ({ children }) => {
         <Camera />
         <Objects textureQuality={renderingSettings.textureQuality} />
       </Canvas>
+      {children}
     </div>
   );
 };
