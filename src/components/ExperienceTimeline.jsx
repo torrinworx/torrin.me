@@ -15,7 +15,7 @@ import Typography from '@mui/material/Typography';
 const experience = [
     {
         "id": 1,
-        "startDate": "2023-3-01",
+        "startDate": "2023-03-01",
         "image": "./images/Equator.jpg",
         "image_url": "https://equatorstudios.com/",
         "imageStyle": { "height": "5rem", "width": "auto", "borderRadius": "50%" },
@@ -59,7 +59,7 @@ const experience = [
 export const CustomizedTimeline = () => {
     const [data, setData] = useState([]);
 
-    const isSmallScreen = useMediaQuery('(max-width:800px)');
+    const isSmallScreen = useMediaQuery('(max-width:920px)');
 
     const calculatePeriod = (startDate, endDate) => {
         const start = new Date(startDate);
