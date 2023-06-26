@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useContext } from 'react';
 import { useEffect, useState } from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
@@ -11,6 +11,8 @@ import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineOppositeContent from '@mui/lab/TimelineOppositeContent';
 import Typography from '@mui/material/Typography';
+
+import { ThemeContext } from "../Theme";
 
 const experience = [
     {
@@ -57,6 +59,8 @@ const experience = [
 ]
 
 export const CustomizedTimeline = () => {
+    const { selectedPalette } = useContext(ThemeContext);
+
     const [data, setData] = useState([]);
 
     const isSmallScreen = useMediaQuery('(max-width:920px)');
@@ -118,11 +122,11 @@ export const CustomizedTimeline = () => {
                             <Typography variant="body1">{item.period}</Typography>
                         </TimelineOppositeContent>
                         <TimelineSeparator>
-                            <TimelineConnector />
+                            <TimelineConnector sx={{ background: `${selectedPalette.colors.text}` }} />
                             <Link href={item.image_url} target="_blank" rel="noopener noreferrer">
                                 <Box component="img" src={item.image} sx={item.imageStyle} />
                             </Link>
-                            <TimelineConnector />
+                            <TimelineConnector sx={{ background: `${selectedPalette.colors.text}` }} />
                         </TimelineSeparator>
                         <TimelineContent>
                             <Typography variant="h1" align="left" marginBottom={"1vw"}>{item.header}</Typography>
