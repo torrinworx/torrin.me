@@ -8,7 +8,7 @@ import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import ComingSoon from "./pages/ComingSoon";
 import AresMarketMaster from "./pages/AresMarketMaster";
-import { Test1 } from "./pages/Test1";
+import OrbKingdom from "./pages/OrbKingdom";
 
 const AppRoutes = () => {
   return (
@@ -19,8 +19,7 @@ const AppRoutes = () => {
         <Route path="/games" element={<Collision children={<ComingSoon />} />} />
         <Route path="/contact" element={<Collision children={<ComingSoon />} />} />
         <Route path="/aresmarketmaker" element={<AresMarketMaster />} />
-
-        <Route path="/test1" element={<Test1 />} />
+        <Route path="/orbkingdom" element={<OrbKingdom />} />
 
         {/* Add more routes here */}
 
