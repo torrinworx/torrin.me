@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Grid, Typography } from "@mui/material";
-import { Stage, Container, Graphics, useTick, useApp } from '@pixi/react';
+import { Stage, Container, Graphics, Text, useTick, useApp } from '@pixi/react'
 import FloatingCard from "../components/FloatingCard";
 import { contentMargin } from "../Theme";
 
@@ -12,11 +12,27 @@ const OrbKingdomGame = ({ stageWidth, stageHeight }) => {
     const mapSize = { width: 2000, height: 2000 };
     const cellSize = 50;
 
-    const [x, setX] = useState(stageWidth / 2);
-    const [y, setY] = useState(stageHeight / 2);
+    const [x, setX] = useState(mapSize.width / 2);
+    const [y, setY] = useState(mapSize.height / 2);
     const [radius, setRadius] = useState(30);
+    const [mousePosition, setMousePosition] = useState({ x: stageWidth / 2, y: stageHeight / 2 });
 
-    useTick(() => {
+    const [score, setScore] = useState(0);
+    const scoreRef = useRef(null);
+    const dots = useRef([]);
+
+    // Dots Spawning
+    useEffect(() => {
+        for (let i = 0; i < 100; i++) {
+            const x = Math.random() * mapSize.width;
+            const y = Math.random() * mapSize.height;
+            const dot = { x, y, radius: 5 };
+            dots.current.push(dot);
+        }
+    }, []);
+
+    // Draw the grid once when the component is mounted
+    useEffect(() => {
         if (mapGraphics.current) {
             const graphics = mapGraphics.current;
             graphics.clear();
@@ -31,55 +47,129 @@ const OrbKingdomGame = ({ stageWidth, stageHeight }) => {
                 graphics.lineTo(mapSize.width, i);
             }
         }
+    }, [mapSize.width, mapSize.height]);
 
+    useEffect(() => {
+        const handleMouseMove = (e) => {
+            const rect = e.target.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            setMousePosition({ x: mouseX, y: mouseY });
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+        };
+    }, []);
+
+    useTick(() => {
         if (circle.current) {
             const graphics = circle.current;
             graphics.clear();
             graphics.lineStyle(2, 0x333333, 1);
             graphics.beginFill(0xff0000);
-            graphics.drawCircle(stageWidth / 2, stageHeight / 2, radius);
+            graphics.drawCircle(0, 0, radius);
             graphics.endFill();
+
+            // Calculate the scale based on the player's size and stage size
+            const scale = Math.min(stageHeight / (radius * 4), 1);
+
+            // Scale and offset mouse position
+            const scaledMouseX = (mousePosition.x + (x - stageWidth / 2) / scale) * scale;
+            const scaledMouseY = (mousePosition.y + (y - stageHeight / 2) / scale) * scale;
+
+            // Calculate the direction vector towards the mouse
+            const dx = scaledMouseX - x * scale;
+            const dy = scaledMouseY - y * scale;
+
+            // Normalize the direction vector
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance > 5) { // Threshold to prevent jittery movement
+                const nx = dx / distance;
+                const ny = dy / distance;
+
+                // Move the circle in the direction of the mouse cursor with speed dependent on size
+                const moveSpeed = 50 / radius;
+                let newX = x + nx * moveSpeed;
+                let newY = y + ny * moveSpeed;
+
+                // Clamp x and y to be within the map before setting the position
+                newX = Math.max(Math.min(newX, mapSize.width - radius), radius);
+                newY = Math.max(Math.min(newY, mapSize.height - radius), radius);
+
+                // Set the position of the graphics object directly for smoother movement
+                graphics.position.set(newX, newY);
+                setX(newX);
+                setY(newY);
+            }
         }
 
         if (mapContainer.current) {
-            // Clamp x and y to be within the map
-            const clampedX = Math.max(Math.min(x, mapSize.width - radius), radius);
-            const clampedY = Math.max(Math.min(y, mapSize.height - radius), radius);
-
-            // Scale the map container based on the circle's radius
-            const scale = 30 / radius;
+            // Calculate the scale based on the player's size and stage size
+            const scale = Math.min(stageHeight / (radius * 4), 1);
             mapContainer.current.scale.set(scale, scale);
 
-            // Set the position of the map container
-            mapContainer.current.position.set(clampedX - stageWidth / 2, clampedY - stageHeight / 2);
+            // Move the map container in the opposite direction to simulate camera movement
+            mapContainer.current.position.set(
+                -(x * scale - stageWidth / 2),
+                -(y * scale - stageHeight / 2)
+            );
+        }
+
+        // Dot eating and score update
+        for (let i = dots.current.length - 1; i >= 0; i--) {
+            const dot = dots.current[i];
+            const dx = x - dot.x;
+            const dy = y - dot.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < radius + dot.radius) {
+                // eat the dot
+                dots.current.splice(i, 1);
+
+                // grow the circle and update score
+                setRadius(radius => radius + 1);
+                setScore(score => score + 1);
+
+                // spawn a new dot in a random location
+                const newX = Math.random() * mapSize.width;
+                const newY = Math.random() * mapSize.height;
+                const newDot = { x: newX, y: newY, radius: 5 };
+                dots.current.push(newDot);
+            }
+        }
+
+        if (scoreRef.current) {
+            scoreRef.current.text = `Score: ${score}`;
         }
     });
 
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            const moveSpeed = 5;
-            const growthSpeed = 2;
-            if (e.key === 'w' || e.key === 'ArrowUp') setY(y => y + moveSpeed);
-            if (e.key === 's' || e.key === 'ArrowDown') setY(y => y - moveSpeed);
-            if (e.key === 'a' || e.key === 'ArrowLeft') setX(x => x + moveSpeed);
-            if (e.key === 'd' || e.key === 'ArrowRight') setX(x => x - moveSpeed);
-            if (e.key === 'e') setRadius(r => Math.min(r + growthSpeed, 100));
-            if (e.key === 'q') setRadius(r => Math.max(r - growthSpeed, 10));
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, []);
-
     return (
         <Container>
+            <Text ref={scoreRef} text={`Score: ${score}`} x={10} y={10} style={{ fontSize: '24px', fill: 'white' }} />
             <Container ref={mapContainer}>
                 <Graphics ref={mapGraphics} />
+                {dots.current.map((dot, index) => (
+                    <Graphics
+                        key={index}
+                        draw={g => {
+                            g.clear();
+                            g.beginFill(0x00ff00);
+                            g.drawCircle(0, 0, dot.radius);
+                            g.endFill();
+                        }}
+                        x={dot.x}
+                        y={dot.y}
+                    />
+                ))}
+                <Graphics ref={circle} x={x} y={y} />
             </Container>
-            <Graphics ref={circle} />
         </Container>
     );
 };
-
 
 export const OrbKingdom = () => {
     const wrapperRef = useRef(null);
@@ -118,13 +208,6 @@ export const OrbKingdom = () => {
                         )}
                     </Stage>
                 </div>
-                {/* Adding a ledger below the stage */}
-                <Typography variant="body1" style={{ marginTop: '20px' }}>
-                    <strong>Controls:</strong>
-                </Typography>
-                <Typography variant="body2">Move: Arrows or WASDA</Typography>
-                <Typography variant="body2">Increase Circle Size: E </Typography>
-                <Typography variant="body2">Decrease Circle Size: Q</Typography>
             </FloatingCard>
         </Grid>
     );
