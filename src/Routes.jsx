@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import ComingSoon from "./pages/ComingSoon";
 import AresMarketMaster from "./pages/AresMarketMaster";
 import OrbKingdom from "./pages/OrbKingdom";
+import NakamaTestPage from "./pages/NakamaTestPage";
 
 const AppRoutes = () => {
   return (
@@ -20,6 +21,7 @@ const AppRoutes = () => {
         <Route path="/contact" element={<Collision children={<ComingSoon />} />} />
         <Route path="/aresmarketmaker" element={<AresMarketMaster />} />
         <Route path="/orbkingdom" element={<OrbKingdom />} />
+        <Route path="/nakamatestpage" element={<NakamaTestPage />} />
 
         {/* Add more routes here */}
 

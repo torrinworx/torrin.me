@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Grid, Typography } from "@mui/material";
-import { Stage, Container, Graphics, Text, useTick, useApp } from '@pixi/react'
+import { Stage, Container, Graphics, Text, useTick } from '@pixi/react'
 import FloatingCard from "../components/FloatingCard";
 import { contentMargin } from "../Theme";
 
@@ -29,7 +29,7 @@ const OrbKingdomGame = ({ stageWidth, stageHeight }) => {
             const dot = { x, y, radius: 5 };
             dots.current.push(dot);
         }
-    }, []);
+    }, [mapSize.height, mapSize.width]);
 
     // Draw the grid once when the component is mounted
     useEffect(() => {
