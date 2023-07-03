@@ -2,14 +2,15 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 import Header from "./components/Header";
-import Collision from "./components/Collision/Collision"
+import Collision from "./components/Collision/Collision";
 
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import ComingSoon from "./pages/ComingSoon";
 import AresMarketMaster from "./pages/AresMarketMaster";
-import OrbKingdom from "./pages/OrbKingdom";
-import NakamaTestPage from "./pages/NakamaTestPage";
+import OrbKingdom from "./OrbKingdom/pages/OrbKingdom";
+import SignUp from "./OrbKingdom/pages/SignUp";
+import SignIn from "./OrbKingdom/pages/SignIn";
 
 const AppRoutes = () => {
   return (
@@ -21,7 +22,8 @@ const AppRoutes = () => {
         <Route path="/contact" element={<Collision children={<ComingSoon />} />} />
         <Route path="/aresmarketmaker" element={<AresMarketMaster />} />
         <Route path="/orbkingdom" element={<OrbKingdom />} />
-        <Route path="/nakamatestpage" element={<NakamaTestPage />} />
+        <Route path="/orbkingdom/sign-up" element={<SignUp />} />
+        <Route path="/orbkingdom/sign-in" element={<SignIn />} />
 
         {/* Add more routes here */}
 

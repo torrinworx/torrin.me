@@ -3,10 +3,10 @@ import { Grid, Typography } from "@mui/material";
 import { Client } from "@heroiclabs/nakama-js";
 import { v4 as uuidv4 } from "uuid";
 
-import FloatingCard from "../components/FloatingCard";
-import { contentMargin } from "../Theme";
+import FloatingCard from "../../components/FloatingCard";
+import { contentMargin } from "../../Theme";
 
-export const NakamaTestPage = () => {
+export const OrbKingdom = () => {
     const [account, setAccount] = useState(null);
     const [leaderboard, setLeaderboard] = useState(null);
 
@@ -67,4 +67,4 @@ export const NakamaTestPage = () => {
     );
 };
 
-export default NakamaTestPage;
+export default OrbKingdom;
