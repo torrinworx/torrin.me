@@ -171,7 +171,7 @@ const OrbKingdomGame = ({ stageWidth, stageHeight }) => {
     );
 };
 
-export const OrbKingdom = () => {
+export const OrbKingdomTest = () => {
     const wrapperRef = useRef(null);
     const [wrapperDimensions, setWrapperDimensions] = useState({ width: 0, height: 0 });
 
@@ -213,4 +213,4 @@ export const OrbKingdom = () => {
     );
 };
 
-export default OrbKingdom;
+export default OrbKingdomTest;

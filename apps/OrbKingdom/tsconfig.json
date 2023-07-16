@@ -4,11 +4,15 @@
   "compilerOptions": {
     "target": "es5",
     "typeRoots": ["./node_modules/@types"],
-    "outFile": "./modules/index.js",
-    "strict": true,
+    "strict": false,
+    "noImplicitReturns": true,
+    "moduleResolution": "node",
     "esModuleInterop": true,
+    "noUnusedLocals": true,
+    "removeComments": true,
     "skipLibCheck": true,
+    "module": "ESNext",
     "forceConsistentCasingInFileNames": true
   },
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "modules"]
 }

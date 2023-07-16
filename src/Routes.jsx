@@ -12,6 +12,8 @@ import OrbKingdom from "./OrbKingdom/pages/OrbKingdom";
 import SignUp from "./OrbKingdom/pages/SignUp";
 import SignIn from "./OrbKingdom/pages/SignIn";
 
+import OrbKingdomTest from "./pages/OrbKingdomGameTest";
+
 const AppRoutes = () => {
   return (
     <Router>
@@ -25,6 +27,9 @@ const AppRoutes = () => {
         <Route path="/orbkingdom" element={<OrbKingdom />} />
         <Route path="/orbkingdom/sign-up" element={<SignUp />} />
         <Route path="/orbkingdom/sign-in" element={<SignIn />} />
+
+        <Route path="/orbkingdom-test" element={<OrbKingdomTest />} />
+
 
         {/* Add more routes here */}
 
