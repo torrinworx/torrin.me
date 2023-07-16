@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Grid, Typography } from "@mui/material";
 import { Stage, Container, Graphics, Text, useTick } from '@pixi/react'
-import FloatingCard from "../components/FloatingCard";
+import FloatingCard from "../Components/FloatingCard";
 import { contentMargin } from "../Theme";
 
 const OrbKingdomGame = ({ stageWidth, stageHeight }) => {

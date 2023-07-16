@@ -1,18 +1,17 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
-import Header from "./components/Header";
-import Collision from "./components/Collision/Collision";
+import Header from "./Components/Header";
+import Collision from "./Components/Collision/Collision";
 
-import Home from "./pages/Home";
-import NotFound from "./pages/NotFound";
-import ComingSoon from "./pages/ComingSoon";
-import AresMarketMaster from "./pages/AresMarketMaster";
-import OrbKingdom from "./OrbKingdom/pages/OrbKingdom";
-import SignUp from "./OrbKingdom/pages/SignUp";
-import SignIn from "./OrbKingdom/pages/SignIn";
-
-import OrbKingdomTest from "./pages/OrbKingdomGameTest";
+import Home from "./Pages/Home";
+import NotFound from "./Pages/NotFound";
+import ComingSoon from "./Pages/ComingSoon";
+import AresMarketMaster from "./Pages/AresMarketMaster";
+import OrbKingdomTest from "./Pages/OrbKingdomGameTest";
+import OrbKingdom from "./OrbKingdom/Pages/OrbKingdom";
+import SignUp from "./OrbKingdom/Pages/SignUp";
+import SignIn from "./OrbKingdom/Pages/SignIn";
 
 const AppRoutes = () => {
   return (

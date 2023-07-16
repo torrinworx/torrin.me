@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button, TextField, Typography, Grid, Alert } from "@mui/material";
 import { Client } from "@heroiclabs/nakama-js";
 import isEmail from 'validator/lib/isEmail';
-import FloatingCard from "../../components/FloatingCard";
+import FloatingCard from "../../Components/FloatingCard";
 
 
 const SignUp = () => {

@@ -3,7 +3,7 @@ import { Grid, Typography } from "@mui/material";
 import { Client } from "@heroiclabs/nakama-js";
 import { v4 as uuidv4 } from "uuid";
 
-import FloatingCard from "../../components/FloatingCard";
+import FloatingCard from "../../Components/FloatingCard";
 import { contentMargin } from "../../Theme";
 
 export const OrbKingdom = () => {

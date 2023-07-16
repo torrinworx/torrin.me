@@ -1,17 +1,3 @@
-// Copyright 2020 The Nakama Authors
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 export const rpcReward = (context: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, payload: string): string => {
     if (!context.userId) {
         throw Error('No user ID in context');
@@ -21,12 +7,14 @@ export const rpcReward = (context: nkruntime.Context, logger: nkruntime.Logger, 
         throw Error('no input allowed');
     }
 
-    var objectId: nkruntime.StorageReadRequest = {
+    const objectId: nkruntime.StorageReadRequest = {
         collection: 'reward',
         key: 'daily',
         userId: context.userId,
     }
-    var objects: nkruntime.StorageObject[];
+    
+    let objects: nkruntime.StorageObject[];
+    
     try {
         objects = nk.storageRead([ objectId ]);
     } catch (error) {
@@ -34,7 +22,7 @@ export const rpcReward = (context: nkruntime.Context, logger: nkruntime.Logger, 
         throw error;
     }
 
-    var dailyReward: any = {
+    let dailyReward: any = {
         lastClaimUnix: 0,
     }
     objects.forEach(object => {
@@ -43,11 +31,11 @@ export const rpcReward = (context: nkruntime.Context, logger: nkruntime.Logger, 
         }
     });
 
-    var resp = {
+    let resp = {
         coinsReceived: 0,
     }
 
-    var d = new Date();
+    let d = new Date();
     d.setHours(0,0,0,0);
 
     // If last claimed is before the new day grant a new reward!
@@ -55,7 +43,7 @@ export const rpcReward = (context: nkruntime.Context, logger: nkruntime.Logger, 
         resp.coinsReceived = 500;
 
         // Update player wallet.
-        var changeset = {
+        const changeset = {
             coins: resp.coinsReceived,
         }
         try {
@@ -65,7 +53,7 @@ export const rpcReward = (context: nkruntime.Context, logger: nkruntime.Logger, 
             throw error;
         }
 
-        var notification: nkruntime.NotificationRequest = {
+        const notification: nkruntime.NotificationRequest = {
             code: 1001,
             content: changeset,
             persistent: true,
@@ -81,7 +69,7 @@ export const rpcReward = (context: nkruntime.Context, logger: nkruntime.Logger, 
 
         dailyReward.lastClaimUnix = msecToSec(Date.now());
 
-        var write: nkruntime.StorageWriteRequest = {
+        const write: nkruntime.StorageWriteRequest = {
             collection: 'reward',
             key: 'daily',
             permissionRead: 1,
@@ -101,7 +89,7 @@ export const rpcReward = (context: nkruntime.Context, logger: nkruntime.Logger, 
         }
     }
 
-    var result = JSON.stringify(resp);
+    const result = JSON.stringify(resp);
     logger.debug('rpcReward resp: %q', result)
 
     return result;
