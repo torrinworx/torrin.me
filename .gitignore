@@ -225,3 +225,4 @@ cython_debug/
 #.idea/
 
 .cookie
+apps/OrbKingdom/modules/

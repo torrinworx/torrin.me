@@ -4,16 +4,16 @@
   "private": true,
   "proxy": "http://localhost:5000",
   "dependencies": {
-    "@emotion/react": "^11.10.6",
+    "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.10.6",
     "@heroiclabs/nakama-js": "^2.6.1",
     "@mui/icons-material": "^5.11.16",
     "@mui/lab": "^5.0.0-alpha.132",
-    "@mui/material": "^5.13.3",
+    "@mui/material": "^5.13.6",
     "@pixi/react": "^7.1.0",
     "@react-three/cannon": "^6.5.2",
     "@react-three/drei": "^9.66.1",
-    "@react-three/fiber": "^8.12.2",
+    "@react-three/fiber": "^8.13.4",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -61,7 +61,7 @@
   },
   "devDependencies": {
     "concurrently": "^8.1.0",
-    "html-webpack-plugin": "^5.5.1",
+    "html-webpack-plugin": "^5.5.3",
     "webpack": "^5.80.0",
     "webpack-cli": "^5.0.2",
     "webpack-dev-server": "^4.13.3"

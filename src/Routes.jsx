@@ -21,6 +21,7 @@ const AppRoutes = () => {
         <Route path="/games" element={<Collision children={<ComingSoon />} />} />
         <Route path="/contact" element={<Collision children={<ComingSoon />} />} />
         <Route path="/aresmarketmaker" element={<AresMarketMaster />} />
+
         <Route path="/orbkingdom" element={<OrbKingdom />} />
         <Route path="/orbkingdom/sign-up" element={<SignUp />} />
         <Route path="/orbkingdom/sign-in" element={<SignIn />} />

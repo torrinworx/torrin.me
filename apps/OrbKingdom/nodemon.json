@@ -1,0 +1,7 @@
+{
+    "watch": [
+        "modules"
+    ],
+    "ext": "js,json",
+    "exec": "docker-compose down && docker-compose up -d --build nakama"
+}

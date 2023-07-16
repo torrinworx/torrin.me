@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Button, TextField, Typography, Box, Alert } from "@mui/material";
+import { Button, TextField, Typography, Grid, Alert } from "@mui/material";
 import { Client } from "@heroiclabs/nakama-js";
 import isEmail from 'validator/lib/isEmail';
 import FloatingCard from "../../components/FloatingCard";
+
 
 const SignUp = () => {
     const [email, setEmail] = useState("");
@@ -91,40 +92,58 @@ const SignUp = () => {
     };
 
     return (
-        <FloatingCard type="translucentSecondary" style={{ height: '100%', justifyContent:"center", alignItems: "center" }}>
-            <Box margin={"10%"}>
-                <Typography variant="h5" gutterBottom>
-                    Sign Up
-                </Typography>
-                {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
-                <TextField 
-                    label="Email"
-                    variant="outlined"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    style={{ width: '100%', marginBottom: '20px' }}
-                />
-                <TextField 
-                    label="Password"
-                    variant="outlined"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    style={{ width: '100%', marginBottom: '20px' }}
-                />
-                <TextField 
-                    label="Username"
-                    variant="outlined"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    style={{ width: '100%', marginBottom: '20px' }}
-                />
-                <Button variant="contained" color="primary" onClick={handleSignUp}>
-                    Sign Up
-                </Button>
-            </Box>
+        <FloatingCard type="translucentSecondary" style={{ height: '100%', display: 'flex', justifyContent: "center", alignItems: "center" }}>
+            <Grid container direction="column" spacing={3} alignItems="center" style={{ maxWidth: '500px', width: '100%' }}>
+                <Grid item xs={12} style={{ textAlign: 'center' }}>
+                    <Typography variant="h1" gutterBottom>
+                        OrbKingdom
+                    </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                    <Typography variant="h5" gutterBottom>
+                        Sign Up
+                    </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                    <TextField
+                        label="Username"
+                        variant="outlined"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        fullWidth
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <TextField
+                        label="Email"
+                        variant="outlined"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        fullWidth
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <TextField
+                        label="Password"
+                        variant="outlined"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        fullWidth
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+                </Grid>
+                <Grid item xs={12}>
+                    <Button variant="contained" color="primary" onClick={handleSignUp}>
+                        Sign Up
+                    </Button>
+                </Grid>
+            </Grid>
         </FloatingCard>
     );
 };
+
 
 export default SignUp;
