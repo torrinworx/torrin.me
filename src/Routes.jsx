@@ -1,18 +1,21 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
-import Header from "./components/Header";
-import Collision from "./components/Collision/Collision"
+import SEO from "./Components/SEO";
+import Header from "./Components/Header";
+import Footer from "./Components/Footer";
+import Collision from "./Components/Collision/Collision"
 
-import Home from "./pages/Home";
-import NotFound from "./pages/NotFound";
-import ComingSoon from "./pages/ComingSoon";
-import AresMarketMaster from "./pages/AresMarketMaster";
-import OrbKingdom from "./pages/OrbKingdom";
+import Home from "./Pages/Home";
+import NotFound from "./Pages/NotFound";
+import ComingSoon from "./Pages/ComingSoon";
+import AresMarketMaster from "./Pages/AresMarketMaster";
+import OrbKingdom from "./Pages/OrbKingdom";
 
 const AppRoutes = () => {
   return (
     <Router>
+      <SEO />
       <Header />
       <Routes>
         <Route path="/" element={<Collision children={<Home />} />} />
@@ -26,6 +29,7 @@ const AppRoutes = () => {
         {/* Catch-all route for undefined paths */}
         <Route path="*" element={<Collision children={<NotFound />} />} />
       </Routes>
+      <Footer />
     </Router>
   );
 };
