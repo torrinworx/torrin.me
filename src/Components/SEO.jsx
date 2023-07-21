@@ -5,7 +5,7 @@ const SEO = ({
     title = "Torrin Leonard",
     description = "Torrin Leonard: Building open source and 3D projects as the CEO and Co-Founder of This Cozy Studio and as a Software Developer at Equator Studios.",
     url = window.location.href,
-    image = "/site-card.png",
+    image = "images/site-card.png",
     locale = "en_CA",
     keywords = "Torrin Leonard, Software development, This Cozy Studio Inc, CEO, Lead software engineer, Blend_My_NFTs, Open source, Generative AI, 3D Graphics, worX4you, Equator Studios"
 }) => {
@@ -23,6 +23,20 @@ const SEO = ({
         "author": {
             "@type": "Person",
             "name": "Torrin Leonard",
+            "worksFor": [
+                {
+                    "@type": "Organization",
+                    "name": "This Cozy Studio Inc",
+                    "url": "https://www.thiscozystudio.com/",
+                    // add more properties specific to the company if necessary, like address, contact etc.
+                },
+                {
+                    "@type": "Organization",
+                    "name": "Equator Studios",
+                    "url": "https://www.equatorstudios.com/",
+                    // add more properties specific to the company if necessary, like address, contact etc.
+                }
+            ],
             "sameAs": [
                 "https://twitter.com/LeonardTorrin",
                 "https://github.com/torrinworx",
@@ -30,6 +44,15 @@ const SEO = ({
                 "https://www.thiscozystudio.com/",
                 "https://www.youtube.com/c/ThisCozyStudio"
             ]
+        },
+        "about": {
+            "@type": "SoftwareApplication",
+            "name": "Blend_My_NFTs",
+            "applicationCategory": "DesignApplication",
+            "operatingSystem": "Windows, macOS, Linux",
+            "softwareVersion": "4.6.0",
+            "downloadUrl": "https://github.com/torrinworx/Blend_My_NFTs",
+            "license": "https://www.gnu.org/licenses/gpl-3.0.en.html"
         }
     };
     return (
