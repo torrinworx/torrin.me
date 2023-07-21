@@ -2,10 +2,10 @@ import _ from 'lodash';
 
 import React, { useContext } from "react";
 import { Grid, Box, Typography } from "@mui/material";
-import FloatingCard from "../components/FloatingCard";
+import FloatingCard from "../Components/FloatingCard";
 
 import { ThemeContext, contentMargin, bevelRadius, themeModes } from "../Theme";
-import CustomizedTimeline from "../components/ExperienceTimeline";
+import CustomizedTimeline from "../Components/ExperienceTimeline";
 
 export const Home = () => {
   const { selectedThemeMode } = useContext(ThemeContext);

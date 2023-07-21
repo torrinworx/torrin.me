@@ -1,27 +1,11 @@
-import React from 'react'
+import React from 'react';
 
-import { AppBar, Box, Toolbar, Container } from "@mui/material/";
+import { Box } from "@mui/material/";
 
-import FloatingCard from "./FloatingCard";
-import { contentMargin } from "../Theme"
+import { contentMargin } from "../Theme";
 
 const Footer = () => {
-  return <>
-    <FloatingCard
-      type="translucentSecondary"
-      component={AppBar}
-      position="relative"
-      marginTop={contentMargin}
-      style={{ padding: 0 }}
-    >
-      <Container maxWidth="xl">
-        {/* Set a fixed height for the Toolbar (twice as large) */}
-        <Toolbar disableGutters sx={{ height: "96px" }}>
-          Footer tbd
-        </Toolbar>
-      </Container>
-    </FloatingCard>
-    <Box
+  return <Box
       sx={{
         display: 'flex',
         justifyContent: 'center',
@@ -29,9 +13,8 @@ const Footer = () => {
         marginTop: contentMargin,
       }}
     >
-      © Torrin Leonard {new Date().getFullYear()}
+    © Torrin Leonard {new Date().getFullYear()}
     </Box>
-  </>
 }
 
 export default Footer;

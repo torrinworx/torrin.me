@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Grid, Typography } from "@mui/material";
-import FloatingCard from "../components/FloatingCard";
+import FloatingCard from "../Components/FloatingCard";
 import { contentMargin } from "../Theme";
 import Api from '../Api';
 

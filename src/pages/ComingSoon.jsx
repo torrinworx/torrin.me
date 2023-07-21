@@ -2,7 +2,7 @@ import React from 'react';
 import { Typography, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-import FloatingCard from '../components/FloatingCard';
+import FloatingCard from '../Components/FloatingCard';
 
 const ComingSoon = () => {
   const navigate = useNavigate();
