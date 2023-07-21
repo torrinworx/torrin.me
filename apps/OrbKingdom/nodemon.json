@@ -1,7 +1,8 @@
 {
     "watch": [
-        "modules"
+        "modules",
+        "Dockerfile"
     ],
-    "ext": "js,json",
-    "exec": "docker-compose down && docker-compose up -d --build nakama"
+    "ext": "js,json,Dockerfile",
+    "exec": "docker build -t nakama . && docker-compose up -d nakama"
 }

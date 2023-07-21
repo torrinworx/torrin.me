@@ -1,132 +1,28 @@
-Nakama Project Template
-===
+# OrbKingdom Server
 
-> An example project template on how to set up and write custom logic in Nakama server.
+## Operation
 
-The codebase shows a few simple gameplay features written in all three of the runtime framework languages supported by the server: Go, Lua, and TypeScript. The code shows how to read/write storage objects, send in-app notifications, parse JSON, update player wallets, and handle errors.
-
-For more documentation have a look at:
-
-* https://heroiclabs.com/docs/runtime-code-basics/
-* https://heroiclabs.com/docs/storage-collections/
-* https://heroiclabs.com/docs/user-accounts/#virtual-wallet
-* https://heroiclabs.com/docs/social-in-app-notifications/
-* https://heroiclabs.com/docs/gameplay-multiplayer-server-multiplayer/
-* https://heroiclabs.com/docs/runtime-code-function-reference/
-
-For a detailed guide on setting up TypeScript check out the [Setup page](https://heroiclabs.com/docs/runtime-code-typescript-setup/#initialize-the-project).
-
-__NOTE__ You can remove the Go, Lua or TypeScript code within this project to develop with just the single language you prefer.
-
-### Prerequisites
-
-The codebase requires these development tools:
-
-* Go compiler and runtime: 1.15.2 or greater.
-* Docker Engine: 19.0.0 or greater.
-* Node v14 (active LTS) or greater.
-* Basic UNIX tools or knowledge on the Windows equivalents.
-
-### Go Dependencies
-
-The project uses Go modules which should be vendored as normal:
-
-```shell
-env GO111MODULE=on GOPRIVATE="github.com" go mod vendor
+The operation of the OrbKingdom server is quite simple, you just need to run:
 ```
-
-### TypeScript Dependencies
-
-The project uses NPM to manage dependencies which can be installed as normal:
-
-```shell
-npm install
+npm start
 ```
+This will use Docker Compose to set up the Nakama docker-compose file and will create the containers needed to run the server. It also handles hot reloading of the code with a combination of Rollup for building and Nodemon to restart the container if watches are triggered on any of the files in this repository.
 
-Before you start the server you can transpile the TypeScript code to JavaScript code with the TypeScript compiler:
+## Deployment
+Deployment steps are still needed.
 
-```shell
-npx tsc
-```
+## TypeScript Restrictions and Caveats
+It's important to note that Nakama has some specific restrictions on how you can write and compile your TypeScript code:
 
-The bundled JavaScript code output can be found in "build/index.js".
+1. All code must compile down to ES5 compliant JavaScript: Nakama's JavaScript runtime is powered by the Goja VM, which supports the JavaScript ES5 specification. This means you can't use newer JavaScript features that aren't included in ES5.
 
-### Start
+2. Your code cannot interact with the OS in any way, including the file system: This is a security measure to prevent potentially malicious actions.
 
-The recommended workflow is to use Docker and the compose file to build and run the game server and database resources.
+3. You cannot use any module that relies on NodeJS functionality (e.g. crypto, fs, etc.): Module code is not running in a Node environment, it's running inside the Nakama server. This means Node-specific modules and features are not available. (Might be possible to manually compile them into the build index.js file)
 
-```shell
-docker-compose up --build nakama
-```
+4. Typescript anotations can function normally as they are removed when building.
 
-### Recompile / Run
+For specific compatibility issues present within Goja see the Goja known incompatibilities and caveats.
 
-When the containers have been started as shown above you can replace just the game server custom code and recompile it with the `-d` option.
-
-```shell
-docker-compose up -d --build nakama
-```
-
-### Stop
-
-To stop all running containers you can use the Docker compose sub-command.
-
-```shell
-docker-compose down
-```
-
-You can wipe the database and workspace with `docker-compose down -v` to remove the disk volumes.
-
-### Run RPC function
-
-A bunch of RPC IDs are registered with the server logic. A couple of these are:
-
-* "rewards" in Go or as "reward" in Lua.
-* "refreshes" in Go or as "refresh" in Lua.
-
-To execute the RPC function with cURL generated a session token:
-
-```shell
-curl "127.0.0.1:7350/v2/account/authenticate/device" --data "{\"id\": \""$(uuidgen)"\"}" --user 'defaultkey:'
-```
-
-Take the session token in the response and use it to execute the RPC function as the user:
-
-```shell
-curl "127.0.0.1:7350/v2/rpc/rewards" -H 'Authorization: Bearer $TOKEN' --data '""'
-```
-
-This will generate an RPC response on the initial response in that day and grant no more until the rollover.
-
-```
-{"payload":"{\"coins_received\":500}"}
-or
-{"payload":"{\"coins_received\":0}"}
-```
-
-You can also skip the cURL steps and use the [Nakama Console's API Explorer](http://127.0.0.1:7351/apiexplorer) to execute the RPCs.
-
-### Authoritative Multiplayer
-
-The authoritative multiplayer example includes a match handler that defines game logic, and an RPC function players should call to find a match they can join or have the server create one for them if none are available.
-
-Running the match finder RPC function registered as RPC ID "find_match" returns one or more match IDs that fit the user's criteria:
-
-```shell
-curl "127.0.0.1:7350/v2/rpc/find_match" -H 'Authorization: Bearer $TOKEN' --data '"{}"'
-```
-
-This will return one or more match IDs:
-
-```
-{"payload":"{\"match_ids\":[\"match ID 1\","match ID 2\",\"...\"]}"}
-```
-
-To join one of these matches check the [documentation on individual client libraries here](https://heroiclabs.com/docs/gameplay-multiplayer-realtime/#join-a-match).
-
-
-### Contribute
-
-The development roadmap is managed as GitHub issues and pull requests are welcome. If you're interested to add a gameplay feature as a new example; which is not mentioned on the issue tracker please open one to create a discussion or drop in and discuss it in the [community forum](https://forum.heroiclabs.com).
-
-Finally, we love feedback and would love to hear from you. Please join our [Forums](https://forum.heroiclabs.com/) and connect with us today!
+## Future Structure to get around Nakama Caveats:
+Build only game logic inside of Nakama, anything that needs node_modules or more complex code can be done inside the Express backend of the torrinleonard.com (orbkingdom.com after we migrate to a new repo independent from my personal website repo). We might be able to facilitate this with the [httpRequest](https://heroiclabs.com/docs/nakama/server-framework/typescript-runtime/function-reference/#httpRequest) function, we could also possibly modify the Nakama container to include a node image and run an aditional app inside the conainer, that way it is one container but with two servers, Nakama, and a Nodejs express server that Nakama can call too so that we get around the Goja issue.

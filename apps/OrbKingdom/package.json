@@ -1,8 +1,9 @@
 {
-  "name": "nakama-project-template",
+  "name": "orb-kingdom",
   "version": "0.1.0",
-  "description": "An example project on how to set up and write custom logic in TypeScript for Nakama server.",
+  "description": "The game logic server for OrbKingdom",
   "main": "build/index.js",
+  "type": "module",
   "scripts": {
     "prestart": "tsc --noEmit",
     "start": "concurrently \"rollup -c -w\" \"docker-compose up --build nakama\" \"nodemon\"",
@@ -17,25 +18,28 @@
   "keywords": [
     "nakama"
   ],
-  "author": "Nakama Authors",
-  "license": "Apache-2.0",
+  "author": "Torrin Leonard",
   "bugs": {
     "url": "https://github.com/heroiclabs/nakama-project-template/issues"
   },
   "homepage": "https://github.com/heroiclabs/nakama-project-template#readme",
   "dependencies": {
     "nakama-runtime": "github:heroiclabs/nakama-common#master",
-    "npx": "^10.2.2"
+    "npx": "^10.2.2",
+    "rollup-plugin-multi-input": "^1.4.1",
+    "rollup-plugin-node-polyfills": "^0.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.22.9",
     "@babel/plugin-external-helpers": "^7.22.5",
+    "@babel/plugin-transform-modules-commonjs": "^7.22.5",
     "@babel/preset-env": "^7.22.9",
     "@rollup/plugin-babel": "^6.0.3",
     "@rollup/plugin-commonjs": "^25.0.3",
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "^15.1.0",
     "@rollup/plugin-typescript": "^11.1.2",
+    "@types/node": "^20.4.2",
     "concurrently": "^8.2.0",
     "nodemon": "^3.0.1",
     "rollup": "^3.26.2",
