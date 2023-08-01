@@ -17,7 +17,7 @@ const pages = {
 const HeaderProfileImage = () => {
   const { selectedThemeMode, selectedPalette } = useContext(ThemeContext);
 
-  const profileImage = _.isEqual(selectedThemeMode, themeModes.dark) ? '/torrin-profile.dark-mode.png' : '/torrin-profile.light-mode.png';
+  const profileImage = _.isEqual(selectedThemeMode, themeModes.dark) ? '/images/torrin-profile.dark-mode.png' : '/images/torrin-profile.light-mode.png';
 
   const [isHovered, setIsHovered] = useState(false);
 
