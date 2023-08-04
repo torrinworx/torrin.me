@@ -10,7 +10,7 @@ import CustomizedTimeline from "../Components/ExperienceTimeline";
 export const Home = () => {
   const { selectedThemeMode } = useContext(ThemeContext);
 
-  const profileImage = _.isEqual(selectedThemeMode, themeModes.dark) ? './torrin-profile.dark-mode.png' : './torrin-profile.light-mode.png';
+  const profileImage = _.isEqual(selectedThemeMode, themeModes.dark) ? '/images/torrin-profile.dark-mode.png' : '/images/torrin-profile.light-mode.png';
 
   return (
     <Grid container spacing={contentMargin} justifyContent="center">
