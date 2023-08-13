@@ -33,6 +33,8 @@ const Contact = () => {
         }
     };
 
+    console.log(`SITE KEY: ${sitekey}`);
+
     return (
         <FloatingCard type="translucentSecondary">
             <Grid container direction="column" justifyContent="center" alignItems="center">
