@@ -16,11 +16,13 @@ const Contact = () => {
     const { executeRecaptcha } = useGoogleReCaptcha();
 
     const handleCaptchaVerification = async () => {
+        console.log(`SITE KEY: ${sitekey}`);
         if (executeRecaptcha) {
             const token = await executeRecaptcha("homepage");
+            console.log(`TOKEN: ${token}`);
             if (token) {
                 // If captcha is verified, fetch contact information from the server
-                Api.fetchContactInfo(token)
+                const response = Api.fetchContactInfo(token)
                     .then(data => {
                         setContactInfo(data);
                         setIsVerified(true);
@@ -29,11 +31,10 @@ const Contact = () => {
                         console.error("Captcha verification failed:", error);
                         setIsVerified(false);
                     });
+                console.log(JSON.stringify(response))
             }
         }
     };
-
-    console.log(`SITE KEY: ${sitekey}`);
 
     return (
         <FloatingCard type="translucentSecondary">
