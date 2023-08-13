@@ -8,7 +8,13 @@ const Api = {
       .get(`${BASE_PATH}/add/${param1}/${param2}`)
       .then(response => response.data)
       .catch(error => { throw error; });
-    },
+  },
+  fetchContactInfo: (captchaToken) => {
+    return axios
+      .post(`${BASE_PATH}/fetchContactInfo`, { captchaToken })
+      .then(response => response.data)
+      .catch(error => { throw error; });
+  },
 };
 
 export default Api;

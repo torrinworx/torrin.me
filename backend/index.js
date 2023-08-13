@@ -5,6 +5,9 @@ require('dotenv').config();
 const apiRoutes = require('./ApiRoutes');
 const app = express();
 
+// Handle JSON
+app.use(express.json());
+
 // Serve static files from the React app
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.join(__dirname, '../build')));
