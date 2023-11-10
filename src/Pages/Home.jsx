@@ -1,8 +1,13 @@
 import _ from 'lodash';
 
 import React, { useContext } from "react";
-import { Grid, Box, Typography } from "@mui/material";
+import { Grid, Box, Typography, IconButton } from "@mui/material";
 import FloatingCard from "../Components/FloatingCard";
+
+import YouTubeIcon from '@mui/icons-material/YouTube';
+import TwitterIcon from '@mui/icons-material/Twitter';
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import GitHubIcon from '@mui/icons-material/GitHub';
 
 import { ThemeContext, contentMargin, bevelRadius, themeModes } from "../Theme";
 import CustomizedTimeline from "../Components/ExperienceTimeline";
@@ -77,6 +82,23 @@ export const Home = () => {
       {/* Big element at the top of the grid with custom height */}
       <FloatingCard type="translucentSecondary">
         <CustomizedTimeline />
+      </FloatingCard>
+
+      <FloatingCard type="translucentSecondary">
+        <Grid container justifyContent="center">
+          <IconButton aria-label="YouTube" component="a" href="https://www.youtube.com/c/thiscozystudio" target="_blank" rel="noopener">
+            <YouTubeIcon sx={{ color: 'red', fontSize: '5rem' }} />
+          </IconButton>
+          <IconButton aria-label="Twitter" component="a" href="https://twitter.com/LeonardTorrin" target="_blank" rel="noopener">
+            <TwitterIcon sx={{ color: '#1DA1F2', fontSize: '5rem' }} />
+          </IconButton>
+          <IconButton aria-label="LinkedIn" component="a" href="https://www.linkedin.com/in/torrin-leonard-8343a1154/" target="_blank" rel="noopener">
+            <LinkedInIcon sx={{ color: '#0077b5', fontSize: '5rem' }} />
+          </IconButton>
+          <IconButton aria-label="GitHub" component="a" href="https://github.com/torrinworx" target="_blank" rel="noopener">
+            <GitHubIcon sx={{ fontSize: '5rem' }} />
+          </IconButton>
+        </Grid>
       </FloatingCard>
     </Grid>
   );
