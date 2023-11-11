@@ -3,7 +3,7 @@ import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import { ThemeContext, shadow, bevelRadius, contentPadding } from "../Theme";
 
-const FloatingCard = ({ children, type, size, ...props }) => {
+const FloatingCard = ({ children, type, size, zIndex, ...props }) => {
   /*
   types: translucentPrimary, translucentSecondary, invisible
   
@@ -19,17 +19,17 @@ const FloatingCard = ({ children, type, size, ...props }) => {
   const colorMap = {
     translucentPrimary: {
       color: hexToRgba(selectedPalette.colors.primary, 0.3),
-      zIndex: 1,
-      blur: "25px",  // blur amount for translucentPrimary
+      defaultZIndex: 1,
+      blur: "25px",
     },
     translucentSecondary: {
       color: hexToRgba(selectedPalette.colors.secondary, 0.3),
-      zIndex: 1,
-      blur: "25px",  // blur amount for translucentSecondary
+      defaultZIndex: 1,
+      blur: "25px",
     },
     invisible: {
       color: "rgba(255, 255, 255, 0.0)",
-      zIndex: -1,
+      defaultZIndex: -1,
     },
   };
 
@@ -38,22 +38,26 @@ const FloatingCard = ({ children, type, size, ...props }) => {
     medium: { height: "50rem", xs: 12, sm: 12, md: 12 },
     small: { height: "25rem", xs: 12, sm: 12, md: 12 },
     halfWidth: { height: "25rem", xs: 12, sm: 12, md: 6 },
-    default: { xs: 12, sm: 12, md: 12 }, // default size with no fixed height
+    default: { xs: 12, sm: 12, md: 12 },
   };
 
-  const { color, zIndex, blur } = colorMap[type] || {};
+  const { color, defaultZIndex, blur } = colorMap[type] || {};
   const { height, xs, sm, md } = size ? sizeConfig[size] : sizeConfig.default;
 
+  // Override the default zIndex with the user provided zIndex, if available
+  const appliedZIndex = zIndex !== undefined ? zIndex : defaultZIndex;
+
   return (
-    <Grid item xs={xs} sm={sm} md={md} zIndex={zIndex}>
+    <Grid item xs={xs} sm={sm} md={md} style={{ zIndex: appliedZIndex }}>
       <Box
         sx={{
           backgroundColor: color,
           borderRadius: bevelRadius,
           boxShadow: type === "invisible" ? "none" : shadow,
-          ...(height && { height }), // apply height only when it is defined
-          backdropFilter: blur ? `blur(${blur})` : "none",  // add blur effect if blur is defined
+          ...(height && { height }),
+          backdropFilter: blur ? `blur(${blur})` : "none",
           padding: contentPadding,
+          zIndex: appliedZIndex,
           ...props.sx,
         }}
         {...props}
