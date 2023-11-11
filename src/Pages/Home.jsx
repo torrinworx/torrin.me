@@ -79,12 +79,7 @@ export const Home = () => {
         </Grid>
       </FloatingCard>
 
-      {/* Big element at the top of the grid with custom height */}
-      <FloatingCard type="translucentSecondary">
-        <CustomizedTimeline />
-      </FloatingCard>
-
-      <FloatingCard type="translucentSecondary">
+      <FloatingCard type="invisible" zIndex="1">
         <Grid container justifyContent="center">
           <IconButton aria-label="YouTube" component="a" href="https://www.youtube.com/c/thiscozystudio" target="_blank" rel="noopener">
             <YouTubeIcon sx={{ color: 'red', fontSize: '5rem' }} />
@@ -96,9 +91,14 @@ export const Home = () => {
             <LinkedInIcon sx={{ color: '#0077b5', fontSize: '5rem' }} />
           </IconButton>
           <IconButton aria-label="GitHub" component="a" href="https://github.com/torrinworx" target="_blank" rel="noopener">
-            <GitHubIcon sx={{ fontSize: '5rem' }} />
+            <GitHubIcon sx={{ color: 'white', fontSize: '5rem' }} />
           </IconButton>
         </Grid>
+      </FloatingCard>
+      
+      {/* Big element at the top of the grid with custom height */}
+      <FloatingCard type="translucentSecondary">
+        <CustomizedTimeline />
       </FloatingCard>
     </Grid>
   );

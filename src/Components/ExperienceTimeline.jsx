@@ -13,6 +13,40 @@ import Typography from '@mui/material/Typography';
 
 import { ThemeContext } from "../Theme";
 
+const AnimatedUnderline = ({ children, href }) => {
+    const { selectedPalette } = useContext(ThemeContext);
+    const [isHovered, setIsHovered] = useState(false);
+    const isMobile = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+
+    return (
+        <Link
+            href={href}
+            target="_blank"
+            underline="none"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            sx={{
+                display: 'inline-block', // Change from inline-flex to inline-block
+                position: 'relative', // Set position relative to allow absolute positioning of children
+                textDecoration: 'none',
+            }}
+        >
+            {children}
+            <Box
+                style={{
+                    width: isMobile || !isHovered ? '0%' : '100%',
+                    height: '4px',
+                    backgroundColor: selectedPalette.colors.text,
+                    position: 'absolute',
+                    bottom: '10px', // Adjust this value as needed to position the underline
+                    left: 0,
+                    transition: 'width 0.6s cubic-bezier(0.2,0.5,0.6,1)',
+                }}
+            />
+        </Link>
+    );
+};
+
 const experience = [
     {
         "id": 1,
@@ -20,8 +54,8 @@ const experience = [
         "image": "./images/Equator.jpg",
         "image_url": "https://equatorstudios.com/",
         "imageStyle": { "height": "5rem", "width": "auto", "borderRadius": "50%" },
-        "header": "Equator Studios",
-        "position": "Junior Software Developer", // Show only this and header on mobile, not timeline.
+        "header": "Equator",
+        "position": "Software Developer",
         "content": "As a Software Developer at Equator Studios, I've spent the past few months focusing on enhancing our mapping and design software. Our platform is used by professionals all over the world, and my goal is to make it as easy and intuitive as possible for them to create and share their maps. With Equator Studios, I've had the chance to use and deepen my knowledge in a range of technologies including React, JavaScript, Express.js, MongoDB, WSL, Linux/Ubuntu, Docker, GitLab, and CI. Some of the exciting projects I've worked on include the implementation of our new Site Selector and the development of our Segmentation AI product. I'm eager to continue expanding my skillset and contributing to the ongoing evolution of Equator Studios."
     },
     {
@@ -30,7 +64,7 @@ const experience = [
         "image": "./images/TCS_Icon_SVG.svg",
         "image_url": "https://www.thiscozystudio.com/",
         "imageStyle": { "height": "5rem" },
-        "header": "This Cozy Studio Inc.",
+        "header": "This Cozy Studio",
         "position": "Co-Founder, CEO, Lead Software Engineer and Web Developer",
         "content": "As the Co-Founder, CEO, and Lead Software Engineer of This Cozy Studio Inc, I've driven the company's growth through my diverse technical abilities, leadership, and management skills. My contributions include the development of 'Blend_My_NFTs', a popular 3D model NFT generator operating as a Blender add-on, and the creation of multiple NFT collections for our clients, among them Cozy Place, Vox Coodles, Omni Coin, Metapanda, and AKidCalledBeast. Additionally, I designed and developed our company's website, ThisCozyStudio.com, and implemented a cloud rendering, storage, and NFT minting platform, making it easier for 3D graphical artists to launch their own 3D NFT collections."
     },
@@ -99,7 +133,9 @@ export const CustomizedTimeline = () => {
                         <Link href={item.image_url} target="_blank" rel="noopener noreferrer">
                             <Box component="img" src={item.image} sx={item.imageStyle} />
                         </Link>
-                        <Typography variant="h6" align="center">{item.header}</Typography>
+                        <AnimatedUnderline href={item.image_url}>
+                            <Typography variant="h6" align="center">{item.header}</Typography>
+                        </AnimatedUnderline>
                         <Typography variant="subtitle1" align="center">{item.period}</Typography>
                         <Typography variant="subtitle1" align="center">{item.position}</Typography>
                         {/* <Typography variant="body1">{item.content}</Typography> */}
@@ -128,7 +164,9 @@ export const CustomizedTimeline = () => {
                             <TimelineConnector sx={{ background: `${selectedPalette.colors.text}` }} />
                         </TimelineSeparator>
                         <TimelineContent>
-                            <Typography variant="h1" align="left" marginBottom={"1vw"}>{item.header}</Typography>
+                            <AnimatedUnderline href={item.image_url}>
+                                <Typography variant="h1" align="left" marginBottom={"1vw"}>{item.header}</Typography>
+                            </AnimatedUnderline>
                             <Typography variant="h2" align="left" marginBottom={"1vw"}>{item.position}</Typography>
                             <Typography variant="body1" align="left">{item.content}</Typography>
                         </TimelineContent>
