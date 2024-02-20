@@ -24,7 +24,7 @@ export const Home = () => {
           <Grid item xs={12}>
             <Typography variant="h1" gutterBottom>
               CEO/CO-Founder <br />
-              Software Developer <br />
+              Full Stack Software Developer <br />
             </Typography>
           </Grid>
           <Grid item xs={12} md={6} sx={{ marginTop: 'auto' }}>
@@ -45,7 +45,7 @@ export const Home = () => {
               Hi there, I'm Torrin Leonard. I started my career in tech at worX4you and League, working on automation and QA. This experience sparked my interest in software development which led me to gain interest in the fascinating world of 3D graphics and animation. I eventually co-founded This Cozy Studio Inc., along with my two brothers, where I served as its CEO and lead software engineer. Here, I created Blend_My_NFTs and developed ThisCozyStudio.com, contributing significantly to projects that made AI-generated tiled textures and 3D NFT collections easily accessible and open source. I also prototyped a cloud platform to simplify gpu intensive rendering and NFT minting.
             </Typography>
             <Typography variant="body1" paragraph>
-              Currently I'm working as a Software Developer at Equator Studios, fine-tuning our mapping and design software for the benefit of professionals worldwide.
+              Currently I'm working as a Full Stack Software Developer at Equator Studios, fine-tuning our mapping and design software for the benefit of professionals worldwide.
             </Typography>
             <Typography variant="body1" paragraph>
               It's all in a day's work. Ok well... maybe a few year's work... quite a few years...
