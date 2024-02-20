@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet";
 
 const SEO = ({
     title = "Torrin Leonard",
-    description = "Torrin Leonard: Building open source and 3D projects as the CEO and Co-Founder of This Cozy Studio and as a Software Developer at Equator Studios.",
+    description = "Torrin Leonard: Building open source and 3D projects as the CEO and Co-Founder of This Cozy Studio and as a Full Stack Software Developer at Equator Studios.",
     url = window.location.href,
     image = "https://www.torrinleonard.com/images/site-card.png",
     locale = "en_CA",

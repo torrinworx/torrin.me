@@ -55,8 +55,8 @@ const experience = [
         "image_url": "https://equatorstudios.com/",
         "imageStyle": { "height": "5rem", "width": "auto", "borderRadius": "50%" },
         "header": "Equator",
-        "position": "Software Developer",
-        "content": "As a Software Developer at Equator Studios, I've spent the past few months focusing on enhancing our mapping and design software. Our platform is used by professionals all over the world, and my goal is to make it as easy and intuitive as possible for them to create and share their maps. With Equator Studios, I've had the chance to use and deepen my knowledge in a range of technologies including React, JavaScript, Express.js, MongoDB, WSL, Linux/Ubuntu, Docker, GitLab, and CI. Some of the exciting projects I've worked on include the implementation of our new Site Selector and the development of our Segmentation AI product. I'm eager to continue expanding my skillset and contributing to the ongoing evolution of Equator Studios."
+        "position": "Full Stack Software Developer",
+        "content": "As a Full Stack Software Developer at Equator Studios, I've spent the past few months focusing on enhancing our mapping and design software. Our platform is used by professionals all over the world, and my goal is to make it as easy and intuitive as possible for them to create and share their maps. With Equator Studios, I've had the chance to use and deepen my knowledge in a range of technologies including React, JavaScript, Express.js, MongoDB, WSL, Linux/Ubuntu, Docker, GitLab, and CI. Some of the exciting projects I've worked on include the implementation of our new Site Selector and the development of our Segmentation AI product. I'm eager to continue expanding my skillset and contributing to the ongoing evolution of Equator Studios."
     },
     {
         "id": 2,
