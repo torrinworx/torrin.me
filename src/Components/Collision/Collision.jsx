@@ -24,13 +24,8 @@ const Collision = ({ children }) => {
   const container = useRef();
   const domContent = useRef();
 
-  // If the benchmark data is not on the window object, it means the benchmark hasn't been run yet
   if (!window.globalDeviceSettingsAndInfo) {
     window.globalDeviceSettingsAndInfo = GetRenderingSettings();
-
-    // Logs will appear only when the benchmark runs
-    console.log("Device Information:", window.globalDeviceSettingsAndInfo.deviceInfo);
-    console.log("Rendering Settings:", window.globalDeviceSettingsAndInfo.renderingSettings);
   }
 
   const { renderingSettings } = window.globalDeviceSettingsAndInfo;
