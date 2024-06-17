@@ -40,43 +40,40 @@ const config = {
     ],
     module: {
         rules: [
-        {
-            test: /\.jsx?$/,
-            // Include the 'destamatic-ui' folder for Babel transpilation
-            include: [
-            path.resolve(__dirname, 'src2'), // Your source folder
-            path.resolve(__dirname, 'node_modules/destamatic-ui'),
-            ],
-            use: {
-            loader: 'babel-loader',
-            options: {
-                presets: ['@babel/preset-env', '@babel/preset-react'], // Added preset-react
-                plugins: [
-                '@babel/plugin-syntax-jsx',
-                () => ({
-                    visitor: {
-                    Program: (path) => {
-                        transformBabelAST(path.node);
-                    },
-                    },
-                }),
-                ],
+            {
+                test: /\.jsx?$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: ['@babel/preset-env'],
+                        plugins: [
+                            '@babel/plugin-syntax-jsx',
+                            () => ({
+                                visitor: {
+                                    Program: path => {
+                                        transformBabelAST(path.node);
+                                    }
+                                }
+                            })
+                        ],
+                    }
+                }
             },
+            {
+                test: /\.(png|jpg|jpeg|gif|ico|webp)$/,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'assets/[name][ext][query]',
+                },
             },
-        },
-        {
-            test: /\.(png|jpg|jpeg|gif|ico|webp)$/,
-            type: 'asset/resource',
-            generator: {
-            filename: 'assets/[name][ext][query]',
+            {
+                test: /\.css$/,
+                use: ['style-loader', 'css-loader'],
             },
-        },
-        {
-            test: /\.css$/,
-            use: ['style-loader', 'css-loader'],
-        },
-        ],
+        ]
     },
+
     devServer: {
         headers: {
         'Access-Control-Allow-Origin': '*',
