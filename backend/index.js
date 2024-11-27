@@ -1,32 +1,51 @@
-const express = require('express');
-const path = require('path');
-require('dotenv').config();
+import fs from 'fs';
+import path from 'path';
 
-const apiRoutes = require('./ApiRoutes');
+import express from 'express';
+import { createServer as createViteServer } from 'vite';
+
+const root = process.env.ENV === 'production' ? './dist' : './frontend'
+
 const app = express();
 
-// Handle JSON
-app.use(express.json());
+if (process.env.ENV === 'production') {
+    app.use(express.static(root));
+    console.log('Serving from:', path.join(root, 'index.html'));
 
-// Serve static files from the React app
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../build')));
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(root, 'index.html'), err => {
+            if (err) {
+                res.status(500).send(err);
+                console.error('Error serving index.html:', err);
+            }
+        });
+    });
 } else {
-    app.use(express.static(path.join(__dirname, '../public')));
+
+    const vite = await createViteServer({ server: { middlewareMode: 'html' } });
+
+    app.use(vite.middlewares);
+
+    app.get('*', async (req, res, next) => {
+        try {
+            console.log("TEST")
+
+            const html = await vite.transformIndexHtml(
+                req.originalUrl,
+                fs.readFileSync(
+                    path.resolve(root, 'index.html'),
+                    'utf-8'
+                )
+            );
+
+            res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
+        } catch (e) {
+            vite.ssrFixStacktrace(e);
+            next(e);
+        }
+    });
 }
 
-// Use API routes
-app.use('/api', apiRoutes);
-
-// The "catchall" handler: for any request that doesn't
-// match one above, send back React's index.html file.
-app.get('*', (req, res) => {
-    if (process.env.NODE_ENV === 'production') {
-        res.sendFile(path.resolve(__dirname, '../build', 'index.html'));
-    } else {
-        res.sendFile(path.resolve(__dirname, '../public', 'index.html'));
-    }
-});
-
-const port = process.env.PORT || process.env.BACKEND_PORT || 5000;
-app.listen(port, () => console.log(`Server is running on port ${port}`));
+app.listen(process.env.PORT || 3000, () => {
+    console.log(`Server running on port ${process.env.PORT || 3000}`);
+})
