@@ -1,5 +1,5 @@
 import { mount } from 'destam-dom';
-import { Button, Theme, Typography, Tabs } from 'destamatic-ui';
+import { Button, Theme, Typography } from 'destamatic-ui';
 
 import theme from './theme';
 
@@ -19,7 +19,6 @@ const NotFound = () => <Theme value={theme}>
         />
     </div>
 </Theme>;
-
 
 const App = () => {
     return <Theme value={theme}>
