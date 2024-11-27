@@ -14,6 +14,9 @@
 .env.development
 .env.production
 
+.dev.env
+.prod.env
+
 # Logs
 logs
 *.log
