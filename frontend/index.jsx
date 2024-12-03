@@ -1,5 +1,5 @@
 import { mount, Observer } from 'destam-dom';
-import { Button, Theme, Typography, Tabs, Radio, Switch, Checkbox } from 'destamatic-ui';
+import { Button, Theme, Typography, Tabs, Radio, Switch, Checkbox, Paper } from 'destamatic-ui';
 
 import theme from './theme';
 import Personal from './components/Personal';
@@ -35,23 +35,32 @@ const App = () => {
     return <Theme value={theme}>
         <Gradient>
             <Collision>
-                <Switch
-                    value={Observer.mutable(true)}
-                    onChange={isChecked => {
-                        window.themeMode.set(isChecked ? 'dark' : 'light');
-                    }}
-                />
-                <Checkbox value={Observer.mutable(false)} />
-                <Radio items={colors} value={window.colorMode} />
-                <Typography type='h5'>HI THERE</Typography>
-                <Tabs style={{ width: '100%' }}>
-                    <mark:tab name='Portfolio'>
-                        <Portfolio />
-                    </mark:tab>
-                    <mark:tab name='Personal'>
-                        <Personal />
-                    </mark:tab>
-                </Tabs>
+                <div style={{
+                    padding: 40,
+                    gap: 40,
+                    display: 'flex',
+                    flexDirection: 'column',
+                }}>
+                    <Paper>
+                        <Switch
+                            value={Observer.mutable(true)}
+                            onChange={isChecked => {
+                                window.themeMode.set(isChecked ? 'dark' : 'light');
+                            }}
+                        />
+                        <Radio items={colors} value={window.colorMode} />
+                    </Paper>
+                    <Paper>
+                        <Tabs style={{ width: '100%' }}>
+                            <mark:tab name='Portfolio'>
+                                <Portfolio />
+                            </mark:tab>
+                            <mark:tab name='Personal'>
+                                <Personal />
+                            </mark:tab>
+                        </Tabs>
+                    </Paper>
+                </div>
             </Collision>
         </Gradient>
     </Theme>;
