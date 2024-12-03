@@ -6,7 +6,7 @@ export default Theme.use(theme => ({ children }) => {
 	const secondaryColor = theme('secondary').vars('color');
 
 	const gradient = Observer.all([primaryColor, secondaryColor]).map(([p, s]) => {
-		return `linear-gradient(to top right, ${p}, ${s})`;
+		return `linear-gradient(to top right, ${p}, ${s}, ${s})`;
 	});
 
 	const currentGradient = Observer.mutable(gradient.get());

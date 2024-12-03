@@ -74,7 +74,8 @@ const colorModes = {
 
 const theme = OObject({
 	"*": {
-		fontFamily: 'Roboto, sans-serif',
+        fontFamily: 'IBM Plex Sans',
+        fontWeight: 600,
 		boxSizing: 'border-box',
 		transition: 'opacity 250ms ease-out, box-shadow 250ms ease-out, background-color 250ms ease-in-out',
 		$color_text: 'black',
@@ -87,7 +88,7 @@ const theme = OObject({
 	},
 
 	radius: {
-		borderRadius: 6,
+		borderRadius: 20,
 	},
 
 	drawer: {
@@ -135,7 +136,35 @@ const theme = OObject({
 	expand: {
 		flexGrow: 1,
 		height: '100%',
-	}
+	},
+
+	typography: {
+		extends: 'secondary',
+		color: '$color_top',
+	},
+
+	paper: {
+        extends: 'radius',
+        background: '$alpha($color, 0.2)',
+        color: '$color_top',
+        boxShadow: '4px 4px 10px rgba(0,0,0,0.2)',
+        padding: 10,
+        maxWidth: 'inherit',
+        maxHeight: 'inherit',
+        overflow: 'hidden',
+        blur: "25px",
+    },
+
+	switchknob: {
+        extends: 'secondary',
+        position: 'absolute',
+        width: '23px',
+        height: '23px',
+        background: '$color_top',
+        borderRadius: '50%',
+        transition: '100ms',
+    },
+
 });
 
 window.colorMode = Observer.mutable('red');
