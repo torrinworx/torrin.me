@@ -1,11 +1,11 @@
 import { mount, Observer } from 'destam-dom';
-import { Button, Theme, Typography, Tabs, Radio } from 'destamatic-ui';
+import { Button, Theme, Typography, Tabs, Radio, Switch, Checkbox } from 'destamatic-ui';
 
 import theme from './theme';
 import Personal from './components/Personal';
 import Portfolio from './components/Portfolio';
 import Collision from './components/Collision';
-import Wrap from './components/Wrap';
+import Gradient from './components/Gradient';
 
 const NotFound = () => <Theme value={theme}>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -24,25 +24,26 @@ const NotFound = () => <Theme value={theme}>
     </div>
 </Theme>;
 
-
-
 const App = () => {
-    const currentTheme = Observer.mutable('light')
-    const themes = [
-        { label: 'Dark', value: 'dark' },
-        { label: 'Light', value: 'light' },
+    const colors = [
+        { label: 'Red', value: 'red' },
+        { label: 'Purple', value: 'purple' },
+        { label: 'Cyan', value: 'cyan' },
+        { label: 'Gold', value: 'gold' },
     ];
 
-    currentTheme.watch(() => {
-        window.themeMode.set(currentTheme.get());
-        console.log(window.themeMode.get());
-    });
-
     return <Theme value={theme}>
-        <Collision>
-            <Wrap>
-                <Radio items={themes} value={currentTheme} />
-
+        <Gradient>
+            <Collision>
+                <Switch
+                    value={Observer.mutable(true)}
+                    onChange={isChecked => {
+                        window.themeMode.set(isChecked ? 'dark' : 'light');
+                    }}
+                />
+                <Checkbox value={Observer.mutable(false)} />
+                <Radio items={colors} value={window.colorMode} />
+                <Typography type='h5'>HI THERE</Typography>
                 <Tabs style={{ width: '100%' }}>
                     <mark:tab name='Portfolio'>
                         <Portfolio />
@@ -51,9 +52,10 @@ const App = () => {
                         <Personal />
                     </mark:tab>
                 </Tabs>
-            </Wrap>
-        </Collision>
-    </Theme >;
+            </Collision>
+        </Gradient>
+    </Theme>;
 };
+
 
 mount(document.body, window.location.pathname === '/' ? <App /> : <NotFound />);
