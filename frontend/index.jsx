@@ -7,14 +7,6 @@ import Portfolio from './components/Portfolio';
 // import Collision from './components/Collision';
 import Gradient from './components/Gradient';
 
-let ws;
-
-export const initWS = () => {
-    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-    const wsURL = `${protocol}${window.location.hostname}:${window.location.port}`;
-    ws = new WebSocket(wsURL);
-};
-
 const NotFound = () => <Theme value={theme}>
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <Typography type='h4' style={{ marginBottom: '20px' }}>404 Page Not Found</Typography>
@@ -32,7 +24,7 @@ const NotFound = () => <Theme value={theme}>
     </div>
 </Theme>;
 
-const App = () => {
+const App = ({ ws }) => {
     return <Theme value={theme}>
         <Gradient>
             {/* <Collision> */}
@@ -61,11 +53,11 @@ const App = () => {
                 </Paper>
                 <Paper>
                     <Tabs style={{ width: '100%' }}>
-                        <mark:tab name='Portfolio'>
-                            <Portfolio />
-                        </mark:tab>
                         <mark:tab name='Personal'>
                             <Personal ws={ws} />
+                        </mark:tab>
+                        <mark:tab name='Portfolio'>
+                            <Portfolio />
                         </mark:tab>
                     </Tabs>
                 </Paper>
@@ -75,7 +67,12 @@ const App = () => {
     </Theme>;
 };
 
-window.addEventListener("load", async () => {
-    await initWS();
-    mount(document.body, window.location.pathname === '/' ? <App /> : <NotFound />);
+window.addEventListener("load", () => {
+	const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+	const wsURL = `${protocol}${window.location.hostname}:${window.location.port}`;
+	const ws = new WebSocket(wsURL);
+
+	ws.addEventListener('open', () => {
+		mount(document.body, window.location.pathname === '/' ? <App ws={ws} /> : <NotFound />);
+	});
 });

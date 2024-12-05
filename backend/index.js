@@ -3,10 +3,73 @@ import path from 'path';
 import express from 'express';
 import { WebSocketServer } from 'ws';
 import { createServer as createViteServer } from 'vite';
+import sharp from 'sharp';
 
 const root = process.env.ENV === 'production' ? './dist' : './frontend';
 const PORT = process.env.PORT || 3000;
 const IMAGES_DIR = './images';
+const CACHE_DIR = './cache';
+
+// Ensure cache directory exists
+if (!fs.existsSync(CACHE_DIR)) {
+    fs.mkdirSync(CACHE_DIR);
+}
+
+// Function to create lower-resolution images
+const createLowResImages = (filename) => {
+    const inputPath = path.join(IMAGES_DIR, filename);
+    const outputPath = path.join(CACHE_DIR, filename);
+
+    sharp(inputPath)
+        .resize({ width: 300 })
+        .toFile(outputPath, (err, info) => {
+            if (err) {
+                console.error('Error creating low-res image:', err);
+            } else {
+                console.log(`Low-res image ${outputPath} created`);
+            }
+        });
+};
+
+// Load and resize files initially
+let jpgFiles = [];
+const loadAndResizeFiles = () => {
+    fs.readdir(IMAGES_DIR, (err, files) => {
+        if (err) {
+            console.error('Unable to scan directory:', err);
+            return;
+        }
+
+        jpgFiles = files.filter(file => file.endsWith('.jpg')).sort((a, b) => {
+            const aStats = fs.statSync(path.join(IMAGES_DIR, a));
+            const bStats = fs.statSync(path.join(IMAGES_DIR, b));
+
+            // Compare modification time first
+            if (aStats.mtime > bStats.mtime) return 1;
+            if (aStats.mtime < bStats.mtime) return -1;
+
+            // If modification times are identical, fall back to file name comparison
+            return a.localeCompare(b);
+        });
+
+        jpgFiles.forEach(file => {
+            const lowResPath = path.join(CACHE_DIR, file);
+            if (!fs.existsSync(lowResPath)) {
+                createLowResImages(file);
+            }
+        });
+    });
+};
+
+loadAndResizeFiles();
+
+// Monitor directory for changes
+fs.watch(IMAGES_DIR, (eventType, filename) => {
+    if (filename && filename.endsWith('.jpg')) {
+        console.log(`File ${eventType}: ${filename}`);
+        loadAndResizeFiles();
+    }
+});
 
 const app = express();
 
@@ -44,35 +107,6 @@ if (process.env.ENV === 'production') {
     });
 }
 
-// Function to load and sort files
-let jpgFiles = [];
-const loadFiles = () => {
-    fs.readdir(IMAGES_DIR, (err, files) => {
-        if (err) {
-            console.error('Unable to scan directory:', err);
-            return;
-        }
-
-        jpgFiles = files.filter(file => file.endsWith('.jpg')).sort((a, b) => {
-            const aTime = fs.statSync(path.join(IMAGES_DIR, a)).birthtime;
-            const bTime = fs.statSync(path.join(IMAGES_DIR, b)).birthtime;
-            return aTime - bTime;
-        });
-    });
-};
-
-// Load files initially
-loadFiles();
-
-// Monitor directory for changes
-fs.watch(IMAGES_DIR, (eventType, filename) => {
-    if (filename && filename.endsWith('.jpg')) {
-        console.log(`File ${eventType}: ${filename}`);
-        loadFiles(); // Refresh the file list
-    }
-});
-
-// Create and Attach WebSocket Server
 const server = app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}/`);
 });
@@ -80,10 +114,7 @@ const server = app.listen(PORT, () => {
 const wss = new WebSocketServer({ server });
 
 wss.on('connection', ws => {
-    console.log("THIS IS A CONNECTION")
     ws.on('message', msg => {
-        console.log(msg)
-        // Parse the incoming message
         let request;
         try {
             request = JSON.parse(msg);
@@ -97,16 +128,31 @@ wss.on('connection', ws => {
             return ws.send('Error: invalid request format');
         }
 
-        // Stream the requested range of images
         const filesToSend = jpgFiles.slice(index, index + num);
-        filesToSend.forEach(file => {
-            const filePath = path.join(IMAGES_DIR, file);
-            fs.readFile(filePath, (err, data) => {
+        if (filesToSend.length === 0) {
+            return ws.send('Error: no files to send');
+        }
+
+        filesToSend.forEach((file, idx) => {
+            const lowResPath = path.join(CACHE_DIR, file);
+            const highResPath = path.join(IMAGES_DIR, file);
+
+            fs.readFile(lowResPath, (err, data) => {
                 if (err) {
-                    console.error('Error reading file:', filePath, err);
+                    console.error(`Error reading low-res file: ${lowResPath} - ${err}`);
                     return ws.send(`Error reading file: ${file}`);
                 }
-                ws.send(JSON.stringify({ fileName: file, data: data.toString('base64') }));
+                ws.send(JSON.stringify({ fileName: file, data: data.toString('base64'), type: 'low' }));
+                console.log(`Sent low-res ${file} as message ${idx}`);
+            });
+
+            fs.readFile(highResPath, (err, data) => {
+                if (err) {
+                    console.error(`Error reading high-res file: ${highResPath} - ${err}`);
+                    return ws.send(`Error reading file: ${file}`);
+                }
+                ws.send(JSON.stringify({ fileName: file, data: data.toString('base64'), type: 'high' }));
+                console.log(`Sent high-res ${file} as message ${idx}`);
             });
         });
     });

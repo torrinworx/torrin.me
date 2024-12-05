@@ -25,6 +25,7 @@
 		"destamatic-ui": "file:destamatic-ui",
 		"dotenv": "^16.4.5",
 		"express": "^4.21.0",
+		"sharp": "^0.33.5",
 		"vite": "^5.4.11",
 		"web-core": "file:web-core",
 		"websocket": "^1.0.35"
