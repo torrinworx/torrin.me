@@ -10,6 +10,8 @@ const PORT = process.env.PORT || 3000;
 const IMAGES_DIR = './images';
 const CACHE_DIR = './cache';
 
+// TODO: Move image stuff to it's own file.
+
 // Ensure cache directory exists
 if (!fs.existsSync(CACHE_DIR)) {
     fs.mkdirSync(CACHE_DIR);

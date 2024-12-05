@@ -2,17 +2,17 @@ import { Observer, OObject, OArray } from "destam-dom";
 import { Shown } from "destamatic-ui";
 
 const ImageSection = ({ ws }) => {
+	// TODO: Somehow need to cache images, then on each component mount check for cached imaged so that we don't make repeated requests.
 	const images = OArray([]);
 
 	const Image = ({ each: image }) => {
-		const imageIndex = images.findIndex(img => img.fileName === image.fileName);
 		const showHighDef = Observer.mutable(false);
-		const imageObs = images[imageIndex];
-
 		const hideLowDef = Observer.mutable(false);
 
+		const imageIndex = images.findIndex(img => img.fileName === image.fileName);
+		const imageObs = images[imageIndex];
+
 		imageObs.observer.watch(() => {
-			console.log(imageObs.type);
 			if (imageObs.type === 'high') {
 				showHighDef.set(true);
 			}
