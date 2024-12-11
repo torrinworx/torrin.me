@@ -18,15 +18,15 @@ const ImageSection = ({ ws }) => {
 			}
 		});
 
-		return <div style={{ position: 'relative', height: '400px' }}>
+		return <div style={{ position: 'relative', height: '700px' }}>
 			<Shown value={imageObs} >
-				<img src={`data:image/jpeg;base64,${images[imageIndex].data}`} style={{ height: '400px', position: 'absolute', top: 0, left: 0 }} />
+				<img src={`data:image/jpeg;base64,${images[imageIndex].data}`} style={{ height: 'inherit', position: 'absolute', top: 0, left: 0 }} />
 			</Shown>
 			{showHighDef.map(show => show
 				? <img
 					onLoad={() => hideLowDef.set(true)}
 					src={`data:image/jpeg;base64,${images[imageIndex].data}`}
-					style={{ height: '400px', position: 'absolute', top: 0, left: 0 }}
+					style={{ height: 'inherit', position: 'absolute', top: 0, left: 0 }}
 				/> : null
 			)}
 		</div>;
