@@ -1,16 +1,18 @@
 import fs from 'fs';
 import path from 'path';
+
+import sharp from 'sharp';
 import express from 'express';
+import ExifReader from 'exifreader';
 import { WebSocketServer } from 'ws';
 import { createServer as createViteServer } from 'vite';
-import sharp from 'sharp';
+
+import { initODB } from 'destam-web-core';
 
 const root = process.env.ENV === 'production' ? './dist' : './frontend';
 const PORT = process.env.PORT || 3000;
 const IMAGES_DIR = './images';
 const CACHE_DIR = './cache';
-
-// TODO: Move image stuff to it's own file.
 
 // Ensure cache directory exists
 if (!fs.existsSync(CACHE_DIR)) {
@@ -24,7 +26,7 @@ const createLowResImages = (filename) => {
 
     sharp(inputPath)
         .resize({ width: 300 })
-        .toFile(outputPath, (err, info) => {
+        .toFile(outputPath, (err) => {
             if (err) {
                 console.error('Error creating low-res image:', err);
             } else {
@@ -65,6 +67,41 @@ const loadAndResizeFiles = () => {
 
 loadAndResizeFiles();
 
+
+// Only thing we care about to scan is the date time the images were taken and the keywords to sort via both time and tags. Everything else
+// can be gotten from the images in the client and displayed there when they are loaded.
+const scanImages = async () => {
+    const files = fs.readdirSync(IMAGES_DIR);
+
+    const imageFiles = files.filter(file =>
+        file.toLowerCase().endsWith('.jpg') || file.toLowerCase().endsWith('.jpeg')
+    );
+
+    for (const file of imageFiles) {
+        const filePath = path.join(IMAGES_DIR, file);
+        const fileBuffer = fs.readFileSync(filePath);
+        const tags = ExifReader.load(fileBuffer, { expanded: true });
+
+        console.log(tags)
+
+        let keywords = [];
+
+        if (tags['Keywords']) {
+            keywords = tags['Keywords'].description.split(';');
+        } else if (tags['Subject']) {
+            keywords = Array.isArray(tags['Subject'].value) ? tags['Subject'].value : [tags['Subject'].value];
+        } else if (tags['xmp'] && tags['xmp']['subject']) {
+            keywords = Array.isArray(tags['xmp']['subject'].value) ? tags['xmp']['subject'].value : [tags['xmp']['subject'].value];
+        } else if (tags['iptc'] && tags['iptc']['Keywords']) {
+            keywords = Array.isArray(tags['iptc']['Keywords'].value) ? tags['iptc']['Keywords'].value : [tags['iptc']['Keywords'].value];
+        }
+
+        console.log(`Keywords for "${path.basename(filePath)}":`, keywords);
+    }
+};
+
+scanImages();
+
 // Monitor directory for changes
 fs.watch(IMAGES_DIR, (eventType, filename) => {
     if (filename && filename.endsWith('.jpg')) {
@@ -80,7 +117,7 @@ if (process.env.ENV === 'production') {
     console.log('Serving from:', path.join(root, 'index.html'));
 
     app.get('*', (req, res) => {
-        res.sendFile(path.join(root, 'index.html'), err => {
+        res.sendFile(path.join(root, 'index.html'), (err) => {
             if (err) {
                 res.status(500).send(err);
                 console.error('Error serving index.html:', err);
@@ -96,10 +133,7 @@ if (process.env.ENV === 'production') {
         try {
             const html = await vite.transformIndexHtml(
                 req.originalUrl,
-                fs.readFileSync(
-                    path.resolve(root, 'index.html'),
-                    'utf-8'
-                )
+                fs.readFileSync(path.resolve(root, 'index.html'), 'utf-8')
             );
             res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
         } catch (e) {
@@ -109,7 +143,8 @@ if (process.env.ENV === 'production') {
     });
 }
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, async () => {
+    await initODB();
     console.log(`Server running at http://localhost:${PORT}/`);
 });
 
@@ -125,7 +160,8 @@ wss.on('connection', ws => {
             return ws.send('Error: invalid JSON');
         }
 
-        const { num, index } = request;
+        // Tags is a simple list of string tags that the images must contain in order to be returned.
+        const { num, index, tags } = request;
         if (typeof num !== 'number' || typeof index !== 'number') {
             return ws.send('Error: invalid request format');
         }

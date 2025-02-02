@@ -3,7 +3,7 @@ import { Shown } from "destamatic-ui";
 
 const ImageSection = ({ ws }) => {
 	// TODO: Somehow need to cache images, then on each component mount check for cached imaged so that we don't make repeated requests.
-	const images = OArray([]);
+	const images = OArray([]); // On load, search for all images already loaded in the indexeddb.
 
 	const Image = ({ each: image }) => {
 		const showHighDef = Observer.mutable(false);
