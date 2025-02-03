@@ -21,8 +21,8 @@
 	},
 	"homepage": "https://github.com/torrinworx/torrinleonard.com#readme",
 	"dependencies": {
-		"destam": "^0.4.0",
-		"destam-dom": "^0.9.2",
+        "destam": "^0.5.0",
+        "destam-dom": "^0.10.2",
 		"destamatic-ui": "file:destamatic-ui",
 		"dotenv": "^16.4.5",
 		"exifreader": "^4.26.1",
