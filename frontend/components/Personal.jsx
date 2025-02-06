@@ -18,7 +18,7 @@ const ImageSection = ({ ws }) => {
 			}
 		});
 
-		return <div style={{ position: 'relative', height: '700px' }}>
+		return <div style={{ position: 'relative', height: '1000px' }}>
 			<Shown value={imageObs} >
 				<img src={`data:image/jpeg;base64,${images[imageIndex].data}`} style={{ height: 'inherit', position: 'absolute', top: 0, left: 0 }} />
 			</Shown>
@@ -33,7 +33,7 @@ const ImageSection = ({ ws }) => {
 	};
 
 	// TODO: Find a dynamic way to load high def ones and image requests on scrolling down the page:
-	ws.send(JSON.stringify({ num: 10, index: 0 }));
+	ws.send(JSON.stringify({ num: 10, index: 0, tags: ['trees'] }));
 
 	ws.onmessage = (msg) => {
 		try {
