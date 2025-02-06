@@ -24,7 +24,7 @@ const themeModes = {
 const colorModes = {
 	'red': {
 		primary: {
-			$color: '#A30029',
+			$color: '$color_red',
 			$color_hover: '$shiftBrightness($color, 0.1)',
 			$color_error: 'red',
 			$color_top: '$contrast_text($color)',
@@ -36,38 +36,26 @@ const colorModes = {
 	},
 	'purple': {
 		primary: {
-			$color: '#6021c0',
+			$color: '$color_purple',
 			$color_hover: '$shiftBrightness($color, 0.1)',
 			$color_error: 'red',
 			$color_top: '$contrast_text($color)',
-		},
-		flow: {
-			extends: 'primary',
-			$color_text: '$color',
 		},
 	},
 	'cyan': {
 		primary: {
-			$color: '#368F8B',
+			$color: '$color_cyan',
 			$color_hover: '$shiftBrightness($color, 0.1)',
 			$color_error: 'red',
 			$color_top: '$contrast_text($color)',
-		},
-		flow: {
-			extends: 'primary',
-			$color_text: '$color',
 		},
 	},
 	'gold': {
 		primary: {
-			$color: '#FABC2A',
+			$color: '$color_gold',
 			$color_hover: '$shiftBrightness($color, 0.1)',
 			$color_error: 'red',
 			$color_top: '$contrast_text($color)',
-		},
-		flow: {
-			extends: 'primary',
-			$color_text: '$color',
 		},
 	},
 };
@@ -79,6 +67,10 @@ const theme = OObject({
 		boxSizing: 'border-box',
 		transition: 'opacity 250ms ease-out, box-shadow 250ms ease-out, background-color 250ms ease-in-out',
 		$color_text: 'black',
+		$color_red: '#A30029',
+		$color_purple: '#6021c0',
+		$color_cyan: '#368F8B',
+		$color_gold: '#FABC2A',
 	},
 
 	center: {
@@ -155,7 +147,7 @@ const theme = OObject({
         blur: "25px",
     },
 
-	switchknob: {
+	toggleknob: {
         extends: 'secondary',
         position: 'absolute',
         width: '23px',
