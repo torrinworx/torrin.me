@@ -24,8 +24,7 @@ if (!fs.existsSync(CACHE_DIR)) {
 }
 
 // Read and parse EXIF (for dateTimeOriginal, keywords)
-
-function imageMetadata(filePath) {
+const imageMetadata = (filePath) => {
     const fileBuffer = fs.readFileSync(filePath);
     const tags = ExifReader.load(fileBuffer, { expanded: true });
 
@@ -75,11 +74,11 @@ function imageMetadata(filePath) {
 }
 
 // create low-res version if it doesn't exist
-async function createLowResImage(filename) {
+const createLowResImage = async (filename) => {
     const inputPath = path.join(IMAGES_DIR, filename);
     const outputPath = path.join(CACHE_DIR, filename);
     if (fs.existsSync(outputPath)) return;
-    
+
     try {
         await sharp(inputPath)
             .resize({
@@ -96,7 +95,7 @@ async function createLowResImage(filename) {
 }
 
 // handleFileChange (add/remove) => update imagesList, keywordsList
-function handleFileChange(change, imagesList, keywordsList) {
+const handleFileChange = (change, imagesList, keywordsList) => {
     const { ref, value } = change;
     const existing = imagesList.find(i => i.name === ref);
 
@@ -156,42 +155,28 @@ function handleFileChange(change, imagesList, keywordsList) {
     });
 }
 
-// rectifyMissingCache => create cache for any images lacking it
-async function rectifyMissingCache(imagesList) {
-    for (const img of imagesList) {
-        const cachedPath = path.join(CACHE_DIR, img.name);
-        if (!fs.existsSync(cachedPath)) {
-            createLowResImage(img.name).catch(err =>
-                console.error(`Error creating low-res: ${img.name}`, err)
-            );
-        }
-    }
-}
-
 // syncImages => do initial scanning & cleanup, set watchers
-async function syncImages() {
-    // Use destam to store images list in Mongo
-    const imagesObj = await ODB('mongodb','images',
+const syncImages = async () => {
+    const imagesObj = await ODB('mongodb', 'images',
         { name: 'images' },
         OObject({ name: 'images', list: OArray([]) })
     );
     const imagesList = imagesObj.list; // OArray
     const keywordsList = OArray([]);
 
-    // 1) Scan the current files in the images directory
     const files = fs.readdirSync(IMAGES_DIR);
     files.forEach(file => {
         handleFileChange({ ref: file, value: file }, imagesList, keywordsList);
     });
 
-    // 2) Remove anything in imagesList that no longer exists on disk
+    // Remove anything in imagesList that no longer exists on disk
     for (let i = imagesList.length - 1; i >= 0; i--) {
         if (!files.includes(imagesList[i].name)) {
             handleFileChange({ ref: imagesList[i].name, value: undefined }, imagesList, keywordsList);
         }
     }
 
-    // 3) Remove stale cache files
+    // Remove stale cache files from cache
     const cacheFiles = fs.readdirSync(CACHE_DIR);
     cacheFiles.forEach(file => {
         if (!imagesList.some(img => img.name === file)) {
@@ -206,18 +191,21 @@ async function syncImages() {
         }
     });
 
-    // 4) Ensure every image in imagesList has a cached copy
-    await rectifyMissingCache(imagesList);
+    // Ensure every image in imagesList has a cached copy
+    for (const img of imagesList) {
+        const cachedPath = path.join(CACHE_DIR, img.name);
+        if (!fs.existsSync(cachedPath)) {
+            createLowResImage(img.name).catch(err =>
+                console.error(`Error creating low-res: ${img.name}`, err)
+            );
+        }
+    }
 
-    // 5) Watch for add/remove changes in the images dir
+    // Watch for add/remove changes in the images dir
     ODir(IMAGES_DIR).watch(d => handleFileChange(d, imagesList, keywordsList));
 
     return { imagesList, keywordsList };
-}
-
-//──────────────────────────────────────────────────────────────────────────────────
-// EXPRESS + WEBSOCKET SERVER
-//──────────────────────────────────────────────────────────────────────────────────
+};
 
 const root = process.env.ENV === 'production' ? './dist' : './frontend';
 const app = express();
@@ -235,7 +223,7 @@ if (process.env.ENV === 'production') {
         });
     });
 } else {
-    const vitePromise = createViteServer({ server: { middlewareMode: 'html' } })
+    createViteServer({ server: { middlewareMode: 'html' } })
         .then(vite => {
             app.use(vite.middlewares);
             app.get('*', async (req, res, next) => {
@@ -252,16 +240,11 @@ if (process.env.ENV === 'production') {
             });
         })
         .catch(err => console.error('Error creating Vite server:', err));
-
-    // We’ll await that later in the main start routine
-}
+};
 
 let imagesList, keywordsList;
 const server = app.listen(process.env.PORT || 3000, async () => {
-    // 1) Init DB
     await initODB();
-
-    // 2) Sync images => sets up watchers, etc.
     const result = await syncImages();
     imagesList = result.imagesList;
     keywordsList = result.keywordsList;
@@ -272,8 +255,8 @@ const server = app.listen(process.env.PORT || 3000, async () => {
 const wss = new WebSocketServer({ server });
 
 wss.on('connection', ws => {
-    ws.on('message', (msg) => {
-        // Delegate streaming to images.js
-        images(ws, msg, imagesList, keywordsList);
-    });
+    ws.send(JSON.stringify({
+        keywords: keywordsList
+    }));
+    ws.on('message', (msg) => images(ws, msg, imagesList, keywordsList));
 });
