@@ -21,18 +21,18 @@
 	},
 	"homepage": "https://github.com/torrinworx/torrinleonard.com#readme",
 	"dependencies": {
-        "destam": "^0.5.0",
-        "destam-dom": "^0.10.2",
+		"destam": "^0.5.0",
+		"destam-dom": "^0.10.2",
 		"destamatic-ui": "file:destamatic-ui",
 		"dotenv": "^16.4.5",
 		"exifreader": "^4.26.1",
 		"express": "^4.21.0",
 		"sharp": "^0.33.5",
-		"vite": "^5.4.11",
-		"destam-web-core": "file:destam-web-core",
-		"websocket": "^1.0.35"
+		"destam-db-core": "file:destam-db-core",
+		"ws": "^8.18.0"
 	},
 	"devDependencies": {
+		"vite": "^5.4.11",
 		"@babel/core": "^7.25.2",
 		"@babel/generator": "^7.25.6",
 		"@babel/parser": "^7.25.6",

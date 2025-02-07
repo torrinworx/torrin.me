@@ -3,46 +3,34 @@ import { Button, Shown } from "destamatic-ui";
 
 import ExifReader from 'exifreader';
 
-// Utility function to convert a base64 string to an ArrayBuffer
-const base64ToArrayBuffer = (base64) => {
-	const binaryString = window.atob(base64);
-	const len = binaryString.length;
-	const bytes = new Uint8Array(len);
-	for (let i = 0; i < len; i++) {
-		bytes[i] = binaryString.charCodeAt(i);
-	}
-	return bytes.buffer;
-};
-
-// Attempt to read the EXIF "DateTimeOriginal" tag from the binary
-// If found, return that date as a JS Date object; otherwise, default to Date(0) or now().
 const getExifDate = (base64) => {
 	try {
-		const arrayBuffer = base64ToArrayBuffer(base64);
-		const tags = ExifReader.load(arrayBuffer, { expanded: true });
+		const binaryString = window.atob(base64);
+		const len = binaryString.length;
+		const bytes = new Uint8Array(len);
+		for (let i = 0; i < len; i++) {
+			bytes[i] = binaryString.charCodeAt(i);
+		}
 
-		// Check typical EXIF structures
+		const tags = ExifReader.load(bytes.buffer, { expanded: true });
+
 		if (tags.exif && tags.exif.DateTimeOriginal) {
-			// ExifReader usually gives "YYYY:MM:DD HH:mm:ss"
 			const raw = tags.exif.DateTimeOriginal.description;
-			// For safety, replace ":" in the date portion with "-" so Date.parse() doesn't choke:
 			const safeStr = raw.replace(/^(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3');
 			const parsed = Date.parse(safeStr);
 			if (!isNaN(parsed)) {
-				// console.log(new Date(parsed))
 				return new Date(parsed)
 			};
 		}
 	} catch (err) {
 		console.warn('Could not parse EXIF date:', err);
 	}
-	// Fallback:
 	return new Date(0);
 };
 
-const ImageSection = ({ ws, images}) => {
+export default ({ ws, keywords }) => {
+	const images = OArray([]); // On load, search for all images already loaded in the indexeddb.
 	// TODO: Somehow need to cache images, then on each component mount check for cached imaged so that we don't make repeated requests.
-
 	// TODO: Sort images rendered order so that they appear based on capture date, not export date. oldest last. newest first
 
 	const Image = ({ each: image }) => {
@@ -72,39 +60,68 @@ const ImageSection = ({ ws, images}) => {
 		</div>;
 	};
 
+	const CollectionButton = ({ each }) => <Button type='contained' onClick={() => {
+		images.splice(0, images.length);
+		ws.send(JSON.stringify({ num: 100, index: 0, tags: [each] }));
+	}} label={each} />;
+
 	// TODO: Find a dynamic way to load high def ones and image requests on scrolling down the page:
 	// ws.send(JSON.stringify({ num: 50, index: 0, tags: ['finished'] }));
 
+	// ws.onmessage handler
 	ws.onmessage = (msg) => {
 		try {
 			const message = JSON.parse(msg.data);
+			const { fileName, type, data } = message;
 
-			// If it’s the low-res image, we parse EXIF & store in OArray
-			if (message.type === 'low') {
-				// Grab EXIF date from the base64 data
-				const exifDate = getExifDate(message.data);
-				// console.log(exifDate)
+			if (type === 'low') {
+				// 1) Parse EXIF for the low-res data
+				const exifDate = getExifDate(data);
 
-				// Create a new OObject for the “low” image
-				// Include our computed date in the object:
+				// 2) Build a new object
 				const newImage = OObject({
 					...message,
-					date: exifDate, // Store the parsed date
+					date: exifDate,
+					type: 'low',
 				});
 
-				// Push into array
-				images.push(newImage);
+				// 3) Check if we already have an entry for fileName
+				const existingIndex = images.findIndex(img => img.fileName === fileName);
+				if (existingIndex === -1) {
+					// Not found, insert
+					images.push(newImage);
+				} else {
+					// Found, replace
+					images.splice(existingIndex, 1, newImage);
+				}
 
-				// Re-sort images  (newest first, for example):
-				// images.sort((a, b) => b.date - a.date);
+				// 4) Sort by date descending, then splice back
+				const sorted = [...images].sort((a, b) => b.date - a.date);
+				images.splice(0, images.length, ...sorted);
 
-			} else if (message.type === 'high') {
-				// If it’s the high-res image, augment the existing array entry
-				const imageIndex = images.findIndex(img => img.fileName === message.fileName);
-				if (imageIndex !== -1) {
-					// Update the object in place
-					images[imageIndex].data = message.data;
-					images[imageIndex].type = 'high';
+			} else if (type === 'high') {
+				// 5) Look for an existing "low" entry
+				const existingIndex = images.findIndex(img => img.fileName === fileName);
+				if (existingIndex !== -1) {
+					// => Overwrite that entry in place, preserving date
+					const oldDate = images[existingIndex].date;
+					images.splice(existingIndex, 1, OObject({
+						...images[existingIndex],
+						data,
+						type: 'high',
+						date: oldDate, // preserve the same date so the order doesn’t change
+					}));
+				} else {
+					// 6) If no existing entry was found (rare edge case),
+					//    insert a new one + parse EXIF + sort
+					const exifDate = getExifDate(data);
+					images.push(OObject({
+						...message,
+						date: exifDate,
+						type: 'high',
+					}));
+					const sorted = [...images].sort((a, b) => b.date - a.date);
+					images.splice(0, images.length, ...sorted);
 				}
 			}
 		} catch (e) {
@@ -112,25 +129,12 @@ const ImageSection = ({ ws, images}) => {
 		}
 	};
 
-	return <Image each={images.observer.ignore('data').ignore('type')} />;
-};
-
-export default ({ ws, keywords }) => {
-	const images = OArray([]); // On load, search for all images already loaded in the indexeddb.
-
-	const CollectionButton = ({ each }) => {
-
-		return <Button type='contained' onClick={() => {
-			images.splice(0, images.length);
-			ws.send(JSON.stringify({ num: 10, index: 0, tags: [each] }));
-		}} label={each} />
-	}
-	// console.log(keywords);
 	return <div>
 		<div theme='row_spread'>
 			<CollectionButton each={keywords} />
 		</div>
-
-		<ImageSection ws={ws} keywords={keywords} images={images}/>
+		<div >
+			<Image each={images.observer.ignore('data').ignore('type')} />
+		</div>
 	</div>;
 };

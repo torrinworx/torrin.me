@@ -1,17 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 
-import express from 'express';
-import { WebSocketServer } from 'ws';
-import { createServer as createViteServer } from 'vite';
-
 import sharp from 'sharp';
+import express from 'express';
 import ExifReader from 'exifreader';
-
-import { ODB } from 'destam-web-core';
+import { WebSocketServer } from 'ws';
 import { OArray, OObject } from 'destam';
-import { initODB } from 'destam-web-core';
-import { ODir } from 'destam-web-core/server';
+import { ODB, initODB, ODir } from 'destam-db-core';
+import { createServer as createViteServer } from 'vite';
 
 import images from './images.js';
 
@@ -81,6 +77,7 @@ const createLowResImage = async (filename) => {
 
     try {
         await sharp(inputPath)
+            .withMetadata()
             .resize({
                 width: 1000,
                 height: 1000,
