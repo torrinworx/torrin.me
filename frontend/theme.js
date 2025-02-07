@@ -83,80 +83,14 @@ const theme = OObject({
 		borderRadius: 20,
 	},
 
-	drawer: {
-		extends: 'secondary',
-		outlineColor: '$color',
-		outlineWidth: 1,
-		outlineStyle: 'solid',
-	},
-
-	disabled: {
-		cursor: 'default',
-		pointerEvents: 'none',
-		backgroundColor: 'none',
-	},
-	disabledoverlay: {
-		position: 'absolute',
-		top: 0,
-		left: 0,
-		right: 0,
-		bottom: 0,
-		backgroundColor: 'rgba(0, 0, 0, 0.2)',
-		pointerEvents: 'none',
-	},
-
-	focusable: {
-		borderStyle: 'solid',
-		borderWidth: 0.5,
-		borderColor: '$color',
-		transitionDuration: '0.3s',
-		transitionProperty: 'border-color, background-color, box-shadow',
-	},
-
-	field: {
-		extends: 'primary_radius_typography_p1_regular_focusable',
-		outline: 0,
-		padding: 10,
-		background: '$color_top',
-		color: '$color_text',
-	},
-
-	focused: {
-		boxShadow: '$color 0 0 0 0.2rem',
-	},
-
-	expand: {
-		flexGrow: 1,
-		height: '100%',
-	},
-
-	typography: {
-		extends: 'secondary',
-		color: '$color_top',
-	},
-
 	paper: {
-        extends: 'radius',
         background: '$alpha($color, 0.2)',
-        color: '$color_top',
         boxShadow: '4px 4px 10px rgba(0,0,0,0.2)',
         padding: 10,
         maxWidth: 'inherit',
         maxHeight: 'inherit',
-        overflow: 'hidden',
         blur: "25px",
     },
-
-	toggleknob: {
-        extends: 'secondary',
-        position: 'absolute',
-        width: '23px',
-        height: '23px',
-        background: '$color_top',
-        borderRadius: '50%',
-        transition: '100ms',
-    },
-
 });
 
 window.colorMode = Observer.mutable('red');
@@ -175,11 +109,32 @@ window.themeMode.effect(mode => atomic(() => {
 	}
 }));
 
-export const define = obj => atomic(() => {
-	for (const o in obj) {
-		if (o in theme) throw new Error("Theme.define: theme definition already exists: " + o);
-		theme[o] = obj[o];
-	}
-});
 
-export default theme;
+export default {
+	theme,
+	define: (...args) => atomic(() => {
+		let prefix = '';
+		let i = 0;
+
+		for (; i < args.length; i++) {
+			if (typeof args[i] === 'string') {
+				prefix += args[i] + '_';
+			} else {
+				break;
+			}
+		}
+
+		const obj = args[i];
+		for (const o in obj) {
+			let name;
+			if (o === '*') {
+				name = prefix.substring(0, prefix.length - 1);
+			} else {
+				name = prefix + o;
+			}
+
+			if (name in theme) throw new Error("Theme.define: theme definition already exists: " + o);
+			theme[name] = obj[o];
+		}
+	}),
+};

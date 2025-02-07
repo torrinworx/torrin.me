@@ -1,3 +1,4 @@
+import OArray from 'destam/Array';
 import { mount, Observer } from 'destam-dom';
 import { Button, Theme, Typography, Tabs, Radio, Toggle, Paper } from 'destamatic-ui';
 
@@ -6,6 +7,8 @@ import Personal from './components/Personal';
 import Portfolio from './components/Portfolio';
 // import Collision from './components/Collision';
 import Gradient from './components/Gradient';
+
+const keywords = OArray([]);
 
 const NotFound = () => <Theme value={theme}>
 	<div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -24,11 +27,10 @@ const NotFound = () => <Theme value={theme}>
 	</div>
 </Theme>;
 
-
 const App = ({ ws }) => {
 	const SelectRadio = Radio(window.colorMode);
 
-	return <Theme value={theme}>
+	return <Theme value={theme.theme}>
 		<Gradient>
 			{/* <Collision> */}
 			<div style={{
@@ -39,11 +41,10 @@ const App = ({ ws }) => {
 			}}>
 				<Paper>
 					<div theme='center_row' style={{ gap: 8 }}>
-
-						<SelectRadio style={{ background: '$color_red' }} value={'red'} />
-						<SelectRadio style={{ background: '$color_purple' }} value={'purple'} />
-						<SelectRadio style={{ background: '$color_cyan' }} value={'cyan'} />
-						<SelectRadio style={{ background: '$color_gold' }} value={'gold'} />
+						<SelectRadio style={{ color: '$color_red' }} value={'red'} />
+						<SelectRadio style={{ color: '$color_purple' }} value={'purple'} />
+						<SelectRadio style={{ color: '$color_cyan' }} value={'cyan'} />
+						<SelectRadio style={{ color: '$color_gold' }} value={'gold'} />
 						<Toggle
 							value={Observer.mutable(true)}
 							onChange={isChecked => {
@@ -55,7 +56,7 @@ const App = ({ ws }) => {
 				<Paper>
 					<Tabs style={{ width: '100%' }}>
 						<mark:tab name='Personal'>
-							<Personal ws={ws} />
+							<Personal ws={ws} keywords={keywords} />
 						</mark:tab>
 						<mark:tab name='Portfolio'>
 							<Portfolio />
@@ -75,5 +76,10 @@ window.addEventListener("load", () => {
 
 	ws.addEventListener('open', () => {
 		mount(document.body, window.location.pathname === '/' ? <App ws={ws} /> : <NotFound />);
+	});
+
+	ws.addEventListener('message', msg => {
+		const message = JSON.parse(msg.data);
+		if (message.keywords) keywords.push(...message.keywords);
 	});
 });
