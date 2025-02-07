@@ -4,10 +4,8 @@ import path from 'path';
 const IMAGES_DIR = path.resolve('./images');
 const CACHE_DIR = path.resolve('./cache');
 
-/**
- * parse dateTimeOriginal or fallback to file mtime
- */
-function getImageDate(image) {
+
+const getImageDate = (image) => {
     if (image.dateTimeOriginal) {
         // Exif date strings often "YYYY:MM:DD HH:MM:SS"
         const safeStr = image.dateTimeOriginal.replace(/:/g, '-');
@@ -25,11 +23,7 @@ function getImageDate(image) {
     }
 }
 
-/**
- * Default export: WebSocket message handler
- * imagesList & keywordsList are passed in from index.js
- */
-export default function (ws, msg, imagesList, keywordsList) {
+export default (ws, msg, imagesList) => {
     let request;
     try {
         request = JSON.parse(msg);
@@ -48,22 +42,20 @@ export default function (ws, msg, imagesList, keywordsList) {
         return ws.send('Error: invalid request format');
     }
 
-    // 1) Filter by tags => must contain all
+    // Filter by tags => must contain all
     const filtered = imagesList.filter(img =>
         tags.every(t => img.keywords.includes(t))
     );
 
-    // 2) Sort newest first
+    // Sort newest first
     filtered.sort((a, b) => getImageDate(b) - getImageDate(a));
 
-    // 3) Slice
+    // Slice
     const slice = filtered.slice(index, index + num);
 
-    if (slice.length === 0) {
-        return ws.send(JSON.stringify({ error: 'No images in this slice' }));
-    }
+    if (slice.length === 0) return ws.send(JSON.stringify({ error: 'No images in this slice' }));
 
-    // 4) Send each image in two messages: low-res first, then high-res
+    // Send each image in two messages: low-res first, then high-res
     slice.forEach(image => {
         const cachedPath = path.join(CACHE_DIR, image.name);
         const fullPath = path.join(IMAGES_DIR, image.name);
