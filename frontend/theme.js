@@ -73,10 +73,14 @@ const theme = OObject({
 		blur: '25px',
 	},
 
-	gradient: {
-		extends: ['primary'],
+	// The issue with the gradient not updating to the right color isn't an issue with the theme,
+	// because other components like typography work just fine with updating $color_text.
+	// it's specifically an issue with how gradient is setup to react to variable changes
+	// in the theme.
+	gradient: OObject({
+		extends: ['*'],
 		$gradientCSS: 'linear-gradient(to top right, $color_main, $color_top)',
-	},
+	}),
 
 	typography: {
 		color: '$color_text',
@@ -121,7 +125,6 @@ window.themeMode = Observer.mutable(window.matchMedia('(prefers-color-scheme:dar
 window.theme = theme;
 
 window.colorMode.effect(color => atomic(() => {
-	console.log(color);
 	for (const [key, val] of Object.entries(colorModes[color])) {
 		theme['*'][key] = val;
 	}
