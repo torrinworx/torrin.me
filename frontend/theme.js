@@ -1,45 +1,36 @@
 import { atomic } from 'destam/Network';
 import { OObject, Observer } from 'destam-dom';
 
-const colors = {
-	$color_white: '#D6D6D6',
-	$color_black: '#141414',
-	$color_red: '#A30029',
-	$color_purple: '#6021c0',
-	$color_cyan: '#368F8B',
-	$color_gold: '#FABC2A',
-};
-
 const colorModes = {
 	red: {
-		$color: colors.$color_red,
+		$color: '$color_red',
 	},
 	purple: {
-		$color: colors.$color_purple,
+		$color: '$color_purple',
 	},
 	cyan: {
-		$color: colors.$color_cyan,
+		$color: '$color_cyan',
 	},
 	gold: {
-		$color: colors.$color_gold,
+		$color: '$color_gold',
 	},
 };
 
 const themeModes = {
 	light: {
-		$color_main: colors.$color_white,
+		$color_main: '$color_white',
 		$color_text: '$color',
 		$color_top: '$color',
 		$color_hover: '$shiftBrightness($color_white, 0.1)',
-		$color_hover_top: colors.$color_white,
+		$color_hover_top: '$color_white',
 	},
 
 	dark: {
 		$color_main: '$color',
-		$color_text: colors.$color_white,
-		$color_top: colors.$color_white,
+		$color_text: '$color_white',
+		$color_top: '$color_white',
 		$color_hover: '$shiftBrightness($color_white, 0.1)',
-		$color_hover_top: colors.$color_white,
+		$color_hover_top: '$color_white',
 	},
 };
 
@@ -51,23 +42,31 @@ const theme = OObject({
 		fontWeight: 600,
 		boxSizing: 'border-box',
 		transition: `opacity ${transition}, box-shadow ${transition}, background-color ${transition}, color ${transition}, border-color ${transition}`,
-		...colors,
+		$color_white: '#D6D6D6',
+		$color_black: '#141414',
+		$color_red: '#A30029',
+		$color_purple: '#6021c0',
+		$color_cyan: '#368F8B',
+		$color_gold: '#FABC2A',
 	}),
 
-	center: {
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
+	// Override destamatic-ui primary theme
+	primary: {
+		extends: ['*'],
+		$color: '$color',
+		$color_hover: '$color_hover',
+		$color_top: '$color_top',
 	},
 
 	radius: {
-		borderRadius: 20,
+		$radius: '20px',
+		borderRadius: '$radius',
 	},
 
 	paper: {
-		background: '$alpha($color, 0.2)',
-		boxShadow: '4px 4px 10px rgba(0,0,0,0.2)',
+		extends: ['*', 'radius', 'shadow'],
 		padding: 10,
+		background: '$alpha($color, 0.4)',
 		maxWidth: 'inherit',
 		maxHeight: 'inherit',
 		blur: '25px',
@@ -139,6 +138,17 @@ window.themeMode.effect(mode => atomic(() => {
 
 export default {
 	theme,
+	// icons: [{
+	// 	search: FeatherIcons('search'),
+	// 	x: FeatherIcons('x'),
+	// 	user: FeatherIcons('user'),
+	// 	image: FeatherIcons('image'),
+	// 	feather: FeatherIcons('feather'),
+	// 	globe: FeatherIcons('globe'),
+	// 	github: FeatherIcons('github'),
+	// },
+	// 	FeatherIcons
+	// ],
 	define: (...args) => atomic(() => {
 		let prefix = '';
 		let i = 0;
