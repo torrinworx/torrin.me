@@ -6,7 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"start": "node ./backend/index.js",
-		"dev": "nodemon --watch ./web-core/server --watch ./backend --exec node ./backend/index.js",
+		"dev": "nodemon  --watch ./destamatic-ui  --watch ./backend --exec node ./backend/index.js",
 		"build": "bash build.sh",
 		"test": "node --test"
 	},
@@ -21,15 +21,11 @@
 	},
 	"homepage": "https://github.com/torrinworx/torrinleonard.com#readme",
 	"dependencies": {
-		"destam": "^0.5.0",
-		"destam-dom": "^0.10.2",
+		"destam": "^0.5.3",
+		"destam-dom": "^0.11.3",
 		"destamatic-ui": "file:destamatic-ui",
 		"dotenv": "^16.4.5",
-		"exifreader": "^4.26.1",
-		"express": "^4.21.0",
-		"sharp": "^0.33.5",
-		"destam-db-core": "file:destam-db-core",
-		"ws": "^8.18.0"
+		"express": "^4.21.0"
 	},
 	"devDependencies": {
 		"vite": "^5.4.11",
