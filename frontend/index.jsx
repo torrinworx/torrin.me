@@ -3,7 +3,7 @@ import { Button, Theme, Typography, Radio, Toggle, Paper, Gradient, TextField } 
 
 import theme from './theme';
 import Portfolio from './components/Portfolio';
-// import Collision from './components/Collision';
+import Collision from './components/Collision';
 
 const NotFound = () => <Theme value={theme}>
 	<div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -27,7 +27,8 @@ const App = () => {
 
 	return <Theme value={theme.theme}>
 		<Gradient>
-			{/* <Collision> */}
+			{/* somehow have to make this render below the child content but the mount() in this waits and makes it render after the below is already rendered. */}
+			<Collision />
 			<div theme='center' style={{ paddingTop: 20, userSelect: 'none' }}>
 				<Paper style={{ width: 250 }}>
 					<div theme='center_row' style={{ gap: 8 }}>
@@ -45,10 +46,7 @@ const App = () => {
 				display: 'flex',
 				flexDirection: 'column',
 			}}>
-
-
 				<Paper>
-
 					<Portfolio />
 				</Paper>
 
@@ -79,7 +77,6 @@ const App = () => {
 					<Toggle value={Observer.mutable(false)} />
 				</Paper>
 			</div>
-			{/* </Collision> */}
 		</Gradient>
 	</Theme>;
 };
