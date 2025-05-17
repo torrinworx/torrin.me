@@ -2,7 +2,6 @@ import { mount, Observer } from 'destam-dom';
 import { Button, Theme, Typography, Radio, Toggle, Paper, Gradient, TextField } from 'destamatic-ui';
 
 import theme from './theme';
-import Portfolio from './components/Portfolio';
 import Collision from './components/Collision';
 
 const NotFound = () => <Theme value={theme}>
@@ -40,16 +39,17 @@ const App = () => {
 					</div>
 				</Paper>
 			</div>
+			<Typography type='h1'>Torrin Z. Leonard</Typography>
+			<Typography type='p1'>Full Stack Software Developer</Typography>
+			<Typography type='p1'>Waterloo, Ontario, Canada</Typography>
+
+			<div style={{height: 375}}></div>
 			<div style={{
 				padding: 20,
 				gap: 40,
 				display: 'flex',
 				flexDirection: 'column',
 			}}>
-				<Paper>
-					<Portfolio />
-				</Paper>
-
 				<Paper>
 					<Typography type='h5' label='UI Component Test:' />
 
