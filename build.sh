@@ -23,8 +23,8 @@ if ! command_exists nvm; then
 	[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 fi
 
-nvm install 21
-nvm use 21
+nvm install 23
+nvm use 23
 
 if [ -d "$BUILD_DIR" ]; then
 	rm -rf "$BUILD_DIR"
@@ -38,7 +38,6 @@ fi
 npm install
 npx vite build
 
-rm -rf ./destam-db-core/.git
 rm -rf ./destamatic-ui/.git
 
 # Prepare build directory
@@ -46,7 +45,6 @@ mkdir -p "$BUILD_DIR"
 
 # Copy files to build directory
 cp -r ./backend "$BUILD_DIR"
-cp -r ./destam-db-core "$BUILD_DIR"
 cp -r ./destamatic-ui "$BUILD_DIR"
 cp -r ./node_modules "$BUILD_DIR"
 cp ./package.json "$BUILD_DIR"

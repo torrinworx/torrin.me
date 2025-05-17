@@ -25,8 +25,6 @@
 		"destam-dom": "^0.11.3",
 		"destamatic-ui": "file:destamatic-ui",
 		"dotenv": "^16.4.5",
-		"express": "^4.21.0",
-		"gsap": "^3.13.0",
 		"three": "^0.176.0"
 	},
 	"devDependencies": {
