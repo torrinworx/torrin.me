@@ -62,7 +62,7 @@ const theme = OObject({
 		$color_top: '$contrast_text($color_main)',
 
 		$color_hover: '$saturate($shiftBrightness($color_main, -.3), -.3)',
-		$color_top: '$color_top',
+		// $color_top: '$color_top',
 	},
 
 	// Need to handle the $color_top slot here specially when switching between light/dark mode?
