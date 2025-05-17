@@ -82,7 +82,7 @@ const theme = OObject({
 		maxHeight: 'inherit',
 		padding: 10,
 		background: '$alpha($color_main, 0.4)',
-		blur: '25px',
+		backdropFilter: 'blur(5px)'
 	},
 
 	radius: {
