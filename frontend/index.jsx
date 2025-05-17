@@ -54,13 +54,13 @@ const App = () => {
 					<Typography type='h5' label='UI Component Test:' />
 
 					<Typography type='h1' label='Header 1' />
-					<Typography type='h2' label='Header 2' />
-					<Typography type='h3' label='Header 3' />
-					<Typography type='h4' label='Header 4' />
-					<Typography type='h5' label='Header 5' />
-					<Typography type='h6' label='Header 6' />
-					<Typography type='p1' label='Paragraph 1' />
-					<Typography type='p2' label='Paragraph 2' />
+					<Typography type='h1' label='Header 2' />
+					<Typography type='h1' label='Header 3' />
+					<Typography type='h1' label='Header 4' />
+					<Typography type='h1' label='Header 5' />
+					<Typography type='h1' label='Header 6' />
+					<Typography type='h1' label='Paragraph 1' />
+					<Typography type='h1' label='Paragraph 2' />
 					<Typography type='p1_regular' label='Paragraph 1 Regular' />
 					<Typography type='p1_bold' label='Paragraph 1 Bold' />
 					<Typography type='p1_italic' label='Paragraph 1 Italic' />
