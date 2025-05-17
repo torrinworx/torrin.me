@@ -25,15 +25,17 @@
 		"destam-dom": "^0.11.3",
 		"destamatic-ui": "file:destamatic-ui",
 		"dotenv": "^16.4.5",
-		"express": "^4.21.0"
+		"express": "^4.21.0",
+		"gsap": "^3.13.0",
+		"three": "^0.176.0"
 	},
 	"devDependencies": {
-		"vite": "^5.4.11",
 		"@babel/core": "^7.25.2",
 		"@babel/generator": "^7.25.6",
 		"@babel/parser": "^7.25.6",
 		"@babel/plugin-syntax-jsx": "^7.24.7",
 		"esbuild": "^0.24.0",
-		"nodemon": "^3.1.7"
+		"nodemon": "^3.1.7",
+		"vite": "^5.4.11"
 	}
 }

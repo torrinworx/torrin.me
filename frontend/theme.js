@@ -59,6 +59,8 @@ const theme = OObject({
 	primary: {
 		$color: '$color_main',
 		$color_text: '$contrast_text($color_main)',
+		$color_top: '$contrast_text($color_main)',
+
 		$color_hover: '$saturate($shiftBrightness($color_main, -.3), -.3)',
 		$color_top: '$color_top',
 	},
