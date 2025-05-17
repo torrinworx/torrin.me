@@ -31,7 +31,7 @@ export default Theme.use(theme => {
 		const defaultMaterial = new THREE.MeshStandardMaterial({
 			roughness: 0.8,
 			metalness: 0,
-			emissiveIntensity: 0,
+			emissiveIntensity: 0.1,
 			flatShading: true,
 		});
 
@@ -40,6 +40,12 @@ export default Theme.use(theme => {
 			defaultMaterial.color = c;
 			defaultMaterial.emissive = c;
 		});
+
+		const updateCamera = () => {
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+			renderer.setSize(window.innerWidth, window.innerHeight);
+		};
 
 		mounted(() => {
 			const width = Canvas.clientWidth;
@@ -87,11 +93,13 @@ export default Theme.use(theme => {
 				renderer.render(scene, camera);
 			};
 			animate();
+			window.addEventListener('resize', updateCamera);
 
 		});
 
 		cleanup(() => {
 			renderer.dispose();
+			window.removeEventListener('resize', updateCamera);
 		});
 
 		return <div style={{
