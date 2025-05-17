@@ -27,7 +27,7 @@ export default Theme.use(theme => {
 			useShadows: true,
 		};
 
-		const colorObserver = theme('*').vars('color_main');
+		const color = theme('*').vars('color_main');
 		const defaultMaterial = new THREE.MeshStandardMaterial({
 			roughness: 0.8,
 			metalness: 0,
@@ -35,10 +35,24 @@ export default Theme.use(theme => {
 			flatShading: true,
 		});
 
-		colorObserver.effect(newColor => {
-			const c = new THREE.Color(newColor);
-			defaultMaterial.color = c;
-			defaultMaterial.emissive = c;
+		const transitionDuration = 250;
+		let isTransitioning = false;
+		let transitionStartTime = 0;
+		let startColor = new THREE.Color();
+		let targetColor = new THREE.Color();
+
+		// ease in-out
+		const easeInOutCubic = (t) => {
+			return t < 0.5
+				? 4 * t * t * t
+				: 1 - Math.pow(-2 * t + 2, 3) / 2;
+		};
+
+		color.effect(newColor => {
+			startColor.copy(defaultMaterial.color);
+			targetColor.set(newColor);
+			transitionStartTime = performance.now();
+			isTransitioning = true;
 		});
 
 		const updateCamera = () => {
@@ -63,6 +77,7 @@ export default Theme.use(theme => {
 
 			camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
 			camera.position.set(0, 0, 30);
+			scene.add(camera);
 
 			const spotLight = new THREE.SpotLight(0xffffff, 100);
 			spotLight.position.set(0, 10, 0);
@@ -83,6 +98,8 @@ export default Theme.use(theme => {
 						mesh.scale.set(1, 1, 1);
 						mesh.material = defaultMaterial;
 						mesh.position.set(startX + i * spacing, 0, 0);
+						mesh.castShadow = settings.useShadows;
+						mesh.receiveShadow = settings.useShadows;
 						scene.add(mesh);
 					}
 				});
@@ -90,15 +107,35 @@ export default Theme.use(theme => {
 
 			const animate = () => {
 				requestAnimationFrame(animate);
+
+				if (isTransitioning) {
+					const currentTime = performance.now();
+					const elapsed = currentTime - transitionStartTime;
+					const t = Math.min(elapsed / transitionDuration, 1);
+					const easedT = easeInOutCubic(t);
+
+					// Interpolate color
+					const currentColor = new THREE.Color();
+					currentColor.copy(startColor).lerp(targetColor, easedT);
+					defaultMaterial.color.copy(currentColor);
+					defaultMaterial.emissive.copy(currentColor);
+
+					if (t >= 1) {
+						isTransitioning = false;
+						startColor.copy(targetColor);
+					}
+				}
+
 				renderer.render(scene, camera);
 			};
 			animate();
 			window.addEventListener('resize', updateCamera);
-
 		});
 
 		cleanup(() => {
-			renderer.dispose();
+			if (renderer) {
+				renderer.dispose();
+			}
 			window.removeEventListener('resize', updateCamera);
 		});
 
