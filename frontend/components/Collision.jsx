@@ -102,19 +102,14 @@ export default Theme.use(theme => {
 			window.removeEventListener('resize', updateCamera);
 		});
 
-		return <div style={{
-			position: 'absolute',
+		return <Canvas style={{
+			position: 'fixed',
 			top: 0,
 			left: 0,
 			width: '100%',
 			height: '100%',
 			pointerEvents: 'none',
-		}} >
-			<Canvas style={{
-				width: '100%',
-				height: '100%',
-			}} />
-		</div>;
+		}} />;
 	};
 
 	return Collision;
