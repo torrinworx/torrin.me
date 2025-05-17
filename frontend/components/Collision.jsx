@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { Theme } from 'destamatic-ui';
-import { Observer } from 'destam-dom';
 
 export const isOnTouchScreen = ('ontouchstart' in window);
 
@@ -83,7 +82,6 @@ export default Theme.use(theme => {
 				});
 			});
 
-			// Animation loop
 			const animate = () => {
 				requestAnimationFrame(animate);
 				renderer.render(scene, camera);
