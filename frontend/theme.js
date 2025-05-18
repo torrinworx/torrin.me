@@ -292,7 +292,6 @@ window.colorMode.effect(color => atomic(() => {
 
 window.themeMode.effect(mode => atomic(() => {
 	mode = mode ? 'dark' : 'light'; // if mode is true => dark mode, else false => light mode
-	console.log(mode);
 	for (const [key, val] of Object.entries(themeModes[mode])) {
 		theme['*'][key] = val;
 	}
