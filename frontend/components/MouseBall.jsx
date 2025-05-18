@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
 import * as THREE from "three";
-import { isOnTouchScreen } from "./Collision";
 import { ThemeContext } from "../../Theme";
 
 // Helper function to create a circle geometry
@@ -51,25 +50,25 @@ export const useIsHovered = () => {
 };
 
 export const MouseBall = () => {
-	const canvasRef = useRef();
+	const canvasRef = {};
 	const scene = useRef(new THREE.Scene());
 	const camera = useRef(new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000));
 	const renderer = useRef(new THREE.WebGLRenderer({ canvas: canvasRef.current, alpha: true }));
 
-	const mesh = useRef();
-	const mousePos = useRef({ x: 0, y: 0 });
-	const { selectedPalette } = useContext(ThemeContext);
+	const mesh = {};
+	const mousePos = { x: 0, y: 0 };
+
 
 	const speed = 2;
 	const scale = 8;
-
-	useEffect(() => {
+	
+	mount(() => {
 		camera.current.position.z = 50;
 		renderer.current.setSize(window.innerWidth, window.innerHeight);
 		renderer.current.setPixelRatio(window.devicePixelRatio);
 
 		const geometry = createCircleGeometry(3, 6);
-		const material = new THREE.LineBasicMaterial({ color: selectedPalette.colors.text, depthTest: false, transparent: true, opacity: 1 });
+		const material = new THREE.LineBasicMaterial({ color: 'white', depthTest: false, transparent: true, opacity: 1 });
 		mesh.current = new THREE.LineLoop(geometry, material);
 		scene.current.add(mesh.current);
 
@@ -81,12 +80,6 @@ export const MouseBall = () => {
 
 		window.addEventListener('resize', onWindowResize);
 
-		return () => {
-			window.removeEventListener('resize', onWindowResize);
-		};
-	}, [selectedPalette]);
-
-	useEffect(() => {
 		const onMouseMove = (event) => {
 			mousePos.current.x = (event.clientX / window.innerWidth) * 2 - 1;
 			mousePos.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -94,12 +87,6 @@ export const MouseBall = () => {
 
 		window.addEventListener('mousemove', onMouseMove);
 
-		return () => {
-			window.removeEventListener('mousemove', onMouseMove);
-		};
-	}, []);
-
-	useEffect(() => {
 		const animate = () => {
 			requestAnimationFrame(animate);
 
@@ -110,17 +97,20 @@ export const MouseBall = () => {
 			const combinedX = (mousePos.current.x * window.innerWidth) / 2 + infinityX;
 			const combinedY = (mousePos.current.y * window.innerHeight) / 2 + infinityY;
 
-			if (mesh.current) {
-				mesh.current.position.set(combinedX, combinedY, 0);
-			}
+			if (mesh.current) mesh.current.position.set(combinedX, combinedY, 0);
 
 			renderer.current.render(scene.current, camera.current);
 		};
 
 		animate();
-	}, []);
+	});
 
-	return <canvas ref={canvasRef} />;
+	cleanup(() => {
+		window.removeEventListener('resize', onWindowResize);
+
+		window.removeEventListener('mousemove', onMouseMove);
+
+	})
 };
 
 export default MouseBall;
