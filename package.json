@@ -21,6 +21,7 @@
 	},
 	"homepage": "https://github.com/torrinworx/torrinleonard.com#readme",
 	"dependencies": {
+		"cannon-es": "^0.20.0",
 		"destam": "^0.5.3",
 		"destam-dom": "^0.11.3",
 		"destamatic-ui": "file:destamatic-ui",
