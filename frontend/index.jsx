@@ -1,5 +1,5 @@
 import { mount, Observer } from 'destam-dom';
-import { Button, Theme, Typography, Radio, Toggle, Paper, Gradient, TextField } from 'destamatic-ui';
+import { Button, Theme, Typography, Radio, Toggle, Paper, Gradient, TextField, Shown } from 'destamatic-ui';
 
 import theme from './theme';
 import Collision from './components/Collision';
@@ -54,8 +54,7 @@ const experience = [
 		"image": "./EquatorLogo.svg",
 		"url": "https://equatorstudios.com/",
 		"style": {
-			"height": "5rem",
-			"width": "auto",
+			height: '300px'
 		},
 		"header": "Equator Studios",
 		"position": "Software Developer",
@@ -65,9 +64,7 @@ const experience = [
 		"start": "2021-10-01",
 		"image": "./ThisCozyStudioLogo.svg",
 		// "url": "https://www.thiscozystudio.com/",
-		"style": {
-			"height": "5rem"
-		},
+		"style": {},
 		"header": "This Cozy Studio",
 		"position": "Co-Founder, CEO, Lead Software Engineer and Web Developer",
 		"content": "As the Co-Founder, CEO, and Lead Software Engineer of This Cozy Studio Inc, I've driven the company's growth through my diverse technical abilities, leadership, and management skills. My contributions include the development of 'Blend_My_NFTs', a popular 3D model NFT generator operating as a Blender add-on, and the creation of multiple NFT collections for our clients, among them Cozy Place, Vox Coodles, Omni Coin, Metapanda, and AKidCalledBeast. Additionally, I designed and developed our company's website, ThisCozyStudio.com, and implemented a cloud rendering, storage, and NFT minting platform, making it easier for 3D graphical artists to launch their own 3D NFT collections."
@@ -78,8 +75,6 @@ const experience = [
 		"image": "./LeagueLogo.jpg",
 		"url": "https://www.league.com/",
 		"style": {
-			"height": "5rem",
-			"width": "auto",
 			"borderRadius": "50%"
 		},
 		"header": "League",
@@ -91,8 +86,6 @@ const experience = [
 		"image": "./worX4youLogo.jpg",
 		"url": "https://www.worx4you.com/",
 		"style": {
-			"height": "5rem",
-			"width": "auto",
 			"borderRadius": "50%"
 		},
 		"header": "worX4you Inc.",
@@ -102,25 +95,29 @@ const experience = [
 ];
 
 const Experience = ({ each }) => {
-	return <div theme='row'>
-		<img src={each.image} style={{ ...each.style }} />
+	const index = experience.indexOf(each);
 
-		{/* Somehow need to make this virticle bar perfectly centered so it aligns with each other experience time item*/}
-		<div style={{
-			padding: '40px',
-		}}>
-			<div theme='primary' style={{
-				color: '$color_text',
-				borderLeft: '6px solid $color_text',
-				height: '500px',
-			}} />
-		</div>
+	const Header = () => <div style={{ textAlign: index % 2 === 0 ? 'right' : 'left', flex: 1, paddingRight: '20px', maxWidth: '800px' }}>
+		<Typography type='h3' label={each.header} />
+	</div>;
 
+	const Position = () => <div theme='' style={{ flex: 1, paddingLeft: '20px', maxWidth: '800px' }}>
 		<div theme='column'>
-			<Typography type='h2' label={each.header} />
-			<Typography type='h5' label={each.position} />
+			<Typography type='h3' label={each.position} />
 			<Typography type='p1' label={each.content} />
 		</div>
+	</div>;
+
+	return <div style={{ display: 'flex', alignItems: 'stretch', justifyContent: 'space-between' }}>
+		{index % 2 === 0 ? <Header /> : <Position />}
+
+		<div theme='column_center' style={{ flex: 'none', position: 'relative', display: 'flex', alignItems: 'center' }}>
+			<div theme='primary' style={{ height: '100%', borderLeft: '3px solid $color_top', borderRight: '3px solid $color_top' }} />
+			<img src={each.image} style={{ boxSizing: 'border-box', padding: '20px', height: '125px', width: 'auto', ...each.style }} />
+			<div theme='primary' style={{ height: '100%', borderLeft: '3px solid $color_top', borderRight: '3px solid $color_top' }} />
+		</div>
+
+		{index % 2 === 0 ? <Position /> : <Header />}
 	</div>;
 };
 
@@ -130,8 +127,6 @@ const Page = () => {
 		gap: '40px',
 		display: 'flex',
 		flexDirection: 'column',
-		height: '100%',
-		minHeight: '100vh'
 	}}>
 		<div theme='clear' style={{ height: '75', minHeight: '75vh' }}>
 			<Typography type='h1'>Torrin Z. Leonard</Typography>
@@ -140,8 +135,9 @@ const Page = () => {
 
 		<Paper>
 			<Typography type='h1'>My Experience</Typography>
-
-			<Experience each={experience} />
+			<div theme='center_column'>
+				<Experience each={experience} />
+			</div>
 		</Paper>
 	</div>;
 };
