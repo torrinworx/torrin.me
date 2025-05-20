@@ -1,5 +1,7 @@
 import { atomic } from 'destam/Network';
 import { OObject, Observer } from 'destam-dom';
+import FeatherIcons from "destamatic-ui/components/icons/FeatherIcons";
+import SimpleIcons from "destamatic-ui/components/icons/SimpleIcons";
 
 const mainColors = {
 	$color_white: '#D6D6D6',
@@ -78,7 +80,7 @@ const theme = OObject({
 		maxHeight: 'inherit',
 		background: '$alpha($color_main, 0.4)',
 		backdropFilter: 'blur(25px)',
-		padding: 20,
+		padding: 40,
 		gap: 40,
 		display: 'flex',
 		flexDirection: 'column',
@@ -267,15 +269,19 @@ const theme = OObject({
 		margin: '20px 4px',
 	},
 
-	// custom
 	page: {
 		background: '$color_main',
-		padding: '40px',
+		padding: '20px',
 		gap: '40px',
 		display: 'flex',
 		flexDirection: 'column',
 		height: '100%',
 		minHeight: '100vh'
+	},
+
+	icon: {
+		extends: 'primary',
+		fill: '$color_top',
 	},
 });
 
@@ -298,17 +304,19 @@ window.themeMode.effect(mode => atomic(() => {
 
 export default {
 	theme,
-	// icons: [{
-	// 	search: FeatherIcons('search'),
-	// 	x: FeatherIcons('x'),
-	// 	user: FeatherIcons('user'),
-	// 	image: FeatherIcons('image'),
-	// 	feather: FeatherIcons('feather'),
-	// 	globe: FeatherIcons('globe'),
-	// 	github: FeatherIcons('github'),
-	// },
-	// 	FeatherIcons
-	// ],
+	icons: [{
+		vite: SimpleIcons('vite'),
+		// 	search: FeatherIcons('search'),
+		// 	x: FeatherIcons('x'),
+		// 	user: FeatherIcons('user'),
+		// 	image: FeatherIcons('image'),
+		// 	feather: FeatherIcons('feather'),
+		// 	globe: FeatherIcons('globe'),
+		// 	github: FeatherIcons('github'),
+	},
+		FeatherIcons,
+		SimpleIcons
+	],
 	define: (...args) => atomic(() => {
 		let prefix = '';
 		let i = 0;
