@@ -71,7 +71,7 @@ jobs:
               env:
                   PUBLIC_IP: ${{ secrets.PUBLIC_IP }}
               run: |
-                  scp -o 'StrictHostKeyChecking=no' ./build.zip root@$PUBLIC_IP:/root/build.zip
+                  scp -o 'StrictHostKeyChecking=no' ./build.zip root@$PUBLIC_IP:/home/torrin.me/build.zip
                   ssh -o "StrictHostKeyChecking=no" root@$PUBLIC_IP "
                       # Ensure DBus and XDG environment variables are set for root
                       export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u root)/bus
@@ -83,29 +83,26 @@ jobs:
                       fi
 
                       # Proceed with deployment steps
-                      mkdir /root/deploying
-                      unzip -o -qq /root/build.zip -d /root/deploying
-                      rm -r /root/build.zip
+                      mkdir /home/torrin.me/deploying
+                      unzip -o -qq /home/torrin.me/build.zip -d /home/torrin.me/deploying
+                      rm -r /home/torrin.me/build.zip
 
-                      # Reload systemd
                       systemctl daemon-reload
 
-                      # Move to new build directory and install dependencies
-                      mv /root/deploying/build /root/build.new
-                      rm -r /root/deploying
-                      cd /root/build.new/
-                      # npm install
+                      mv /home/torrin.me/deploying/build /home/torrin.me/build.new
+                      rm -r /home/torrin.me/deploying
+                      cd /home/torrin.me/build.new/
 
-                      # Stop opengig service
-                      systemctl stop opengig || echo 'skipped stop opengig'
+                      # Stop service
+                      systemctl stop torrin || echo 'skipped stop torrin'
 
                       # Clean up old builds
-                      rm -r /root/build.old | true
-                      mv /root/build /root/build.old
-                      mv /root/build.new /root/build
+                      rm -r /home/torrin.me/build.old | true
+                      mv /home/torrin.me/build /home/torrin.me/build.old
+                      mv /home/torrin.me/build.new /home/torrin.me/build
 
-                      chmod +x /root/build/run.sh
+                      chmod +x /home/torrin.me/build/run.sh
 
                       # Enable and start the service under root
-                      systemctl enable --now opengig
+                      systemctl enable --now torrin
                   "

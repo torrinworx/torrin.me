@@ -2,7 +2,6 @@ import fs from 'fs';
 import http from 'http';
 import path from 'path';
 
-// Simple work around to avoid adding another library.
 const mimeTypes = {
 	'.html': 'text/html',
 	'.js': 'application/javascript',
@@ -21,7 +20,6 @@ const mimeTypes = {
 	'.xml': 'application/xml',
 	'.pdf': 'application/pdf',
 	'.txt': 'text/plain',
-	// Add more as needed
 };
 
 export default () => {
@@ -29,9 +27,9 @@ export default () => {
 	let vite;
 
 	const server = http.createServer((req, res) => {
-		if (process.env.NODE_ENV === 'production') {
+		if (process.env.ENV === 'production') {
 			const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
-			let filePath = path.join(root, parsedUrl.pathname);
+			let filePath = path.resolve(path.join(root, parsedUrl.pathname));
 
 			fs.stat(filePath, (err, stats) => {
 				if (!err && stats.isFile()) {
@@ -62,7 +60,7 @@ export default () => {
 					});
 				}
 			});
-		} else if (process.env.NODE_ENV === 'development') {
+		} else if (process.env.ENV === 'development') {
 			// Handle requests in development mode with Vite
 			vite.middlewares(req, res, (err) => {
 				if (err) {
@@ -83,7 +81,7 @@ export default () => {
 			vite = viteInstance;
 		},
 		listen: () => server.listen(process.env.PORT || 3000, () => {
-			console.log(`Http is serving on http://localhost:${process.env.PORT || 3000}/`);
+			console.log(`http.js is serving on http://localhost:${process.env.PORT || 3000}/`);
 		})
 	}
 };

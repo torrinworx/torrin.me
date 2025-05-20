@@ -1,15 +1,32 @@
-import { createServer as createViteServer } from 'vite';
-
+import fs from 'fs/promises';
 import http from './http.js';
 
-let root = process.env.ENV === 'production' ? './dist' : './frontend';
+const loadEnv = async (filePath = './.env') => {
+    try {
+        const data = await fs.readFile(filePath, { encoding: 'utf8' });
+        data.split('\n').forEach(line => {
+            const [key, value] = line.split('=');
+            if (key && value) process.env[key.trim()] = value.trim();
+        });
+    } catch (e) {
+        console.error(`Failed to load .env file: ${e.message}`);
+    }
+};
+
+if (!process.env.ENV) await loadEnv();
+
+let root = process.env.ENV === 'production' ? './build/dist' : './frontend';
 let server = http();
 
-if (process.env.NODE_ENV === 'production') {
-    server.production({ root });
-} else {
-    const vite = await createViteServer({ server: { middlewareMode: 'html' } });
-    server.development({ vite });
-}
+const start = async () => {
+    if (process.env.ENV === 'production') server.production({ root });
+    else {
+        const { createServer: createViteServer } = await import('vite');
+        const vite = await createViteServer({ server: { middlewareMode: 'html' } });
+        server.development({ vite });
+    }
 
-server = server.listen();
+    server.listen();
+};
+
+start();
