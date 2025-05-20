@@ -1,5 +1,5 @@
-import { mount, Observer } from 'destam-dom';
-import { Button, Theme, Typography, Radio, Toggle, Paper, Gradient, TextField, Shown } from 'destamatic-ui';
+import { mount } from 'destam-dom';
+import { Button, Theme, Typography, Radio, Toggle, Paper, Gradient, Icons, Icon } from 'destamatic-ui';
 
 import theme from './theme';
 import Collision from './components/Collision';
@@ -36,7 +36,7 @@ const Controls = () => {
 	const SelectRadio = Radio(window.colorMode);
 
 	return <div theme='center' style={{ paddingTop: 20, userSelect: 'none' }}>
-		<Paper style={{ width: 250 }}>
+		<Paper style={{ width: 250, padding: 10 }}>
 			<div theme='center_row' style={{ gap: 8 }}>
 				<SelectRadio style={{ color: '$color_red' }} value={'red'} />
 				<SelectRadio style={{ color: '$color_purple' }} value={'purple'} />
@@ -121,6 +121,38 @@ const Work = ({ each }) => {
 	</div>;
 };
 
+const tools = [
+	{ name: 'JavaScript', icon: 'javascript' },
+	{ name: 'Node.js', icon: 'nodedotjs' },
+	{ name: 'Python', icon: 'python' },
+	{ name: 'Rust', icon: 'rust' },
+	{ name: 'Django', icon: 'django' },
+	{ name: 'FastAPI', icon: 'fastapi' },
+	{ name: 'React', icon: 'react' },
+	{ name: 'Express', icon: 'express' },
+	{ name: 'Vite', icon: 'vite' },
+	{ name: 'Three.js', icon: 'threedotjs' },
+	{ name: 'Blender', icon: 'blender' },
+	{ name: 'Ubuntu', icon: 'ubuntu' },
+	{ name: 'Arch Linux', icon: 'archlinux' },
+	{ name: 'NGINX', icon: 'nginx' },
+	{ name: 'OpenAI API', icon: 'openai' },
+	{ name: 'Docker', icon: 'docker' },
+	{ name: 'Hugging Face', icon: 'huggingface' },
+	{ name: 'Ollama', icon: 'ollama' },
+	{ name: 'DigitalOcean', icon: 'digitalocean' },
+	{ name: 'AWS', icon: 'amazonwebservices' },
+	{ name: 'Heroku', icon: 'heroku' },
+
+];
+
+const Tools = ({ each }) => {
+	return <div theme='column_center'>
+		<Icon name={each.icon} size={100} style={{ fill: '$color_top' }} />
+		<Typography type='h4' label={each.name} />
+	</div>;
+};
+
 const Page = () => {
 	return <div style={{
 		padding: '40px',
@@ -132,7 +164,8 @@ const Page = () => {
 			<Typography type='h1'>Torrin Z. Leonard</Typography>
 			<Typography type='p1'>Full Stack Software Developer, located in <i>Waterloo, Ontario, Canada</i></Typography>
 		</div>
-		<Paper>
+
+		<Paper style={{ paddingBottom: '100px' }}>
 			<Typography type='h1'>Work</Typography>
 			<div theme='center_column'>
 				<Work each={work} />
@@ -140,8 +173,8 @@ const Page = () => {
 		</Paper>
 		<Paper>
 			<Typography type='h1'>Tools</Typography>
-			<div theme='center_column'>
-				{/* put tools and info on what stack I have experience with */}
+			<div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 20 }}>
+				<Tools each={tools} />
 			</div>
 		</Paper>
 
@@ -155,9 +188,11 @@ const Page = () => {
 };
 
 mount(document.body, window.location.pathname === '/' ? <Theme value={theme.theme}>
-	<Gradient>
-		<Collision />
-		<Controls />
-		<Page />
-	</Gradient>
+	<Icons value={theme.icons}>
+		<Gradient>
+			<Collision />
+			<Controls />
+			<Page />
+		</Gradient>
+	</Icons >
 </Theme> : <NotFound />);
