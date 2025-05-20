@@ -17,7 +17,6 @@ const loadEnv = async (filePath = './.env') => {
 if (!process.env.ENV) await loadEnv();
 
 let root = path.resolve(process.env.ENV === 'production' ? './dist' : './frontend');
-console.log("THIS IS ROOT PATH: ", root);
 let server = http();
 
 const start = async () => {

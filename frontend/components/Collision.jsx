@@ -20,7 +20,7 @@ const smoothstep = (min, max, value) => {
 };
 
 // Resets and randomizes an object's state
-const resetObject = (obj) => {
+const resetObject = (obj, circlePosition) => {
 	const range = 20; // spawn range
 	obj.position.set(
 		random(-range, range),
@@ -28,11 +28,25 @@ const resetObject = (obj) => {
 		random(-range, range)
 	);
 
-	// Give a random velocity "impulse"
-	const vx = random(-0.8, 0.8);
-	const vy = random(-0.8, 0.8);
-	const vz = random(-0.8, 0.8);
-	obj.userData.velocity.set(vx, vy, vz);
+	// Calculate direction from circle to object
+	const direction = new THREE.Vector3().subVectors(obj.position, circlePosition).normalize();
+
+	// Calculate tangential vector (perpendicular to direction)
+	let tangential = new THREE.Vector3(0, 0, 1).cross(direction).normalize();
+
+	// If direction is parallel to Z-axis, choose another perpendicular axis
+	if (tangential.length() === 0) {
+		tangential = new THREE.Vector3(1, 0, 0).cross(direction).normalize();
+	}
+
+	// Assign velocity with both radial and tangential components
+	const radialSpeed = random(-0.2, 0.2); // Reduced radial component
+	const tangentialSpeed = random(0.3, 0.6); // Increased tangential component for orbiting
+	obj.userData.velocity.set(
+		direction.x * radialSpeed + tangential.x * tangentialSpeed,
+		direction.y * radialSpeed + tangential.y * tangentialSpeed,
+		direction.z * radialSpeed + tangential.z * tangentialSpeed
+	);
 
 	// Random rotation axis + speed
 	obj.userData.rotationAxis.set(
@@ -44,7 +58,7 @@ const resetObject = (obj) => {
 
 	// Age / life
 	obj.userData.age = 0;
-	obj.userData.lifetime = random(200, 500);
+	obj.userData.lifetime = random(300, 600); // Increased lifetime for longer existence
 
 	// Start scale almost zero
 	obj.userData.scale = 0.001;
@@ -58,7 +72,7 @@ export default Theme.use(theme => {
 		const settings = {
 			dpr: [1, 3],
 			shadowMapSize: [1024, 1024],
-			antialias: true,
+			antialias: false,
 			useShadows: true,
 		};
 
@@ -171,7 +185,7 @@ export default Theme.use(theme => {
 			return geometry;
 		};
 
-		const MAX_OBJECTS = 15;
+		const MAX_OBJECTS = 15; // Adjust as needed
 		const loadedObjects = [];
 		const loader = new GLTFLoader();
 
@@ -194,7 +208,7 @@ export default Theme.use(theme => {
 						mesh.userData.lifetime = 300;
 						mesh.userData.scale = 0.001;
 
-						resetObject(mesh);
+						resetObject(mesh, circlePosition);
 						scene.add(mesh);
 
 						loadedObjects.push(mesh);
@@ -336,22 +350,27 @@ export default Theme.use(theme => {
 				const life = obj.userData.lifetime;
 				const t = age / life;
 
-				// A curve to quickly grow up to about ~0.15 in time, then slowly shrink
+				// Update scale
 				let scl = smoothstep(0.0, 0.15, t) * (1.0 - Math.pow(Math.max(0.0, Math.abs(t) * 2.0 - 1.0), 10.0)) * 1.4;
 				if (scl < 0.001) scl = 0.001;
 				obj.userData.scale = scl;
 				obj.scale.setScalar(scl);
 
-				if (age > life) resetObject(obj);
+				if (age > life) resetObject(obj, circlePosition);
 
 				if (obj.userData.scale > 0.002) {
 					const forceDir = new THREE.Vector3().subVectors(circlePosition, obj.position);
 					const dist2 = forceDir.lengthSq();
-					const attractionMultiplier = 400.0;
+					const attractionMultiplier = 300.0; // Adjusted for balance
+
 					if (dist2 > 0.00001) {
 						forceDir.normalize();
 						obj.userData.velocity.addScaledVector(forceDir, attractionMultiplier * 0.000015);
 					}
+
+					// Calculate and apply tangential force
+					const tangentialForce = new THREE.Vector3().crossVectors(forceDir, new THREE.Vector3(0, 0, 1)).normalize().multiplyScalar(0.00002);
+					obj.userData.velocity.add(tangentialForce);
 
 					// Fling away if circle is moving quickly
 					const circleRadius = circleCurrentScale;
@@ -370,7 +389,15 @@ export default Theme.use(theme => {
 					}
 				}
 
-				obj.userData.velocity.multiplyScalar(0.97);
+				// Increased damping factor for longer-lasting velocity
+				obj.userData.velocity.multiplyScalar(0.99); // Changed from 0.97
+
+				// Optional: Limit maximum velocity to prevent excessive speeds
+				const maxVelocity = 2.0;
+				if (obj.userData.velocity.length() > maxVelocity) {
+					obj.userData.velocity.setLength(maxVelocity);
+				}
+
 				obj.position.add(obj.userData.velocity);
 
 				if (obj.userData.rotationAxis) {

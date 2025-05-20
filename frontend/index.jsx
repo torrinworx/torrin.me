@@ -4,21 +4,14 @@ import { Button, Theme, Typography, Radio, Toggle, Paper, Gradient, TextField } 
 import theme from './theme';
 import Collision from './components/Collision';
 
-const Controls = () => {
-	const SelectRadio = Radio(window.colorMode);
-
-	return <div theme='center' style={{ paddingTop: 20, userSelect: 'none' }}>
-		<Paper style={{ width: 250 }}>
-			<div theme='center_row' style={{ gap: 8 }}>
-				<SelectRadio style={{ color: '$color_red' }} value={'red'} />
-				<SelectRadio style={{ color: '$color_purple' }} value={'purple'} />
-				<SelectRadio style={{ color: '$color_cyan' }} value={'cyan'} />
-				<SelectRadio style={{ color: '$color_gold' }} value={'gold'} />
-				<Toggle value={window.themeMode} />
-			</div>
-		</Paper>
-	</div>;
-};
+Theme.define({
+	clear: {
+		padding: 20,
+		gap: 40,
+		display: 'flex',
+		flexDirection: 'column',
+	}
+});
 
 const NotFound = () => <Theme value={theme.theme}>
 	<Gradient>
@@ -39,49 +32,125 @@ const NotFound = () => <Theme value={theme.theme}>
 	</Gradient>
 </Theme>;
 
+const Controls = () => {
+	const SelectRadio = Radio(window.colorMode);
+
+	return <div theme='center' style={{ paddingTop: 20, userSelect: 'none' }}>
+		<Paper style={{ width: 250 }}>
+			<div theme='center_row' style={{ gap: 8 }}>
+				<SelectRadio style={{ color: '$color_red' }} value={'red'} />
+				<SelectRadio style={{ color: '$color_purple' }} value={'purple'} />
+				<SelectRadio style={{ color: '$color_cyan' }} value={'cyan'} />
+				<SelectRadio style={{ color: '$color_gold' }} value={'gold'} />
+				<Toggle value={window.themeMode} />
+			</div>
+		</Paper>
+	</div>;
+};
+
+const experience = [
+	{
+		"start": "2023-03-01",
+		"image": "./EquatorLogo.svg",
+		"url": "https://equatorstudios.com/",
+		"style": {
+			"height": "5rem",
+			"width": "auto",
+		},
+		"header": "Equator Studios",
+		"position": "Software Developer",
+		"content": "As a Software Developer at Equator Studios, I've spent the past few months focusing on enhancing our mapping and design software. Our platform is used by professionals all over the world, and my goal is to make it as easy and intuitive as possible for them to create and share their maps. With Equator Studios, I've had the chance to use and deepen my knowledge in a range of technologies including React, JavaScript, Express.js, MongoDB, WSL, Linux/Ubuntu, Docker, GitLab, and CI. Some of the exciting projects I've worked on include the implementation of our new Site Selector and the development of our Segmentation AI product. I'm eager to continue expanding my skillset and contributing to the ongoing evolution of Equator Studios."
+	},
+	{
+		"start": "2021-10-01",
+		"image": "./ThisCozyStudioLogo.svg",
+		// "url": "https://www.thiscozystudio.com/",
+		"style": {
+			"height": "5rem"
+		},
+		"header": "This Cozy Studio",
+		"position": "Co-Founder, CEO, Lead Software Engineer and Web Developer",
+		"content": "As the Co-Founder, CEO, and Lead Software Engineer of This Cozy Studio Inc, I've driven the company's growth through my diverse technical abilities, leadership, and management skills. My contributions include the development of 'Blend_My_NFTs', a popular 3D model NFT generator operating as a Blender add-on, and the creation of multiple NFT collections for our clients, among them Cozy Place, Vox Coodles, Omni Coin, Metapanda, and AKidCalledBeast. Additionally, I designed and developed our company's website, ThisCozyStudio.com, and implemented a cloud rendering, storage, and NFT minting platform, making it easier for 3D graphical artists to launch their own 3D NFT collections."
+	},
+	{
+		"start": "2021-03-01",
+		"end": "2022-05-01",
+		"image": "./LeagueLogo.jpg",
+		"url": "https://www.league.com/",
+		"style": {
+			"height": "5rem",
+			"width": "auto",
+			"borderRadius": "50%"
+		},
+		"header": "League",
+		"position": "QA, Accessibility, and Automation Software Tester",
+		"content": "As a Quality Assurance Engineer at League, I had the privilege of working on the development of President Choice's 'PC Health' app and League's Health OS website. I utilized my TypeScript/JavaScript skills to develop automated tests using TestCafe. I also conducted manual testing and accessibility testing to ensure that the app and website met the WCAG accessibility standards. I worked closely with the development team and my colleagues at worX4you Inc. to provide feedback and suggestions for improvements. This was an enriching experience where I could apply my skills in automated testing, accessibility testing, and teamwork."
+	},
+	{
+		"start": "2013-06-01",
+		"image": "./worX4youLogo.jpg",
+		"url": "https://www.worx4you.com/",
+		"style": {
+			"height": "5rem",
+			"width": "auto",
+			"borderRadius": "50%"
+		},
+		"header": "worX4you Inc.",
+		"position": "QA, Accessibility, and Automation Software Tester",
+		"content": "As a Software Assurance Engineer contractor at worx4You, I had the opportunity to work on multiple projects for companies such as THRILLWORKS, League, TunnelBear, Hubba, and Hopscotch. In this role, I was responsible for manual and automation testing using tools such as Jira, Slack, Visual Studio Code, Javascript, TypeScript, and TestCafe. Additionally, I conducted research on and implemented WCAG accessibility standards to ensure that the companies I worked with were following accessibility standards. Through my work at worx4You, I gained valuable experience in software testing and accessibility, and I am excited to continue to develop my skills in these areas."
+	}
+];
+
+const Experience = ({ each }) => {
+	return <div theme='row'>
+		<img src={each.image} style={{ ...each.style }} />
+
+		{/* Somehow need to make this virticle bar perfectly centered so it aligns with each other experience time item*/}
+		<div style={{
+			padding: '40px',
+		}}>
+			<div theme='primary' style={{
+				color: '$color_text',
+				borderLeft: '6px solid $color_text',
+				height: '500px',
+			}} />
+		</div>
+
+		<div theme='column'>
+			<Typography type='h2' label={each.header} />
+			<Typography type='h5' label={each.position} />
+			<Typography type='p1' label={each.content} />
+		</div>
+	</div>;
+};
+
+const Page = () => {
+	return <div style={{
+		padding: '40px',
+		gap: '40px',
+		display: 'flex',
+		flexDirection: 'column',
+		height: '100%',
+		minHeight: '100vh'
+	}}>
+		<div theme='clear' style={{ height: '75', minHeight: '75vh' }}>
+			<Typography type='h1'>Torrin Z. Leonard</Typography>
+			<Typography type='p1'>Full Stack Software Developer, located in <i>Waterloo, Ontario, Canada</i></Typography>
+		</div>
+
+		<Paper>
+			<Typography type='h1'>My Experience</Typography>
+
+			<Experience each={experience} />
+		</Paper>
+	</div>;
+};
+
 const App = () => <Theme value={theme.theme}>
 	<Gradient>
 		<Collision />
 		<Controls />
-
-		<Typography type='h1'>Torrin Z. Leonard</Typography>
-		<Typography type='p1'>Full Stack Software Developer</Typography>
-		<Typography type='p1'>Waterloo, Ontario, Canada</Typography>
-
-		<div style={{ height: 375 }}></div>
-		<div style={{
-			padding: 20,
-			gap: 40,
-			display: 'flex',
-			flexDirection: 'column',
-		}}>
-			<Paper>
-				<Typography type='h5' label='UI Component Test:' />
-
-				<Typography type='h1' label='Header 1' />
-				<Typography type='h1' label='Header 2' />
-				<Typography type='h1' label='Header 3' />
-				<Typography type='h1' label='Header 4' />
-				<Typography type='h1' label='Header 5' />
-				<Typography type='h1' label='Header 6' />
-				<Typography type='h1' label='Paragraph 1' />
-				<Typography type='h1' label='Paragraph 2' />
-				<Typography type='p1_regular' label='Paragraph 1 Regular' />
-				<Typography type='p1_bold' label='Paragraph 1 Bold' />
-				<Typography type='p1_italic' label='Paragraph 1 Italic' />
-				<div theme='row' style={{ gap: 10 }}>
-					<Button type='contained' label='Button' onClick={() => { }} />
-					<Button type='outlined' label='Button' onClick={() => { }} />
-					<Button type='text' label='Button' onClick={() => { }} />
-				</div>
-				<div theme='column' style={{ gap: 10 }} >
-					<TextField placeholder='Email' value={Observer.mutable('')} />
-					<TextField />
-					<TextField />
-				</div>
-				<Toggle value={Observer.mutable(false)} />
-			</Paper>
-		</div>
+		<Page />
 	</Gradient>
 </Theme>;
 

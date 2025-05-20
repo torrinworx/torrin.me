@@ -76,9 +76,12 @@ const theme = OObject({
 		color: '$color_main',
 		maxWidth: 'inherit',
 		maxHeight: 'inherit',
-		padding: 10,
 		background: '$alpha($color_main, 0.4)',
-		backdropFilter: 'blur(5px)'
+		backdropFilter: 'blur(25px)',
+		padding: 20,
+		gap: 40,
+		display: 'flex',
+		flexDirection: 'column',
 	},
 
 	radius: {
