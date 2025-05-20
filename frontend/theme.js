@@ -28,7 +28,6 @@ const colorModes = {
 const themeModes = {
 	light: {
 		$color_main: '$color',
-		$color_top: '$color_white',
 		$color_hover_top: '$color_white',
 		$color_grad_tr: '$color_white',
 		$color_grad_bl: '$color',
@@ -36,7 +35,6 @@ const themeModes = {
 
 	dark: {
 		$color_main: '$color',
-		$color_top: '$color_white',
 		$color_hover_top: '$color_white',
 		$color_grad_tr: '$color_black',
 		$color_grad_bl: '$color',
@@ -60,9 +58,7 @@ const theme = OObject({
 		$color: '$color_main',
 		$color_text: '$contrast_text($color_main)',
 		$color_top: '$contrast_text($color_main)',
-
 		$color_hover: '$saturate($shiftBrightness($color_main, -.3), -.3)',
-		// $color_top: '$color_top',
 	},
 
 	// Need to handle the $color_top slot here specially when switching between light/dark mode?

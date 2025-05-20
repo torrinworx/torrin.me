@@ -6,7 +6,6 @@ export const isOnTouchScreen = ('ontouchstart' in window);
 
 const models = ['cone.glb', 'cube.glb', 'sphere.glb', 'suzanne.glb', 'torus.glb'];
 
-// Simple random utility
 const random = (min = 1, max) => {
 	if (max === undefined) {
 		max = min;
@@ -15,20 +14,14 @@ const random = (min = 1, max) => {
 	return (Math.random() * (max - min) + min);
 };
 
-// Smoothstep function
 const smoothstep = (min, max, value) => {
 	const x = Math.max(0, Math.min(1, (value - min) / (max - min)));
 	return x * x * (3 - 2 * x);
 };
 
-// A curve to quickly grow up to about ~0.15 in time, then slowly shrink
-const customCurve = (x) => {
-	return smoothstep(0.0, 0.15, x) * (1.0 - Math.pow(Math.max(0.0, Math.abs(x) * 2.0 - 1.0), 10.0));
-};
-
 // Resets and randomizes an object's state
 const resetObject = (obj) => {
-	const range = 10; // spawn range
+	const range = 20; // spawn range
 	obj.position.set(
 		random(-range, range),
 		random(-range, range),
@@ -71,34 +64,51 @@ export default Theme.use(theme => {
 
 		let camera, renderer;
 
-		// Use a single material reference:
 		const defaultMaterial = new THREE.MeshStandardMaterial({
 			roughness: 1,
-			metalness: 0.0,
-			emissiveIntensity: 0.2,
+			metalness: 0,
+			emissiveIntensity: 0.3,
 			flatShading: false,
 		});
 
-		// Handle dynamic color changes for theming
+		const secondaryMaterial = new THREE.MeshStandardMaterial({
+			roughness: 1,
+			metalness: 0,
+			emissiveIntensity: 0.3,
+			flatShading: false,
+		});
+
 		const transitionDuration = 250;
 		let isTransitioning = false;
 		let transitionStartTime = 0;
 		const startColor = new THREE.Color();
 		const targetColor = new THREE.Color();
 
-		// React to "color_main" in your theme:
-		const color = theme("*").vars("color_main");
-		color.effect(newColor => {
-			console.log("New color:", newColor);
+		let isSecondaryTransitioning = false;
+		let secondaryTransitionStartTime = 0;
+		const secondaryStartColor = new THREE.Color();
+		const secondaryTargetColor = new THREE.Color();
+
+		const colorMain = theme("*").vars("color_main");
+		colorMain.effect(newColor => {
 			startColor.copy(defaultMaterial.color);
 			targetColor.set(newColor);
 			transitionStartTime = performance.now();
 			isTransitioning = true;
 		});
 
-		// Easing function for color
+		const colorSecond = theme("*").vars('color_grad_tr');
+		colorSecond.effect(newColor => {
+			secondaryStartColor.copy(secondaryMaterial.color);
+			secondaryTargetColor.set(newColor);
+			secondaryTransitionStartTime = performance.now();
+			isSecondaryTransitioning = true;
+		});
+
 		const easeInOutCubic = (t) => {
-			return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+			return t < 0.5
+				? 4 * t * t * t
+				: 1 - Math.pow(-2 * t + 2, 3) / 2;
 		};
 
 		const handleColorTransition = () => {
@@ -116,7 +126,21 @@ export default Theme.use(theme => {
 			}
 		};
 
-		// Mouse circle
+		const handleSecondaryColorTransition = () => {
+			const currentTime = performance.now();
+			const elapsed = currentTime - secondaryTransitionStartTime;
+			const t = Math.min(elapsed / transitionDuration, 1);
+			const easedT = easeInOutCubic(t);
+
+			secondaryMaterial.color.copy(secondaryStartColor).lerp(secondaryTargetColor, easedT);
+			secondaryMaterial.emissive.copy(secondaryStartColor).lerp(secondaryTargetColor, easedT);
+
+			if (t >= 1) {
+				isSecondaryTransitioning = false;
+				secondaryStartColor.copy(secondaryTargetColor);
+			}
+		};
+
 		let circle;
 		const mouse = new THREE.Vector2();
 		const mousePosition = new THREE.Vector3();
@@ -147,22 +171,22 @@ export default Theme.use(theme => {
 			return geometry;
 		};
 
-		// Increase the count for a fuller effect
 		const MAX_OBJECTS = 15;
 		const loadedObjects = [];
 		const loader = new GLTFLoader();
 
+		const objectsByType = {};
 		const spawnAllObjects = () => {
 			for (let i = 0; i < MAX_OBJECTS; i++) {
 				const modelPath = models[Math.floor(Math.random() * models.length)];
 				loader.load(modelPath, (gltf) => {
 					const mesh = gltf.scene.children.find(child => child instanceof THREE.Mesh);
 					if (mesh) {
-						// Instead of cloning the material, use the single shared reference:
 						mesh.material = defaultMaterial;
 						mesh.castShadow = settings.useShadows;
 						mesh.receiveShadow = settings.useShadows;
 
+						mesh.userData.modelPath = modelPath;
 						mesh.userData.velocity = new THREE.Vector3();
 						mesh.userData.rotationAxis = new THREE.Vector3();
 						mesh.userData.rotationSpeed = 0.01;
@@ -172,13 +196,26 @@ export default Theme.use(theme => {
 
 						resetObject(mesh);
 						scene.add(mesh);
+
 						loadedObjects.push(mesh);
+
+						if (!objectsByType[modelPath]) {
+							objectsByType[modelPath] = [];
+						}
+						objectsByType[modelPath].push(mesh);
+
+						const objs = objectsByType[modelPath];
+						const n = objs.length;
+						const half = Math.floor(n / 2);
+
+						for (let j = 0; j < n; j++) {
+							objs[j].material = (j < half) ? secondaryMaterial : defaultMaterial;
+						}
 					}
 				});
 			}
 		};
 
-		// Basic bounding-sphere collisions
 		const handleCollisions = () => {
 			for (let i = 0; i < loadedObjects.length; i++) {
 				const objA = loadedObjects[i];
@@ -203,11 +240,9 @@ export default Theme.use(theme => {
 						const overlap = minDist - dist;
 						delta.normalize();
 
-						// Separate them
 						posA.addScaledVector(delta, -overlap * 0.5);
 						posB.addScaledVector(delta, overlap * 0.5);
 
-						// Basic bounce
 						const velA = objA.userData.velocity;
 						const velB = objB.userData.velocity;
 						if (velA && velB) {
@@ -216,7 +251,6 @@ export default Theme.use(theme => {
 							velA.addScaledVector(delta, dotB - dotA);
 							velB.addScaledVector(delta, dotA - dotB);
 
-							// Slight damping
 							velA.multiplyScalar(0.9);
 							velB.multiplyScalar(0.9);
 						}
@@ -294,7 +328,6 @@ export default Theme.use(theme => {
 			const circleSpeed = circleVelocity.length();
 			circlePreviousPosition.copy(circlePosition);
 
-			// Update all objects
 			loadedObjects.forEach((obj) => {
 				if (!obj.userData) return;
 
@@ -303,15 +336,13 @@ export default Theme.use(theme => {
 				const life = obj.userData.lifetime;
 				const t = age / life;
 
-				let scl = customCurve(t) * 1.4;
+				// A curve to quickly grow up to about ~0.15 in time, then slowly shrink
+				let scl = smoothstep(0.0, 0.15, t) * (1.0 - Math.pow(Math.max(0.0, Math.abs(t) * 2.0 - 1.0), 10.0)) * 1.4;
 				if (scl < 0.001) scl = 0.001;
 				obj.userData.scale = scl;
 				obj.scale.setScalar(scl);
 
-				if (age > life) {
-					// Instead of removing, reset the object
-					resetObject(obj);
-				}
+				if (age > life) resetObject(obj);
 
 				if (obj.userData.scale > 0.002) {
 					const forceDir = new THREE.Vector3().subVectors(circlePosition, obj.position);
@@ -342,7 +373,6 @@ export default Theme.use(theme => {
 				obj.userData.velocity.multiplyScalar(0.97);
 				obj.position.add(obj.userData.velocity);
 
-				// Rotate
 				if (obj.userData.rotationAxis) {
 					obj.rotateOnAxis(obj.userData.rotationAxis, obj.userData.rotationSpeed);
 				}
@@ -351,6 +381,7 @@ export default Theme.use(theme => {
 			handleCollisions();
 
 			if (isTransitioning) handleColorTransition();
+			if (isSecondaryTransitioning) handleSecondaryColorTransition();
 
 			renderer.render(scene, camera);
 		};
@@ -379,7 +410,6 @@ export default Theme.use(theme => {
 			scene.add(targetObject);
 			targetObject.position.set(0, 0, 0);
 
-			// Set the spotlight's target to the target object
 			spotLight.target = targetObject;
 			spotLight.castShadow = settings.useShadows;
 			spotLight.shadow.mapSize.width = settings.shadowMapSize[0];
