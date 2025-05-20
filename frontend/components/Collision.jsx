@@ -70,12 +70,13 @@ export default Theme.use(theme => {
 		};
 
 		let camera, renderer;
+
+		// Use a single material reference:
 		const defaultMaterial = new THREE.MeshStandardMaterial({
-			roughness: 0.8,
+			roughness: 1,
 			metalness: 0.0,
-			emissiveIntensity: 0.3,
-			flatShading: false,    // Show facets a bit more
-			// wireframe: false      // Turn off wireframe, but facets remain visible
+			emissiveIntensity: 0.2,
+			flatShading: false,
 		});
 
 		// Handle dynamic color changes for theming
@@ -85,15 +86,17 @@ export default Theme.use(theme => {
 		const startColor = new THREE.Color();
 		const targetColor = new THREE.Color();
 
+		// React to "color_main" in your theme:
 		const color = theme("*").vars("color_main");
 		color.effect(newColor => {
-			console.log(newColor);
+			console.log("New color:", newColor);
 			startColor.copy(defaultMaterial.color);
 			targetColor.set(newColor);
 			transitionStartTime = performance.now();
 			isTransitioning = true;
 		});
 
+		// Easing function for color
 		const easeInOutCubic = (t) => {
 			return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 		};
@@ -104,9 +107,8 @@ export default Theme.use(theme => {
 			const t = Math.min(elapsed / transitionDuration, 1);
 			const easedT = easeInOutCubic(t);
 
-			const currentColor = new THREE.Color().copy(startColor).lerp(targetColor, easedT);
-			defaultMaterial.color.copy(currentColor);
-			// Optionally tie emissive to the same color so it "pops" slightly
+			defaultMaterial.color.copy(startColor).lerp(targetColor, easedT);
+			defaultMaterial.emissive.copy(startColor).lerp(targetColor, easedT);
 
 			if (t >= 1) {
 				isTransitioning = false;
@@ -114,7 +116,7 @@ export default Theme.use(theme => {
 			}
 		};
 
-		// Mouse circle geometry
+		// Mouse circle
 		let circle;
 		const mouse = new THREE.Vector2();
 		const mousePosition = new THREE.Vector3();
@@ -146,7 +148,7 @@ export default Theme.use(theme => {
 		};
 
 		// Increase the count for a fuller effect
-		const MAX_OBJECTS = 30;
+		const MAX_OBJECTS = 15;
 		const loadedObjects = [];
 		const loader = new GLTFLoader();
 
@@ -156,8 +158,8 @@ export default Theme.use(theme => {
 				loader.load(modelPath, (gltf) => {
 					const mesh = gltf.scene.children.find(child => child instanceof THREE.Mesh);
 					if (mesh) {
-						const mat = defaultMaterial.clone();
-						mesh.material = mat;
+						// Instead of cloning the material, use the single shared reference:
+						mesh.material = defaultMaterial;
 						mesh.castShadow = settings.useShadows;
 						mesh.receiveShadow = settings.useShadows;
 
@@ -281,7 +283,7 @@ export default Theme.use(theme => {
 			circleCurrentScale += (targetScale - circleCurrentScale) * 0.1;
 			circle.scale.setScalar(circleCurrentScale);
 
-			// Circle rotate
+			// Circle rotation
 			const rotationSpeed = pointerFocus ? 0.05 : 0.01;
 			circleRotation += rotationSpeed;
 			circle.rotation.z = circleRotation;
@@ -301,26 +303,22 @@ export default Theme.use(theme => {
 				const life = obj.userData.lifetime;
 				const t = age / life;
 
-				// Make objects bigger overall
 				let scl = customCurve(t) * 1.4;
 				if (scl < 0.001) scl = 0.001;
 				obj.userData.scale = scl;
 				obj.scale.setScalar(scl);
 
 				if (age > life) {
-					// Instead of removing, reset 
+					// Instead of removing, reset the object
 					resetObject(obj);
 				}
 
-				// Reduce attraction so they're more airy
 				if (obj.userData.scale > 0.002) {
 					const forceDir = new THREE.Vector3().subVectors(circlePosition, obj.position);
 					const dist2 = forceDir.lengthSq();
-					// Lower multiplier than before
 					const attractionMultiplier = 400.0;
 					if (dist2 > 0.00001) {
 						forceDir.normalize();
-						// slightly smaller factor => less "weight"
 						obj.userData.velocity.addScaledVector(forceDir, attractionMultiplier * 0.000015);
 					}
 
@@ -336,17 +334,15 @@ export default Theme.use(theme => {
 							.normalize();
 						if (obj.userData.velocity.dot(normal) < 0) {
 							obj.userData.velocity.reflect(normal);
-							// Boost the bounce a bit
 							obj.userData.velocity.multiplyScalar(1.2);
 						}
 					}
 				}
 
-				// Slightly lower damping => more floaty
 				obj.userData.velocity.multiplyScalar(0.97);
 				obj.position.add(obj.userData.velocity);
 
-				// Rotate about random axis
+				// Rotate
 				if (obj.userData.rotationAxis) {
 					obj.rotateOnAxis(obj.userData.rotationAxis, obj.userData.rotationSpeed);
 				}
@@ -376,28 +372,32 @@ export default Theme.use(theme => {
 			camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
 			camera.position.set(0, 0, 30);
 			scene.add(camera);
+			const spotLight = new THREE.SpotLight(0xffffff, 2000, 100.0);
+			spotLight.position.set(0, 30, 10);
 
-			const spotLight = new THREE.SpotLight(0xffffff, 100);
-			spotLight.position.set(0, 10, 0);
+			const targetObject = new THREE.Object3D();
+			scene.add(targetObject);
+			targetObject.position.set(0, 0, 0);
+
+			// Set the spotlight's target to the target object
+			spotLight.target = targetObject;
 			spotLight.castShadow = settings.useShadows;
 			spotLight.shadow.mapSize.width = settings.shadowMapSize[0];
 			spotLight.shadow.mapSize.height = settings.shadowMapSize[1];
 			scene.add(spotLight);
 
-			// Mouse circle
 			const circleGeometry = createCircleGeometry(1, 12);
 			const circleMaterial = new THREE.LineBasicMaterial({
 				color: 0xffffff,
-				depthTest: false
+				depthTest: false,
+				depthWrite: false,
 			});
 			circle = new THREE.LineLoop(circleGeometry, circleMaterial);
 			scene.add(circle);
 
-			// Spawn objects
 			spawnAllObjects();
 			swoopStartTime = performance.now();
 
-			// Events
 			window.addEventListener('pointermove', handlePointerMove);
 			window.addEventListener('resize', updateCamera);
 
