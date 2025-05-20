@@ -6,7 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"start": "node ./backend/index.js",
-		"dev": "nodemon  --watch ./destamatic-ui  --watch ./backend --exec node ./backend/index.js",
+		"dev": "nodemon --watch ./frontend --watch ./destamatic-ui --watch ./backend --exec node ./backend/index.js",
 		"build": "bash build.sh",
 		"test": "node --test"
 	},
@@ -20,21 +20,20 @@
 		"url": "https://github.com/torrinworx/torrinleonard.com/issues"
 	},
 	"homepage": "https://github.com/torrinworx/torrinleonard.com#readme",
-	"dependencies": {
-		"cannon-es": "^0.20.0",
-		"destam": "^0.5.3",
-		"destam-dom": "^0.11.3",
-		"destamatic-ui": "file:destamatic-ui",
-		"dotenv": "^16.4.5",
-		"three": "^0.176.0"
-	},
 	"devDependencies": {
 		"@babel/core": "^7.25.2",
 		"@babel/generator": "^7.25.6",
 		"@babel/parser": "^7.25.6",
 		"@babel/plugin-syntax-jsx": "^7.24.7",
-		"esbuild": "^0.24.0",
+		"cannon-es": "^0.20.0",
+		"destam": "^0.5.3",
+		"destam-dom": "^0.11.3",
+		"destamatic-ui": "file:destamatic-ui",
+		"esbuild": "^0.25.4",
 		"nodemon": "^3.1.7",
-		"vite": "^5.4.11"
-	}
+		"three": "^0.176.0",
+		"vite": "^5.4.11",
+		"dotenv": "^16.5.0"
+	},
+	"dependencies": {}
 }

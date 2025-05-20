@@ -1,0 +1,16 @@
+# systemd service file for prod
+# file should be placed in /etc/systemd/system/torrin.service
+
+[Unit]
+Description=torrin.me
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/torrin.me/build/run.sh
+WorkingDirectory=/home/torrin.me/build
+Restart=always
+EnvironmentFile=/home/torrin.me/.env
+
+[Install]
+WantedBy=multi-user.target
