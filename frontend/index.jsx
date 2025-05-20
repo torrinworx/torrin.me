@@ -48,7 +48,7 @@ const Controls = () => {
 	</div>;
 };
 
-const experience = [
+const work = [
 	{
 		'start': '2023-03-01',
 		'image': './EquatorLogo.svg',
@@ -86,8 +86,8 @@ const experience = [
 	}
 ];
 
-const Experience = ({ each }) => {
-	const index = experience.indexOf(each);
+const Work = ({ each }) => {
+	const index = work.indexOf(each);
 
 	const Header = () => <div style={{
 		display: 'flex',
@@ -132,22 +132,32 @@ const Page = () => {
 			<Typography type='h1'>Torrin Z. Leonard</Typography>
 			<Typography type='p1'>Full Stack Software Developer, located in <i>Waterloo, Ontario, Canada</i></Typography>
 		</div>
+		<Paper>
+			<Typography type='h1'>Work</Typography>
+			<div theme='center_column'>
+				<Work each={work} />
+			</div>
+		</Paper>
+		<Paper>
+			<Typography type='h1'>Tools</Typography>
+			<div theme='center_column'>
+				{/* put tools and info on what stack I have experience with */}
+			</div>
+		</Paper>
 
 		<Paper>
-			<Typography type='h1'>My Experience</Typography>
+			<Typography type='h1'>Projects</Typography>
 			<div theme='center_column'>
-				<Experience each={experience} />
+				{/* List out github projects */}
 			</div>
 		</Paper>
 	</div>;
 };
 
-const App = () => <Theme value={theme.theme}>
+mount(document.body, window.location.pathname === '/' ? <Theme value={theme.theme}>
 	<Gradient>
 		<Collision />
 		<Controls />
 		<Page />
 	</Gradient>
-</Theme>;
-
-mount(document.body, window.location.pathname === '/' ? <App /> : <NotFound />);
+</Theme> : <NotFound />);
