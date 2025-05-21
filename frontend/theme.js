@@ -51,7 +51,7 @@ const theme = OObject({
 		fontFamily: 'IBM Plex Sans',
 		fontWeight: 600,
 		boxSizing: 'border-box',
-		transition: `opacity ${transition}, box-shadow ${transition}, background-color ${transition}, color ${transition}, border-color ${transition}`,
+		transition: `opacity ${transition}, box-shadow ${transition}, background-color ${transition}, color ${transition}, border-color ${transition}, stroke ${transition}`,
 		...mainColors,
 	}),
 
@@ -305,7 +305,9 @@ window.themeMode.effect(mode => atomic(() => {
 export default {
 	theme,
 	icons: [{
-		vite: SimpleIcons('vite'),
+		linkedinFI: FeatherIcons('linkedin'),
+		gitlabFI: FeatherIcons('gitlab'),
+		githubFI: FeatherIcons('github'),
 		// 	search: FeatherIcons('search'),
 		// 	x: FeatherIcons('x'),
 		// 	user: FeatherIcons('user'),
