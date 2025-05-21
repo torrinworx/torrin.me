@@ -1,5 +1,5 @@
 import { mount, Observer } from 'destam-dom';
-import { Button, Theme, Typography, Radio, Toggle, Paper, Gradient, Icons, Icon, Detached, popups } from 'destamatic-ui';
+import { Button, Theme, Typography, Radio, Toggle, Paper, Gradient, Icons, Icon, Detached, popups, ColorPicker } from 'destamatic-ui';
 
 import theme from './theme';
 import Collision from './components/Collision';
@@ -44,8 +44,8 @@ const Controls = () => {
 			top: 0,
 		}}
 	>
-		<Paper style={{ width: 250, padding: 10 }}>
-			<div theme='center_row' style={{ gap: 8 }}>
+		<Paper style={{ padding: 0 }}>
+			<div theme='center_row' style={{ padding: 10, gap: 10 }}>
 				<SelectRadio style={{ color: '$color_red' }} value={'red'} />
 				<SelectRadio style={{ color: '$color_purple' }} value={'purple'} />
 				<SelectRadio style={{ color: '$color_cyan' }} value={'cyan'} />
@@ -223,7 +223,7 @@ const Projects = ({ each }) => {
 	</div>;
 };
 
-const Kebab = ({ children, ...props }) => {
+const Kebab = ({ icon, children, ...props }) => {
 	const focused = Observer.mutable(false);
 
 	return <Detached enabled={focused}>
@@ -231,7 +231,7 @@ const Kebab = ({ children, ...props }) => {
 			type='icon'
 			onClick={() => focused.set(!focused.get())}
 			title={props.title}
-			icon={<Icon name='at-sign' style={{ fill: 'none' }} size={65} />}
+			icon={icon}
 		/>
 		<mark:popup>
 			<Paper {...props}>
@@ -295,7 +295,7 @@ const Page = () => {
 				icon={<Icon name='gitlabFI' size={65} style={{ fill: 'none' }} />}
 				onClick={() => window.open('https://gitlab.com/torrin1', '_blank')}
 			/>
-			<Kebab style={{ padding: 10, gap: 10 }} title='Email'>
+			<Kebab icon={<Icon name='at-sign' style={{ fill: 'none' }} size={65} />} style={{ padding: 10, gap: 10 }} title='Email'>
 				<Button title='Copy email address to clipboard.' type='outlined' label='Copy' onClick={() => navigator.clipboard.writeText('torrin@torrin.me')} />
 				<Button title='Open email address in default mailer.' type='outlined' label='Open' onClick={() => window.open('mailto:torrin@torrin.me', '_blank')} />
 			</Kebab>
