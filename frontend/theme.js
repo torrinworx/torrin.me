@@ -51,7 +51,7 @@ const theme = OObject({
 		fontFamily: 'IBM Plex Sans',
 		fontWeight: 600,
 		boxSizing: 'border-box',
-		transition: `opacity ${transition}, box-shadow ${transition}, background-color ${transition}, color ${transition}, border-color ${transition}, stroke ${transition}`,
+		transition: `opacity ${transition}, box-shadow ${transition}, background-color ${transition}, color ${transition}, border-color ${transition}, stroke ${transition}, fill ${transition}`,
 		...mainColors,
 	}),
 
@@ -81,9 +81,7 @@ const theme = OObject({
 		background: '$alpha($color_main, 0.4)',
 		backdropFilter: 'blur(25px)',
 		padding: 40,
-		gap: 40,
-		display: 'flex',
-		flexDirection: 'column',
+		gap: 40
 	},
 
 	radius: {
@@ -286,7 +284,7 @@ const theme = OObject({
 });
 
 window.colorMode = Observer.mutable('red');
-window.themeMode = Observer.mutable(window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
+window.themeMode = Observer.mutable(window.matchMedia('(prefers-color-scheme:dark)').matches ? true : false);
 window.theme = theme;
 
 window.colorMode.effect(color => atomic(() => {

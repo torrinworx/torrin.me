@@ -242,6 +242,8 @@ const Kebab = ({ icon, children, ...props }) => {
 };
 
 const Page = () => {
+	const mode = window.themeMode;
+
 	return <div style={{
 		padding: '40px',
 		gap: '40px',
@@ -252,7 +254,15 @@ const Page = () => {
 			<Typography type='h1'>Torrin Z. Leonard</Typography>
 			<Typography type='p1'>Full Stack Software Developer, located in <i>Waterloo, Ontario, Canada</i></Typography>
 		</div>
-		<Paper style={{ paddingBottom: '100px' }}>
+		<Paper theme='row'>
+			<div theme='column' style={{ width: '100%' }}>
+				<Typography type='h1'>Me</Typography>
+				<Typography style={{ maxWidth: 600 }} type='p1' label={'I am a full stack software developer very passionate about open source, creating clean reliable code that others can use and build on. I like working along side others because it motivates me to create tools that those around me can use and create with. Programming is one of those rare jobs that let\'s you build for yourself and those around you, while giving you the potential to improve the work and lives of others. I am passionate about create ethical and moral tools that can help those around me and those who will be here long after I\'m gone.'} />
+				<Typography style={{ marginTop: 20, maxWidth: 600 }} type='p1' label={'Outside of tech I\'m a digital photographer who loves long walks and bike rides and a good capachino, big supporter of public transit and love walkable pedestrian focused cities. I also love home labbing and have built and run my own rack mount server which houses a NAS and a mineraft server.'} />
+			</div>
+			<img theme='radius' src={mode.map(m => m ? './profile.dark.png' : './profile.light.png')} style={{ height: '30vh' }} />
+		</Paper>
+		<Paper theme='column' style={{ paddingBottom: '100px' }}>
 			<Typography type='h1'>Work</Typography>
 			<Typography type='p1' label='A bit about my work experience.' />
 
@@ -260,14 +270,14 @@ const Page = () => {
 				<Work each={work} />
 			</div>
 		</Paper>
-		<Paper>
+		<Paper theme='column'>
 			<Typography label='Tools' type='h1' />
 			<Typography type='p1' label='These are the tools that I have experience with or have used in my work or on personal projects.' />
 			<div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 20 }}>
 				<Tools each={tools} />
 			</div>
 		</Paper>
-		<Paper>
+		<Paper theme='column'>
 			<Typography type='h1'>Projects</Typography>
 			<Typography type='p1' label='Some personal projects I am proud of and want to show off.' />
 
