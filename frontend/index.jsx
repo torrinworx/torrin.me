@@ -1,5 +1,5 @@
-import { mount } from 'destam-dom';
-import { Button, Theme, Typography, Radio, Toggle, Paper, Gradient, Icons, Icon } from 'destamatic-ui';
+import { mount, Observer } from 'destam-dom';
+import { Button, Theme, Typography, Radio, Toggle, Paper, Gradient, Icons, Icon, Detached, popups } from 'destamatic-ui';
 
 import theme from './theme';
 import Collision from './components/Collision';
@@ -123,34 +123,114 @@ const Work = ({ each }) => {
 
 const tools = [
 	{ name: 'JavaScript', icon: 'javascript' },
-	{ name: 'Node.js', icon: 'nodedotjs' },
 	{ name: 'Python', icon: 'python' },
+	{ name: 'TypeScript', icon: 'typescript' },
+	{ name: 'Go', icon: 'go' },
 	{ name: 'Rust', icon: 'rust' },
-	{ name: 'Django', icon: 'django' },
-	{ name: 'FastAPI', icon: 'fastapi' },
+
+	{ name: 'Node.js', icon: 'nodedotjs' },
 	{ name: 'React', icon: 'react' },
 	{ name: 'Express', icon: 'express' },
-	{ name: 'Vite', icon: 'vite' },
+	{ name: 'Django', icon: 'django' },
+	{ name: 'FastAPI', icon: 'fastapi' },
 	{ name: 'Three.js', icon: 'threedotjs' },
-	{ name: 'Blender', icon: 'blender' },
-	{ name: 'Ubuntu', icon: 'ubuntu' },
-	{ name: 'Arch Linux', icon: 'archlinux' },
-	{ name: 'NGINX', icon: 'nginx' },
+	{ name: 'WordPress', icon: 'wordpress' },
+
 	{ name: 'OpenAI API', icon: 'openai' },
-	{ name: 'Docker', icon: 'docker' },
 	{ name: 'Hugging Face', icon: 'huggingface' },
 	{ name: 'Ollama', icon: 'ollama' },
-	{ name: 'DigitalOcean', icon: 'digitalocean' },
-	{ name: 'AWS', icon: 'amazonwebservices' },
-	{ name: 'Heroku', icon: 'heroku' },
+	{ name: 'PyTorch', icon: 'pytorch' },
+	{ name: 'LangChain', icon: 'langchain' },
+	{ name: 'Anaconda', icon: 'anaconda' },
+	{ name: 'Conda Forge', icon: 'condaforge' },
 
+	{ name: 'Git', icon: 'git' },
+	{ name: 'GitHub', icon: 'github' },
+	{ name: 'Gitlab', icon: 'gitlab' },
+	{ name: 'Docker', icon: 'docker' },
+	{ name: 'NGINX', icon: 'nginx' },
+	{ name: 'npm', icon: 'npm' },
+	{ name: 'Vite', icon: 'vite' },
+	{ name: 'Webpack', icon: 'webpack' },
+
+	{ name: 'MongoDB', icon: 'mongodb' },
+	{ name: 'MariaDB', icon: 'mariadb' },
+	{ name: 'CockroachDB', icon: 'cockroachlabs' },
+	{ name: 'Redis', icon: 'redis' },
+
+	{ name: 'DigitalOcean', icon: 'digitalocean' },
+	{ name: 'Heroku', icon: 'heroku' },
+	{ name: 'GoDaddy', icon: 'godaddy' },
+	{ name: 'AWS', icon: 'amazonwebservices' },
+	{ name: 'Google App Script', icon: 'googleappsscript' },
+
+	{ name: 'Ubuntu', icon: 'ubuntu' },
+	{ name: 'Arch Linux', icon: 'archlinux' },
+	{ name: 'Linux Mint', icon: 'linuxmint' },
+	{ name: 'Shell/Terminal', icon: 'gnometerminal' },
+
+	{ name: 'Blender', icon: 'blender' },
 ];
 
 const Tools = ({ each }) => {
 	return <div theme='column_center'>
-		<Icon name={each.icon} size={100} style={{ fill: '$color_top' }} />
+		<Icon name={each.icon} size={75} style={{ fill: '$color_top' }} />
 		<Typography type='h4' label={each.name} />
 	</div>;
+};
+
+const projects = [
+	{
+		url: 'https://github.com/torrinworx/destam-web-core',
+		name: 'destam web core',
+		description: 'A library package that contains core abstractions and utilities of a full stack platform. destam-web-core simplifies and implements features like client/server websocket state syncrhonization, observer based state syncing, MongoDB server state storage, backend websocket module routing system, user signup/login flow and db management, user websocket authentication.',
+	},
+	{
+		url: 'https://opengig.org',
+		name: 'OpenGig.org',
+		description: 'An Open Source platform passion project built for gig workers and customers. A full stack, state streaming, websocket based reactive web application that uses js on the backend and frontend.',
+	},
+	{
+		url: 'https://github.com/torrinworx/MangoSync',
+		name: 'MangoSync',
+		description: 'A music player that enhances your albums with metadata like lyrics, animated art, descriptions, and tags. MangoSync uses a locally modified Whisper audio-to-text AI model to auto transcribe lyrics, first searching online, then aligning and transcribing your songs for Apple Music-style synchronized lyrics.'
+	},
+	{
+		url: 'https://github.com/torrinworx/destamatic-ui',
+		name: 'destamatic ui',
+		description: 'A custom ui component library built on destam and destam-dom reactivity libraries. Similar in style and functionality to MaterialUI components, but snappier thanks to the speed of destam-doms lack of a virtual dom.',
+	},
+	{
+		url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+		name: 'torrin.me',
+		description: 'My personal website! Built using destamatic-ui, destam-dom, and destam state menagement. Where does this link go? 🤔',
+	},
+];
+
+const Projects = ({ each }) => {
+	return <div style={{ maxWidth: 500, padding: '20px', alignItems: 'center', display: 'flex', flexDirection: 'column' }}>
+		<Typography type='h2' label={each.name} />
+		<Typography type='p1' label={each.description} style={{ marginBottom: '10px' }} />
+		<Button type='outlined' label='View' onClick={() => window.open(each.url, '_blank')} />
+	</div>;
+};
+
+const Kebab = ({ children, ...props }) => {
+	const focused = Observer.mutable(false);
+
+	return <Detached enabled={focused}>
+		<Button
+			type='icon'
+			onClick={() => focused.set(!focused.get())}
+			title={props.title}
+			icon={<Icon name='at-sign' style={{ fill: 'none' }} size={65} />}
+		/>
+		<mark:popup>
+			<Paper {...props}>
+				{children}
+			</Paper>
+		</mark:popup>
+	</Detached>
 };
 
 const Page = () => {
@@ -164,26 +244,58 @@ const Page = () => {
 			<Typography type='h1'>Torrin Z. Leonard</Typography>
 			<Typography type='p1'>Full Stack Software Developer, located in <i>Waterloo, Ontario, Canada</i></Typography>
 		</div>
-
 		<Paper style={{ paddingBottom: '100px' }}>
 			<Typography type='h1'>Work</Typography>
+			<Typography type='p1' label='A bit about my work experience.' />
+
 			<div theme='center_column'>
 				<Work each={work} />
 			</div>
 		</Paper>
 		<Paper>
-			<Typography type='h1'>Tools</Typography>
+			<Typography label='Tools' type='h1' />
+			<Typography type='p1' label='These are the tools that I have experience with or have used in my work or on personal projects.' />
 			<div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 20 }}>
 				<Tools each={tools} />
 			</div>
 		</Paper>
-
 		<Paper>
 			<Typography type='h1'>Projects</Typography>
-			<div theme='center_column'>
-				{/* List out github projects */}
+			<Typography type='p1' label='Some personal projects I am proud of and want to show off.' />
+
+			<div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 20 }}>
+				<Projects each={projects} />
 			</div>
 		</Paper>
+
+		<div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 20 }}>
+			<Button
+				title='LinkedIn'
+				type='icon'
+				icon={<Icon name='linkedinFI' size={65} style={{ fill: 'none' }} />}
+				onClick={() => window.open('https://www.linkedin.com/in/torrin-leonard-8343a1154/', '_blank')}
+			/>
+			<Button
+				title='GitHub'
+				type='icon'
+				icon={<Icon name='githubFI' size={65} style={{ fill: 'none' }} />}
+				onClick={() => window.open('https://github.com/torrinworx', '_blank')}
+			/>
+			<Button
+				title='GitLab'
+				type='icon'
+				icon={<Icon name='gitlabFI' size={65} style={{ fill: 'none' }} />}
+				onClick={() => window.open('https://gitlab.com/torrin1', '_blank')}
+			/>
+			<Kebab style={{ padding: 10, gap: 10 }} title='Email'>
+				<Button title='Copy email address to clipboard.' type='outlined' label='Copy' onClick={() => navigator.clipboard.writeText('torrin@torrin.me')} />
+				<Button title='Open email address in default mailer.' type='outlined' label='Open' onClick={() => window.open('mailto:torrin@torrin.me', '_blank')} />
+			</Kebab>
+		</div>
+
+		<div theme='center_clear' >
+			<Typography type='p2'> © Torrin Z. Leonard {new Date().getFullYear()}</Typography>
+		</div>
 	</div>;
 };
 
@@ -194,5 +306,6 @@ mount(document.body, window.location.pathname === '/' ? <Theme value={theme.them
 			<Controls />
 			<Page />
 		</Gradient>
+		{popups}
 	</Icons >
 </Theme> : <NotFound />);
