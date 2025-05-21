@@ -33,15 +33,13 @@ const resetObject = (obj, circlePosition) => {
 
 	// Calculate tangential vector (perpendicular to direction)
 	let tangential = new THREE.Vector3(0, 0, 1).cross(direction).normalize();
-
-	// If direction is parallel to Z-axis, choose another perpendicular axis
 	if (tangential.length() === 0) {
 		tangential = new THREE.Vector3(1, 0, 0).cross(direction).normalize();
 	}
 
 	// Assign velocity with both radial and tangential components
-	const radialSpeed = random(-0.2, 0.2); // Reduced radial component
-	const tangentialSpeed = random(0.3, 0.6); // Increased tangential component for orbiting
+	const radialSpeed = random(-0.2, 0.2);
+	const tangentialSpeed = random(0.3, 0.6);
 	obj.userData.velocity.set(
 		direction.x * radialSpeed + tangential.x * tangentialSpeed,
 		direction.y * radialSpeed + tangential.y * tangentialSpeed,
@@ -58,7 +56,7 @@ const resetObject = (obj, circlePosition) => {
 
 	// Age / life
 	obj.userData.age = 0;
-	obj.userData.lifetime = random(300, 600); // Increased lifetime for longer existence
+	obj.userData.lifetime = random(300, 600);
 
 	// Start scale almost zero
 	obj.userData.scale = 0.001;
@@ -69,9 +67,13 @@ export default Theme.use(theme => {
 	const Collision = (_, cleanup, mounted) => {
 		const Canvas = <raw:canvas />;
 		const scene = new THREE.Scene();
+
 		const settings = {
+			// 1) Lower the shadowMapSize to [512, 512].
+			// 2) Disable anti-aliasing (antialias: false).
+			// 3) We'll further restrict pixel ratio to 1, below in mounted().
 			dpr: [1, 3],
-			shadowMapSize: [1024, 1024],
+			shadowMapSize: [512, 512],
 			antialias: false,
 			useShadows: true,
 		};
@@ -185,7 +187,7 @@ export default Theme.use(theme => {
 			return geometry;
 		};
 
-		const MAX_OBJECTS = 15; // Adjust as needed
+		const MAX_OBJECTS = 10;
 		const loadedObjects = [];
 		const loader = new GLTFLoader();
 
@@ -200,6 +202,9 @@ export default Theme.use(theme => {
 						mesh.castShadow = settings.useShadows;
 						mesh.receiveShadow = settings.useShadows;
 
+						// 6) Ensure objects can be frustum-culled by default:
+						mesh.frustumCulled = true;
+
 						mesh.userData.modelPath = modelPath;
 						mesh.userData.velocity = new THREE.Vector3();
 						mesh.userData.rotationAxis = new THREE.Vector3();
@@ -210,7 +215,6 @@ export default Theme.use(theme => {
 
 						resetObject(mesh, circlePosition);
 						scene.add(mesh);
-
 						loadedObjects.push(mesh);
 
 						if (!objectsByType[modelPath]) {
@@ -230,43 +234,97 @@ export default Theme.use(theme => {
 			}
 		};
 
+		// Partitioning the space in a grid to reduce pairwise checks.
+		// For each object, place it in a cell based on its position, then only 
+		// check collisions among objects in the same or neighboring cells.
+		const cellSize = 10;
+		const getCellIndex = (pos) => {
+			const x = Math.floor(pos.x / cellSize);
+			const y = Math.floor(pos.y / cellSize);
+			const z = Math.floor(pos.z / cellSize);
+			return `${x},${y},${z}`;
+		};
+
+		// Return the cell keys for the 26 neighboring cells (including the cell itself):
+		const getNeighborCells = (x, y, z) => {
+			const neighbors = [];
+			for (let dx = -1; dx <= 1; dx++) {
+				for (let dy = -1; dy <= 1; dy++) {
+					for (let dz = -1; dz <= 1; dz++) {
+						neighbors.push(`${x + dx},${y + dy},${z + dz}`);
+					}
+				}
+			}
+			return neighbors;
+		};
+
 		const handleCollisions = () => {
-			for (let i = 0; i < loadedObjects.length; i++) {
-				const objA = loadedObjects[i];
-				if (!objA || !objA.userData) continue;
+			// Build dictionary of objects by cell
+			const grid = {};
+			for (const obj of loadedObjects) {
+				// Skip invisible or frustum-culled objects
+				if (!obj.visible) continue;
 
-				for (let j = i + 1; j < loadedObjects.length; j++) {
-					const objB = loadedObjects[j];
-					if (!objB || !objB.userData) continue;
+				const cellKey = getCellIndex(obj.position);
+				if (!grid[cellKey]) grid[cellKey] = [];
+				grid[cellKey].push(obj);
+			}
 
-					const posA = objA.position;
-					const posB = objB.position;
+			// For each occupied cell, check collisions among objects in that cell and neighbors
+			for (const cellKey in grid) {
+				const [cx, cy, cz] = cellKey.split(',').map(Number);
+				const neighborKeys = getNeighborCells(cx, cy, cz);
 
-					const delta = new THREE.Vector3().subVectors(posB, posA);
-					const distSq = delta.lengthSq();
+				for (const neighborKey of neighborKeys) {
+					if (!grid[neighborKey]) continue;
+					// Compare all objects in cellKey with those in neighborKey
+					const objectsA = grid[cellKey];
+					const objectsB = grid[neighborKey];
 
-					const rA = (objA.userData.scale || 0.5) * 0.9;
-					const rB = (objB.userData.scale || 0.5) * 0.9;
-					const minDist = rA + rB;
+					for (let i = 0; i < objectsA.length; i++) {
+						const objA = objectsA[i];
+						if (!objA.userData) continue;
 
-					if (distSq < minDist * minDist && distSq > 0.0001) {
-						const dist = Math.sqrt(distSq);
-						const overlap = minDist - dist;
-						delta.normalize();
+						for (let j = 0; j < objectsB.length; j++) {
+							// Avoid double-check or checking same object
+							if (cellKey === neighborKey && j <= i) continue;
 
-						posA.addScaledVector(delta, -overlap * 0.5);
-						posB.addScaledVector(delta, overlap * 0.5);
+							const objB = objectsB[j];
+							if (!objB.userData) continue;
 
-						const velA = objA.userData.velocity;
-						const velB = objB.userData.velocity;
-						if (velA && velB) {
-							const dotA = velA.dot(delta);
-							const dotB = velB.dot(delta);
-							velA.addScaledVector(delta, dotB - dotA);
-							velB.addScaledVector(delta, dotA - dotB);
+							const posA = objA.position;
+							const posB = objB.position;
 
-							velA.multiplyScalar(0.9);
-							velB.multiplyScalar(0.9);
+							// 1) Skip collisions if objects are far apart
+							const delta = new THREE.Vector3().subVectors(posB, posA);
+							const distSq = delta.lengthSq();
+							// E.g. skip if further than 200 units away (tweak to your liking)
+							if (distSq > 200 * 200) continue;
+
+							const rA = (objA.userData.scale || 0.5) * 0.9;
+							const rB = (objB.userData.scale || 0.5) * 0.9;
+							const minDist = rA + rB;
+
+							if (distSq < minDist * minDist && distSq > 0.0001) {
+								const dist = Math.sqrt(distSq);
+								const overlap = minDist - dist;
+								delta.normalize();
+
+								posA.addScaledVector(delta, -overlap * 0.5);
+								posB.addScaledVector(delta, overlap * 0.5);
+
+								const velA = objA.userData.velocity;
+								const velB = objB.userData.velocity;
+								if (velA && velB) {
+									const dotA = velA.dot(delta);
+									const dotB = velB.dot(delta);
+									velA.addScaledVector(delta, dotB - dotA);
+									velB.addScaledVector(delta, dotA - dotB);
+
+									velA.multiplyScalar(0.9);
+									velB.multiplyScalar(0.9);
+								}
+							}
 						}
 					}
 				}
@@ -280,11 +338,7 @@ export default Theme.use(theme => {
 			} else {
 				const nodeName = targetElement.nodeName.toLowerCase();
 				const computedStyle = window.getComputedStyle(targetElement);
-				if (
-					nodeName === 'a' ||
-					nodeName === 'button' ||
-					computedStyle.cursor === 'pointer'
-				) {
+				if (nodeName === 'a' || nodeName === 'button' || computedStyle.cursor === 'pointer') {
 					pointerFocus = true;
 				} else {
 					pointerFocus = false;
@@ -308,6 +362,13 @@ export default Theme.use(theme => {
 
 		const animate = () => {
 			requestAnimationFrame(animate);
+
+			// Frustum for culling checks
+			camera.updateMatrixWorld();
+			const frustum = new THREE.Frustum();
+			const cameraViewProjectionMatrix = new THREE.Matrix4();
+			cameraViewProjectionMatrix.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+			frustum.setFromProjectionMatrix(cameraViewProjectionMatrix);
 
 			// Circle swoop from z=45
 			const swoopProgress = getSwoopProgress();
@@ -345,6 +406,10 @@ export default Theme.use(theme => {
 			loadedObjects.forEach((obj) => {
 				if (!obj.userData) return;
 
+				// Hide objects that are not in the camera frustum
+				// they won't be rendered, and we skip collisions for them
+				obj.visible = frustum.intersectsObject(obj);
+
 				obj.userData.age++;
 				const age = obj.userData.age;
 				const life = obj.userData.lifetime;
@@ -356,12 +421,14 @@ export default Theme.use(theme => {
 				obj.userData.scale = scl;
 				obj.scale.setScalar(scl);
 
-				if (age > life) resetObject(obj, circlePosition);
+				if (age > life) {
+					resetObject(obj, circlePosition);
+				}
 
 				if (obj.userData.scale > 0.002) {
 					const forceDir = new THREE.Vector3().subVectors(circlePosition, obj.position);
 					const dist2 = forceDir.lengthSq();
-					const attractionMultiplier = 300.0; // Adjusted for balance
+					const attractionMultiplier = 300.0;
 
 					if (dist2 > 0.00001) {
 						forceDir.normalize();
@@ -369,7 +436,9 @@ export default Theme.use(theme => {
 					}
 
 					// Calculate and apply tangential force
-					const tangentialForce = new THREE.Vector3().crossVectors(forceDir, new THREE.Vector3(0, 0, 1)).normalize().multiplyScalar(0.00002);
+					const tangentialForce = new THREE.Vector3().crossVectors(forceDir, new THREE.Vector3(0, 0, 1))
+						.normalize()
+						.multiplyScalar(0.00002);
 					obj.userData.velocity.add(tangentialForce);
 
 					// Fling away if circle is moving quickly
@@ -379,9 +448,7 @@ export default Theme.use(theme => {
 					const dist = obj.position.distanceTo(circlePosition);
 
 					if (circleSpeed > 0.25 && dist < padDistance) {
-						const normal = new THREE.Vector3()
-							.subVectors(obj.position, circlePosition)
-							.normalize();
+						const normal = new THREE.Vector3().subVectors(obj.position, circlePosition).normalize();
 						if (obj.userData.velocity.dot(normal) < 0) {
 							obj.userData.velocity.reflect(normal);
 							obj.userData.velocity.multiplyScalar(1.2);
@@ -389,10 +456,17 @@ export default Theme.use(theme => {
 					}
 				}
 
-				// Increased damping factor for longer-lasting velocity
-				obj.userData.velocity.multiplyScalar(0.99); // Changed from 0.97
+				// Increased damping
+				obj.userData.velocity.multiplyScalar(0.99);
 
-				// Optional: Limit maximum velocity to prevent excessive speeds
+				// Clamp small velocities to zero
+				['x', 'y', 'z'].forEach(axis => {
+					if (Math.abs(obj.userData.velocity[axis]) < 0.0001) {
+						obj.userData.velocity[axis] = 0;
+					}
+				});
+
+				// Limit maximum velocity
 				const maxVelocity = 2.0;
 				if (obj.userData.velocity.length() > maxVelocity) {
 					obj.userData.velocity.setLength(maxVelocity);
@@ -405,6 +479,7 @@ export default Theme.use(theme => {
 				}
 			});
 
+			// Handle collision detection among objects
 			handleCollisions();
 
 			if (isTransitioning) handleColorTransition();
@@ -417,19 +492,25 @@ export default Theme.use(theme => {
 			const width = Canvas.clientWidth;
 			const height = Canvas.clientHeight;
 
+			// Create renderer with no AA, alpha for transparency
 			renderer = new THREE.WebGLRenderer({
 				canvas: Canvas,
 				alpha: true,
 				antialias: settings.antialias
 			});
 			renderer.setSize(width, height);
-			renderer.setPixelRatio(Math.min(window.devicePixelRatio, settings.dpr[1]));
+
+			// Restrict pixel ratio to 1 to avoid excessive rendering load:
+			renderer.setPixelRatio(1);
+
 			renderer.shadowMap.enabled = settings.useShadows;
 			renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 			camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
 			camera.position.set(0, 0, 30);
 			scene.add(camera);
+
+			// Light with lower shadow resolution
 			const spotLight = new THREE.SpotLight(0xffffff, 2000, 100.0);
 			spotLight.position.set(0, 30, 10);
 
