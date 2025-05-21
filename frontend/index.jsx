@@ -90,7 +90,7 @@ const work = [
 		'style': { 'borderRadius': '50%' },
 		'header': 'worX4you Inc.',
 		'position': 'QA, Accessibility, and Automation Software Tester',
-		'content': 'As a Software Assurance Engineer contractor at worx4You, I had the opportunity to work on multiple projects for companies such as THRILLWORKS, League, TunnelBear, Hubba, and Hopscotch. In this role, I was responsible for manual and automation testing using tools such as Jira, Slack, Visual Studio Code, Javascript, TypeScript, and TestCafe. Additionally, I conducted research on and implemented WCAG accessibility standards to ensure that the companies I worked with were following accessibility standards. Through my work at worx4You, I gained valuable experience in software testing and accessibility, and I am excited to continue to develop my skills in these areas.'
+		'content': 'As a Software Assurance Engineer contractor at worx4You, I had the opportunity to work on multiple projects for companies such as THRILLWORKS, League, TunnelBear, Hubba, and Hopscotch. In this role, I was responsible for manual and automation testing using tools such as Jira, Slack, Visual Studio Code, JavaScript, TypeScript, and TestCafe. Additionally, I conducted research on and implemented WCAG accessibility standards to ensure that the companies I worked with were following accessibility standards. Through my work at worx4You, I gained valuable experience in software testing and accessibility, and I am excited to continue to develop my skills in these areas.'
 	}
 ];
 
@@ -154,7 +154,7 @@ const tools = [
 
 	{ name: 'Git', icon: 'git' },
 	{ name: 'GitHub', icon: 'github' },
-	{ name: 'Gitlab', icon: 'gitlab' },
+	{ name: 'GitLab', icon: 'gitlab' },
 	{ name: 'Docker', icon: 'docker' },
 	{ name: 'NGINX', icon: 'nginx' },
 	{ name: 'npm', icon: 'npm' },
@@ -191,12 +191,12 @@ const projects = [
 	{
 		url: 'https://github.com/torrinworx/destam-web-core',
 		name: 'destam web core',
-		description: 'A library package that contains core abstractions and utilities of a full stack platform. destam-web-core simplifies and implements features like client/server websocket state syncrhonization, observer based state syncing, MongoDB server state storage, backend websocket module routing system, user signup/login flow and db management, user websocket authentication.',
+		description: 'A library package that contains core abstractions and utilities of a full stack platform. destam-web-core simplifies and implements features like client/server websocket state synchronization, observer-based state syncing, MongoDB server state storage, backend websocket module routing system, user signup/login flow, and db management, user websocket authentication.',
 	},
 	{
 		url: 'https://opengig.org',
 		name: 'OpenGig.org',
-		description: 'An Open Source platform passion project built for gig workers and customers. A full stack, state streaming, websocket based reactive web application that uses js on the backend and frontend.',
+		description: 'An Open Source platform passion project built for gig workers and customers. A full stack, state streaming, websocket-based reactive web application that uses JavaScript on the backend and frontend.',
 	},
 	{
 		url: 'https://github.com/torrinworx/MangoSync',
@@ -206,12 +206,12 @@ const projects = [
 	{
 		url: 'https://github.com/torrinworx/destamatic-ui',
 		name: 'destamatic ui',
-		description: 'A custom ui component library built on destam and destam-dom reactivity libraries. Similar in style and functionality to MaterialUI components, but snappier thanks to the speed of destam-doms lack of a virtual dom.',
+		description: 'A custom UI component library built on destam and destam-dom reactivity libraries. Similar in style and functionality to MaterialUI components, but snappier thanks to the speed of destam-dom\'s lack of a virtual DOM.',
 	},
 	{
 		url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
 		name: 'torrin.me',
-		description: 'My personal website! Built using destamatic-ui, destam-dom, and destam state menagement. Where does this link go? 🤔',
+		description: 'My personal website! Built using destamatic-ui, destam-dom, and destam state management. Where does this link go? 🤔',
 	},
 ];
 
