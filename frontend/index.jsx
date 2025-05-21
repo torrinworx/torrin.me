@@ -35,7 +35,15 @@ const NotFound = () => <Theme value={theme.theme}>
 const Controls = () => {
 	const SelectRadio = Radio(window.colorMode);
 
-	return <div theme='center' style={{ paddingTop: 20, userSelect: 'none' }}>
+	return <div
+		theme='center'
+		style={{
+			paddingTop: 20,
+			userSelect: 'none',
+			position: 'sticky',
+			top: 0,
+		}}
+	>
 		<Paper style={{ width: 250, padding: 10 }}>
 			<div theme='center_row' style={{ gap: 8 }}>
 				<SelectRadio style={{ color: '$color_red' }} value={'red'} />
@@ -303,9 +311,9 @@ mount(document.body, window.location.pathname === '/' ? <Theme value={theme.them
 	<Icons value={theme.icons}>
 		<Gradient>
 			<Collision />
-			<Controls />
 			<Page />
 		</Gradient>
+		<Controls />
 		{popups}
 	</Icons >
 </Theme> : <NotFound />);
