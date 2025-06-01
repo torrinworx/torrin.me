@@ -27,7 +27,7 @@ const start = async () => {
         server.development({ vite });
     }
 
-    server.listen();
+    server.listen(process.env.PORT);
 };
 
 start();
