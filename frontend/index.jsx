@@ -305,6 +305,12 @@ const Page = () => {
 				icon={<Icon name='gitlabFI' size={65} style={{ fill: 'none' }} />}
 				onClick={() => window.open('https://gitlab.com/torrin1', '_blank')}
 			/>
+			<Button
+				title='dev.to'
+				type='icon'
+				icon={<Icon name='devdotto' size={65} style={{ fill: 'none' }} />}
+				onClick={() => window.open('https://dev.to/torrin', '_blank')}
+			/>
 			<Kebab icon={<Icon name='at-sign' style={{ fill: 'none' }} size={65} />} style={{ padding: 10, gap: 10 }} title='Email'>
 				<Button title='Copy email address to clipboard.' type='outlined' label='Copy' onClick={() => navigator.clipboard.writeText('torrin@torrin.me')} />
 				<Button title='Open email address in default mailer.' type='outlined' label='Open' onClick={() => window.open('mailto:torrin@torrin.me', '_blank')} />
