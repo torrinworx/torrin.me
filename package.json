@@ -26,13 +26,14 @@
 		"@babel/parser": "^7.25.6",
 		"@babel/plugin-syntax-jsx": "^7.24.7",
 		"cannon-es": "^0.20.0",
-		"destam": "^0.5.3",
-		"destam-dom": "^0.11.3",
+		"destam": "^0.7.0",
+		"destam-dom": "^0.13.0",
 		"destamatic-ui": "file:destamatic-ui",
 		"esbuild": "^0.25.4",
 		"nodemon": "^3.1.7",
 		"three": "^0.176.0",
-		"vite": "^5.4.11"
-	},
-	"dependencies": {}
+		"vite": "^5.4.11",
+		"feather-icons": "^4.29.2",
+		"simple-icons": "^15.1.0"
+	}
 }
