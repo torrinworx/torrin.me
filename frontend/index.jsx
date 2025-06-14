@@ -267,25 +267,25 @@ const Page = () => {
 			<Button
 				title='LinkedIn'
 				type='icon'
-				icon={<Icon name='linkedinFI' size={65} style={{ fill: 'none' }} />}
+				icon={<Icon name='linkedinFI' size={65} />}
 				onClick={() => window.open('https://www.linkedin.com/in/torrin-leonard-8343a1154/', '_blank')}
 			/>
 			<Button
 				title='GitHub'
 				type='icon'
-				icon={<Icon name='githubFI' size={65} style={{ fill: 'none' }} />}
+				icon={<Icon name='githubFI' size={65}/>}
 				onClick={() => window.open('https://github.com/torrinworx', '_blank')}
 			/>
 			<Button
 				title='GitLab'
 				type='icon'
-				icon={<Icon name='gitlabFI' size={65} style={{ fill: 'none' }} />}
+				icon={<Icon name='gitlabFI' size={65} />}
 				onClick={() => window.open('https://gitlab.com/torrin1', '_blank')}
 			/>
 			<Button
 				title='dev.to'
 				type='icon'
-				icon={<Icon name='devdotto' size={65} style={{ fill: '$color_top' }} />}
+				icon={<Icon name='devdotto' size={65} />}
 				onClick={() => window.open('https://dev.to/torrin', '_blank')}
 			/>
 			<Kebab icon={<Icon name='at-sign' style={{ fill: 'none' }} size={65} />} style={{ padding: 10, gap: 10 }} title='Email'>
