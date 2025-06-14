@@ -46,8 +46,7 @@ const themeModes = {
 const transition = '250ms ease-in-out';
 
 const theme = OObject({
-	// destamatic-ui
-	'*': OObject({ // Doesn't have to be an oobject I don't think
+	'*': OObject({
 		_fontFace_IBMPlexSansNormal: {
 			fontFamily: 'IBM Plex Sans',
 			fontStyle: 'normal',
@@ -70,6 +69,25 @@ const theme = OObject({
 		transition: `opacity ${transition}, box-shadow ${transition}, background-color ${transition}, color ${transition}, border-color ${transition}, stroke ${transition}, fill ${transition}`,
 		...mainColors,
 	}),
+	
+	white: {
+		$color: '$color_white',
+	},
+	black: {
+		$color: '$color_black',
+	},
+	red: {
+		$color: '$color_red',
+	},
+	purple: {
+		$color: '$color_purple',
+	},
+	cyan: {
+		$color: '$color_cyan',
+	},
+	gold: {
+		$color: '$color_gold',
+	},
 
 	// Override destamatic-ui primary theme
 	primary: {
@@ -79,7 +97,6 @@ const theme = OObject({
 		$color_hover: '$saturate($shiftBrightness($color_main, -.3), -.3)',
 	},
 
-	// Need to handle the $color_top slot here specially when switching between light/dark mode?
 	gradient: OObject({
 		extends: ['*'],
 		$gradientCSS: 'linear-gradient(to top right, $color_grad_bl, $color_grad_tr)',
@@ -304,7 +321,6 @@ window.themeMode = Observer.mutable(window.matchMedia('(prefers-color-scheme:dar
 window.theme = theme;
 
 window.colorMode.effect(color => {
-	console.log("COLOR CHANGE", color, theme['*'], colorModes[color]);
 	for (const [key, val] of Object.entries(colorModes[color])) {
 		theme['*'][key] = val;
 	}
@@ -323,13 +339,6 @@ export default {
 		linkedinFI: FeatherIcons('linkedin'),
 		gitlabFI: FeatherIcons('gitlab'),
 		githubFI: FeatherIcons('github'),
-		// 	search: FeatherIcons('search'),
-		// 	x: FeatherIcons('x'),
-		// 	user: FeatherIcons('user'),
-		// 	image: FeatherIcons('image'),
-		// 	feather: FeatherIcons('feather'),
-		// 	globe: FeatherIcons('globe'),
-		// 	github: FeatherIcons('github'),
 	},
 		FeatherIcons,
 		SimpleIcons

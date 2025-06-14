@@ -1,7 +1,8 @@
 import { mount, Observer } from 'destam-dom';
-import { Button, Theme, Typography, Radio, Toggle, Paper, Gradient, Icons, Icon, Detached, popups, ColorPicker } from 'destamatic-ui';
+import { Button, Theme, Typography, Paper, Gradient, Icons, Icon, Detached, popups } from 'destamatic-ui';
 
 import theme from './theme';
+import Controls from './components/Controls';
 import Collision from './components/Collision';
 
 Theme.define({
@@ -31,30 +32,6 @@ const NotFound = () => <Theme value={theme.theme}>
 		</div>
 	</Gradient>
 </Theme>;
-
-const Controls = () => {
-	const SelectRadio = Radio(window.colorMode);
-
-	return <div
-		theme='center'
-		style={{
-			paddingTop: 20,
-			userSelect: 'none',
-			position: 'sticky',
-			top: 0,
-		}}
-	>
-		<Paper style={{ padding: 0 }}>
-			<div theme='center_row' style={{ padding: 10, gap: 10 }}>
-				<SelectRadio style={{ color: '$color_red' }} value={'red'} />
-				<SelectRadio style={{ color: '$color_purple' }} value={'purple'} />
-				<SelectRadio style={{ color: '$color_cyan' }} value={'cyan'} />
-				<SelectRadio style={{ color: '$color_gold' }} value={'gold'} />
-				<Toggle value={window.themeMode} />
-			</div>
-		</Paper>
-	</div>;
-};
 
 const work = [
 	{
