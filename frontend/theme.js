@@ -309,11 +309,6 @@ const theme = OObject({
 		height: '100%',
 		minHeight: '100vh'
 	},
-
-	icon: {
-		extends: 'primary',
-		fill: '$color_top',
-	},
 });
 
 window.colorMode = Observer.mutable('red');
