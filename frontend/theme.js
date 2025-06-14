@@ -47,22 +47,22 @@ const transition = '250ms ease-in-out';
 
 const theme = OObject({
 	'*': OObject({
-		_fontFace_IBMPlexSansNormal: {
-			fontFamily: 'IBM Plex Sans',
-			fontStyle: 'normal',
-			fontWeight: '100 700',
-			fontStretch: '100%',
-			fontDisplay: 'swap',
-			src: "url('/IBM_Plex_Sans/IBMPlexSans-VariableFont_wdth,wght.ttf') format('truetype')"
-		},
-		_fontFace_IBMPlexSansItalic: {
-			fontFamily: 'IBM Plex Sans',
-			fontStyle: 'italic',
-			fontWeight: '100 700',
-			fontStretch: '100%',
-			fontDisplay: 'swap',
-			src: "url('/IBM_Plex_Sans/IBMPlexSans-Italic-VariableFont_wdth,wght.ttf') format('truetype')"
-		},
+		// _fontFace_IBMPlexSansNormal: {
+		// 	fontFamily: 'IBM Plex Sans',
+		// 	fontStyle: 'normal',
+		// 	fontWeight: '100 700',
+		// 	fontStretch: '100%',
+		// 	fontDisplay: 'swap',
+		// 	src: "url('/IBM_Plex_Sans/IBMPlexSans-VariableFont_wdth,wght.ttf') format('truetype')"
+		// },
+		// _fontFace_IBMPlexSansItalic: {
+		// 	fontFamily: 'IBM Plex Sans',
+		// 	fontStyle: 'italic',
+		// 	fontWeight: '100 700',
+		// 	fontStretch: '100%',
+		// 	fontDisplay: 'swap',
+		// 	src: "url('/IBM_Plex_Sans/IBMPlexSans-Italic-VariableFont_wdth,wght.ttf') format('truetype')"
+		// },
 		fontFamily: 'IBM Plex Sans',
 		fontWeight: 600,
 		boxSizing: 'border-box',
