@@ -1,7 +1,7 @@
 import { atomic } from 'destam/Network';
 import { OObject, Observer } from 'destam-dom';
-import FeatherIcons from "destamatic-ui/components/icons/FeatherIcons";
 import SimpleIcons from "destamatic-ui/components/icons/SimpleIcons";
+import FeatherIcons from "destamatic-ui/components/icons/FeatherIcons";
 
 const mainColors = {
 	$color_white: '#D6D6D6',
@@ -48,6 +48,22 @@ const transition = '250ms ease-in-out';
 const theme = OObject({
 	// destamatic-ui
 	'*': OObject({ // Doesn't have to be an oobject I don't think
+		_fontFace_IBMPlexSansNormal: {
+			fontFamily: 'IBM Plex Sans',
+			fontStyle: 'normal',
+			fontWeight: '100 700',
+			fontStretch: '100%',
+			fontDisplay: 'swap',
+			src: "url('/IBM_Plex_Sans/IBMPlexSans-VariableFont_wdth,wght.ttf') format('truetype')"
+		},
+		_fontFace_IBMPlexSansItalic: {
+			fontFamily: 'IBM Plex Sans',
+			fontStyle: 'italic',
+			fontWeight: '100 700',
+			fontStretch: '100%',
+			fontDisplay: 'swap',
+			src: "url('/IBM_Plex_Sans/IBMPlexSans-Italic-VariableFont_wdth,wght.ttf') format('truetype')"
+		},
 		fontFamily: 'IBM Plex Sans',
 		fontWeight: 600,
 		boxSizing: 'border-box',
@@ -287,11 +303,12 @@ window.colorMode = Observer.mutable('red');
 window.themeMode = Observer.mutable(window.matchMedia('(prefers-color-scheme:dark)').matches ? true : false);
 window.theme = theme;
 
-window.colorMode.effect(color => atomic(() => {
+window.colorMode.effect(color => {
+	console.log("COLOR CHANGE", color, theme['*'], colorModes[color]);
 	for (const [key, val] of Object.entries(colorModes[color])) {
 		theme['*'][key] = val;
 	}
-}));
+});
 
 window.themeMode.effect(mode => atomic(() => {
 	mode = mode ? 'dark' : 'light'; // if mode is true => dark mode, else false => light mode
