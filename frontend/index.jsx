@@ -228,7 +228,7 @@ const Page = () => {
 		flexDirection: 'column',
 	}}>
 		<div theme='clear' style={{ height: '75', minHeight: '75vh' }}>
-			<Typography type='h1'>Torrin Z. Leonard</Typography>
+			<Typography type='h1'>Torrin Leonard</Typography>
 			<Typography type='p1'>Full Stack Software Developer, located in <i>Waterloo, Ontario, Canada</i></Typography>
 		</div>
 		<Paper theme='row'>
@@ -295,7 +295,7 @@ const Page = () => {
 		</div>
 
 		<div theme='center_clear' >
-			<Typography type='p2'> © Torrin Z. Leonard {new Date().getFullYear()}</Typography>
+			<Typography type='p2'> © Torrin Leonard {new Date().getFullYear()}</Typography>
 		</div>
 	</div>;
 };
