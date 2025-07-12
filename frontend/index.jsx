@@ -76,62 +76,70 @@ const pages = {
 	enabled,
 };
 
-const Pages = StageContext.use(s => (_, cleanup, mounted) => {
-	const pathResolve = () => {
-		const path = window.location.pathname;
+const Pages = StageContext.use(s => (_, cleanup) => {
+	let isPopState = false;
 
-		if (path === '/') s.open({ name: 'landing' });
-		else {
-			const page = pages.stages[path.slice(1)];
+	const getPath = () => {
+		const rawPath = window.location.pathname;
+		return rawPath.endsWith('/') && rawPath.length > 1 ? rawPath.slice(0, -1) : rawPath;
+	};
+
+	const urlResolve = () => {
+		s.props?.enabled.set(true);
+
+		isPopState = true;
+		const path = getPath();
+
+		if (path === '/') {
+			s.open({ name: 'landing' });
+		} else {
+			const name = path.slice(1);
+			const page = pages.stages[name];
 			if (page) {
-				s.open({ name: path.slice(1) });
+				s.open({ name });
 			} else {
 				s.open({ name: 'fallback' });
 			}
 		}
+		// Reset the flag after the open completes (so that effect doesn't push)
+		queueMicrotask(() => {
+			isPopState = false;
+		});
 	};
 
+	urlResolve();
+
 	cleanup(s.observer.path('current').effect(c => {
-		if (!c) return; // ignore null/undefined
+		if (!c || isPopState) return;
 
 		if (c === 'landing') {
-			history.pushState({ page: 'home' }, "Home", '/');
-			return;
-		} else if (c != 'fallback') {
-			console.log(c);
+			history.pushState({ page: 'home' }, 'Home', '/');
+		} else if (c !== 'fallback') {
 			history.pushState({ page: c }, c, '/' + c);
 		}
 	}));
 
-	mounted(() => {
-		pathResolve();
-	});
+	window.addEventListener('popstate', urlResolve);
+	cleanup(() => window.removeEventListener('popstate', urlResolve));
 
 	return <Stage />;
 });
 
 
-const App = () => {
-
-	window.location.pathname === '/' ? <></> : <NotFound />
-
-	return <Theme value={theme.theme}>
-		<Icons value={theme.icons}>
-			<PopupContext >
-				<Gradient>
-					<Shown value={enabled}>
-						<Collision />
-					</Shown>
-					<StageContext value={pages}>
-						<div theme='pages'>
-							<Pages />
-						</div>
-					</StageContext>
-				</Gradient>
-				<Controls />
-			</PopupContext>
-		</Icons >
-	</Theme>;
-};
-
-mount(document.body, <App />);
+mount(document.body, <Theme value={theme.theme}>
+	<Icons value={theme.icons}>
+		<PopupContext >
+			<Gradient>
+				<Shown value={enabled}>
+					<Collision />
+				</Shown>
+				<StageContext value={pages}>
+					<div theme='pages'>
+						<Pages />
+					</div>
+				</StageContext>
+			</Gradient>
+			<Controls />
+		</PopupContext>
+	</Icons >
+</Theme>);
