@@ -4,7 +4,14 @@ import { Theme } from 'destamatic-ui';
 
 export const isOnTouchScreen = ('ontouchstart' in window);
 
-const models = ['cone.glb', 'cube.glb', 'sphere.glb', 'suzanne.glb', 'torus.glb'];
+const models = [
+	'/cone.glb',
+	'/cube.glb',
+	'/sphere.glb',
+	'/suzanne.glb',
+	'/torus.glb'
+];
+
 
 const random = (min = 1, max) => {
 	if (max === undefined) {
@@ -195,6 +202,7 @@ export default Theme.use(theme => {
 		const spawnAllObjects = () => {
 			for (let i = 0; i < MAX_OBJECTS; i++) {
 				const modelPath = models[Math.floor(Math.random() * models.length)];
+				console.log(modelPath);
 				loader.load(modelPath, (gltf) => {
 					const mesh = gltf.scene.children.find(child => child instanceof THREE.Mesh);
 					if (mesh) {
