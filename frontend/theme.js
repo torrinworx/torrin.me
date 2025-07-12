@@ -69,7 +69,7 @@ const theme = OObject({
 		transition: `opacity ${transition}, box-shadow ${transition}, background-color ${transition}, color ${transition}, border-color ${transition}, stroke ${transition}, fill ${transition}`,
 		...mainColors,
 	}),
-	
+
 	white: {
 		$color: '$color_white',
 	},
@@ -189,6 +189,7 @@ const theme = OObject({
 	typography_italic: { fontStyle: 'italic' },
 	typography_center: { textAlign: 'center' },
 	typography_inline: { display: 'inline' },
+
 
 	button: {
 		extends: 'center_radius',
