@@ -20,6 +20,8 @@ import Blog from './Blog';
 import theme from './theme';
 import Landing from './Landing';
 import Collision from './Collision';
+import Markdown from './Markdown';
+
 
 Theme.define({
 	clear: {
@@ -73,20 +75,41 @@ const blogs = await response.json();
 // This can be it's own file:
 const Something = StageContext.use(s => suspend(LoadingDots, async ({ key, value }) => {
 	s.props.enabled.set(false);
-	const content = await fetch(`/blog/${key}`).then(r => r.text());
+	let content = await fetch(`/blog/${key}`).then(r => r.text());
 
-	return <div theme='column' style={{ gap: 40 }}>
-		<div theme='row_spread'>
-			<Button type='outlined' label='Back' onClick={() => s.open({ name: 'blog' })} />
+	const cleanupMd = (md) => {
+		md = md.replace(/#\s*header\s*\n([^#]*)\n+/i, '');
+		md = md.replace(/#\s*description\s*\n((?:[^\n]+\n?)*)/i, '');
+		return md.trim();
+	};
+
+	content = cleanupMd(content);
+
+	const formatDate = (dateString) => {
+		const date = new Date(dateString);
+		return new Intl.DateTimeFormat('en-US', {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric',
+			hour: 'numeric',
+			minute: 'numeric',
+			hour12: false,
+		}).format(date);
+	};
+
+	return (
+		<div theme='column' style={{ gap: 40 }}>
+			<div theme='row_spread'>
+				<Button type='outlined' label='Back' onClick={() => s.open({ name: 'blog' })} />
+			</div>
+			<Paper>
+				<Typography type='p1' label={`Created on: ${formatDate(value.created)}`} />
+				<Typography type='p1' label={`Modified on: ${formatDate(value.modified)}`} />
+				<Markdown value={content} />
+			</Paper>
 		</div>
-		<Paper>
-			<Typography type='p1' label={content} />
-			<Typography type='p1' label={value.created} />
-			<Typography type='p1' label={value.modified} />
-		</Paper>
-	</div>
+	);
 }));
-
 const blogPages = Object.entries(blogs).reduce((acc, [key, value]) => {
 	const baseName = key.replace(/\.[^/.]+$/, '');
 	const routeKey = `blog/${baseName}`;
