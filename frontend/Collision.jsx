@@ -202,7 +202,6 @@ export default Theme.use(theme => {
 		const spawnAllObjects = () => {
 			for (let i = 0; i < MAX_OBJECTS; i++) {
 				const modelPath = models[Math.floor(Math.random() * models.length)];
-				console.log(modelPath);
 				loader.load(modelPath, (gltf) => {
 					const mesh = gltf.scene.children.find(child => child instanceof THREE.Mesh);
 					if (mesh) {
