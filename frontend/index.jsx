@@ -72,6 +72,7 @@ const blogs = await response.json();
 
 // This can be it's own file:
 const Something = StageContext.use(s => suspend(LoadingDots, async ({ key, value }) => {
+	s.props.enabled.set(false);
 	const content = await fetch(`/blog/${key}`).then(r => r.text());
 
 	return <div theme='column' style={{ gap: 40 }}>
@@ -139,6 +140,8 @@ const Pages = StageContext.use(s => (_, cleanup) => {
 	urlResolve();
 
 	cleanup(s.observer.path('current').effect(c => {
+		s.props?.enabled.set(true);
+
 		if (!c || isPopState) return;
 
 		if (c === 'landing') {

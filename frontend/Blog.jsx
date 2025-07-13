@@ -1,7 +1,6 @@
 import { Typography, Button } from 'destamatic-ui';
 
 const Blog = ({ stage }) => {
-    stage.props.enabled.set(false);
     const blogs = Object.values(stage.props.blogs);
 
     const Card = ({ each }) => {
