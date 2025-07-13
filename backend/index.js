@@ -31,7 +31,7 @@ const blogIndex = (req, res, next) => {
 };
 
 (async () => {
-    const blogPath = path.join(root, process.env.ENV === 'production' ? 'blog' : 'public', 'blog')
+    const blogPath = path.join(root, process.env.ENV === 'production' ? 'blog' : 'public', 'blog');
     const files = await fs.readdir(blogPath);
 
     for (const file of files) {
@@ -39,9 +39,19 @@ const blogIndex = (req, res, next) => {
             const filePath = path.join(blogPath, file);
 
             try {
+                const fileContent = await fs.readFile(filePath, 'utf-8');
                 const fileStats = await fs.stat(filePath);
 
+                const headerMatch = fileContent.match(/#\s*header\s*\n([^#]*)\n+/i);
+                const descriptionMatch = fileContent.match(/#\s*description\s*\n((?:[^\n]+\n?)*)/i);
+
+                const header = headerMatch ? headerMatch[1].trim() : '';
+                const description = descriptionMatch ? descriptionMatch[1].trim() : '';
+
                 blogs[file] = {
+                    name: file,
+                    header: header,
+                    description: description,
                     modified: fileStats.mtime.toISOString(),
                     created: fileStats.birthtime.toISOString(),
                 };
@@ -50,6 +60,7 @@ const blogIndex = (req, res, next) => {
             }
         }
     }
+    console.log(blogs);
 
     if (process.env.ENV === 'production') server.production({ root });
     else {
