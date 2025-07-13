@@ -48,6 +48,7 @@ export default defineConfig({
 		extensions: ['.js', '.ts', '.tsx', '.jsx'],
 	},
 	build: {
+		target: 'esnext',
 		outDir: '../build/dist',
 		rollupOptions: {
 			output: {

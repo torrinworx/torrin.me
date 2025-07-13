@@ -12,6 +12,8 @@ import {
 	StageContext,
 	Stage,
 	Shown,
+	LoadingDots,
+	suspend,
 } from 'destamatic-ui';
 
 import Blog from './Blog';
@@ -65,12 +67,34 @@ const Controls = () => {
 
 const enabled = Observer.mutable(true);
 
+const response = await fetch('/blog/index.json');
+const blogs = await response.json();
+
+
+// This can be it's own file:
+const Something = suspend(LoadingDots, async ({ key, value }) => {
+	const content = await fetch(`/blog/${key}`).then(r => r.text());
+
+	return <Paper>
+		<Typography type='p1' label={content} />
+		<Typography type='p1' label={value.created} />
+		<Typography type='p1' label={value.modified} />
+	</Paper>;
+});
+
+const blogPages = Object.entries(blogs).reduce((acc, [key, value]) => {
+	const baseName = key.replace(/\.[^/.]+$/, '');
+	const routeKey = `blog/${baseName}`;
+	acc[routeKey] = () => <Something key={key} value={value} />;
+	return acc;
+}, {});
+
 const pages = {
-	stages: { // TODO: use this to create a site map to feed to google and cross link on pages.
+	stages: {
 		landing: Landing,
 		blog: Blog,
 		fallback: NotFound,
-		'blog/test': Landing
+		...blogPages,
 	},
 	template: ({ children }) => children,
 	enabled,
