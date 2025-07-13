@@ -31,7 +31,7 @@ const blogIndex = (req, res, next) => {
 };
 
 (async () => {
-    const blogPath = path.join(root, process.env.ENV === 'production' ? 'blog' : 'public', 'blog');
+    const blogPath = path.join(root, process.env.ENV === 'production' ? 'blog' : path.join('public', 'blog'));
     const files = await fs.readdir(blogPath);
 
     for (const file of files) {
