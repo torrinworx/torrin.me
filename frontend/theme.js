@@ -213,13 +213,14 @@ const theme = OObject({
 
 	button_contained: {
 		extends: 'typography_p1_bold',
-		background: '$color_top',
-		color: '$color_main',
+		color: '$color_top',
+		background: '$alpha($color_main, 0.4)',
+		backdropFilter: 'blur(25px)',
 	},
 
 	button_contained_hovered: {
-		background: '$color_hover',
-		color: '$color_hover_top'
+		background: '$color_top',
+		color: '$color_hover'
 	},
 
 	button_outlined: {

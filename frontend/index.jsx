@@ -29,7 +29,7 @@ Theme.define({
 		flexDirection: 'column',
 	},
 	pages: {
-		padding: '60px 40px 40px 40px',
+		padding: '100px 40px 40px 40px',
 		gap: 40,
 		display: 'flex',
 		flexDirection: 'column',
@@ -70,17 +70,21 @@ const enabled = Observer.mutable(true);
 const response = await fetch('/blog/index.json');
 const blogs = await response.json();
 
-
 // This can be it's own file:
-const Something = suspend(LoadingDots, async ({ key, value }) => {
+const Something = StageContext.use(s => suspend(LoadingDots, async ({ key, value }) => {
 	const content = await fetch(`/blog/${key}`).then(r => r.text());
 
-	return <Paper>
-		<Typography type='p1' label={content} />
-		<Typography type='p1' label={value.created} />
-		<Typography type='p1' label={value.modified} />
-	</Paper>;
-});
+	return <div theme='column' style={{ gap: 40 }}>
+		<div theme='row_spread'>
+			<Button type='outlined' label='Back' onClick={() => s.open({ name: 'blog' })} />
+		</div>
+		<Paper>
+			<Typography type='p1' label={content} />
+			<Typography type='p1' label={value.created} />
+			<Typography type='p1' label={value.modified} />
+		</Paper>
+	</div>
+}));
 
 const blogPages = Object.entries(blogs).reduce((acc, [key, value]) => {
 	const baseName = key.replace(/\.[^/.]+$/, '');
@@ -98,6 +102,7 @@ const pages = {
 	},
 	template: ({ children }) => children,
 	enabled,
+	blogs,
 };
 
 const Pages = StageContext.use(s => (_, cleanup) => {
