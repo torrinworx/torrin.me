@@ -1,19 +1,8 @@
 import { mount, Observer } from 'destam-dom';
 import {
-	Button,
-	Theme,
-	Typography,
-	Paper,
-	Gradient,
-	Icons,
-	Radio,
-	Toggle,
-	PopupContext,
-	StageContext,
-	Stage,
-	Shown,
-	LoadingDots,
-	suspend,
+	Button, Theme, Typography, Paper, Gradient, Icons,
+	Radio, Toggle, PopupContext, StageContext, Stage,
+	Shown, LoadingDots, suspend,
 } from 'destamatic-ui';
 
 import Blog from './Blog';
@@ -21,7 +10,6 @@ import theme from './theme';
 import Landing from './Landing';
 import Collision from './Collision';
 import Markdown from './Markdown';
-
 
 Theme.define({
 	clear: {
@@ -97,18 +85,16 @@ const Something = StageContext.use(s => suspend(LoadingDots, async ({ key, value
 		}).format(date);
 	};
 
-	return (
-		<div theme='column' style={{ gap: 40 }}>
-			<div theme='row_spread'>
-				<Button type='outlined' label='Back' onClick={() => s.open({ name: 'blog' })} />
-			</div>
-			<Paper>
-				<Typography type='p1' label={`Created on: ${formatDate(value.created)}`} />
-				<Typography type='p1' label={`Modified on: ${formatDate(value.modified)}`} />
-				<Markdown value={content} />
-			</Paper>
+	return <div theme='column' style={{ gap: 40 }}>
+		<div theme='row_spread'>
+			<Button type='outlined' label='Back' onClick={() => s.open({ name: 'blog' })} />
 		</div>
-	);
+		<Paper>
+			<Typography type='p1' label={`Created on: ${formatDate(value.created)}`} />
+			<Typography type='p1' label={`Modified on: ${formatDate(value.modified)}`} />
+			<Markdown value={content} />
+		</Paper>
+	</div>;
 }));
 const blogPages = Object.entries(blogs).reduce((acc, [key, value]) => {
 	const baseName = key.replace(/\.[^/.]+$/, '');
@@ -154,7 +140,6 @@ const Pages = StageContext.use(s => (_, cleanup) => {
 				s.open({ name: 'fallback' });
 			}
 		}
-		// Reset the flag after the open completes (so that effect doesn't push)
 		queueMicrotask(() => {
 			isPopState = false;
 		});
@@ -180,7 +165,6 @@ const Pages = StageContext.use(s => (_, cleanup) => {
 	return <Stage />;
 });
 
-
 mount(document.body, <Theme value={theme.theme}>
 	<Icons value={theme.icons}>
 		<PopupContext >
@@ -196,5 +180,5 @@ mount(document.body, <Theme value={theme.theme}>
 			</Gradient>
 			<Controls />
 		</PopupContext>
-	</Icons >
+	</Icons>
 </Theme>);

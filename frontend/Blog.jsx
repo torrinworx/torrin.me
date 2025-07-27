@@ -1,7 +1,7 @@
 import { Typography, Button } from 'destamatic-ui';
 
 const Blog = ({ stage }) => {
-    const blogs = Object.values(stage.props.blogs);
+    const blogs = Object.values(stage.props.blogs); // somehow sort by date, most recent at top?
 
     const Card = ({ each }) => {
         console.log(each);
