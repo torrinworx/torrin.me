@@ -60,7 +60,6 @@ const blogIndex = (req, res, next) => {
             }
         }
     }
-    console.log(blogs);
 
     if (process.env.ENV === 'production') server.production({ root });
     else {
