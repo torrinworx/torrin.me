@@ -1,10 +1,10 @@
 # header
 Value(s) by Mark Carny: Book Review
 
-# Description
+# description
 Mark Carny proposes in his book Value(s) a new approach to solve our largest global problems. Are his arguments convincing? Or do they lack substance...
 
-# Introduction
+### Introduction
 In his 2024 book, Value(s): Building a Better World for All, Mark Carney presents an ambitious vision for tackling some of the world's most pressing challenges: the credit crisis, the COVID-19 pandemic, and the climate crisis. Carney's premise is that these crises are rooted in a fundamental misalignment between societal values and market values. He argues that by realigning these values, we can build a more resilient and equitable global system. However, while Carney's diagnosis of these crises is thorough and perceptive, his proposed solutions remain deeply entrenched within the confines of capitalism, lacking any creative vision needed to address the urgent systemic issues at hand.
 
 Throughout the book, Carney critiques the market's tendency to erode social and moral values. Yet, paradoxically, he places faith in the very system he critiques, suggesting that markets, if provided with the right "frameworks," can self regulate and resolve these crises on their own. This reliance on market based solutions reveals an underlying hesitance to tackle the broader implications of capitalism and its structural limitations. Instead of exploring alternative systems or acknowledging successful public sector solutions and interventions, Carney remains tethered to the belief that the market, properly incentivized, holds the key to societal redemption.
@@ -13,7 +13,7 @@ By ignoring the successes of public programs, such as Canada's universal healthc
 
 My overall takeaway from this book; Value(s) is a vision tailored to reassure elite economic actors rather than challenge them. Let's go over Carneys contradictions, examine his approach, and understand if this neoliberal technocratic reimagining of the status quo really is as reformatively revolutionary as he seems to think. Carney is right to insist that values must be at the heart of economic design, but he fails to consider systems that already embody them.
 
-# The Three Crisis
+### The Three Crisis
 The 2008 credit crisis, the COVID-19 pandemic, and the climate crisis. These are the examples Carney uses in his diagnosis of market failures, these issues set the stage for a broader discussion on the role of values in economic systems. Carney effectively articulates how these crises are fundamentally interconnected through the lens of societal and market values. For example, he acknowledges that the market's expansion has deeply impacted the social contract:
 
 > " [...] whether the expansion of the market is changing the underlying social contract on which it has been based. Has the emphasis on the individual over the community, our selfish traits over our altruistic ones, imperilled both the market's effectiveness in determining value and ultimately society's values?" (Value(s), p. 113)
@@ -28,7 +28,7 @@ His recognition of the market's shortcomings is further illustrated by his refle
 
 Carney does a great job of showing how these global challenges are all connected through our values. He makes it clear that we need to rethink how we align market and societal values. But despite diagnosing these problems well, his solutions stick too close to the same market focused strategies that helped cause these issues to begin with.
 
-# Misplaced Faith
+### Misplaced Faith
 
 One of the key points in Carney’s Value(s) is the critique of the blind faith placed in markets, which he argues has led to detrimental outcomes. Let's zero in on this point of acknowledgment from Carney about markets:
 
@@ -48,7 +48,7 @@ Carney’s faith that markets, if given the right incentives, can solve societal
 
 By lacking a clear enforcement mechanism such as regulation, his solutions essentially revert to trusting that markets will adopt a moral compass on their own. This reliance on market dynamics to spontaneously foster ethical behavior is at odds with his earlier acknowledgment of markets' inherent flaws. It leaves readers questioning how these frameworks alone can avert the misplaced faith in markets that Carney initially critiques. Rather than treating governance as a proactive force, Carney relegates it to a mere facilitator of market functionality. This narrow view not only understates the successes of public systems but also reveals how his entire framework sidelines collective solutions that operate outside of capitalist incentives.
 
-# The Role of Government
+### The Role of Government
 
 Let's dig into something Carney completely marginalizes: governance. Throughout Value(s), Carney sidelines the crucial role of government, reducing its function to merely creating "frameworks," "policies," and "incentives for markets." This approach significantly underrepresents the successes and essential roles government plays in areas that don't rely on capitalist market solutions.
 
@@ -68,7 +68,7 @@ He stops short of recognizing the broader implications and benefits of a more ac
 
 By not incorporating the demonstrated achievements of public sector programs, Carney’s framework inadequately addresses the potential of governance as a proactive and independent force for good. It leaves readers questioning whether a market centric approach can truly cater to the diverse needs and values of society. This point becomes even more pertinent given his recent ascent to the prime ministership, where the stakes of his market driven policy approach directly affect national governance.
 
-# Social Solutions
+### Social Solutions
 
 In Value(s), Carney presents a market centric approach, advocating for incentives and frameworks to guide capitalism towards ethical outcomes. However, he conspicuously omits any detailed discussion of non-capitalist solutions, such as cooperatives and social programs, that have demonstrated success in aligning economic activities with societal values.
 
@@ -86,7 +86,7 @@ He fails to recognize that prosperity and security can, and often do, come from 
 
 As we consider Carney's market driven reformism, it becomes evident that by ignoring non-capitalist models, he completely disregards systems that inherently embody the societal values he claims to champion. This glaring omission underscores a critical need for a broader, more comprehensive discussion on integrating ethics and economics beyond a limited reform of capitalism. Carney's analysis consistently reveals a bias and unwavering faith in market based solutions. While he does not explicitly dismiss non-market approaches, his proposals demonstrate a severe lack of creativity, underscoring his bias towards banking and economic reform rather than embracing governance driven economic restructuring.
 
-# Moral Implications
+### Moral Implications
 The moral critique of Carney's approach lies in its reluctance to recognize the successes of non-capitalist models and the indispensable role of government as more than mere facilitators of market efficiency. In the face of urgent challenges like the COVID-19 pandemic and the escalating climate crisis, Carney’s faith in market mechanisms as the solution is deeply misguided. These crises demand rapid, comprehensive, and ambitious change. Realities that a market centric framework simply cannot address with the speed and scale required.
 
 Throughout *Value(s)*, Carney ignores the achievements of public programs that have historically aligned economic activity with human values. Instead, he places an unwarranted optimism in markets if they are given the "right incentives," neglecting the evidence that these very systems have been direct contributors to the crises we face. This optimism is not just misplaced, it's completely hypocritical, as it disregards the market's proven role as an agitator and creator of these crisis as seen in 2008.
