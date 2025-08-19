@@ -4,7 +4,7 @@ A Moral Framework
 # description
 A philosophy for surviving an uncaring universe.
 
-I wish to design and build a moral framework, based on a scientific understanding of the universe, to help humans understand and survive an uncaring universe. Something that will appeal to and help people from all walks of life, and seek to build a better world through collaboration, rather than division.
+I wish to design and build a moral framework, based on a scientific understanding of the universe, to help humans understand and survive an uncaring universe. Something that will appeal to and help people from all walks of life, and seek to build a better world through collaboration, rather than division. The modern world lacks a source of shared morality that religion has provided for much of human history, the rise of the scientific academic has created new agnostic and spiritual belivers. This contemporary and fast growing group is in direct sociological competition with traditional faith followers, this leads to divisive rehtoric and polarization. I belive this can be rectified by creating a shared framework of moral abstractions. One that etches the moral philosophies of the world in stone, while creating a shared understanding of morality that includes all relgions and creeds. A concise outline that analyzes and incorporates lessons, stories, morals, and ideologies from all religions, creating a relatable framework for followers of diverse faiths and worldviews to find common ground in human survival and morality.
 
 # Introduction and Short-Hand Guide
 There are two gods in the mind of all humans: The morally agnostic god of the universe, and our idealized personal god of the mind.
@@ -58,5 +58,25 @@ This is where moral frameworks, education, and collective understanding come in.
 > -> this point in the alegators needs to be condensed and distilled.
 Note: Next, discuss where selfishness fails, and why a moral framework, education and understanding is needed to combat it.
 
-Section notes:
+
+# Ongoing Notes/ideas:
+This section is just an ongoing list of ideas and info dumping, not a finished section intended to be read:
+
 How is selfishness a force for good? How can it be used? How do groups utilize individual selfish behavior to promote individual survival and thus group survival? What are the limits of selfishness, and how can selfishness also be bad both for individuals and others? How can those limits be avoided and prevented with this framework?
+
+
+s moral and spiritual crisis in yoyung people in the west
+
+The western rise in spiritually and the crisis many people have in their faiths. This can be harnessed and used if given a clear moral understanding of the human context, a base for morality built on our best fundamental understanding of the universe.
+
+Science has created an amazing understanding of the universe over the past 250 years. Thinkers and philosophers have failed to see the oportunity this has presented humanity in creating a new shared religion. An idea echoed in the book "The Ministry for The Future."
+
+
+Donald from INVINCIBLE Season 2 Episode 7 25:44: We're not our bodies, we're the decisions we make, the lives we change, the people we love. Or who love us. I don't need to forget that, and neither do you.
+
+
+Need to rewrite and work some of the wording around presenting science and religion in the same light, they should be "interpretive frameworks" that help people interpret the agnostic god/universe. This can help avoid the issue with people associating science with religion, even though they function the same way in the subjective sense.
+
+People coming froma scientific or religious background will staunchly defend their opposition to the other side, scientific backgrounds will view religeon as immoral on the basis that it is not a provably true system that is based on empirical evidence and peer review and debate. Religion will see science as a system of academea, pompus, wrong at times, and structurally biased towards those in power.
+
+
