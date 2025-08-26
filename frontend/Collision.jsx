@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { Theme } from 'destamatic-ui';
 
-export const isOnTouchScreen = ('ontouchstart' in window);
+const isTouchDevice = () => /Mobi|Android/i.test(navigator.userAgent) || ('ontouchstart' in window);;
 
 const models = [
 	'/cone.glb',
@@ -11,7 +11,6 @@ const models = [
 	'/suzanne.glb',
 	'/torus.glb'
 ];
-
 
 const random = (min = 1, max) => {
 	if (max === undefined) {
@@ -72,6 +71,8 @@ const resetObject = (obj, circlePosition) => {
 
 export default Theme.use(theme => {
 	const Collision = (_, cleanup, mounted) => {
+		const isTouch = isTouchDevice();
+
 		const Canvas = <raw:canvas />;
 		const scene = new THREE.Scene();
 
@@ -377,44 +378,44 @@ export default Theme.use(theme => {
 			cameraViewProjectionMatrix.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
 			frustum.setFromProjectionMatrix(cameraViewProjectionMatrix);
 
-			// Circle swoop from z=45
 			const swoopProgress = getSwoopProgress();
 			const zStart = 45;
 			const zEnd = 0;
 			circlePosition.z = zStart + (zEnd - zStart) * swoopProgress;
 
-			// Circle follows mouse
-			mousePosition.set(mouse.x, mouse.y, 0);
-			mousePosition.unproject(camera);
-			mousePosition.sub(camera.position).normalize();
-			const distance = -camera.position.z / mousePosition.z;
-			mousePosition.multiplyScalar(distance).add(camera.position);
+			if (!isTouch && circle) {
+				// Normal circle logic for desktop
+				mousePosition.set(mouse.x, mouse.y, 0);
+				mousePosition.unproject(camera);
+				mousePosition.sub(camera.position).normalize();
+				const distance = -camera.position.z / mousePosition.z;
+				mousePosition.multiplyScalar(distance).add(camera.position);
 
-			const followFactor = 0.15;
-			circlePosition.x += (mousePosition.x - circlePosition.x) * followFactor;
-			circlePosition.y += (mousePosition.y - circlePosition.y) * followFactor;
+				const followFactor = 0.15;
+				circlePosition.x += (mousePosition.x - circlePosition.x) * followFactor;
+				circlePosition.y += (mousePosition.y - circlePosition.y) * followFactor;
 
-			// Circle scale
-			const targetScale = pointerFocus ? hoverCircleScale : baseCircleScale;
-			circleCurrentScale += (targetScale - circleCurrentScale) * 0.1;
-			circle.scale.setScalar(circleCurrentScale);
+				const targetScale = pointerFocus ? hoverCircleScale : baseCircleScale;
+				circleCurrentScale += (targetScale - circleCurrentScale) * 0.1;
+				circle.scale.setScalar(circleCurrentScale);
 
-			// Circle rotation
-			const rotationSpeed = pointerFocus ? 0.05 : 0.01;
-			circleRotation += rotationSpeed;
-			circle.rotation.z = circleRotation;
-			circle.position.copy(circlePosition);
+				const rotationSpeed = pointerFocus ? 0.05 : 0.01;
+				circleRotation += rotationSpeed;
+				circle.rotation.z = circleRotation;
+				circle.position.copy(circlePosition);
 
-			// Circle velocity
-			circleVelocity.copy(circlePosition).sub(circlePreviousPosition);
+				circleVelocity.copy(circlePosition).sub(circlePreviousPosition);
+				circlePreviousPosition.copy(circlePosition);
+			}
+
+			// Calculate circle speed (used below for flinging objects)
 			const circleSpeed = circleVelocity.length();
-			circlePreviousPosition.copy(circlePosition);
 
+			// Update objects
 			loadedObjects.forEach((obj) => {
 				if (!obj.userData) return;
 
-				// Hide objects that are not in the camera frustum
-				// they won't be rendered, and we skip collisions for them
+				// Hide objects not in the camera frustum
 				obj.visible = frustum.intersectsObject(obj);
 
 				obj.userData.age++;
@@ -422,16 +423,19 @@ export default Theme.use(theme => {
 				const life = obj.userData.lifetime;
 				const t = age / life;
 
-				// Update scale
-				let scl = smoothstep(0.0, 0.15, t) * (1.0 - Math.pow(Math.max(0.0, Math.abs(t) * 2.0 - 1.0), 10.0)) * 1.4;
+				// Update scale using smoothstep
+				let scl = smoothstep(0.0, 0.15, t) *
+					(1.0 - Math.pow(Math.max(0.0, Math.abs(t) * 2.0 - 1.0), 10.0)) * 1.4;
 				if (scl < 0.001) scl = 0.001;
 				obj.userData.scale = scl;
 				obj.scale.setScalar(scl);
 
 				if (age > life) {
+					// Reset once lifetime is exceeded
 					resetObject(obj, circlePosition);
 				}
 
+				// Apply attraction and tangential forces if the object is big enough
 				if (obj.userData.scale > 0.002) {
 					const forceDir = new THREE.Vector3().subVectors(circlePosition, obj.position);
 					const dist2 = forceDir.lengthSq();
@@ -442,7 +446,7 @@ export default Theme.use(theme => {
 						obj.userData.velocity.addScaledVector(forceDir, attractionMultiplier * 0.000015);
 					}
 
-					// Calculate and apply tangential force
+					// Tangential force
 					const tangentialForce = new THREE.Vector3().crossVectors(forceDir, new THREE.Vector3(0, 0, 1))
 						.normalize()
 						.multiplyScalar(0.00002);
@@ -463,10 +467,10 @@ export default Theme.use(theme => {
 					}
 				}
 
-				// Increased damping
+				// Damping
 				obj.userData.velocity.multiplyScalar(0.99);
 
-				// Clamp small velocities to zero
+				// Clamp very small velocities to zero
 				['x', 'y', 'z'].forEach(axis => {
 					if (Math.abs(obj.userData.velocity[axis]) < 0.0001) {
 						obj.userData.velocity[axis] = 0;
@@ -479,16 +483,19 @@ export default Theme.use(theme => {
 					obj.userData.velocity.setLength(maxVelocity);
 				}
 
+				// Apply velocity
 				obj.position.add(obj.userData.velocity);
 
+				// Apply rotation
 				if (obj.userData.rotationAxis) {
 					obj.rotateOnAxis(obj.userData.rotationAxis, obj.userData.rotationSpeed);
 				}
 			});
 
-			// Handle collision detection among objects
+			// Handle object collisions
 			handleCollisions();
 
+			// Handle color transitions
 			if (isTransitioning) handleColorTransition();
 			if (isSecondaryTransitioning) handleSecondaryColorTransition();
 
@@ -538,7 +545,16 @@ export default Theme.use(theme => {
 				depthWrite: false,
 			});
 			circle = new THREE.LineLoop(circleGeometry, circleMaterial);
-			scene.add(circle);
+
+			if (!isTouch) {
+				// On desktop, add the circle to the scene + pointer events
+				scene.add(circle);
+				window.addEventListener('pointermove', handlePointerMove);
+			} else {
+				// On mobile/touch, do not add it to the scene
+				// or just set circle.visible = false if you prefer
+				circle.visible = false;
+			}
 
 			spawnAllObjects();
 			swoopStartTime = performance.now();
