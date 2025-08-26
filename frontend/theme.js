@@ -3,6 +3,33 @@ import { OObject, Observer } from 'destam-dom';
 import SimpleIcons from "destamatic-ui/components/icons/SimpleIcons";
 import FeatherIcons from "destamatic-ui/components/icons/FeatherIcons";
 
+import color from 'destamatic-ui/util/color.js';
+
+const transformHSV = callback => (c, ...params) => {
+	let [r, g, b, a] = color(c);
+	let [h, s, v] = color.rgbToHsv(r, g, b);
+
+	[h, s, v] = callback(h, s, v, ...params.map(p => parseFloat(p)));
+
+	[r, g, b] = color.hsvToRgb(h, s, v);
+	return color.toCSS([r, g, b, a]);
+};
+
+const math = cb => (a, b) => {
+	return String(cb(parseFloat(a), parseFloat(b)));
+};
+
+const luminance = (r, g, b) => {
+	const adjust = (value) => {
+		return value <= 0.03928 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+	};
+
+	return 0.2126 * adjust(r) + 0.7152 * adjust(g) + 0.0722 * adjust(b);
+};
+
+const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
+
+
 const mainColors = {
 	$color_white: '#D6D6D6',
 	$color_black: '#141414',
@@ -30,6 +57,8 @@ const colorModes = {
 const themeModes = {
 	light: {
 		$color_main: '$color',
+		$color_text: '$contrast_text($color)',
+		$color_top: '$contrast_text($color)',
 		$color_hover_top: '$color_white',
 		$color_grad_tr: '$color_white',
 		$color_grad_bl: '$color',
@@ -37,6 +66,8 @@ const themeModes = {
 
 	dark: {
 		$color_main: '$color',
+		$color_text: '$contrast_text($color)',
+		$color_top: '$contrast_text($color)',
 		$color_hover_top: '$color_white',
 		$color_grad_tr: '$color_black',
 		$color_grad_bl: '$color',
@@ -65,8 +96,91 @@ const theme = OObject({
 		// },
 		fontFamily: 'IBM Plex Sans',
 		fontWeight: 600,
+		fontSize: '100%',
 		boxSizing: 'border-box',
 		transition: `opacity ${transition}, box-shadow ${transition}, background-color ${transition}, color ${transition}, border-color ${transition}, stroke ${transition}, fill ${transition}`,
+		$shiftBrightness: transformHSV((h, s, v, amount) => {
+			if (v > 0.5) {
+				v -= amount;
+			} else {
+				v += amount;
+			}
+
+			return [h, s, v];
+		}),
+
+		/*
+		Adjusts the saturation of the input colour by shifting it's value in the HSV colour space. Accepts colours
+		in hexadecimal, RGB, or HSV.
+		*/
+		$saturate: transformHSV((h, s, v, amount) => {
+			return [h, clamp(s + amount, 0, 1), v];
+		}),
+
+		/*
+		Adjusts the hue of the input colour by shifting it's value in the HSV colour space. Accepts colours in
+		hexadecimal, RGB, or HSV.
+		*/
+		$hue: transformHSV((h, s, v, amount) => {
+			return [clamp(h + amount, 0, 1), s, v];
+		}),
+
+		$brightness: transformHSV((h, s, v, amount) => {
+			return [h, s, clamp(v + amount, 0, 1)];
+		}),
+
+		/*
+		Inverts the RGB components of the input colour. Accepts colours in hexadecimal, RGB, or HSV.
+		*/
+		$invert: (c) => {
+			let [r, g, b, a] = color(c);
+			return color.toCSS([1 - r, 1 - g, 1 - b, a]);
+		},
+
+		/*
+		Applies an alpha (transparency) value to the input colour. Accepts colours in hexadecimal, RGB, or HSV.
+		*/
+		$alpha: (c, amount) => {
+			let [r, g, b] = color(c);
+			return color.toCSS([r, g, b, parseFloat(amount)]);
+		},
+
+		/*
+		Computes a contrast color (black or white) based on the luminance of the input colour to ensure readability
+		compliant with WCAG 2.0 AAA standards. Accepts colours in hexadecimal, RGB, or HSV.
+		*/
+		$contrast_text: (c, ...colors) => {
+			if (colors.length === 0) colors = ['white', 'black'];
+
+			const [r, g, b, a] = color(c);
+			const backgroundLuminance = luminance(r, g, b);
+
+			let bestColor;
+			let bestContrast = 0;
+			for (const colorCompare of colors) {
+				const [r, g, b] = color(colorCompare);
+				const contrast = Math.abs(backgroundLuminance - luminance(r, g, b));
+
+				if (bestContrast <= contrast) {
+					bestContrast = contrast;
+					bestColor = [r, g, b, a];
+				}
+			}
+
+			return color.toCSS(bestColor);
+		},
+
+		$add: math((a, b) => a + b),
+		$sub: math((a, b) => a - b),
+		$div: math((a, b) => a / b),
+		$mul: math((a, b) => a * b),
+		$mod: math((a, b) => a % b),
+		$min: math(Math.min),
+		$max: math(Math.max),
+		$floor: a => String(Math.floor(parseFloat(a))),
+		$ceil: a => String(Math.ceil(parseFloat(a))),
+		$round: a => String(Math.round(parseFloat(a))),
+		$if: (cond, a, b) => parseFloat(cond) ? a : b,
 		...mainColors,
 	}),
 
@@ -107,14 +221,13 @@ const theme = OObject({
 	},
 
 	paper: {
-		extends: ['*', 'radius'],
+		extends: ['*', 'radius',],
 		color: '$color_main',
-		maxWidth: 'inherit',
-		maxHeight: 'inherit',
 		background: '$alpha($color_main, 0.4)',
 		backdropFilter: 'blur(25px)',
 		padding: 40,
-		gap: 40
+		gap: 40,
+		maxWidth: 1000
 	},
 
 	radius: {
@@ -154,42 +267,41 @@ const theme = OObject({
 	},
 	typography_h1: {
 		color: '$color_text',
-		fontSize: 62
+		fontSize: 'clamp(2rem, 2vw + 1rem, 3.5rem)',
 	},
 	typography_h2: {
 		color: '$color_text',
-		fontSize: 56
+		fontSize: ' clamp(1.75rem, 1.75vw + 0.875rem, 3rem)',
 	},
 	typography_h3: {
 		color: '$color_text',
-		fontSize: 36
+		fontSize: 'clamp(1.5rem, 1.5vw + 0.75rem, 2.5rem)',
 	},
 	typography_h4: {
 		color: '$color_text',
-		fontSize: 30
+		fontSize: 'clamp(1.25rem, 1.25vw + 0.625rem, 2rem)',
 	},
 	typography_h5: {
 		color: '$color_text',
-		fontSize: 24
+		fontSize: 'clamp(1rem, 1vw + 0.5rem, 1.75rem)'
 	},
 	typography_h6: {
 		color: '$color_text',
-		fontSize: 20
+		fontSize: 'clamp(0.875rem, 0.875vw + 0.4375rem, 1.5rem)',
 	},
 	typography_p1: {
 		color: '$color_text',
-		fontSize: 16
+		fontSize: 'clamp(0.75rem, 0.75vw + 0.375rem, 1.25rem)',
 	},
 	typography_p2: {
 		color: '$color_text',
-		fontSize: 14
+		fontSize: 'clamp(0.625rem, 0.625vw + 0.3125rem, 1rem)',
 	},
 	typography_regular: { fontStyle: 'normal' },
 	typography_bold: { fontWeight: 'bold' },
 	typography_italic: { fontStyle: 'italic' },
 	typography_center: { textAlign: 'center' },
 	typography_inline: { display: 'inline' },
-
 
 	button: {
 		extends: 'center_radius',
@@ -311,10 +423,21 @@ const theme = OObject({
 		height: '100%',
 		minHeight: '100vh'
 	},
+	pages: {
+		extends: 'column_center',
+		padding: '10vh clamp(2rem, 10vw, 1rem)',
+		gap: '3vh',
+	},
+	divider: {
+		width: '100%',
+		height: '2px',
+		background: '$color_text',
+		margin: '10px 0px 10px 0px',
+	},
 });
 
 window.colorMode = Observer.mutable('red');
-window.themeMode = Observer.mutable(window.matchMedia('(prefers-color-scheme:dark)').matches ? true : false);
+window.themeMode = Observer.mutable(true);
 window.theme = theme;
 
 window.colorMode.effect(color => {
