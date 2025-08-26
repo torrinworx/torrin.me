@@ -1,29 +1,25 @@
-import { Typography, Button } from 'destamatic-ui';
+import { Typography, Button, Paper } from 'destamatic-ui';
 
 const Blog = ({ stage }) => {
     const blogs = Object.values(stage.props.blogs); // somehow sort by date, most recent at top?
 
     const Card = ({ each }) => {
-        console.log(each);
-        return <Button
-            type='contained_column'
-            style={{ padding: 50 }}
-            onClick={() => {
+        return <Paper theme='column_fill'>
+            <Typography type='h4' label={each.header} />
+            <Typography type='p1' label={each.description} />
+            <Button type='outlined' label='View' onClick={() => {
                 const nameWithoutExtension = each.name.replace(/\.[^/.]+$/, "");
                 stage.open({ name: "blog/" + nameWithoutExtension });
-            }}
-        >
-            <Typography type='h4' style={{ color: 'inherit' }} label={each.header} />
-            <Typography type='p1' style={{ color: 'inherit' }} label={each.description} />
-        </Button>;
+            }} />
+        </Paper>;
     };
 
-    return <div theme='column' style={{ gap: 40 }}>
-        <div theme='row_spread'>
+    return <>
+        <div theme='row'>
             <Button type='outlined' label='Back' onClick={() => stage.open({ name: 'landing' })} />
         </div>
         <Card each={blogs} />
-    </div>;
+    </>;
 };
 
 export default Blog;
