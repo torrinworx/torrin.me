@@ -11,21 +11,6 @@ import Landing from './Landing';
 import Collision from './Collision';
 import Markdown from './Markdown';
 
-Theme.define({
-	clear: {
-		padding: 20,
-		gap: 40,
-		display: 'flex',
-		flexDirection: 'column',
-	},
-	pages: {
-		padding: '100px 40px 40px 40px',
-		gap: 40,
-		display: 'flex',
-		flexDirection: 'column',
-	},
-});
-
 const NotFound = StageContext.use(s => () => <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
 	<Typography type='h4' style={{ marginBottom: '20px' }}>404 Page Not Found</Typography>
 	<Typography type='p1' style={{ marginBottom: '20px' }}>The page you are trying to access is either unavailable or restricted.</Typography>
@@ -36,10 +21,10 @@ const Controls = () => {
 	const SelectRadio = Radio(window.colorMode);
 
 	return <div
-		theme='center'
+		theme='center_wide'
 		style={{
 			paddingTop: 20,
-			position: 'sticky',
+			position: 'fixed',
 			top: 0,
 		}}
 	>
@@ -96,6 +81,7 @@ const Something = StageContext.use(s => suspend(LoadingDots, async ({ key, value
 		</Paper>
 	</div>;
 }));
+
 const blogPages = Object.entries(blogs).reduce((acc, [key, value]) => {
 	const baseName = key.replace(/\.[^/.]+$/, '');
 	const routeKey = `blog/${baseName}`;
@@ -167,7 +153,7 @@ const Pages = StageContext.use(s => (_, cleanup) => {
 
 mount(document.body, <Theme value={theme.theme}>
 	<Icons value={theme.icons}>
-		<PopupContext >
+		<PopupContext>
 			<Gradient>
 				<Shown value={enabled}>
 					<Collision />
