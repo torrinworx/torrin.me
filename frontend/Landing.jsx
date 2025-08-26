@@ -1,5 +1,5 @@
 import { Observer } from 'destam-dom';
-import { Button, Typography, Paper, Icon, Detached, StageContext } from 'destamatic-ui';
+import { Button, Typography, Paper, Icon, Detached, StageContext, Shown } from 'destamatic-ui';
 
 const work = [
     {
@@ -12,6 +12,7 @@ const work = [
     },
     {
         'start': '2021-10-01',
+        'end': '2025-01-01',
         'image': '/ThisCozyStudioLogo.svg',
         // 'url': 'https://www.thiscozystudio.com/',
         'header': 'This Cozy Studio',
@@ -39,41 +40,81 @@ const work = [
     }
 ];
 
-const Work = ({ each }) => {
-    const index = work.indexOf(each);
+// const Work = ({ each }) => {
+//     const index = work.indexOf(each);
 
-    const Header = () => <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: index % 2 === 0 ? 'flex-end' : 'flex-start',
-        flex: 1,
-        paddingRight: '20px',
-        maxWidth: '800px',
-        height: 'inherit',
-    }}>
-        <Typography type='h2' label={each.header} />
-    </div>;
+//     const Header = () => <div style={{
+//         display: 'flex',
+//         alignItems: 'center',
+//         justifyContent: index % 2 === 0 ? 'flex-end' : 'flex-start',
+//         flex: 1,
+//         paddingRight: '20px',
+//         maxWidth: '800px',
+//         height: 'inherit',
+//     }}>
+//         <Typography type='h2' label={each.header} />
+//     </div>;
 
-    const Position = () => <div style={{ flex: 1, paddingLeft: '20px', maxWidth: '800px' }}>
-        <div theme='column'>
-            <Typography type='h4' label={each.position} />
-            <Typography type='p1' label={each.content} />
-        </div>
-    </div>;
+//     const Position = () => <div style={{ flex: 1, paddingLeft: '20px', maxWidth: '800px' }}>
+//         <div theme='column'>
+//             <Typography type='h4' label={each.position} />
+//             <Typography type='p1' label={each.content} />
+//         </div>
+//     </div>;
 
-    return <div style={{ display: 'flex', alignItems: 'stretch', justifyContent: 'space-between' }}>
-        {index % 2 === 0 ? <Header /> : <Position />}
+//     return <div style={{ display: 'flex', alignItems: 'stretch', justifyContent: 'space-between' }}>
+//         {index % 2 === 0 ? <Header /> : <Position />}
 
-        <div theme='column_center' style={{ flex: 'none', position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <div theme='primary' style={{ height: '100%', borderLeft: '3px solid $color_top', borderRight: '3px solid $color_top' }} />
-            <img src={each.image} style={{ boxSizing: 'border-box', padding: '20px', height: '125px', width: 'auto', ...each?.style }} />
-            <div theme='primary' style={{ height: '100%', borderLeft: '3px solid $color_top', borderRight: '3px solid $color_top' }} />
-        </div>
+//         <div theme='column_center' style={{ flex: 'none', position: 'relative', display: 'flex', alignItems: 'center' }}>
+//             <div theme='primary' style={{ height: '100%', borderLeft: '3px solid $color_top', borderRight: '3px solid $color_top' }} />
+//             <img src={each.image} style={{ boxSizing: 'border-box', padding: '20px', height: '125px', width: 'auto', ...each?.style }} />
+//             <div theme='primary' style={{ height: '100%', borderLeft: '3px solid $color_top', borderRight: '3px solid $color_top' }} />
+//         </div>
 
-        {index % 2 === 0 ? <Position /> : <Header />}
-    </div>;
+//         {index % 2 === 0 ? <Position /> : <Header />}
+//     </div>;
+// };
+
+
+const getOrdinal = (n) => {
+    const v = n % 100;
+    if (v >= 11 && v <= 13) return 'th';
+    switch (n % 10) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
+    }
 };
 
+const formatDate = (isoDate) => {
+    if (!isoDate) return '';
+    const [y, m, d] = isoDate.split('-').map(Number);
+    const date = new Date(y, m - 1, d);
+    const month = date.toLocaleString('en-US', { month: 'long' });
+    const day = date.getDate();
+    const year = date.getFullYear();
+    return `${month} ${day}${getOrdinal(day)}, ${year}`;
+};
+
+const formatDateRange = (start, end) => {
+    const startStr = formatDate(start);
+    const endStr = end ? formatDate(end) : 'Present';
+    return `${startStr} to ${endStr}`;
+};
+
+// component
+const Work = ({ each }) => {
+    return <div theme='radius'>
+        <div theme='row'>
+            <img src={each.image} style={{ boxSizing: 'border-box', padding: '20px', width: 'clamp(3rem, 25vw, 10rem)', ...each?.style }} />
+            <Typography type='h2' label={each.header} />
+        </div>
+        <Typography type='p2' label={formatDateRange(each.start, each.end)} />
+        <div theme='divider' />
+        <Typography type='p1' label={each.content} />
+    </div>;
+};
 const tools = [
     { name: 'JavaScript', icon: 'javascript' },
     { name: 'Python', icon: 'python' },
@@ -127,8 +168,8 @@ const tools = [
 
 const Tools = ({ each }) => {
     return <div theme='column_center'>
-        <Icon name={each.icon} size={75} style={{ fill: '$color_top' }} />
-        <Typography type='h4' label={each.name} />
+        <Icon name={each.icon} style={{ fill: '$color_top', width: 'clamp(1rem, 10vw, 5rem)' }} />
+        <Typography type='p1' label={each.name} />
     </div>;
 };
 
@@ -161,8 +202,10 @@ const projects = [
 ];
 
 const Projects = ({ each }) => {
-    return <div style={{ maxWidth: 500, padding: '20px', alignItems: 'center', display: 'flex', flexDirection: 'column' }}>
+    return <div theme='column_center' style={{ maxWidth: 500, padding: 10 }}>
         <Typography type='h2' label={each.name} />
+        <div theme='divider' />
+
         <Typography type='p1' label={each.description} style={{ marginBottom: '10px' }} />
         <Button type='outlined' label='View' onClick={() => window.open(each.url, '_blank')} />
     </div>;
@@ -186,81 +229,151 @@ const Kebab = ({ icon, children, ...props }) => {
     </Detached>
 };
 
-const Landing = StageContext.use(s => () => <>
-    <div theme='clear' style={{ height: '75', minHeight: '75vh' }}>
-        <Typography type='h1'>Torrin Leonard</Typography>
-        <Typography type='p1'>Full Stack Software Developer, located in <i>Waterloo, Ontario, Canada</i></Typography>
-    </div>
-    <Paper theme='row'>
-        <div theme='column' style={{ width: '100%' }}>
-            <Typography type='h1'>Me</Typography>
-            <Typography style={{ maxWidth: 600 }} type='p1' label={'I am a full stack software developer very passionate about open source, creating clean reliable code that others can use and build on. I like working along side others because it motivates me to create tools that those around me can use and create with. Programming is one of those rare jobs that let\'s you build for yourself and those around you, while giving you the potential to improve the work and lives of others. I am passionate about create ethical and moral tools that can help those around me and those who will be here long after I\'m gone.'} />
-            <Typography style={{ marginTop: 20, maxWidth: 600 }} type='p1' label={'Outside of tech I\'m a digital photographer who loves long walks and bike rides and a good capachino, big supporter of public transit and love walkable pedestrian focused cities. I also love home labbing and have built and run my own rack mount server which houses a NAS and a mineraft server.'} />
+const Landing = StageContext.use(s => (_, cleanup, mounted) => {
+    const blinkInterval = 400;
+    const timeToFirstBlink = 250;
+    const topOPage = Observer.mutable(true);
+    const lastScrolledTop = Observer.mutable(Date.now());
+    const isAtTop = () => (window.scrollY || window.pageYOffset) <= 0;
 
+    const onScroll = () => {
+        if (isAtTop()) {
+            topOPage.set(true);
+            lastScrolledTop.set(Date.now());
+        } else {
+            topOPage.set(false);
+        }
+    };
+
+    mounted(() => {
+        window.addEventListener('scroll', onScroll);
+    });
+
+    cleanup(() => {
+        window.removeEventListener('scroll', onScroll);
+    });
+
+    return <>
+        <div style={{ height: '75', minHeight: '75vh' }}>
+            <Typography type='h1' label='Torrin Leonard' />
+            <Typography type='p1'>Full Stack Software Developer, living in <i>Waterloo, Ontario, Canada</i></Typography>
+        </div>
+        <Paper theme='column_fill'>
+            <div theme='row'>
+                <div
+                    style={{
+                        width: 'clamp(3rem, 25vw, 10rem)',
+                        margin: 10,
+                        aspectRatio: '1 / 1',
+                        borderRadius: '50%',
+                        overflow: 'hidden',
+                        flex: '0 0 auto',
+                        alignSelf: 'center'
+                    }}
+                >
+                    <img
+                        alt=""
+                        src={window.themeMode ? '/profile.dark.png' : '/profile.light.png'}
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            display: 'block'
+                        }}
+                    />
+                </div>
+                <Typography type='h1'>About Me</Typography>
+            </div>
+            <Typography type='p1' label={'Hi there, I\'m Torrin Leonard, my love for coding began in high school building  Python calculators and Django servers, eventually leading me to the creation of a Blender plugin with my brothers. Outside of coding, you\'ll catch me doing some digital photography, long bike rides, and indulging in a great cappuccino. Passionate about open source projects, my goal has always been to create clean, user/developer friendly software. Checkout the rest of my profile below to learn more about my work and journey!'} />
             <div theme='row' style={{ padding: '40px 0 0 0' }}>
                 <Button type='outlined' label='View my Blog' onClick={() => s.open({ name: 'blog' })} />
             </div>
-        </div>
-        <img theme='radius' src={window.themeMode.map(m => m ? '/profile.dark.png' : '/profile.light.png')} style={{ height: '30vh' }} />
-    </Paper>
-    <Paper theme='column' style={{ paddingBottom: '100px' }}>
-        <Typography type='h1'>Work</Typography>
-        <Typography type='p1' label='A bit about my work experience.' />
-
-        <div theme='center_column'>
-            <Work each={work} />
-        </div>
-    </Paper>
-    <Paper theme='column'>
-        <Typography label='Tools' type='h1' />
-        <Typography type='p1' label='These are the tools that I have experience with or have used in my work or on personal projects.' />
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 20 }}>
-            <Tools each={tools} />
-        </div>
-    </Paper>
-    <Paper theme='column'>
-        <Typography type='h1'>Projects</Typography>
-        <Typography type='p1' label='Some personal projects I am proud of and want to show off.' />
+        </Paper>
+        <Paper theme='column_fill' style={{ paddingBottom: '100px' }}>
+            <Typography type='h1'>Work Experience</Typography>
+            <div theme='center_column'>
+                <Work each={work} />
+            </div>
+        </Paper>
+        <Paper theme='column_fill'>
+            <Typography label={'Tools I Use'} type='h1' />
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 20 }}>
+                <Tools each={tools} />
+            </div>
+        </Paper>
+        <Paper theme='column_fill'>
+            <Typography type='h1'>Personal Projects</Typography>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 20 }}>
+                <Projects each={projects} />
+            </div>
+        </Paper>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 20 }}>
-            <Projects each={projects} />
+            <Button
+                title='LinkedIn'
+                type='icon'
+                icon={<Icon name='linkedinFI' size={65} />}
+                onClick={() => window.open('https://www.linkedin.com/in/torrin-leonard-8343a1154/', '_blank')}
+            />
+            <Button
+                title='GitHub'
+                type='icon'
+                icon={<Icon name='githubFI' size={65} />}
+                onClick={() => window.open('https://github.com/torrinworx', '_blank')}
+            />
+            <Button
+                title='GitLab'
+                type='icon'
+                icon={<Icon name='gitlabFI' size={65} />}
+                onClick={() => window.open('https://gitlab.com/torrin1', '_blank')}
+            />
+            <Button
+                title='dev.to'
+                type='icon'
+                icon={<Icon name='devdotto' size={65} />}
+                onClick={() => window.open('https://dev.to/torrin', '_blank')}
+            />
+            <Kebab icon={<Icon name='at-sign' style={{ fill: 'none' }} size={65} />} style={{ padding: 10, gap: 10 }} title='Email'>
+                <Button title='Copy email address to clipboard.' type='outlined' label='Copy' onClick={() => navigator.clipboard.writeText('torrin@torrin.me')} />
+                <Button title='Open email address in default mailer.' type='outlined' label='Open' onClick={() => window.open('mailto:torrin@torrin.me', '_blank')} />
+            </Kebab>
         </div>
-    </Paper>
 
-    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 20 }}>
-        <Button
-            title='LinkedIn'
-            type='icon'
-            icon={<Icon name='linkedinFI' size={65} />}
-            onClick={() => window.open('https://www.linkedin.com/in/torrin-leonard-8343a1154/', '_blank')}
-        />
-        <Button
-            title='GitHub'
-            type='icon'
-            icon={<Icon name='githubFI' size={65} />}
-            onClick={() => window.open('https://github.com/torrinworx', '_blank')}
-        />
-        <Button
-            title='GitLab'
-            type='icon'
-            icon={<Icon name='gitlabFI' size={65} />}
-            onClick={() => window.open('https://gitlab.com/torrin1', '_blank')}
-        />
-        <Button
-            title='dev.to'
-            type='icon'
-            icon={<Icon name='devdotto' size={65} />}
-            onClick={() => window.open('https://dev.to/torrin', '_blank')}
-        />
-        <Kebab icon={<Icon name='at-sign' style={{ fill: 'none' }} size={65} />} style={{ padding: 10, gap: 10 }} title='Email'>
-            <Button title='Copy email address to clipboard.' type='outlined' label='Copy' onClick={() => navigator.clipboard.writeText('torrin@torrin.me')} />
-            <Button title='Open email address in default mailer.' type='outlined' label='Open' onClick={() => window.open('mailto:torrin@torrin.me', '_blank')} />
-        </Kebab>
-    </div>
-
-    <div theme='center_clear' >
-        <Typography type='p2'> © Torrin Leonard {new Date().getFullYear()}</Typography>
-    </div>
-</>);
+        <div theme='center_clear' >
+            <Typography type='p2'> © Torrin Leonard {new Date().getFullYear()}</Typography>
+        </div>
+        <Shown value={topOPage}>
+            <div
+                theme="row_center"
+                style={{
+                    position: 'fixed',
+                    left: 0,
+                    right: 0,
+                    bottom: '5vh',
+                    height: 64,
+                    alignItems: 'center',
+                }}
+            >
+                <Button
+                    type="icon"
+                    icon={
+                        <Icon
+                            name="arrow-down"
+                            size={50}
+                            style={{
+                                opacity: Observer.timer(blinkInterval).map(() => {
+                                    const delta = Date.now() - lastScrolledTop.get();
+                                    if (delta < timeToFirstBlink) return 1;
+                                    return Math.floor((delta - timeToFirstBlink) / blinkInterval) % 2 === 0 ? 1 : 0;
+                                }),
+                            }}
+                        />
+                    }
+                    onClick={() => window.scrollBy({ top: 400, behavior: 'smooth' })}
+                />
+            </div>
+        </Shown>
+    </>
+});
 
 export default Landing;
