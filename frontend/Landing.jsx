@@ -1,80 +1,132 @@
 import { Observer } from 'destam-dom';
-import { Button, Typography, Paper, Icon, Detached, StageContext, Shown } from 'destamatic-ui';
+import { Button, Typography, Paper, Icon, StageContext, Shown, mark } from 'destamatic-ui';
 
 const work = [
     {
-        'start': '2023-03-01',
-        'image': '/EquatorLogo.svg',
-        'url': 'https://equatorstudios.com/',
-        'header': 'Equator Studios',
-        'position': 'Software Developer',
-        'content': 'As a Software Developer at Equator Studios, I\'ve spent the past few months focusing on enhancing our mapping and design software. Our platform is used by professionals all over the world, and my goal is to make it as easy and intuitive as possible for them to create and share their maps. With Equator Studios, I\'ve had the chance to use and deepen my knowledge in a range of technologies including React, JavaScript, Express.js, MongoDB, WSL, Linux/Ubuntu, Docker, GitLab, and CI. Some of the exciting projects I\'ve worked on include the implementation of our new Site Selector and the development of our Segmentation AI product. I\'m eager to continue expanding my skillset and contributing to the ongoing evolution of Equator Studios.'
+        start: '2023-03-01',
+        image: '/EquatorLogo.svg',
+        url: 'https://equatorstudios.com/',
+        header: 'Equator Studios',
+        position: 'Full Stack Software Developer',
+        description: 'As a Full Stack Software Developer at Equator Studios, I led the development of innovative mapping and AI-driven tools that streamline workflows for professionals worldwide. I built our flagship AI proposal creation tool from the ground up, designed and deployed internal and production servers, and created a custom UI framework that powers both our GIS mapping and AI applications. My work involved building functional and accessible interfaces, integrating AI technologies such as ChatGPT, Qdrant, image generation, and geospatial models, as well as implementing Stripe payment systems. I also gained hands-on experience with deployment pipelines, Docker, Linux/Ubuntu, GitLab CI/CD, and server/domain setup. In addition to deepening my expertise in JavaScript, React, Express.js, FastAPI, and MongoDB, I spearheaded the development of reusable UI libraries, guided other developers through onboarding, and established internal tools and processes to support efficient collaboration.'
     },
     {
-        'start': '2021-10-01',
-        'end': '2025-01-01',
-        'image': '/ThisCozyStudioLogo.svg',
-        // 'url': 'https://www.thiscozystudio.com/',
-        'header': 'This Cozy Studio',
-        'position': 'Co-Founder, CEO, Lead Software Engineer and Web Developer',
-        'content': 'As the Co-Founder, CEO, and Lead Software Engineer of This Cozy Studio Inc, I\'ve driven the company\'s growth through my diverse technical abilities, leadership, and management skills. My contributions include the development of \'Blend_My_NFTs\', a popular 3D model NFT generator operating as a Blender add-on, and the creation of multiple NFT collections for our clients, among them Cozy Place, Vox Coodles, Omni Coin, Metapanda, and AKidCalledBeast. Additionally, I designed and developed our company\'s website, ThisCozyStudio.com, and implemented a cloud rendering, storage, and NFT minting platform, making it easier for 3D graphical artists to launch their own 3D NFT collections.'
+        start: '2021-10-01',
+        end: '2025-01-01',
+        image: '/ThisCozyStudioLogo.svg',
+        header: 'This Cozy Studio',
+        position: 'Co-Founder, CEO, Lead Software Developer',
+        description: 'As the Co-Founder, CEO, and Lead Software Engineer of This Cozy Studio Inc., I combined technical expertise with leadership to grow the company and deliver innovative Web3 and 3D solutions. I developed Blend_My_NFTs, a widely adopted Blender add-on for generating 3D NFT models, which has earned nearly 1,000 stars on GitHub and been customized for client needs. My work also included building and deploying multiple NFT collections—such as Cozy Place, Vox Coodles, Omni Coin, Metapanda, and AKidCalledBeast—as well as designing our company website and creating a cloud rendering, storage, and NFT minting platform for 3D artists. Beyond engineering, I managed a small creative team, oversaw finances and client relationships, and streamlined workflows with Python-based automation systems. My experience spans blockchain ecosystems like Ethereum, Cardano, and Polygon, as well as decentralized storage solutions such as Arweave, giving me a unique mix of technical, creative, and managerial skills.'
     },
     {
-        'start': '2021-03-01',
-        'end': '2022-05-01',
-        'image': '/LeagueLogo.jpg',
-        'url': 'https://www.league.com/',
-        'style': { 'borderRadius': '50%' },
-        'header': 'League',
-        'position': 'QA, Accessibility, and Automation Software Tester',
-        'content': 'As a Quality Assurance Engineer at League, I had the privilege of working on the development of President Choice\'s \'PC Health\' app and League\'s Health OS website. I utilized my TypeScript/JavaScript skills to develop automated tests using TestCafe. I also conducted manual testing and accessibility testing to ensure that the app and website met the WCAG accessibility standards. I worked closely with the development team and my colleagues at worX4you Inc. to provide feedback and suggestions for improvements. This was an enriching experience where I could apply my skills in automated testing, accessibility testing, and teamwork.'
+        start: '2021-03-01',
+        end: '2022-05-01',
+        image: '/LeagueLogo.jpg',
+        url: 'https://www.league.com/',
+        style: { 'borderRadius': '50%' },
+        header: 'League',
+        position: 'QA, Accessibility, and Automation Software Tester',
+        description: 'As a Quality Assurance Engineer at League, I contributed to the development of President’s Choice’s PC Health app and League’s Health OS platform by ensuring functionality, usability, and accessibility across web and mobile. I built and maintained automated tests in TypeScript/JavaScript using TestCafe, conducted manual and accessibility testing in alignment with WCAG standards, and collaborated closely with developers to identify and resolve issues before release. I also leveraged tools like Jira, Slack, GitHub, and VS Code to streamline workflows and improve communication between teams. This role strengthened my skills in automated testing, accessibility compliance, and cross-team collaboration while ensuring a seamless experience for end users.'
     },
     {
-        'start': '2013-06-01',
-        'image': '/worX4youLogo.jpg',
-        'url': 'https://www.worx4you.com/',
-        'style': { 'borderRadius': '50%' },
-        'header': 'worX4you Inc.',
-        'position': 'QA, Accessibility, and Automation Software Tester',
-        'content': 'As a Software Assurance Engineer contractor at worx4You, I had the opportunity to work on multiple projects for companies such as THRILLWORKS, League, TunnelBear, Hubba, and Hopscotch. In this role, I was responsible for manual and automation testing using tools such as Jira, Slack, Visual Studio Code, JavaScript, TypeScript, and TestCafe. Additionally, I conducted research on and implemented WCAG accessibility standards to ensure that the companies I worked with were following accessibility standards. Through my work at worx4You, I gained valuable experience in software testing and accessibility, and I am excited to continue to develop my skills in these areas.'
+        start: '2020-08-01',
+        end: '2021-10-01',
+        image: '/PivotCareersLogo.jpeg',
+        style: { 'borderRadius': '50%' },
+        header: 'Pivot Careers',
+        position: 'Founder and CEO',
+        description: 'As the Founder and CEO of Pivot Careers, I researched and developed an online onboarding platform designed to help companies create training courses for new hires. I conducted market research, spoke with professionals in the recruitment industry, and explored ways to improve the efficiency of employee onboarding through technology. While not heavily technical, this role highlighted my entrepreneurial drive, product design thinking, and ability to identify business opportunities.'
+    },
+    {
+        start: '2017-04-01',
+        end: '2021-02-01',
+        image: '/TunnelBearLogo.svg',
+        header: 'TunnelBear',
+        url: 'https://www.tunnelbear.com/',
+        position: 'Software QA Tester',
+        description: 'As a Software QA Tester at TunnelBear, I tested and assured the quality of products such as the TunnelBear VPN, Remembear Password Manager, and MacOS VPN applications. I worked closely with the development team to identify, reproduce, and document issues, ensuring secure, reliable, and user-friendly releases. My nearly four years at TunnelBear gave me valuable experience in software testing, quality assurance, and collaborating with a dedicated team on widely used consumer applications.'
+    },
+    {
+        start: '2013-06-01',
+        end: '2025-06-01',
+        image: '/worX4youLogo.jpg',
+        url: 'https://www.worx4you.com/',
+        style: { 'borderRadius': '50%' },
+        header: 'worX4you Inc.',
+        position: 'QA, Accessibility, and Automation Software Tester',
+        description: 'As a Software Assurance Engineer contractor at worX4you, I worked on projects for clients including THRILLWORKS, League, TunnelBear, Hubba, and Hopscotch, where I focused on both manual and automated testing. Using tools such as JavaScript, TypeScript, TestCafe, Jira, Slack, GitHub, and VS Code, I developed and executed test plans to ensure product quality and reliability. A key part of my role was researching and applying WCAG accessibility standards, helping teams improve inclusivity and compliance across their applications. This experience allowed me to strengthen my expertise in software testing, accessibility, and cross-team collaboration across diverse projects and industries.'
     }
 ];
 
-// const Work = ({ each }) => {
-//     const index = work.indexOf(each);
 
-//     const Header = () => <div style={{
-//         display: 'flex',
-//         alignItems: 'center',
-//         justifyContent: index % 2 === 0 ? 'flex-end' : 'flex-start',
-//         flex: 1,
-//         paddingRight: '20px',
-//         maxWidth: '800px',
-//         height: 'inherit',
-//     }}>
-//         <Typography type='h2' label={each.header} />
-//     </div>;
+const projects = [
+    {
+        url: 'https://github.com/torrinworx/destam-web-core',
+        header: 'destam web core',
+        description: 'A library package that contains core abstractions and utilities of a full stack platform. destam-web-core simplifies and implements features like client/server websocket state synchronization, observer-based state syncing, MongoDB server state storage, backend websocket module routing system, user signup/login flow, and db management, user websocket authentication.',
+    },
+    {
+        url: 'https://opengig.org',
+        header: 'OpenGig.org',
+        description: 'An Open Source platform passion project built for gig workers and customers. A full stack, state streaming, websocket-based reactive web application that uses JavaScript on the backend and frontend.',
+    },
+    {
+        url: 'https://github.com/torrinworx/MangoSync',
+        header: 'MangoSync',
+        description: 'A music player that enhances your albums with metadata like lyrics, animated art, descriptions, and tags. MangoSync uses a locally modified Whisper audio-to-text AI model to auto transcribe lyrics, first searching online, then aligning and transcribing your songs for Apple Music-style synchronized lyrics.'
+    },
+    {
+        url: 'https://github.com/torrinworx/destamatic-ui',
+        header: 'destamatic ui',
+        description: 'A custom UI component library built on destam and destam-dom reactivity libraries. Similar in style and functionality to MaterialUI components, but snappier thanks to the speed of destam-dom\'s lack of a virtual DOM.',
+    },
+    {
+        url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        header: 'torrin.me',
+        description: 'Designed and developed a fully custom interactive portfolio using my own UI library (destamatic-ui), a DOM manipulation framework built from scratch (destam-dom), and Three.js. The site features a real-time theming system that synchronizes UI and 3D WebGL scenes, with smooth color transitions and support for dark/light modes plus four accent themes. I built touch and desktop input handling, optimized object collisions and animations using spatial partitioning and frustum culling, and integrated a blog engine powered by a custom Markdown renderer.',
+    },
+];
 
-//     const Position = () => <div style={{ flex: 1, paddingLeft: '20px', maxWidth: '800px' }}>
-//         <div theme='column'>
-//             <Typography type='h4' label={each.position} />
-//             <Typography type='p1' label={each.content} />
-//         </div>
-//     </div>;
+const references = [
+    {
+        url: '',
+        header: 'Bobby John',
+        description: 'Torrin did amazing work doing xyz on project xyz and I can vouch for him.',
+        image: 'https://randomuser.me/api/portraits/men/28.jpg',
+        style: { 'borderRadius': '50%' },
 
-//     return <div style={{ display: 'flex', alignItems: 'stretch', justifyContent: 'space-between' }}>
-//         {index % 2 === 0 ? <Header /> : <Position />}
+    }
+]
 
-//         <div theme='column_center' style={{ flex: 'none', position: 'relative', display: 'flex', alignItems: 'center' }}>
-//             <div theme='primary' style={{ height: '100%', borderLeft: '3px solid $color_top', borderRight: '3px solid $color_top' }} />
-//             <img src={each.image} style={{ boxSizing: 'border-box', padding: '20px', height: '125px', width: 'auto', ...each?.style }} />
-//             <div theme='primary' style={{ height: '100%', borderLeft: '3px solid $color_top', borderRight: '3px solid $color_top' }} />
-//         </div>
+const skills = [
+    "💻 JavaScript / TypeScript / Python",
+    "⚛️ React, Express.js, FastAPI, Node.js",
+    "🎨 Custom UI Libraries (destamatic-ui, destam-dom)",
+    "🌐 Three.js / WebGL / Responsive Design",
+    "♿ Accessibility (WCAG Compliance)",
+    "🗄️ MongoDB, Redis, Docker, NGINX",
+    "☁️ GitLab CI/CD, Linux Servers, DigitalOcean, AWS",
+    "🤖 OpenAI API / ChatGPT, Qdrant, LangChain",
+    "🎶 Whisper Speech-to-Text, Image & Segmentation Models",
+    "🔗 Ethereum, Polygon, Cardano",
+    "🖼️ NFT Smart Contracts & 3D NFT Pipelines (Blender API, Arweave)",
+    "🧪 Automated Testing (TestCafe), Manual QA, Accessibility Testing",
+    "👥 Leadership, Mentorship, Entrepreneurship"
+];
 
-//         {index % 2 === 0 ? <Position /> : <Header />}
-//     </div>;
-// };
-
+const Skills = ({ each }) => {
+    return <div
+        theme={['*', 'radius']}
+        style={{
+            padding: 10,
+            color: '$color_text',
+            maxWidth: 'inherit',
+            maxHeight: 'inherit',
+            border: 'solid $color_top 2px'
+        }}>
+        <Typography type='p1' label={each} />
+    </div>
+};
 
 const getOrdinal = (n) => {
     const v = n % 100;
@@ -103,18 +155,46 @@ const formatDateRange = (start, end) => {
     return `${startStr} to ${endStr}`;
 };
 
-// component
-const Work = ({ each }) => {
-    return <div theme='radius'>
-        <div theme='row'>
-            <img src={each.image} style={{ boxSizing: 'border-box', padding: '20px', width: 'clamp(3rem, 25vw, 10rem)', ...each?.style }} />
-            <Typography type='h2' label={each.header} />
-        </div>
+const Card = ({ each }) => <div theme='fill'>
+    <div theme='row'>
+        <Shown value={each.image}>
+            <img
+                src={each.image}
+                style={{
+                    boxSizing: 'border-box',
+                    padding: 20,
+                    marginRight: 20,
+                    width: 'clamp(3rem, 25vw, 10rem)',
+                    ...each?.style
+                }}
+            />
+        </Shown>
+        <Shown value={each.url}>
+            <mark:then>
+                <Button
+                    iconPosition='right'
+                    icon={<Icon name='external-link' size={32} style={{ marginLeft: 5 }} />}
+                    type='text'
+                    label={<Typography type='h2' style={{ color: 'inherit' }} label={each.header} />}
+                    onClick={() => window.open(each.url, '_blank')}
+                    href={each.url}
+                />
+            </mark:then>
+            <mark:else>
+                <Typography type='h2' label={each.header} />
+            </mark:else>
+        </Shown>
+    </div>
+    <Shown value={each.position}>
+        <Typography type='p2' label={each.position} />
+    </Shown>
+    <Shown value={each.start || each.end}>
         <Typography type='p2' label={formatDateRange(each.start, each.end)} />
-        <div theme='divider' />
-        <Typography type='p1' label={each.content} />
-    </div>;
-};
+    </Shown>
+    <div theme='divider' />
+    <Typography type='p1' label={each.description} />
+</div>;
+
 const tools = [
     { name: 'JavaScript', icon: 'javascript' },
     { name: 'Python', icon: 'python' },
@@ -167,66 +247,10 @@ const tools = [
 ];
 
 const Tools = ({ each }) => {
-    return <div theme='column_center'>
+    return <div theme='column_center' style={{ gap: 10 }}>
         <Icon name={each.icon} style={{ fill: '$color_top', width: 'clamp(1rem, 10vw, 5rem)' }} />
         <Typography type='p1' label={each.name} />
     </div>;
-};
-
-const projects = [
-    {
-        url: 'https://github.com/torrinworx/destam-web-core',
-        name: 'destam web core',
-        description: 'A library package that contains core abstractions and utilities of a full stack platform. destam-web-core simplifies and implements features like client/server websocket state synchronization, observer-based state syncing, MongoDB server state storage, backend websocket module routing system, user signup/login flow, and db management, user websocket authentication.',
-    },
-    {
-        url: 'https://opengig.org',
-        name: 'OpenGig.org',
-        description: 'An Open Source platform passion project built for gig workers and customers. A full stack, state streaming, websocket-based reactive web application that uses JavaScript on the backend and frontend.',
-    },
-    {
-        url: 'https://github.com/torrinworx/MangoSync',
-        name: 'MangoSync',
-        description: 'A music player that enhances your albums with metadata like lyrics, animated art, descriptions, and tags. MangoSync uses a locally modified Whisper audio-to-text AI model to auto transcribe lyrics, first searching online, then aligning and transcribing your songs for Apple Music-style synchronized lyrics.'
-    },
-    {
-        url: 'https://github.com/torrinworx/destamatic-ui',
-        name: 'destamatic ui',
-        description: 'A custom UI component library built on destam and destam-dom reactivity libraries. Similar in style and functionality to MaterialUI components, but snappier thanks to the speed of destam-dom\'s lack of a virtual DOM.',
-    },
-    {
-        url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-        name: 'torrin.me',
-        description: 'My personal website! Built using destamatic-ui, destam-dom, and destam state management. Where does this link go? 🤔',
-    },
-];
-
-const Projects = ({ each }) => {
-    return <div theme='column_center' style={{ maxWidth: 500, padding: 10 }}>
-        <Typography type='h2' label={each.name} />
-        <div theme='divider' />
-
-        <Typography type='p1' label={each.description} style={{ marginBottom: '10px' }} />
-        <Button type='outlined' label='View' onClick={() => window.open(each.url, '_blank')} />
-    </div>;
-};
-
-const Kebab = ({ icon, children, ...props }) => {
-    const focused = Observer.mutable(false);
-
-    return <Detached enabled={focused}>
-        <Button
-            type='icon'
-            onClick={() => focused.set(!focused.get())}
-            title={props.title}
-            icon={icon}
-        />
-        <mark:popup>
-            <Paper {...props}>
-                {children}
-            </Paper>
-        </mark:popup>
-    </Detached>
 };
 
 const Landing = StageContext.use(s => (_, cleanup, mounted) => {
@@ -254,9 +278,16 @@ const Landing = StageContext.use(s => (_, cleanup, mounted) => {
     });
 
     return <>
-        <div style={{ height: '75', minHeight: '75vh' }}>
+        <div theme={['*', 'radius', 'fill']} style={{
+            height: '75', minHeight: '75vh', textAlign: 'left',
+            color: '$color_main',
+            padding: 40,
+            gap: 40,
+            maxWidth: 1000
+        }}>
             <Typography type='h1' label='Torrin Leonard' />
-            <Typography type='p1'>Full Stack Software Developer, living in <i>Waterloo, Ontario, Canada</i></Typography>
+            <Typography type='p2'>Full Stack Software Developer, living in Waterloo, Ontario, Canada.</Typography>
+            <Typography type='p2'>{new Date().getFullYear() - 2017} years professional experience.</Typography>
         </div>
         <Paper theme='column_fill'>
             <div theme='row'>
@@ -285,18 +316,32 @@ const Landing = StageContext.use(s => (_, cleanup, mounted) => {
                 <Typography type='h1'>About Me</Typography>
             </div>
             <Typography type='p1' label={'Hi there, I\'m Torrin Leonard, my love for coding began in high school building  Python calculators and Django servers, eventually leading me to the creation of a Blender plugin with my brothers. Outside of coding, you\'ll catch me doing some digital photography, long bike rides, and indulging in a great cappuccino. Passionate about open source projects, my goal has always been to create clean, user/developer friendly software. Checkout the rest of my profile below to learn more about my work and journey!'} />
+
             <div theme='row' style={{ padding: '40px 0 0 0' }}>
-                <Button type='outlined' label='View my Blog' onClick={() => s.open({ name: 'blog' })} />
+                <Button type='text' label='View my Blog' onClick={() => s.open({ name: 'blog' })} href='/blog' />
+            </div>
+        </Paper>
+        <Paper theme='column_fill' style={{
+            paddingBottom: '100px',
+            background: 'none',
+            backdropFilter: 'none',
+        }}>
+            <Typography type='h1'>At A Glance</Typography>
+            <div theme='center' style={{ width: '100%', display: 'flex', flexWrap: 'wrap', gap: 20 }}>
+                <Skills each={skills} />
             </div>
         </Paper>
         <Paper theme='column_fill' style={{ paddingBottom: '100px' }}>
             <Typography type='h1'>Work Experience</Typography>
             <div theme='center_column'>
-                <Work each={work} />
+                <Card each={work} />
             </div>
         </Paper>
-        <Paper theme='column_fill'>
-            <Typography label={'Tools I Use'} type='h1' />
+        <Paper theme='column_fill' style={{
+            background: 'none',
+            backdropFilter: 'none',
+        }}>
+            <Typography label='Tools I Use' type='h1' />
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 20 }}>
                 <Tools each={tools} />
             </div>
@@ -304,43 +349,51 @@ const Landing = StageContext.use(s => (_, cleanup, mounted) => {
         <Paper theme='column_fill'>
             <Typography type='h1'>Personal Projects</Typography>
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 20 }}>
-                <Projects each={projects} />
+                <Card each={projects} />
             </div>
         </Paper>
-
+        {/* <Paper theme='column_fill' style={{
+            background: 'none',
+            backdropFilter: 'none',
+        }}>
+            <Typography label='References and Praise' type='h1' />
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 20 }}>
+                <Card each={references} />
+            </div>
+        </Paper> */}
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 20 }}>
             <Button
                 title='LinkedIn'
                 type='icon'
                 icon={<Icon name='linkedinFI' size={65} />}
                 onClick={() => window.open('https://www.linkedin.com/in/torrin-leonard-8343a1154/', '_blank')}
+                href='https://www.linkedin.com/in/torrin-leonard-8343a1154/'
             />
             <Button
                 title='GitHub'
                 type='icon'
                 icon={<Icon name='githubFI' size={65} />}
                 onClick={() => window.open('https://github.com/torrinworx', '_blank')}
+                href='https://github.com/torrinworx'
             />
             <Button
                 title='GitLab'
                 type='icon'
                 icon={<Icon name='gitlabFI' size={65} />}
                 onClick={() => window.open('https://gitlab.com/torrin1', '_blank')}
+                href='https://gitlab.com/torrin1'
             />
             <Button
                 title='dev.to'
                 type='icon'
                 icon={<Icon name='devdotto' size={65} />}
                 onClick={() => window.open('https://dev.to/torrin', '_blank')}
+                href='https://dev.to/torrin'
             />
-            <Kebab icon={<Icon name='at-sign' style={{ fill: 'none' }} size={65} />} style={{ padding: 10, gap: 10 }} title='Email'>
+            {/* <Kebab icon={<Icon name='at-sign' style={{ fill: 'none' }} size={65} />} style={{ padding: 10, gap: 10 }} title='Email'>
                 <Button title='Copy email address to clipboard.' type='outlined' label='Copy' onClick={() => navigator.clipboard.writeText('torrin@torrin.me')} />
                 <Button title='Open email address in default mailer.' type='outlined' label='Open' onClick={() => window.open('mailto:torrin@torrin.me', '_blank')} />
-            </Kebab>
-        </div>
-
-        <div theme='center_clear' >
-            <Typography type='p2'> © Torrin Leonard {new Date().getFullYear()}</Typography>
+            </Kebab> */}
         </div>
         <Shown value={topOPage}>
             <div
@@ -349,7 +402,7 @@ const Landing = StageContext.use(s => (_, cleanup, mounted) => {
                     position: 'fixed',
                     left: 0,
                     right: 0,
-                    bottom: '5vh',
+                    bottom: '20vh',
                     height: 64,
                     alignItems: 'center',
                 }}
@@ -369,7 +422,7 @@ const Landing = StageContext.use(s => (_, cleanup, mounted) => {
                             }}
                         />
                     }
-                    onClick={() => window.scrollBy({ top: 400, behavior: 'smooth' })}
+                    onClick={() => window.scrollBy({ top: 500, behavior: 'smooth' })}
                 />
             </div>
         </Shown>

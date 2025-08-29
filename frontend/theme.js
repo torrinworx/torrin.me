@@ -425,7 +425,7 @@ const theme = OObject({
 	},
 	pages: {
 		extends: 'column_center',
-		padding: '10vh clamp(2rem, 10vw, 1rem)',
+		padding: '10vh clamp(0rem, 10vw, 1rem)',
 		gap: '3vh',
 	},
 	divider: {
