@@ -493,10 +493,7 @@ const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted
         <Paper theme='column_fill' >
             <Typography type='h1'>Certificates</Typography>
             <div theme='column' style={{ gap: 20 }}>
-                <Card each={[...certificates].sort((a, b) => {
-                    const ts = v => (v == null || /present/i.test(v)) ? Infinity : +new Date(v);
-                    return ts(b.date) - ts(a.date);
-                })} />
+                <Card each={[...certificates].sort((a, b) => new Date(b.date) - new Date(a.date))} />
             </div>
         </Paper>
         {/* <Paper theme='column_fill' style={{
