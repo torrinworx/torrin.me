@@ -58,7 +58,6 @@ const work = [
     }
 ];
 
-
 const projects = [
     {
         url: 'https://github.com/torrinworx/destam-web-core',
@@ -86,114 +85,6 @@ const projects = [
         description: 'Designed and developed a fully custom interactive portfolio using my own UI library (destamatic-ui), a DOM manipulation framework built from scratch (destam-dom), and Three.js. The site features a real-time theming system that synchronizes UI and 3D WebGL scenes, with smooth color transitions and support for dark/light modes plus four accent themes. I built touch and desktop input handling, optimized object collisions and animations using spatial partitioning and frustum culling, and integrated a blog engine powered by a custom Markdown renderer.',
     },
 ];
-
-const references = [
-    {
-        url: '',
-        header: 'Bobby John',
-        description: 'Torrin did amazing work doing xyz on project xyz and I can vouch for him.',
-        image: 'https://randomuser.me/api/portraits/men/28.jpg',
-        style: { 'borderRadius': '50%' },
-
-    }
-]
-
-const skills = [
-    "💻 JavaScript / TypeScript / Python",
-    "⚛️ React, Express.js, FastAPI, Node.js",
-    "🎨 Custom UI Libraries (destamatic-ui, destam-dom)",
-    "🌐 Three.js / WebGL / Responsive Design",
-    "♿ Accessibility (WCAG Compliance)",
-    "🗄️ MongoDB, Redis, Docker, NGINX",
-    "☁️ GitLab CI/CD, Linux Servers, DigitalOcean, AWS",
-    "🤖 OpenAI API / ChatGPT, Qdrant, LangChain",
-    "🎶 Whisper Speech-to-Text, Image & Segmentation Models",
-    "🔗 Ethereum, Polygon, Cardano",
-    "🖼️ NFT Smart Contracts & 3D NFT Pipelines (Blender API, Arweave)",
-    "🧪 Automated Testing (TestCafe), Manual QA, Accessibility Testing",
-    "👥 Leadership, Mentorship, Entrepreneurship"
-];
-
-const Skills = ({ each }) => {
-    return <div
-        theme={['*', 'radius']}
-        style={{
-            padding: 10,
-            color: '$color_text',
-            maxWidth: 'inherit',
-            maxHeight: 'inherit',
-            border: 'solid $color_top 2px'
-        }}>
-        <Typography type='p1' label={each} />
-    </div>
-};
-
-const getOrdinal = (n) => {
-    const v = n % 100;
-    if (v >= 11 && v <= 13) return 'th';
-    switch (n % 10) {
-        case 1: return 'st';
-        case 2: return 'nd';
-        case 3: return 'rd';
-        default: return 'th';
-    }
-};
-
-const formatDate = (isoDate) => {
-    if (!isoDate) return '';
-    const [y, m, d] = isoDate.split('-').map(Number);
-    const date = new Date(y, m - 1, d);
-    const month = date.toLocaleString('en-US', { month: 'long' });
-    const day = date.getDate();
-    const year = date.getFullYear();
-    return `${month} ${day}${getOrdinal(day)}, ${year}`;
-};
-
-const formatDateRange = (start, end) => {
-    const startStr = formatDate(start);
-    const endStr = end ? formatDate(end) : 'Present';
-    return `${startStr} to ${endStr}`;
-};
-
-const Card = ({ each }) => <div theme='fill'>
-    <div theme='row'>
-        <Shown value={each.image}>
-            <img
-                src={each.image}
-                style={{
-                    boxSizing: 'border-box',
-                    padding: 20,
-                    marginRight: 20,
-                    width: 'clamp(3rem, 25vw, 10rem)',
-                    ...each?.style
-                }}
-            />
-        </Shown>
-        <Shown value={each.url}>
-            <mark:then>
-                <Button
-                    iconPosition='right'
-                    icon={<Icon name='external-link' size={32} style={{ marginLeft: 5 }} />}
-                    type='text'
-                    label={<Typography type='h2' style={{ color: 'inherit' }} label={each.header} />}
-                    onClick={() => window.open(each.url, '_blank')}
-                    href={each.url}
-                />
-            </mark:then>
-            <mark:else>
-                <Typography type='h2' label={each.header} />
-            </mark:else>
-        </Shown>
-    </div>
-    <Shown value={each.position}>
-        <Typography type='p2' label={each.position} />
-    </Shown>
-    <Shown value={each.start || each.end}>
-        <Typography type='p2' label={formatDateRange(each.start, each.end)} />
-    </Shown>
-    <div theme='divider' />
-    <Typography type='p1' label={each.description} />
-</div>;
 
 const tools = [
     { name: 'JavaScript', icon: 'javascript' },
@@ -246,11 +137,244 @@ const tools = [
     { name: 'Blender', icon: 'blender' },
 ];
 
+const references = [
+    {
+        url: '',
+        header: 'Bobby John',
+        description: 'Torrin did amazing work doing xyz on project xyz and I can vouch for him.',
+        image: 'https://randomuser.me/api/portraits/men/28.jpg',
+        style: { 'borderRadius': '50%' },
+
+    }
+];
+
+const skills = [
+    "💻 JavaScript / TypeScript / Python",
+    "⚛️ React, Express.js, FastAPI, Node.js",
+    "🎨 Custom UI Libraries (destamatic-ui, destam-dom)",
+    "🌐 Three.js / WebGL / Responsive Design",
+    "♿ Accessibility (WCAG Compliance)",
+    "🗄️ MongoDB, Redis, Docker, NGINX",
+    "☁️ GitLab CI/CD, Linux Servers, DigitalOcean, AWS",
+    "🤖 OpenAI API / ChatGPT, Qdrant, LangChain",
+    "🎶 Whisper Speech-to-Text, Image & Segmentation Models",
+    "🔗 Ethereum, Polygon, Cardano",
+    "🖼️ NFT Smart Contracts & 3D NFT Pipelines (Blender API, Arweave)",
+    "🧪 Automated Testing (TestCafe), Manual QA, Accessibility Testing",
+    "👥 Leadership, Mentorship, Entrepreneurship"
+];
+
+const education = [
+    {
+        start: '2017-09-01',
+        end: '2021-06-01',
+        image: './wrdsbLogo.jpg',
+        style: { 'borderRadius': '50%' },
+        header: 'Laurel Heights Secondary School',
+        headerType: 'h4',
+        description: 'Graduated Laurel Heights Secondary School (previously known as Sir John A. Macdonald) in Waterloo, Ontario in June of 2021.'
+    },
+    {
+        start: '2021-06-01',
+        end: '2026-06-01',
+        image: './uwLogo.png',
+        style: { 'borderRadius': '50%' },
+        header: 'University of Waterloo',
+        headerType: 'h4',
+        description: 'Attended the University of Waterloo for Honours Co-op, Astronomy and Physics.'
+    },
+];
+
+const certificates = [
+    {
+        url: 'https://courses.edx.org/certificates/05d8dc2dc24e42238e616f83329ee2f0',
+        date: '2021-02-09',
+        image: './wcagLogo.png',
+        style: { borderRadius: '16px', background: 'white' },
+        header: 'WAI0.1x',
+        headerType: 'h4',
+        description: 'Completed a W3Cx Web Accessibility course provided by the World Wide Web Consortium on how to implement WCAG 2.2/3.0 web accessibility standards.'
+    },
+    {
+        url: 'https://courses.edx.org/certificates/24e0a4eb8d2c4bee94503c85ba31a7d5',
+        date: '2020-10-13',
+        image: './anuLogo.png',
+        style: { borderRadius: '16px', background: 'white' },
+        header: 'ANU-ASTRO1x',
+        headerType: 'h4',
+        description: 'Completed ANU-ASTRO1x: Greatest Unsolved Mysteries of the Universe, a course provided by Australian National University'
+    },
+    {
+        url: 'https://courses.edx.org/certificates/4671ce0c456844ff81684660be3095e2',
+        date: '2021-02-09',
+        image: './mitLogo.png',
+        style: { borderRadius: '16px', background: 'white' },
+        header: 'Intro to Aerospace Engineering',
+        headerType: 'h4',
+        description: 'Completed  16.00x: Introduction to Aerospace Engineering: Astronautics and Human Spaceflight, a course provided by Massachusetts Institute of Technology.'
+    },
+    {
+        // url: 'https://courses.edx.org/certificates/4671ce0c456844ff81684660be3095e2',
+        date: '2019-03-01',
+        image: './st._john_ambulance_canadaLogo.png',
+        style: { borderRadius: '16px', background: 'white' },
+        header: 'Emergancy First Aid - CPR A - AED',
+        headerType: 'h4',
+        description: 'Completed first aid training at  St. John Ambulance Canada | Ambulance Saint-Jean. Credential ID EFA-A-16-SJKWA-140319-2979.'
+    },
+];
+
+
+
+const getOrdinal = (n) => {
+    const v = n % 100;
+    if (v >= 11 && v <= 13) return 'th';
+    switch (n % 10) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
+    }
+};
+
+const formatDate = (isoDate) => {
+    if (!isoDate) return '';
+    const [y, m, d] = isoDate.split('-').map(Number);
+    const date = new Date(y, m - 1, d);
+    const month = date.toLocaleString('en-US', { month: 'long' });
+    const day = date.getDate();
+    const year = date.getFullYear();
+    return `${month} ${day}${getOrdinal(day)}, ${year}`;
+};
+
+const formatDateRange = (start, end) => {
+    const startStr = formatDate(start);
+    const endStr = end ? formatDate(end) : 'Present';
+    return `${startStr} to ${endStr}`;
+};
+
+const Card = ({ each }) => <div theme='fill'>
+    <div theme='row'>
+        <Shown value={each.image}>
+            <img
+                src={each.image}
+                style={{
+                    boxSizing: 'border-box',
+                    padding: 20,
+                    marginRight: 20,
+                    width: 'clamp(3rem, 25vw, 10rem)',
+                    ...each?.style
+                }}
+            />
+        </Shown>
+        <Shown value={each.url}>
+            <mark:then>
+                <Button
+                    iconPosition='right'
+                    icon={<Icon name='external-link' size={32} style={{ marginLeft: 5 }} />}
+                    type='text'
+                    label={<Typography type={each.headerType ? each.headerType : 'h2'} style={{ color: 'inherit' }} label={each.header} />}
+                    onClick={() => window.open(each.url, '_blank')}
+                    href={each.url}
+                />
+            </mark:then>
+            <mark:else>
+                <Typography type={each.headerType ? each.headerType : 'h2'} label={each.header} />
+            </mark:else>
+        </Shown>
+    </div>
+    <Shown value={each.position}>
+        <Typography type='p2' label={each.position} />
+    </Shown>
+    <Shown value={each.start || each.end}>
+        <Typography type='p2' label={formatDateRange(each.start, each.end)} />
+    </Shown>
+    <Shown value={each.date}>
+        <Typography type='p2' label={formatDate(each.date)} />
+    </Shown>
+    <div theme='divider' />
+    <Shown value={each.description}>
+        <Typography type='p1' label={each.description} />
+    </Shown>
+</div>;
+
+const Skills = ({ each }) => {
+    return <div
+        theme={['*', 'radius']}
+        style={{
+            padding: 10,
+            color: '$color_text',
+            maxWidth: 'inherit',
+            maxHeight: 'inherit',
+            border: 'solid $color_top 2px'
+        }}>
+        <Typography type='p1' label={each} />
+    </div>
+};
+
 const Tools = ({ each }) => {
     return <div theme='column_center' style={{ gap: 10 }}>
         <Icon name={each.icon} style={{ fill: '$color_top', width: 'clamp(1rem, 10vw, 5rem)' }} />
         <Typography type='p1' label={each.name} />
     </div>;
+};
+
+const Resume = ({ type = 'icon' }) => {
+    const downloadCheck = Observer.mutable(false);
+    downloadCheck.watch(() => {
+        if (downloadCheck.get()) {
+            setTimeout(() => {
+                downloadCheck.set(false);
+            }, 5000);
+        }
+    });
+
+    return <Button
+        title='Download resume.'
+        type={type}
+        iconPosition='right'
+        label={downloadCheck.map(c => c ? 'Downloaded!' : 'Resume')}
+        icon={downloadCheck.map(c => c
+            ? <Icon name='check' style={{ fill: 'none' }} size={25} />
+            : <Icon name='download' style={{ fill: 'none', marginLeft: 5 }} size={25} />)}
+        onClick={() => {
+            const a = document.createElement('a');
+            a.href = 'Torrin-Leonard-Software-Developer-Resume.pdf';
+            a.download = 'Torrin-Leonard-Software-Developer-Resume.pdf';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+
+            downloadCheck.set(true);
+        }}
+    />;
+};
+
+const Email = ({ type = 'icon' }) => {
+    const emailCheck = Observer.mutable(false);
+    emailCheck.watch(() => {
+        if (emailCheck.get()) {
+            setTimeout(() => {
+                emailCheck.set(false);
+            }, 5000);
+        }
+    });
+
+    return <Button
+        title='Copy email to clipboard.'
+        type={type}
+        iconPosition='right'
+        label={emailCheck.map(c => c ? 'Copied to Clipboard!' : 'Email')}
+        icon={emailCheck.map(c => c
+            ? <Icon name='check' style={{ fill: 'none' }} size={25} />
+            : <Icon name='copy' style={{ fill: 'none', marginLeft: 5 }} size={25} />)}
+        onClick={async () => {
+            emailCheck.set(true);
+            await navigator.clipboard.writeText('torrin@torrin.me')
+        }}
+        loading={false}
+    />;
 };
 
 const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted) => {
@@ -287,7 +411,7 @@ const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted
         }}>
             <Typography type='h1' label='Torrin Leonard' />
             <Typography type='p2'>Full Stack Software Developer, living in Waterloo, Ontario, Canada.</Typography>
-            <Typography type='p2'>{new Date().getFullYear() - 2017} years professional experience.</Typography>
+            <Typography type='p2'>{new Date().getFullYear() - 2017} years professional experience. Open to US/Canada remote/hybrid.</Typography>
         </div>
         <Paper theme='column_fill'>
             <div theme='row'>
@@ -317,8 +441,11 @@ const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted
             </div>
             <Typography type='p1' label={'Hi there, I\'m Torrin Leonard, my love for coding began in high school building  Python calculators and Django servers, eventually leading me to the creation of a Blender plugin with my brothers. Outside of coding, you\'ll catch me doing some digital photography, long bike rides, and indulging in a great cappuccino. Passionate about open source projects, my goal has always been to create clean, user/developer friendly software. Checkout the rest of my profile below to learn more about my work and journey!'} />
 
-            <div theme='row' style={{ padding: '40px 0 0 0' }}>
-                <Button type='text' label='View my Blog' onClick={() => s.open({ name: 'blog' })} href='/blog' />
+            <div theme='row' style={{ padding: '40px 0 0 0', gap: 20 }}>
+                <Button type='outlined' label='View my Blog' onClick={() => s.open({ name: 'blog' })} href='/blog' />
+                <Email type='outlined' />
+                <Resume type='outlined' />
+
             </div>
         </Paper>
         <Paper theme='column_fill' style={{
@@ -333,8 +460,8 @@ const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted
         </Paper>
         <Paper theme='column_fill' style={{ paddingBottom: '100px' }}>
             <Typography type='h1'>Work Experience</Typography>
-            <div theme='center_column'>
-                <Card each={work} />
+            <div theme='center_column' style={{ gap: 20 }}>
+                <Card each={[...work].sort((a, b) => +new Date(b.end ?? b.start) - +new Date(a.end ?? a.start))} />
             </div>
         </Paper>
         <Paper theme='column_fill' style={{
@@ -352,6 +479,26 @@ const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted
                 <Card each={projects} />
             </div>
         </Paper>
+        <Paper theme='column_fill' style={{
+            paddingBottom: '100px',
+            background: 'none',
+            backdropFilter: 'none',
+        }}>
+            <Typography type='h1'>Education</Typography>
+            <div theme='column' style={{ gap: 20 }}>
+                <Card each={[...education].sort((a, b) => +new Date(b.end ?? b.start) - +new Date(a.end ?? a.start))} />
+            </div>
+
+        </Paper>
+        <Paper theme='column_fill' >
+            <Typography type='h1'>Certificates</Typography>
+            <div theme='column' style={{ gap: 20 }}>
+                <Card each={[...certificates].sort((a, b) => {
+                    const ts = v => (v == null || /present/i.test(v)) ? Infinity : +new Date(v);
+                    return ts(b.date) - ts(a.date);
+                })} />
+            </div>
+        </Paper>
         {/* <Paper theme='column_fill' style={{
             background: 'none',
             backdropFilter: 'none',
@@ -361,7 +508,7 @@ const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted
                 <Card each={references} />
             </div>
         </Paper> */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 20 }}>
+        <div theme='row_center' style={{ gap: 20 }}>
             <Button
                 title='LinkedIn'
                 type='icon'
@@ -390,14 +537,12 @@ const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted
                 onClick={() => window.open('https://dev.to/torrin', '_blank')}
                 href='https://dev.to/torrin'
             />
-            <Button
-                title='Copy email address to clipboard.'
-                type='icon'
-                icon={<Icon name='at-sign' style={{ fill: 'none' }} size={65} />}
-                onClick={async () => await navigator.clipboard.writeText('torrin@torrin.me')}
-                loading={false}
-            />
         </div>
+        <div theme='row_center' style={{ gap: 20 }}>
+            <Email />
+            <Resume />
+        </div>
+
         <Shown value={topOPage}>
             <div
                 theme="row_center"
