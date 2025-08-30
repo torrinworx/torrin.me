@@ -1,5 +1,5 @@
 import { Observer } from 'destam-dom';
-import { Button, Typography, Paper, Icon, StageContext, Shown, mark } from 'destamatic-ui';
+import { Button, Typography, Paper, Icon, StageContext, Shown, mark, ThemeContext } from 'destamatic-ui';
 
 const work = [
     {
@@ -253,7 +253,7 @@ const Tools = ({ each }) => {
     </div>;
 };
 
-const Landing = StageContext.use(s => (_, cleanup, mounted) => {
+const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted) => {
     const blinkInterval = 400;
     const timeToFirstBlink = 250;
     const topOPage = Observer.mutable(true);
@@ -390,10 +390,13 @@ const Landing = StageContext.use(s => (_, cleanup, mounted) => {
                 onClick={() => window.open('https://dev.to/torrin', '_blank')}
                 href='https://dev.to/torrin'
             />
-            {/* <Kebab icon={<Icon name='at-sign' style={{ fill: 'none' }} size={65} />} style={{ padding: 10, gap: 10 }} title='Email'>
-                <Button title='Copy email address to clipboard.' type='outlined' label='Copy' onClick={() => navigator.clipboard.writeText('torrin@torrin.me')} />
-                <Button title='Open email address in default mailer.' type='outlined' label='Open' onClick={() => window.open('mailto:torrin@torrin.me', '_blank')} />
-            </Kebab> */}
+            <Button
+                title='Copy email address to clipboard.'
+                type='icon'
+                icon={<Icon name='at-sign' style={{ fill: 'none' }} size={65} />}
+                onClick={async () => await navigator.clipboard.writeText('torrin@torrin.me')}
+                loading={false}
+            />
         </div>
         <Shown value={topOPage}>
             <div
@@ -427,6 +430,6 @@ const Landing = StageContext.use(s => (_, cleanup, mounted) => {
             </div>
         </Shown>
     </>
-});
+}));
 
 export default Landing;
