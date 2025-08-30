@@ -2,7 +2,7 @@ import { mount, Observer } from 'destam-dom';
 import {
 	Button, Theme, Typography, Paper, Gradient, Icons,
 	Radio, Toggle, PopupContext, StageContext, Stage,
-	Shown, LoadingDots, suspend
+	Shown, LoadingDots, suspend, Popup
 } from 'destamatic-ui';
 
 import Blog from './Blog';
@@ -164,6 +164,7 @@ mount(document.body, <Theme value={theme.theme}>
 						<div theme='center_clear' >
 							<Typography type='p2'> © Torrin Leonard {new Date().getFullYear()}</Typography>
 						</div>
+						<Popup />
 					</div>
 				</StageContext>
 			</Gradient>
