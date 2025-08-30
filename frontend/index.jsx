@@ -162,7 +162,7 @@ mount(document.body, <Theme value={theme.theme}>
 					<div theme='pages'>
 						<Pages />
 						<div theme='center_clear' >
-							<Typography type='p2'> © Torrin Leonard {new Date().getFullYear()}</Typography>
+							<Typography type='p2'> © Torrin Leonard {new Date().getFullYear()} 🇨🇦</Typography>
 						</div>
 						<Popup />
 					</div>
