@@ -441,7 +441,7 @@ const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted
             </div>
             <Typography type='p1' label={'Hi there, I\'m Torrin Leonard, my love for coding began in high school building  Python calculators and Django servers, eventually leading me to the creation of a Blender plugin with my brothers. Outside of coding, you\'ll catch me doing some digital photography, long bike rides, and indulging in a great cappuccino. Passionate about open source projects, my goal has always been to create clean, user/developer friendly software. Checkout the rest of my profile below to learn more about my work and journey!'} />
 
-            <div theme='row' style={{ padding: '40px 0 0 0', gap: 20 }}>
+            <div theme='row' style={{ display: 'flex', flexWrap: 'wrap', padding: '40px 0 0 0', gap: 20 }}>
                 <Button type='outlined' label='View my Blog' onClick={() => s.open({ name: 'blog' })} href='/blog' />
                 <Email type='outlined' />
                 <Resume type='outlined' />
@@ -505,7 +505,7 @@ const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted
                 <Card each={references} />
             </div>
         </Paper> */}
-        <div theme='row_center' style={{ gap: 20 }}>
+        <div theme='row_center' style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>
             <Button
                 title='LinkedIn'
                 type='icon'
