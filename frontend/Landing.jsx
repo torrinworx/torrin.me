@@ -218,7 +218,7 @@ const certificates = [
         date: '2019-03-01',
         image: './st._john_ambulance_canadaLogo.png',
         style: { borderRadius: '16px', background: 'white' },
-        header: 'Emergancy First Aid - CPR A - AED',
+        header: 'Emergency First Aid - CPR A - AED',
         headerType: 'h4',
         description: 'Completed first aid training at  St. John Ambulance Canada | Ambulance Saint-Jean. Credential ID EFA-A-16-SJKWA-140319-2979.'
     },
