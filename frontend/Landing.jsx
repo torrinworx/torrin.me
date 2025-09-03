@@ -409,7 +409,7 @@ const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted
         }}>
             <Typography type='h1' label='Torrin Leonard' />
             <Typography type='p2'>Full Stack Software Developer, living in Waterloo, Ontario, Canada.</Typography>
-            <Typography type='p2'>{new Date().getFullYear() - 2017} years professional experience. Open to US/Canada remote/hybrid.</Typography>
+            <Typography type='p2'>{new Date().getFullYear() - 2017} years professional experience.</Typography>
         </div>
         <Paper theme='column_fill'>
             <div theme='row'>
