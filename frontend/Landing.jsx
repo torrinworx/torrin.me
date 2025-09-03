@@ -224,8 +224,6 @@ const certificates = [
     },
 ];
 
-
-
 const getOrdinal = (n) => {
     const v = n % 100;
     if (v >= 11 && v <= 13) return 'th';
@@ -271,7 +269,7 @@ const Card = ({ each }) => <div theme='fill'>
             <mark:then>
                 <Button
                     iconPosition='right'
-                    icon={<Icon name='external-link' size={32} style={{ marginLeft: 5 }} />}
+                    icon={<Icon name='external-link' size={'clamp(1.75rem, 1.75vw + 0.875rem, 3rem)'} style={{ marginLeft: 5 }} />}
                     type='text'
                     label={<Typography type={each.headerType ? each.headerType : 'h2'} style={{ color: 'inherit' }} label={each.header} />}
                     onClick={() => window.open(each.url, '_blank')}
@@ -335,8 +333,8 @@ const Resume = ({ type = 'icon' }) => {
         iconPosition='right'
         label={downloadCheck.map(c => c ? 'Downloaded!' : 'Resume')}
         icon={downloadCheck.map(c => c
-            ? <Icon name='check' style={{ fill: 'none' }} size={25} />
-            : <Icon name='download' style={{ fill: 'none', marginLeft: 5 }} size={25} />)}
+            ? <Icon name='check' style={{ fill: 'none' }} size={'clamp(0.75rem, 0.75vw + 0.375rem, 1.25rem)'} />
+            : <Icon name='download' style={{ fill: 'none', marginLeft: 5 }} size={'clamp(0.75rem, 0.75vw + 0.375rem, 1.25rem)'} />)}
         onClick={() => {
             const a = document.createElement('a');
             a.href = 'Torrin-Leonard-Software-Developer-Resume.pdf';
@@ -367,8 +365,8 @@ const Email = ({ type = 'icon' }) => {
         iconPosition='right'
         label={emailCheck.map(c => c ? 'Copied to Clipboard!' : 'Email')}
         icon={emailCheck.map(c => c
-            ? <Icon name='check' style={{ fill: 'none' }} size={25} />
-            : <Icon name='copy' style={{ fill: 'none', marginLeft: 5 }} size={25} />)}
+            ? <Icon name='check' style={{ fill: 'none' }} size={'clamp(0.75rem, 0.75vw + 0.375rem, 1.25rem)'} />
+            : <Icon name='copy' style={{ fill: 'none', marginLeft: 5 }} size={'clamp(0.75rem, 0.75vw + 0.375rem, 1.25rem)'} />)}
         onClick={async () => {
             emailCheck.set(true);
             await navigator.clipboard.writeText('torrin@torrin.me')
@@ -437,7 +435,7 @@ const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted
                         }}
                     />
                 </div>
-                <Typography type='h1'>About Me</Typography>
+                <Typography type='h1' label='About Me' />
             </div>
             <Typography type='p1' label={'Hi there, I\'m Torrin Leonard, my love for coding began in high school building  Python calculators and Django servers, eventually leading me to the creation of a Blender plugin with my brothers. Outside of coding, you\'ll catch me doing some digital photography, long bike rides, and indulging in a great cappuccino. Passionate about open source projects, my goal has always been to create clean, user/developer friendly software. Checkout the rest of my profile below to learn more about my work and journey!'} />
 
@@ -453,15 +451,24 @@ const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted
             background: 'none',
             backdropFilter: 'none',
         }}>
-            <Typography type='h1'>At A Glance</Typography>
+            <Typography type='h1' label='At A Glance' />
             <div theme='center' style={{ width: '100%', display: 'flex', flexWrap: 'wrap', gap: 20 }}>
                 <Skills each={skills} />
             </div>
         </Paper>
         <Paper theme='column_fill' style={{ paddingBottom: '100px' }}>
-            <Typography type='h1'>Work Experience</Typography>
+            <Typography type='h1' label='Work Experience' />
             <div theme='center_column' style={{ gap: 20 }}>
-                <Card each={[...work].sort((a, b) => +new Date(b.end ?? b.start) - +new Date(a.end ?? a.start))} />
+                <Card
+                    each={[...work].sort((a, b) => {
+                        // If 'a' has no end date, prioritize it
+                        if (!a.end) return -1;
+                        // If 'b' has no end date, prioritize it
+                        if (!b.end) return 1;
+                        // Otherwise, compare by end date
+                        return +new Date(b.end) - +new Date(a.end);
+                    })}
+                />
             </div>
         </Paper>
         <Paper theme='column_fill' style={{
@@ -474,7 +481,7 @@ const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted
             </div>
         </Paper>
         <Paper theme='column_fill'>
-            <Typography type='h1'>Personal Projects</Typography>
+            <Typography type='h1' label='Personal Projects' />
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 20 }}>
                 <Card each={projects} />
             </div>
@@ -484,14 +491,14 @@ const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted
             background: 'none',
             backdropFilter: 'none',
         }}>
-            <Typography type='h1'>Education</Typography>
+            <Typography type='h1' label='Education' />
             <div theme='column' style={{ gap: 20 }}>
                 <Card each={[...education].sort((a, b) => +new Date(b.end ?? b.start) - +new Date(a.end ?? a.start))} />
             </div>
 
         </Paper>
         <Paper theme='column_fill' >
-            <Typography type='h1'>Certificates</Typography>
+            <Typography type='h1' label='Certificates' />
             <div theme='column' style={{ gap: 20 }}>
                 <Card each={[...certificates].sort((a, b) => new Date(b.date) - new Date(a.date))} />
             </div>

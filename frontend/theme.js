@@ -271,7 +271,7 @@ const theme = OObject({
 	},
 	typography_h2: {
 		color: '$color_text',
-		fontSize: ' clamp(1.75rem, 1.75vw + 0.875rem, 3rem)',
+		fontSize: 'clamp(1.75rem, 1.75vw + 0.875rem, 3rem)',
 	},
 	typography_h3: {
 		color: '$color_text',
@@ -425,7 +425,7 @@ const theme = OObject({
 	},
 	pages: {
 		extends: 'column_center',
-		padding: '10vh clamp(0rem, 10vw, 1rem)',
+		padding: '10vh clamp(0rem, 10vw, 0rem)',
 		gap: '3vh',
 	},
 	divider: {
