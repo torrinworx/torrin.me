@@ -139,12 +139,18 @@ const tools = [
 
 const references = [
     {
-        url: '',
-        header: 'Bobby John',
-        description: 'Torrin did amazing work doing xyz on project xyz and I can vouch for him.',
-        image: 'https://randomuser.me/api/portraits/men/28.jpg',
-        style: { 'borderRadius': '50%' },
+        url: 'https://www.linkedin.com/in/max-weissman/',
+        header: 'Max Weissman',
+        position: 'Coworker at Equator Studios',
+        description: `
+| "Torrin is an exceptionally hard working individual with a naturally curious mind and a genuine passion for learning. He approaches every new challenge with focus, determination, and creativity, consistently demonstrating both the drive and adaptability needed to excel. In our time together at Equator, I witnessed him develop skills to design AI systems purely through his capacity for self learning.
 
+Beyond his work ethic, Torrin is a thoughtful and friendly colleague. He has a warm and approachable personality that puts others at ease and fosters a collaborative, supportive environment. His ability to connect with people and build positive relationships makes him not only a reliable team member but also a pleasure to work alongside.
+
+I am confident that Torrin will bring the same energy, dedication, and collaborative spirit to any role or opportunity he pursues. He would be a valuable asset to any team."
+`,
+        image: 'MaxWeissman.jpeg',
+        style: { 'borderRadius': '50%' },
     }
 ];
 
@@ -461,11 +467,8 @@ const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted
             <div theme='center_column' style={{ gap: 20 }}>
                 <Card
                     each={[...work].sort((a, b) => {
-                        // If 'a' has no end date, prioritize it
                         if (!a.end) return -1;
-                        // If 'b' has no end date, prioritize it
                         if (!b.end) return 1;
-                        // Otherwise, compare by end date
                         return +new Date(b.end) - +new Date(a.end);
                     })}
                 />
@@ -486,16 +489,18 @@ const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted
                 <Card each={projects} />
             </div>
         </Paper>
-        <Paper theme='column_fill' style={{
-            paddingBottom: '100px',
-            background: 'none',
-            backdropFilter: 'none',
-        }}>
+        <Paper theme='column_fill'>
             <Typography type='h1' label='Education' />
             <div theme='column' style={{ gap: 20 }}>
                 <Card each={[...education].sort((a, b) => +new Date(b.end ?? b.start) - +new Date(a.end ?? a.start))} />
             </div>
 
+        </Paper>
+        <Paper theme='column_fill'>
+            <Typography label='Recommendations' type='h1' />
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 20 }}>
+                <Card each={references} />
+            </div>
         </Paper>
         <Paper theme='column_fill' >
             <Typography type='h1' label='Certificates' />
@@ -503,15 +508,6 @@ const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted
                 <Card each={[...certificates].sort((a, b) => new Date(b.date) - new Date(a.date))} />
             </div>
         </Paper>
-        {/* <Paper theme='column_fill' style={{
-            background: 'none',
-            backdropFilter: 'none',
-        }}>
-            <Typography label='References and Praise' type='h1' />
-            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 20 }}>
-                <Card each={references} />
-            </div>
-        </Paper> */}
         <div theme='row_center' style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>
             <Button
                 title='LinkedIn'
