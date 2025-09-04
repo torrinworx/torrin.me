@@ -489,12 +489,15 @@ const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted
                 <Card each={projects} />
             </div>
         </Paper>
-        <Paper theme='column_fill'>
+        <Paper theme='column_fill' style={{
+            paddingBottom: '100px',
+            background: 'none',
+            backdropFilter: 'none',
+        }}>
             <Typography type='h1' label='Education' />
             <div theme='column' style={{ gap: 20 }}>
                 <Card each={[...education].sort((a, b) => +new Date(b.end ?? b.start) - +new Date(a.end ?? a.start))} />
             </div>
-
         </Paper>
         <Paper theme='column_fill'>
             <Typography label='Recommendations' type='h1' />
