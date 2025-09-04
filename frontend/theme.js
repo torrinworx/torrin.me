@@ -261,10 +261,7 @@ const theme = OObject({
 		transition: 'transform 150ms cubic-bezier(0.4, 0.0, 0.2, 1), background-color 150ms ease-in-out',
 	},
 
-	typography: {
-		color: '$color_text',
-		display: 'block'
-	},
+	typography: { color: '$color_text'},
 	typography_h1: {
 		color: '$color_text',
 		fontSize: 'clamp(2rem, 2vw + 1rem, 3.5rem)',
