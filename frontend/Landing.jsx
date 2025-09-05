@@ -151,6 +151,16 @@ I am confident that Torrin will bring the same energy, dedication, and collabora
 `,
         image: 'MaxWeissman.jpeg',
         style: { 'borderRadius': '50%' },
+    },
+    {
+        url: 'https://www.linkedin.com/in/vjkraj/',
+        header: 'Vijay Raj',
+        position: 'Senior to Torrin at League',
+        description: `
+| "I had the chance to work with Torrin at League, where he supported my Marketplace team. Torrin was exceptional at handling the complexities of our multi-store platform. He was detail-oriented, proactive in identifying issues, and quick to suggest practical solutions. His ability to navigate edge cases and ensure quality across a complex product made a real difference. Torrin is a reliable and highly skilled professional who adds strong value to any team.I had the chance to work with Torrin at League, where he supported my Marketplace team. Torrin was exceptional at handling the complexities of our multi-store platform. He was detail-oriented, proactive in identifying issues, and quick to suggest practical solutions. His ability to navigate edge cases and ensure quality across a complex product made a real difference. Torrin is a reliable and highly skilled professional who adds strong value to any team."
+`,
+        icon: 'user',
+        style: { 'borderRadius': '50%' },
     }
 ];
 
@@ -270,6 +280,9 @@ const Card = ({ each }) => <div theme='fill'>
                     ...each?.style
                 }}
             />
+        </Shown>
+        <Shown value={each.icon}>
+            <Icon name={each.icon} size="clamp(3rem, 25vw, 10rem)" style={{ fill: 'none' }} />
         </Shown>
         <Shown value={each.url}>
             <mark:then>
