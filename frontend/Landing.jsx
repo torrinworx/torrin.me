@@ -282,7 +282,7 @@ const Card = ({ each }) => <div theme='fill'>
             />
         </Shown>
         <Shown value={each.icon}>
-            <Icon name={each.icon} size="clamp(3rem, 25vw, 10rem)" style={{ fill: 'none' }} />
+            <Icon name={each.icon} size="clamp(3rem, 10vw, 10rem)" style={{ fill: 'none', color: '$color_top' }} />
         </Shown>
         <Shown value={each.url}>
             <mark:then>
