@@ -150,7 +150,18 @@ Beyond his work ethic, Torrin is a thoughtful and friendly colleague. He has a w
 I am confident that Torrin will bring the same energy, dedication, and collaborative spirit to any role or opportunity he pursues. He would be a valuable asset to any team."
 `,
         image: 'MaxWeissman.jpeg',
-        style: { 'borderRadius': '50%' },
+        style: { borderRadius: '50%' },
+    },
+    {
+        url: '',
+        header: 'Morgan Lim',
+        position: 'Coworker at Equator Studios',
+        description:
+            `
+| "During my time working with Torrin, he grew from an eager junior to an independent team member leading his own projects for the startup. He rapidly acclimated to our codebase and workflows, and always came prepared to ask the right questions to deepen his knowledge and enable him to independently take the next steps for his projects. Not only is Torrin a quick study, he is also a pleasure to work with, which made him a valuable bridge between the coding, business, and customer service parts of our company. Torrin would be an asset to any organization!"
+        `,
+        image: 'MorganLim.jpeg',
+        style: { borderRadius: '50%' }
     },
     {
         url: 'https://www.linkedin.com/in/vjkraj/',
@@ -160,8 +171,8 @@ I am confident that Torrin will bring the same energy, dedication, and collabora
 | "I had the chance to work with Torrin at League, where he supported my Marketplace team. Torrin was exceptional at handling the complexities of our multi-store platform. He was detail-oriented, proactive in identifying issues, and quick to suggest practical solutions. His ability to navigate edge cases and ensure quality across a complex product made a real difference. Torrin is a reliable and highly skilled professional who adds strong value to any team.I had the chance to work with Torrin at League, where he supported my Marketplace team. Torrin was exceptional at handling the complexities of our multi-store platform. He was detail-oriented, proactive in identifying issues, and quick to suggest practical solutions. His ability to navigate edge cases and ensure quality across a complex product made a real difference. Torrin is a reliable and highly skilled professional who adds strong value to any team."
 `,
         icon: 'user',
-        style: { 'borderRadius': '50%' },
-    }
+        style: { borderRadius: '50%' },
+    },
 ];
 
 const skills = [
