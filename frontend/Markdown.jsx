@@ -356,29 +356,3 @@ const Markdown = ThemeContext.use(h => {
 });
 
 export default Markdown;
-
-////////////////////////////////////////////////////////////////////////////////
-// Example usage:
-// 
-// <Markdown value={Observer.mutable(`# Hello
-// This is a paragraph with ***bold+italic*** and so forth.
-// - [x] A checked item
-// - [ ] An unchecked item
-// \`\`\`js
-// console.log("Hello from code block");
-// \`\`\`
-// `)}/>
-//
-// You can override or expand the rules in your usage, e.g.:
-// 
-// <Markdown 
-//   value={someTextObs} 
-//   rules={{
-//     heading(node, renderInline) {
-//       return <Typography type={'h'+node.level} style={{color: 'blue'}}>
-//         {renderInline(node.inlines)}
-//       </Typography>;
-//     }
-//     // ... or define more
-//   }}
-// />

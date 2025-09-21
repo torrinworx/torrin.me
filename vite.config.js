@@ -47,6 +47,9 @@ export default defineConfig({
 	resolve: {
 		extensions: ['.js', '.ts', '.tsx', '.jsx'],
 	},
+	server: {
+		port: process.env.PORT || 3000,
+	},
 	build: {
 		target: 'esnext',
 		outDir: '../build/dist',
