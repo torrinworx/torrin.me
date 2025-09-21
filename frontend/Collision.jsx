@@ -559,7 +559,6 @@ export default Theme.use(theme => {
 			spawnAllObjects();
 			swoopStartTime = performance.now();
 
-			window.addEventListener('pointermove', handlePointerMove);
 			window.addEventListener('resize', updateCamera);
 
 			animate();
