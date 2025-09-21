@@ -40,6 +40,8 @@ const blogIndex = (req, res, next) => {
 
             try {
                 const fileContent = await fs.readFile(filePath, 'utf-8');
+                if (fileContent.match(/#\s*disabled\s*\n([^#]*)\n+/i)) continue;
+
                 const fileStats = await fs.stat(filePath);
 
                 const headerMatch = fileContent.match(/#\s*header\s*\n([^#]*)\n+/i);

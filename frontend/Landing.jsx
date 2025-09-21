@@ -367,8 +367,8 @@ const Resume = ({ type = 'icon' }) => {
             : <Icon name='download' style={{ fill: 'none', marginLeft: 5 }} size={'clamp(0.75rem, 0.75vw + 0.375rem, 1.25rem)'} />)}
         onClick={() => {
             const a = document.createElement('a');
-            a.href = 'Torrin-Leonard-Software-Developer-Resume.pdf';
-            a.download = 'Torrin-Leonard-Software-Developer-Resume.pdf';
+            a.href = 'Torrin_Leonard_Resume.pdf';
+            a.download = 'Torrin_Leonard_Resume.pdf';
             a.style.display = 'none';
             document.body.appendChild(a);
             a.click();
