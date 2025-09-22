@@ -153,7 +153,7 @@ I am confident that Torrin will bring the same energy, dedication, and collabora
         style: { borderRadius: '50%' },
     },
     {
-        url: '',
+        url: 'https://www.linkedin.com/in/morgan-lim-873693205/',
         header: 'Morgan Lim',
         position: 'Coworker at Equator Studios',
         description:
