@@ -214,6 +214,16 @@ const education = [
 
 const certificates = [
     {
+        url: './CS50x.png',
+        // alt link: https://certificates.cs50.io/c5b07d80-d475-44cb-a616-16e4209db48a.pdf?size=letter
+        date: '2025-09-23',
+        image: './HarvardUniversityLogo.png',
+        style: { borderRadius: '16px', background: 'white' },
+        header: 'CS50 Introduction to Computer Science',
+        headerType: 'h4',
+        description: 'Completed the CS50x Introduction to Computer Science course provided by Harvard University.'
+    },
+    {
         url: 'https://courses.edx.org/certificates/05d8dc2dc24e42238e616f83329ee2f0',
         date: '2021-02-09',
         image: './wcagLogo.png',
