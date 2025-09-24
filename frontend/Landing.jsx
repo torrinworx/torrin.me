@@ -58,34 +58,6 @@ const work = [
     }
 ];
 
-const projects = [
-    {
-        url: 'https://github.com/torrinworx/destam-web-core',
-        header: 'destam web core',
-        description: 'A library package that contains core abstractions and utilities of a full stack platform. destam-web-core simplifies and implements features like client/server websocket state synchronization, observer-based state syncing, MongoDB server state storage, backend websocket module routing system, user signup/login flow, and db management, user websocket authentication.',
-    },
-    {
-        url: 'https://opengig.org',
-        header: 'OpenGig.org',
-        description: 'An Open Source platform passion project built for gig workers and customers. A full stack, state streaming, websocket-based reactive web application that uses JavaScript on the backend and frontend.',
-    },
-    {
-        url: 'https://github.com/torrinworx/MangoSync',
-        header: 'MangoSync',
-        description: 'A music player that enhances your albums with metadata like lyrics, animated art, descriptions, and tags. MangoSync uses a locally modified Whisper audio-to-text AI model to auto transcribe lyrics, first searching online, then aligning and transcribing your songs for Apple Music-style synchronized lyrics.'
-    },
-    {
-        url: 'https://github.com/torrinworx/destamatic-ui',
-        header: 'destamatic ui',
-        description: 'A custom UI component library built on destam and destam-dom reactivity libraries. Similar in style and functionality to MaterialUI components, but snappier thanks to the speed of destam-dom\'s lack of a virtual DOM.',
-    },
-    {
-        url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-        header: 'torrin.me',
-        description: 'Designed and developed a fully custom interactive portfolio using my own UI library (destamatic-ui), a DOM manipulation framework built from scratch (destam-dom), and Three.js. The site features a real-time theming system that synchronizes UI and 3D WebGL scenes, with smooth color transitions and support for dark/light modes plus four accent themes. I built touch and desktop input handling, optimized object collisions and animations using spatial partitioning and frustum culling, and integrated a blog engine powered by a custom Markdown renderer.',
-    },
-];
-
 const tools = [
     { name: 'JavaScript', icon: 'javascript' },
     { name: 'Python', icon: 'python' },
@@ -334,6 +306,11 @@ const Card = ({ each }) => <div theme='fill'>
     <Shown value={each.description}>
         <Typography type='p1' label={each.description} />
     </Shown>
+    <Shown value={each.cta}>
+        <div theme='row_end'>
+            {each.cta ? each.cta : null}
+        </div>
+    </Shown>
 </div>;
 
 const Skills = ({ each }) => {
@@ -416,6 +393,35 @@ const Email = ({ type = 'icon' }) => {
 };
 
 const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted) => {
+    const projects = [ // located here so that Live Demo button can have access to stage.
+        {
+            url: 'https://github.com/torrinworx/destam-web-core',
+            header: 'destam web core',
+            description: 'A library package that contains core abstractions and utilities of a full stack platform. destam-web-core simplifies and implements features like client/server websocket state synchronization, observer-based state syncing, MongoDB server state storage, backend websocket module routing system, user signup/login flow, and db management, user websocket authentication.',
+        },
+        {
+            url: 'https://opengig.org',
+            header: 'OpenGig.org',
+            description: 'An Open Source platform passion project built for gig workers and customers. A full stack, state streaming, websocket-based reactive web application that uses JavaScript on the backend and frontend.',
+        },
+        {
+            url: 'https://github.com/torrinworx/MangoSync',
+            header: 'MangoSync',
+            description: 'A music player that enhances your albums with metadata like lyrics, animated art, descriptions, and tags. MangoSync uses a locally modified Whisper audio-to-text AI model to auto transcribe lyrics, first searching online, then aligning and transcribing your songs for Apple Music-style synchronized lyrics.'
+        },
+        {
+            url: 'https://github.com/torrinworx/destamatic-ui',
+            header: 'destamatic ui',
+            description: 'A custom UI component library built on destam and destam-dom reactivity libraries. Similar in style and functionality to MaterialUI components, but snappier thanks to the speed of destam-dom\'s lack of a virtual DOM.',
+            cta: <Button type='outlined' label='Live Demo' onClick={() => s.open({ name: 'destamatic-ui-demo' })} href='/destamatic-ui-demo' />,
+        },
+        {
+            url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+            header: 'torrin.me',
+            description: 'Designed and developed a fully custom interactive portfolio using my own UI library (destamatic-ui), a DOM manipulation framework built from scratch (destam-dom), and Three.js. The site features a real-time theming system that synchronizes UI and 3D WebGL scenes, with smooth color transitions and support for dark/light modes plus four accent themes. I built touch and desktop input handling, optimized object collisions and animations using spatial partitioning and frustum culling, and integrated a blog engine powered by a custom Markdown renderer.',
+        },
+    ];
+
     const blinkInterval = 400;
     const timeToFirstBlink = 250;
     const topOPage = Observer.mutable(true);
@@ -440,7 +446,7 @@ const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted
     });
 
     return <>
-        <div theme={['*', 'radius', 'fill']} style={{
+        <div theme={['*', 'fill']} style={{
             height: '75', minHeight: '75vh', textAlign: 'left',
             color: '$color_main',
             padding: 40,
