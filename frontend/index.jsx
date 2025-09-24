@@ -6,10 +6,11 @@ import {
 } from 'destamatic-ui';
 
 import Blog from './Blog';
+import Demo from './Demo';
 import theme from './theme';
 import Landing from './Landing';
-import Collision from './Collision';
 import Markdown from './Markdown';
+import Collision from './Collision';
 
 const NotFound = StageContext.use(s => () => <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
 	<Typography type='h4' style={{ marginBottom: '20px' }}>404 Page Not Found</Typography>
@@ -94,6 +95,7 @@ const pages = {
 		landing: Landing,
 		blog: Blog,
 		fallback: NotFound,
+		'destamatic-ui-demo': Demo,
 		...blogPages,
 	},
 	template: ({ children }) => children,
