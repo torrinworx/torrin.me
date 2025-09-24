@@ -261,7 +261,7 @@ const theme = OObject({
 		transition: 'transform 150ms cubic-bezier(0.4, 0.0, 0.2, 1), background-color 150ms ease-in-out',
 	},
 
-	typography: { color: '$color_text'},
+	typography: { color: '$color_text' },
 	typography_h1: {
 		color: '$color_text',
 		fontSize: 'clamp(2rem, 2vw + 1rem, 3.5rem)',
@@ -401,14 +401,14 @@ const theme = OObject({
 
 		background: '$color_top',
 		display: 'inline-block',
-		width: '8px',
-		height: '8px',
+		width: 'clamp(0.3rem, 0.6vw, 0.6rem)',
+		height: 'clamp(0.3rem, 0.6vw, 0.6rem)',
 		borderRadius: '50%',
 		animationName: '$animationName',
 		animationDuration: '1s',
 		animationIterationCount: 'infinite',
 		animationTimingFunction: 'ease-in-out',
-		margin: '20px 4px',
+		margin: '10px 4px',
 	},
 
 	page: {
@@ -430,6 +430,94 @@ const theme = OObject({
 		height: '2px',
 		background: '$color_text',
 		margin: '10px 0px 10px 0px',
+	},
+
+	slider: {
+		$size: 25,
+		$trackSize: 8,
+		position: 'relative',
+	},
+
+	slider_horizontal: {
+		$movementAnchor: 'left',
+		$eventAnchor: 'clientX',
+		$sizeAnchor: 'width',
+		width: '100%',
+		height: '$size$px',
+	},
+
+	slider_vertical: {
+		$movementAnchor: 'top',
+		$eventAnchor: 'clientY',
+		$sizeAnchor: 'height',
+
+		width: '$size$px',
+		height: '100%',
+	},
+
+	slider_track: {
+		background: '$saturate($shiftBrightness($color_top, 0.1), -1)',
+
+		position: 'absolute',
+		borderRadius: '$div($trackSize, 2)px',
+		cursor: 'pointer',
+	},
+
+	slider_track_active: {
+		pointerEvents: 'none',
+		position: 'absolute',
+		transition: 'width ease-in-out 100ms, height ease-in-out 100ms',
+		background: '$shiftBrightness($color_top, 0.1)',
+	},
+
+	slider_vertical_track_active: {
+		top: 0,
+	},
+
+	slider_horizontal_track_active: {
+		left: 0,
+	},
+
+	slider_horizontal_track: {
+		top: '50%',
+		width: '100%',
+		height: '$trackSize$px',
+		transform: 'translateY(-50%)',
+	},
+
+	slider_vertical_track: {
+		left: '50%',
+		width: '$trackSize$px',
+		height: '100%',
+		transform: 'translateX(-50%)',
+	},
+
+	slider_track_hovered: {
+		background: '$shiftBrightness($color_hover, 0.1)',
+	},
+
+	slider_thumb: {
+		width: `$size$px`,
+		height: `$size$px`,
+		background: '$color',
+
+		position: 'absolute',
+		borderRadius: '50%',
+		cursor: 'pointer',
+	},
+
+	slider_horizontal_thumb: {
+		top: '50%',
+		transform: 'translateY(-50%)'
+	},
+
+	slider_vertical_thumb: {
+		left: '50%',
+		transform: 'translateX(-50%)'
+	},
+
+	slider_thumb_hovered: {
+		background: '$color_hover',
 	},
 });
 
