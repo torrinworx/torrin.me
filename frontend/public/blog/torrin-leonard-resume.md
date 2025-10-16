@@ -114,6 +114,7 @@ _Graduated Jun 2021_
 - **Bitorch** — Open Source Distributed AI Inference Network; developed and tested FastAPI backend components, inference endpoints, and env config scripts. Set up and managed local Docker instances to run AI models for proof-of-concept distributed inference.
 
 ## Certifications & Courses
+- Harverd CS50 Introduction to Computer Science
 - W3Cx Web Accessibility  
 - MIT 16.00x Intro to Aerospace  
 - ANU-ASTRO1x Mysteries of the Universe  
