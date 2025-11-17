@@ -1,9 +1,8 @@
 # header
-The problem with React and MUI
+An alternative to React and MUI
 
 # description
 For the past year I've been working on a project that started as an internal tool at my job as a web dev at Equator Studios, the project has made me realize that there is a big problem with the way modern js libraries like Material UI are built for developers.
-
 
 
 

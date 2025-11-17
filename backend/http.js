@@ -107,3 +107,5 @@ export default () => {
 		})
 	}
 };
+
+// TODO: ADD middleware loading to other server modules in destam-web-core

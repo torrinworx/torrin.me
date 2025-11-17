@@ -119,9 +119,3 @@ _Graduated Jun 2021_
 - MIT 16.00x Intro to Aerospace  
 - ANU-ASTRO1x Mysteries of the Universe  
 - St. John Ambulance Emergency First Aid + CPR  
-
-## Languages
-- English (native)
-
-## References
-Available upon request (or include direct contacts: Max Weissman, Morgan Lim, Vijay Raj)
