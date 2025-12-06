@@ -2,7 +2,7 @@ import { Typography, Button, Paper, StageContext, LoadingDots, suspend, Default,
 import Markdown from '../utils/Markdown';
 import NotFound from './NotFound';
 
-const BlogPage = StageContext.use(s => suspend(LoadingDots, async ({ key, value }) => {
+const BlogPage = StageContext.use(s => suspend(LoadingDots, async ({ key, value }, cleanup) => {
     s.parent.props.enabled.set(false);
     let content = await fetch(`/blog/${key}`).then(r => r.text());
 
@@ -25,6 +25,8 @@ const BlogPage = StageContext.use(s => suspend(LoadingDots, async ({ key, value 
             hour12: false,
         }).format(date);
     };
+
+    cleanup(() => s.parent.props.enabled.set(true))
 
     return <div theme='column' style={{ gap: 40 }}>
         <div theme='row_spread'>
@@ -61,7 +63,7 @@ const BlogLanding = StageContext.use(stage => () => {
     </>;
 });
 
-const Blog = suspend(LoadingDots, async () => {
+const Blog = StageContext.use(s => suspend(LoadingDots, async () => {
     const response = await fetch('/blog/index.json');
     const blogs = await response.json();
 
@@ -83,6 +85,6 @@ const Blog = suspend(LoadingDots, async () => {
     return <StageContext value={BlogsConfig}>
         <Stage />
     </StageContext>
-});
+}));
 
 export default Blog;
