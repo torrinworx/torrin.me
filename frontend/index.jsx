@@ -1,16 +1,17 @@
 import { mount, Observer } from 'destam-dom';
 import {
-	Button, Theme, Typography, Paper, Gradient, Icons,
-	Radio, Toggle, PopupContext, StageContext, Stage,
-	Shown, LoadingDots, suspend, Popup
+	Button, Theme, Typography, Gradient, Icons,
+	PopupContext, StageContext, Stage, Shown, Popup
 } from 'destamatic-ui';
 
-import Blog from './Blog';
-import Demo from './Demo';
-import theme from './theme';
-import Landing from './Landing';
-import Markdown from './Markdown';
-import Collision from './Collision';
+import Blog from './pages/Blog';
+import Demo from './pages/Demo';
+import theme from './utils/theme';
+import Landing from './pages/Landing';
+import Controls from './utils/Controls';
+import Collision from './utils/Collision';
+
+const enabled = Observer.mutable(true);
 
 const NotFound = StageContext.use(s => () => <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
 	<Typography type='h4' style={{ marginBottom: '20px' }}>404 Page Not Found</Typography>
@@ -18,89 +19,15 @@ const NotFound = StageContext.use(s => () => <div style={{ display: 'flex', flex
 	<Button type='outlined' label='Go back' onClick={() => s.open({ name: 'landing' })} />
 </div>);
 
-const Controls = () => {
-	const SelectRadio = Radio(window.colorMode);
-
-	return <div
-		theme='center_wide'
-		style={{
-			paddingTop: 20,
-			position: 'fixed',
-			top: 0,
-		}}
-	>
-		<Paper style={{ padding: 0 }}>
-			<div theme='center_row' style={{ padding: 10, gap: 10 }}>
-				<SelectRadio theme='red' value={'red'} />
-				<SelectRadio theme='purple' value={'purple'} />
-				<SelectRadio theme='cyan' value={'cyan'} />
-				<SelectRadio theme='gold' value={'gold'} />
-				<Toggle value={window.themeMode} />
-			</div>
-		</Paper>
-	</div>;
-};
-
-const enabled = Observer.mutable(true);
-
-const response = await fetch('/blog/index.json');
-const blogs = await response.json();
-
-// This can be it's own file:
-const Something = StageContext.use(s => suspend(LoadingDots, async ({ key, value }) => {
-	s.props.enabled.set(false);
-	let content = await fetch(`/blog/${key}`).then(r => r.text());
-
-	const cleanupMd = (md) => {
-		md = md.replace(/#\s*header\s*\n([^#]*)\n+/i, '');
-		md = md.replace(/#\s*description\s*\n((?:[^\n]+\n?)*)/i, '');
-		return md.trim();
-	};
-
-	content = cleanupMd(content);
-
-	const formatDate = (dateString) => {
-		const date = new Date(dateString);
-		return new Intl.DateTimeFormat('en-US', {
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric',
-			hour: 'numeric',
-			minute: 'numeric',
-			hour12: false,
-		}).format(date);
-	};
-
-	return <div theme='column' style={{ gap: 40 }}>
-		<div theme='row_spread'>
-			<Button type='outlined' label='Back' onClick={() => s.open({ name: 'blog' })} />
-		</div>
-		<Paper>
-			<Typography type='p1' label={`Created on: ${formatDate(value.created)}`} />
-			<Typography type='p1' label={`Modified on: ${formatDate(value.modified)}`} />
-			<Markdown value={content} />
-		</Paper>
-	</div>;
-}));
-
-const blogPages = Object.entries(blogs).reduce((acc, [key, value]) => {
-	const baseName = key.replace(/\.[^/.]+$/, '');
-	const routeKey = `blog/${baseName}`;
-	acc[routeKey] = () => <Something key={key} value={value} />;
-	return acc;
-}, {});
-
 const pages = {
-	stages: {
+	acts: {
 		landing: Landing,
 		blog: Blog,
 		fallback: NotFound,
 		'destamatic-ui-demo': Demo,
-		...blogPages,
 	},
 	template: ({ children }) => children,
-	enabled,
-	blogs,
+	enabled
 };
 
 const Pages = StageContext.use(s => (_, cleanup) => {
@@ -121,16 +48,13 @@ const Pages = StageContext.use(s => (_, cleanup) => {
 			s.open({ name: 'landing' });
 		} else {
 			const name = path.slice(1);
-			const page = pages.stages[name];
-			if (page) {
+			if (pages.acts[name]) {
 				s.open({ name });
 			} else {
 				s.open({ name: 'fallback' });
 			}
 		}
-		queueMicrotask(() => {
-			isPopState = false;
-		});
+		queueMicrotask(() => isPopState = false);
 	};
 
 	urlResolve();
