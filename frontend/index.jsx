@@ -12,8 +12,9 @@ import Controls from './utils/Controls';
 import NotFound from './pages/NotFound';
 import Collision from './utils/Collision';
 
-const enabled = Observer.mutable(true);
-
+// TODO: Move url stuff to Stage component, have Stage component have in built url route handling.
+// TODO: Stage Context tree, allow the ability to have .route() function that finds the most eldest parent in the tree and routes from that parents .open() function for top of tree navigation.
+// 		or somehow ensure 'root' parent is always passed down to children so that they can open/route? Problem this solves: child context component, cut off, has to manually do stage.parent.open({...}). might be hard to navigate multiple nests of stage contexts
 const Pages = StageContext.use(s => (_, cleanup) => {
 	let isPopState = false;
 
@@ -61,6 +62,7 @@ const Pages = StageContext.use(s => (_, cleanup) => {
 	return <Stage />;
 });
 
+const enabled = Observer.mutable(true);
 const pages = {
 	acts: {
 		landing: Landing,
