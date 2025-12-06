@@ -1,5 +1,6 @@
 import { Typography, Button, Paper, StageContext, LoadingDots, suspend, Default, Stage } from 'destamatic-ui';
 import Markdown from '../utils/Markdown';
+import NotFound from './NotFound';
 
 const BlogPage = StageContext.use(s => suspend(LoadingDots, async ({ key, value }) => {
     s.parent.props.enabled.set(false);
@@ -67,17 +68,17 @@ const Blog = suspend(LoadingDots, async () => {
     const BlogsConfig = {
         acts: {
             blog: BlogLanding,
+            fallback: NotFound,
             ...Object.entries(blogs).reduce((acc, [key, value]) => {
                 const baseName = key.replace(/\.[^/.]+$/, '');
                 acc[baseName] = () => <BlogPage key={key} value={value} />;
                 return acc;
-            }, {})
+            }, {}),
         },
         initial: 'blog',
         template: Default,
         blogs,
     }
-    console.log(BlogsConfig.acts);
 
     return <StageContext value={BlogsConfig}>
         <Stage />

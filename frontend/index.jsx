@@ -1,7 +1,7 @@
 import { mount, Observer } from 'destam-dom';
 import {
-	Button, Theme, Typography, Gradient, Icons,
-	PopupContext, StageContext, Stage, Shown, Popup
+	Theme, Typography, Gradient, Icons, PopupContext,
+	StageContext, Stage, Shown, Popup
 } from 'destamatic-ui';
 
 import Blog from './pages/Blog';
@@ -9,26 +9,10 @@ import Demo from './pages/Demo';
 import theme from './utils/theme';
 import Landing from './pages/Landing';
 import Controls from './utils/Controls';
+import NotFound from './pages/NotFound';
 import Collision from './utils/Collision';
 
 const enabled = Observer.mutable(true);
-
-const NotFound = StageContext.use(s => () => <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-	<Typography type='h4' style={{ marginBottom: '20px' }}>404 Page Not Found</Typography>
-	<Typography type='p1' style={{ marginBottom: '20px' }}>The page you are trying to access is either unavailable or restricted.</Typography>
-	<Button type='outlined' label='Go back' onClick={() => s.open({ name: 'landing' })} />
-</div>);
-
-const pages = {
-	acts: {
-		landing: Landing,
-		blog: Blog,
-		fallback: NotFound,
-		'destamatic-ui-demo': Demo,
-	},
-	template: ({ children }) => children,
-	enabled
-};
 
 const Pages = StageContext.use(s => (_, cleanup) => {
 	let isPopState = false;
@@ -48,7 +32,7 @@ const Pages = StageContext.use(s => (_, cleanup) => {
 			s.open({ name: 'landing' });
 		} else {
 			const name = path.slice(1);
-			if (pages.acts[name]) {
+			if (s.acts[name]) {
 				s.open({ name });
 			} else {
 				s.open({ name: 'fallback' });
@@ -76,6 +60,17 @@ const Pages = StageContext.use(s => (_, cleanup) => {
 
 	return <Stage />;
 });
+
+const pages = {
+	acts: {
+		landing: Landing,
+		blog: Blog,
+		fallback: NotFound,
+		'destamatic-ui-demo': Demo,
+	},
+	template: ({ children }) => children,
+	enabled
+};
 
 mount(document.body, <Theme value={theme.theme}>
 	<Icons value={theme.icons}>
