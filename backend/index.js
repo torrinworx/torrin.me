@@ -19,50 +19,7 @@ if (!process.env.ENV) await loadEnv();
 let root = path.resolve(process.env.ENV === 'production' ? './dist' : './frontend');
 let server = http();
 
-const blogs = {};
-const blogIndex = (req, res, next) => {
-
-    if (req.url === '/blog/index.json' && req.method === 'GET') {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(blogs));
-    } else if (next) {
-        next();
-    }
-};
-
 (async () => {
-    const blogPath = path.join(root, process.env.ENV === 'production' ? 'blog' : path.join('public', 'blog'));
-    const files = await fs.readdir(blogPath);
-
-    for (const file of files) {
-        if (path.extname(file) === '.md') {
-            const filePath = path.join(blogPath, file);
-
-            try {
-                const fileContent = await fs.readFile(filePath, 'utf-8');
-                if (fileContent.match(/#\s*disabled\s*\n([^#]*)\n+/i)) continue;
-
-                const fileStats = await fs.stat(filePath);
-
-                const headerMatch = fileContent.match(/#\s*header\s*\n([^#]*)\n+/i);
-                const descriptionMatch = fileContent.match(/#\s*description\s*\n((?:[^\n]+\n?)*)/i);
-
-                const header = headerMatch ? headerMatch[1].trim() : '';
-                const description = descriptionMatch ? descriptionMatch[1].trim() : '';
-
-                blogs[file] = {
-                    name: file,
-                    header: header,
-                    description: description,
-                    modified: fileStats.mtime.toISOString(),
-                    created: fileStats.birthtime.toISOString(),
-                };
-            } catch (fileError) {
-                console.error(`Error reading file ${file}:`, fileError.message);
-            }
-        }
-    }
-
     if (process.env.ENV === 'production') server.production({ root });
     else {
         const { createServer: createViteServer } = await import('vite');
@@ -70,6 +27,5 @@ const blogIndex = (req, res, next) => {
         server.development({ vite });
     }
 
-    server.middleware(blogIndex);
     server.listen(process.env.PORT);
 })();
