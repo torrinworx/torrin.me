@@ -228,3 +228,4 @@ cython_debug/
 #.idea/
 
 build.zip
+frontend/public/blog/index.json

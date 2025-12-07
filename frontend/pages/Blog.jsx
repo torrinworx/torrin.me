@@ -80,6 +80,7 @@ const Blog = StageContext.use(s => suspend(LoadingDots, async () => {
         initial: 'blog',
         template: Default,
         blogs,
+        ssg: true
     }
 
     return <StageContext value={BlogsConfig}>
