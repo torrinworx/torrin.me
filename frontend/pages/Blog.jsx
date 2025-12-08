@@ -4,6 +4,7 @@ import NotFound from './NotFound';
 
 const BlogPage = StageContext.use(s => suspend(LoadingDots, async ({ key, value }, cleanup) => {
     s.parent.props.enabled.set(false);
+    console.log(s.parent.props.enabled.get());
     let content = await fetch(`/blog/${key}`).then(r => r.text());
 
     const cleanupMd = (md) => {
@@ -41,7 +42,8 @@ const BlogPage = StageContext.use(s => suspend(LoadingDots, async ({ key, value 
 }));
 
 const BlogLanding = StageContext.use(stage => () => {
-    const blogs = Object.values(stage.globalProps.blogs); // TODO: sort by date, most recent at top?
+    console.log(stage)
+    const blogs = Object.values(stage.props.blogs); // TODO: sort by date, most recent at top?
 
     const Card = ({ each }) => {
         const name = each.name.replace(/\.[^/.]+$/, '');
@@ -63,29 +65,31 @@ const BlogLanding = StageContext.use(stage => () => {
     </>;
 });
 
-const Blog = StageContext.use(s => suspend(LoadingDots, async () => {
+const Blog = suspend(LoadingDots, async () => {
     const response = await fetch('/blog/index.json');
     const blogs = await response.json();
+    const blogPages = Object.entries(blogs).reduce((acc, [key, value]) => {
+        const baseName = key.replace(/\.[^/.]+$/, '');
+        acc[baseName] = () => <BlogPage key={key} value={value} />;
+        return acc;
+    }, {});
 
     const BlogsConfig = {
         acts: {
             blog: BlogLanding,
             fallback: NotFound,
-            ...Object.entries(blogs).reduce((acc, [key, value]) => {
-                const baseName = key.replace(/\.[^/.]+$/, '');
-                acc[baseName] = () => <BlogPage key={key} value={value} />;
-                return acc;
-            }, {}),
+            ...blogPages,
         },
         initial: 'blog',
         template: Default,
         blogs,
-        ssg: true
+        ssg: true,
+        urlRouting: true,
     }
 
     return <StageContext value={BlogsConfig}>
         <Stage />
     </StageContext>
-}));
+});
 
 export default Blog;
