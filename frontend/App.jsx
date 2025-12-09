@@ -54,7 +54,7 @@ const App = () => <Head>
 		<Icons value={theme.icons}>
 			<PopupContext>
 				<Gradient>
-					<Shown value={enabled || !is_node()}>
+					<Shown value={enabled.map(e => e && !is_node())}>
 						<Collision />
 					</Shown>
 					<StageContext value={pages}>
