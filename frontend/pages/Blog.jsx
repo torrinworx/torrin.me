@@ -82,10 +82,10 @@ const Blog = () => {
     const BlogsConfig = {
         acts: {
             blog: BlogLanding,
-            // fallback: NotFound,
         },
         initial: 'blog',
         template: Default,
+        ssg: true,
     }
 
     const BlogLoader = StageContext.use(s => suspend(LoadingDots, async () => {
