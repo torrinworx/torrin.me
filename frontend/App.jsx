@@ -26,6 +26,7 @@ const pages = {
 	initial: 'landing',
 	urlRouting: true,
 	enabled,
+	fallback: 'fallback'
 };
 
 const HeadTags = () => <>
