@@ -13,7 +13,7 @@ vite build
 vite build --config vite.config.ssg.js
 
 # SSG step
-node ./destamatic-ui/ssg/build.js "$BUILD_DIR" ./frontend
+node ./destamatic-ui/ssg/build.js "$BUILD_DIR" ./frontend https://torrin.me
 
 # Bundle server
 npx esbuild ./server.js \
