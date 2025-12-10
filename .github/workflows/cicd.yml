@@ -90,8 +90,12 @@ jobs:
 
                       systemctl daemon-reload
 
-                      mv /home/torrin.me/deploying/build /home/torrin.me/build.new
+                      # Create build.new and move contents of deploying into it
+                      rm -rf /home/torrin.me/build.new
+                      mkdir -p /home/torrin.me/build.new
+                      mv /home/torrin.me/deploying/* /home/torrin.me/build.new/
                       rm -r /home/torrin.me/deploying
+
                       cd /home/torrin.me/build.new/
 
                       # Stop service
