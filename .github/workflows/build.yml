@@ -21,4 +21,6 @@ jobs:
           node-version: '25'
 
       - name: Execute build script
-        run: npm run build
+        run: |
+          chmod +x ./build.sh
+          ./build.sh
