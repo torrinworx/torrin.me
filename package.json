@@ -6,7 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"start": "node ./backend/index.js",
-		"dev": "nodemon --watch ./frontend --watch ./destamatic-ui --watch ./backend --ignore ./frontend/public/blog/index.json --exec node ./backend/index.js",
+		"dev": "nodemon --watch ./frontend --watch ./destamatic-ui --watch ./backend --ignore ./frontend/public/blog/index.json --exec vite",
 		"build": "bash build.sh",
 		"test": "node --test"
 	},
