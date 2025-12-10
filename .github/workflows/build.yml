@@ -20,6 +20,9 @@ jobs:
         with:
           node-version: '25'
 
+      - name: Install dependencies
+        run: npm i
+
       - name: Execute build script
         run: |
           chmod +x ./build.sh
