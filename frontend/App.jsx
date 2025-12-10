@@ -2,7 +2,7 @@ import { Observer } from 'destam-dom';
 import {
 	Theme, Typography, Gradient, Icons, PopupContext,
 	StageContext, Stage, Shown, Popup, is_node, Head,
-	Title, Script, Style
+	Title, Script, Style, Meta, Link
 } from 'destamatic-ui';
 
 import Blog from './pages/Blog';
