@@ -18,9 +18,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '23'
+          node-version: '25'
 
       - name: Execute build script
-        run: |
-          chmod +x ./build.sh
-          ./build.sh
+        run: npm run build
