@@ -1,6 +1,5 @@
 import { Typography, Button, Paper, StageContext, LoadingDots, suspend, Default, Stage } from 'destamatic-ui';
 import Markdown from '../utils/Markdown';
-import NotFound from './NotFound';
 
 const BlogPage = StageContext.use(s => suspend(LoadingDots, async (_, cleanup) => {
     const slug = s.current;

@@ -31,7 +31,7 @@ const pages = {
 
 const HeadTags = () => <>
 	<Title text='Something' />
-
+	
 	<Style>
 		{`
           /* Hide body content while we're "preloading" */

@@ -15,5 +15,5 @@ export const renderAppToString = async () => {
 		outFile: path.resolve(__dirname, '../dist/blog/index.json'),
 	});
 
-	return render(App);
+	return await render(App);
 };
