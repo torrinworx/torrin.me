@@ -1,4 +1,6 @@
+# robots.txt for https://torrin.me
+
 User-agent: *
 Allow: /
 
-# Sitemap: https://torrin.me/sitemap.xml
+Sitemap: https://torrin.me/sitemap.xml
