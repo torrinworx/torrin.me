@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 
 const rootDir = path.resolve(__dirname, process.argv[2] || './dist');
 
-const port = Number(process.argv[3]) || 3000;
+const port = Number(process.argv[3]) || 3001;
 
 const mimeTypes = {
     '.html': 'text/html; charset=utf-8',
