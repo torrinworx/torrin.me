@@ -2,15 +2,15 @@ import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import url from 'url';
-
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const rootDir = path.resolve(__dirname, process.argv[2] || './dist');
-
 const port = Number(process.argv[3]) || 3001;
+
+const fallbackFile = path.join(rootDir, 'fallback.html');
 
 const mimeTypes = {
     '.html': 'text/html; charset=utf-8',
@@ -44,7 +44,7 @@ const server = http.createServer((req, res) => {
                 if (!indexErr && indexStats.isFile()) {
                     serveFile(indexPath, res);
                 } else {
-                    sendNotFound(res);
+                    sendFallback(res);
                 }
             });
         }
@@ -56,7 +56,7 @@ const server = http.createServer((req, res) => {
                 if (!htmlErr && htmlStats.isFile()) {
                     serveFile(htmlPath, res);
                 } else {
-                    sendNotFound(res);
+                    sendFallback(res);
                 }
             });
         }
@@ -66,23 +66,31 @@ const server = http.createServer((req, res) => {
     });
 });
 
-function serveFile(filePath, res) {
+function serveFile(filePath, res, statusCode = 200) {
     const ext = path.extname(filePath).toLowerCase();
     const contentType = mimeTypes[ext] || 'application/octet-stream';
 
     fs.createReadStream(filePath)
         .on('open', () => {
-            res.writeHead(200, { 'Content-Type': contentType });
+            res.writeHead(statusCode, { 'Content-Type': contentType });
         })
         .on('error', () => {
-            sendNotFound(res);
+            sendFallback(res);
         })
         .pipe(res);
 }
 
-function sendNotFound(res) {
-    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-    res.end('404 Not Found');
+function sendFallback(res) {
+    fs.stat(fallbackFile, (err, stats) => {
+        if (!err && stats.isFile()) {
+            // Still respond with 404, just render fallback.html
+            serveFile(fallbackFile, res, 404);
+        } else {
+            // If fallback is missing, fall back to plain text 404
+            res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+            res.end('404 Not Found');
+        }
+    });
 }
 
 server.listen(port, () => {
