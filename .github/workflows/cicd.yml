@@ -25,9 +25,7 @@ jobs:
               run: npm i
 
             - name: Execute build script
-              run: |
-                  chmod +x ./build.sh
-                  ./build.sh
+              run: npm run build
 
             - name: Ensure build output exists
               run: ls ./
