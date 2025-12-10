@@ -40,10 +40,8 @@ EOF
 chmod +x "$BUILD_DIR/run.sh"
 
 # Create zip with everything inside build/
-(
-  cd "$BUILD_DIR"
-  zip -r "../$(basename "$ZIP_FILE")" .
-)
+
+  zip -r "$ZIP_FILE" "$BUILD_DIR"
 
 # Show sizes
 du -sh "$BUILD_DIR"
