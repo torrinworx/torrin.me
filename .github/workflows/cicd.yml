@@ -25,7 +25,7 @@ jobs:
               run: npm i
 
             - name: Execute build script
-              run: npm run build
+              run: npm run build 
 
             - name: Ensure build output exists
               run: ls ./
@@ -90,12 +90,8 @@ jobs:
 
                       systemctl daemon-reload
 
-                      # Create build.new and move contents of deploying into it
-                      rm -rf /home/torrin.me/build.new
-                      mkdir -p /home/torrin.me/build.new
-                      mv /home/torrin.me/deploying/* /home/torrin.me/build.new/
+                      mv /home/torrin.me/deploying/build /home/torrin.me/build.new
                       rm -r /home/torrin.me/deploying
-
                       cd /home/torrin.me/build.new/
 
                       # Stop service
