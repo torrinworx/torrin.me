@@ -242,116 +242,55 @@ export default Theme.use(theme => {
 			}
 		};
 
-		// Partitioning the space in a grid to reduce pairwise checks.
-		// For each object, place it in a cell based on its position, then only 
-		// check collisions among objects in the same or neighboring cells.
-		const cellSize = 10;
-		const getCellIndex = (pos) => {
-			const x = Math.floor(pos.x / cellSize);
-			const y = Math.floor(pos.y / cellSize);
-			const z = Math.floor(pos.z / cellSize);
-			return `${x},${y},${z}`;
-		};
-
-		// Return the cell keys for the 26 neighboring cells (including the cell itself):
-		const getNeighborCells = (x, y, z) => {
-			const neighbors = [];
-			for (let dx = -1; dx <= 1; dx++) {
-				for (let dy = -1; dy <= 1; dy++) {
-					for (let dz = -1; dz <= 1; dz++) {
-						neighbors.push(`${x + dx},${y + dy},${z + dz}`);
-					}
-				}
-			}
-			return neighbors;
-		};
+		// allocate once (outside animate)
+		const _delta = new THREE.Vector3();
 
 		const handleCollisions = () => {
-			// Build dictionary of objects by cell
-			const grid = {};
-			for (const obj of loadedObjects) {
-				// Skip invisible or frustum-culled objects
-				if (!obj.visible) continue;
+			const n = loadedObjects.length;
 
-				const cellKey = getCellIndex(obj.position);
-				if (!grid[cellKey]) grid[cellKey] = [];
-				grid[cellKey].push(obj);
-			}
+			for (let i = 0; i < n; i++) {
+				const a = loadedObjects[i];
+				if (!a.visible) continue;
 
-			// For each occupied cell, check collisions among objects in that cell and neighbors
-			for (const cellKey in grid) {
-				const [cx, cy, cz] = cellKey.split(',').map(Number);
-				const neighborKeys = getNeighborCells(cx, cy, cz);
+				for (let j = i + 1; j < n; j++) {
+					const b = loadedObjects[j];
+					if (!b.visible) continue;
 
-				for (const neighborKey of neighborKeys) {
-					if (!grid[neighborKey]) continue;
-					// Compare all objects in cellKey with those in neighborKey
-					const objectsA = grid[cellKey];
-					const objectsB = grid[neighborKey];
+					_delta.subVectors(b.position, a.position);
+					const distSq = _delta.lengthSq();
 
-					for (let i = 0; i < objectsA.length; i++) {
-						const objA = objectsA[i];
-						if (!objA.userData) continue;
+					if (distSq > 200 * 200 || distSq < 1e-8) continue;
 
-						for (let j = 0; j < objectsB.length; j++) {
-							// Avoid double-check or checking same object
-							if (cellKey === neighborKey && j <= i) continue;
+					const rA = (a.userData.scale || 0.5) * 0.9;
+					const rB = (b.userData.scale || 0.5) * 0.9;
+					const minDist = rA + rB;
 
-							const objB = objectsB[j];
-							if (!objB.userData) continue;
+					if (distSq < minDist * minDist) {
+						const dist = Math.sqrt(distSq);
+						const overlap = minDist - dist;
 
-							const posA = objA.position;
-							const posB = objB.position;
+						_delta.multiplyScalar(1 / dist); // normalize in-place
 
-							// 1) Skip collisions if objects are far apart
-							const delta = new THREE.Vector3().subVectors(posB, posA);
-							const distSq = delta.lengthSq();
-							// E.g. skip if further than 200 units away (tweak to your liking)
-							if (distSq > 200 * 200) continue;
+						a.position.addScaledVector(_delta, -overlap * 0.5);
+						b.position.addScaledVector(_delta, overlap * 0.5);
 
-							const rA = (objA.userData.scale || 0.5) * 0.9;
-							const rB = (objB.userData.scale || 0.5) * 0.9;
-							const minDist = rA + rB;
+						const vA = a.userData.velocity;
+						const vB = b.userData.velocity;
 
-							if (distSq < minDist * minDist && distSq > 0.0001) {
-								const dist = Math.sqrt(distSq);
-								const overlap = minDist - dist;
-								delta.normalize();
+						const dotA = vA.dot(_delta);
+						const dotB = vB.dot(_delta);
 
-								posA.addScaledVector(delta, -overlap * 0.5);
-								posB.addScaledVector(delta, overlap * 0.5);
-
-								const velA = objA.userData.velocity;
-								const velB = objB.userData.velocity;
-								if (velA && velB) {
-									const dotA = velA.dot(delta);
-									const dotB = velB.dot(delta);
-									velA.addScaledVector(delta, dotB - dotA);
-									velB.addScaledVector(delta, dotA - dotB);
-
-									velA.multiplyScalar(0.9);
-									velB.multiplyScalar(0.9);
-								}
-							}
-						}
+						vA.addScaledVector(_delta, dotB - dotA).multiplyScalar(0.9);
+						vB.addScaledVector(_delta, dotA - dotB).multiplyScalar(0.9);
 					}
 				}
 			}
 		};
 
 		const handlePointerMove = (event) => {
-			const targetElement = event.target;
-			if (!targetElement) {
-				pointerFocus = false;
-			} else {
-				const nodeName = targetElement.nodeName.toLowerCase();
-				const computedStyle = window.getComputedStyle(targetElement);
-				if (nodeName === 'a' || nodeName === 'button' || computedStyle.cursor === 'pointer') {
-					pointerFocus = true;
-				} else {
-					pointerFocus = false;
-				}
-			}
+			const el = event.target instanceof Element ? event.target : null;
+			pointerFocus = !!el?.closest('a,button,[role="button"],[tabindex],.pointer');
+
 			mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
 			mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 		};
