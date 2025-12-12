@@ -3,7 +3,7 @@ import { OObject, Observer } from 'destam-dom';
 import SimpleIcons from "destamatic-ui/components/icons/SimpleIcons";
 import FeatherIcons from "destamatic-ui/components/icons/FeatherIcons";
 
-import color from 'destamatic-ui/util/color.js';
+import color from 'destamatic-ui/util/color';
 
 const transformHSV = callback => (c, ...params) => {
 	let [r, g, b, a] = color(c);
