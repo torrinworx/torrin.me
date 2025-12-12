@@ -69,77 +69,75 @@ const BlogPage = StageContext.use(s => suspend(LoadingDots, async (_, cleanup) =
 		: 'https://torrin.me/profile.dark.png';
 
 	return <>
-		<Head>
-			<Title>{`${title} | ${SITE_NAME}`}</Title>
+		<Title>{`${title} | ${SITE_NAME}`}</Title>
 
-			<Meta name="description" content={description} />
-			<Meta name="author" content={AUTHOR_NAME} />
-			<Meta name="robots" content="index,follow" />
+		<Meta name="description" content={description} />
+		<Meta name="author" content={AUTHOR_NAME} />
+		<Meta name="robots" content="index,follow" />
 
-			<Link rel="canonical" href={postUrl} />
+		<Link rel="canonical" href={postUrl} />
 
-			<Meta property="og:type" content="article" />
-			<Meta property="og:title" content={title} />
-			<Meta property="og:description" content={description} />
-			<Meta property="og:url" content={postUrl} />
-			<Meta property="og:site_name" content={SITE_NAME} />
-			{imageUrl && (
-				<Meta property="og:image" content={imageUrl} />
-			)}
+		<Meta property="og:type" content="article" />
+		<Meta property="og:title" content={title} />
+		<Meta property="og:description" content={description} />
+		<Meta property="og:url" content={postUrl} />
+		<Meta property="og:site_name" content={SITE_NAME} />
+		{imageUrl && (
+			<Meta property="og:image" content={imageUrl} />
+		)}
 
-			<Meta name="twitter:card" content="summary_large_image" />
-			<Meta name="twitter:title" content={title} />
-			<Meta name="twitter:description" content={description} />
-			{imageUrl && (
-				<Meta name="twitter:image" content={imageUrl} />
-			)}
+		<Meta name="twitter:card" content="summary_large_image" />
+		<Meta name="twitter:title" content={title} />
+		<Meta name="twitter:description" content={description} />
+		{imageUrl && (
+			<Meta name="twitter:image" content={imageUrl} />
+		)}
 
-			{createdIso && (
-				<Meta
-					property="article:published_time"
-					content={createdIso}
-				/>
-			)}
-			{modifiedIso && (
-				<Meta
-					property="article:modified_time"
-					content={modifiedIso}
-				/>
-			)}
-
-			<JsonLd
-				extraNodes={{
-					"@type": "BlogPosting",
-					"@id": `${postUrl}#blogposting`,
-					"mainEntityOfPage": {
-						"@type": "WebPage",
-						"@id": `${postUrl}#webpage`,
-					},
-					"headline": title,
-					"description": description,
-					"articleBody": content,
-					"url": postUrl,
-					"inLanguage": "en-CA",
-					...(createdIso && { "datePublished": createdIso }),
-					...(modifiedIso && { "dateModified": modifiedIso }),
-					"author": {
-						"@id": AUTHOR_ID,
-					},
-					"publisher": {
-						"@id": AUTHOR_ID,
-					},
-					...(imageUrl && {
-						"image": {
-							"@type": "ImageObject",
-							"url": imageUrl,
-						},
-					}),
-					"isPartOf": {
-						"@id": WEBSITE_ID,
-					},
-				}}
+		{createdIso && (
+			<Meta
+				property="article:published_time"
+				content={createdIso}
 			/>
-		</Head>
+		)}
+		{modifiedIso && (
+			<Meta
+				property="article:modified_time"
+				content={modifiedIso}
+			/>
+		)}
+
+		<JsonLd
+			extraNodes={{
+				"@type": "BlogPosting",
+				"@id": `${postUrl}#blogposting`,
+				"mainEntityOfPage": {
+					"@type": "WebPage",
+					"@id": `${postUrl}#webpage`,
+				},
+				"headline": title,
+				"description": description,
+				"articleBody": content,
+				"url": postUrl,
+				"inLanguage": "en-CA",
+				...(createdIso && { "datePublished": createdIso }),
+				...(modifiedIso && { "dateModified": modifiedIso }),
+				"author": {
+					"@id": AUTHOR_ID,
+				},
+				"publisher": {
+					"@id": AUTHOR_ID,
+				},
+				...(imageUrl && {
+					"image": {
+						"@type": "ImageObject",
+						"url": imageUrl,
+					},
+				}),
+				"isPartOf": {
+					"@id": WEBSITE_ID,
+				},
+			}}
+		/>
 
 		<div theme="column" style={{ gap: 40 }}>
 			<div theme="row_spread">
@@ -176,66 +174,62 @@ const BlogLanding = StageContext.use(stage => () => {
 	const Card = ({ each }) => {
 		const name = each.name.replace(/\.[^/.]+$/, '');
 
-		return (
-			<Paper theme="column_fill">
-				<Typography type="h4" label={each.header} />
-				<Typography type="p1" label={each.description} />
-				<div theme="row_center">
-					<Button
-						type="outlined"
-						label="View"
-						onClick={() => stage.open({ name })}
-						href={`/blog/${name}`}
-					/>
-				</div>
-			</Paper>
-		);
+		return <Paper theme="column_fill">
+			<Typography type="h4" label={each.header} />
+			<Typography type="p1" label={each.description} />
+			<div theme="row_center">
+				<Button
+					type="outlined"
+					label="View"
+					onClick={() => stage.open({ name })}
+					href={`/blog/${name}`}
+				/>
+			</div>
+		</Paper>;
 	};
 
 	return <>
-		<Head>
-			<Title>{pageTitle}</Title>
+		<Title>{pageTitle}</Title>
 
-			<Meta name="description" content={pageDescription} />
-			<Meta name="robots" content="index,follow" />
+		<Meta name="description" content={pageDescription} />
+		<Meta name="robots" content="index,follow" />
 
-			<Link rel="canonical" href={pageUrl} />
+		<Link rel="canonical" href={pageUrl} />
 
-			<Meta property="og:type" content="website" />
-			<Meta property="og:title" content={pageTitle} />
-			<Meta property="og:description" content={pageDescription} />
-			<Meta property="og:url" content={pageUrl} />
-			<Meta property="og:site_name" content={SITE_NAME} />
-			<Meta
-				property="og:image"
-				content="https://torrin.me/profile.dark.png"
-			/>
+		<Meta property="og:type" content="website" />
+		<Meta property="og:title" content={pageTitle} />
+		<Meta property="og:description" content={pageDescription} />
+		<Meta property="og:url" content={pageUrl} />
+		<Meta property="og:site_name" content={SITE_NAME} />
+		<Meta
+			property="og:image"
+			content="https://torrin.me/profile.dark.png"
+		/>
 
-			<Meta name="twitter:card" content="summary_large_image" />
-			<Meta name="twitter:title" content={pageTitle} />
-			<Meta name="twitter:description" content={pageDescription} />
-			<Meta
-				name="twitter:image"
-				content="https://torrin.me/profile.dark.png"
-			/>
+		<Meta name="twitter:card" content="summary_large_image" />
+		<Meta name="twitter:title" content={pageTitle} />
+		<Meta name="twitter:description" content={pageDescription} />
+		<Meta
+			name="twitter:image"
+			content="https://torrin.me/profile.dark.png"
+		/>
 
-			<JsonLd
-				extraNodes={{
-					"@type": ["WebPage", "CollectionPage", "Blog"],
-					"@id": `${pageUrl}#webpage`,
-					"url": pageUrl,
-					"name": "Blog | Torrin.me",
-					"description": pageDescription,
-					"inLanguage": "en-CA",
-					"isPartOf": {
-						"@id": WEBSITE_ID,
-					},
-					"about": {
-						"@id": AUTHOR_ID,
-					},
-				}}
-			/>
-		</Head>
+		<JsonLd
+			extraNodes={{
+				"@type": ["WebPage", "CollectionPage", "Blog"],
+				"@id": `${pageUrl}#webpage`,
+				"url": pageUrl,
+				"name": "Blog | Torrin.me",
+				"description": pageDescription,
+				"inLanguage": "en-CA",
+				"isPartOf": {
+					"@id": WEBSITE_ID,
+				},
+				"about": {
+					"@id": AUTHOR_ID,
+				},
+			}}
+		/>
 
 		<div theme="row">
 			<Button

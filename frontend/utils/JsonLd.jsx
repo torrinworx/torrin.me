@@ -184,7 +184,7 @@ const JsonLd = ({ extraNodes = [] }) => {
 		type="application/ld+json"
 		group="jsonld"
 	>
-		{Observer.immutable(jsonText)}
+		{jsonText}
 	</Script>;
 };
 
