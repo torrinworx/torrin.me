@@ -17,11 +17,6 @@ import {
     Text,
 } from 'destamatic-ui';
 
-import Prism from 'prismjs';
-import 'prismjs/components/prism-python';
-import 'prismjs/themes/prism.css'
-
-
 const Demo = ThemeContext.use(h => StageContext.use(s => () => {
     s.props.enabled.set(false);
     const examples = [
