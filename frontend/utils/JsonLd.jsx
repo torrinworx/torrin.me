@@ -179,7 +179,6 @@ const JsonLd = ({ extraNodes = [] }) => {
 
 	const jsonText = JSON.stringify(full);
 
-	console.log(jsonText);
 	return <Script
 		type="application/ld+json"
 		group="jsonld"
