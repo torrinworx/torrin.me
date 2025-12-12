@@ -81,6 +81,9 @@ export default defineConfig({
 	server: {
 		port: process.env.PORT || 3000,
 	},
+	optimizeDeps: {
+		exclude: ['destamatic-ui', 'destam-dom', 'destam'],
+	},
 	build: {
 		target: 'esnext',
 		outDir: '../build/dist',
