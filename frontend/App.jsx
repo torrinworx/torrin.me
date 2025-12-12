@@ -46,9 +46,6 @@ const HeadTags = () => {
 		<Meta name="geo.placename" content="Waterloo, Ontario, Canada" />
 		<Meta name="geo.region" content="CA-ON" />
 		<Meta name="theme-color" content="#000000" />
-		{/*
-        <Meta name="google-site-verification" content="YOUR_TOKEN_HERE" />
-      	*/}
 
 		<Meta property="og:title" content={pageTitle} />
 		<Meta property="og:description" content={description} />
