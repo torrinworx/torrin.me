@@ -11,9 +11,13 @@ import {
     Slider,
     Theme,
     ThemeContext,
+    LoadingDots,
     // TextField,
     TextModifiers,
     Title,
+    Toggle,
+    TextField,
+    Date as DateComponent,
 } from 'destamatic-ui';
 
 const Demo = ThemeContext.use(h => StageContext.use(s => () => {
@@ -22,7 +26,8 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
         {
             title: 'Buttons',
             category: 'inputs',
-            description: '',
+            description: 'Simple button components',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Button.jsx',
             component: () => {
                 const doneCheck = Observer.mutable(false);
                 doneCheck.watch(() => {
@@ -34,11 +39,12 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
                 });
 
                 return <>
-                    <Button type='contained' label='Click me' onClick={() => { }} />
-                    <Button type='outlined' label='Click me' onClick={() => { }} />
-                    <Button type='text' label='Click me' onClick={() => { }} />
+                    <Button type='contained' label='Contained' onClick={() => { }} />
+                    <Button type='outlined' label='Outlined' onClick={() => { }} />
+                    <Button type='text' label='Text' onClick={() => { }} />
                     <Button type='contained' iconPosition='right' label='Download' icon={<Icon name='download' size={'clamp(0.75rem, 0.75vw + 0.375rem, 1.25rem)'} />} onClick={() => { }} />
                     <Button type='outlined' icon={<Icon name='upload' size={'clamp(0.75rem, 0.75vw + 0.375rem, 1.25rem)'} />} onClick={() => { }} />
+                    <Button type='outlined' icon={<LoadingDots />} onClick={() => { }} />
                     <Button
                         type='outlined'
                         iconPosition='right'
@@ -48,6 +54,7 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
                             : <Icon name='upload' style={{ fill: 'none', marginLeft: 5 }} size={'clamp(0.75rem, 0.75vw + 0.375rem, 1.25rem)'} />)}
                         onClick={async () => new Promise(ok => setTimeout(() => { doneCheck.set(true); ok(); }, 800))}
                     />
+                    <Button type='contained' label='Disabled' onClick={() => { }} disabled />
                 </>
             },
         },
@@ -55,6 +62,7 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
             title: 'Checkboxes',
             category: 'inputs',
             description: '',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Checkbox.jsx',
             component: () => {
                 const checkboxCount = Observer.mutable(0);
                 const boxes = Array.from({ length: 10 }).map(() =>
@@ -94,6 +102,7 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
             title: 'ColorPicker',
             category: 'inputs',
             description: '',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/ColorPicker.jsx',
             component: () => {
                 const specialTheme = OObject({
                     special: OObject({
@@ -105,7 +114,7 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
                 return <div theme='column_center'>
                     <Theme value={specialTheme}>
                         <ThemeContext value="special">
-                            <Typography type='h4' label='Hello World !' />
+                            <Typography type='h4' label='Hello World!' />
                         </ThemeContext>
                     </Theme>
 
@@ -121,19 +130,20 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
             title: 'Sliders',
             category: 'inputs',
             description: '',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Slider.jsx',
             component: () => {
                 const sliderValue1 = Observer.mutable(50);
                 const sliderValue2 = Observer.mutable(25);
                 const sliderValue3 = Observer.mutable(75);
 
                 return <>
-                    <div theme='column_start_fill'>
+                    <div theme='column_center'>
                         <Typography
                             type='h4'
                             label={Observer
                                 .all([sliderValue1, sliderValue2, sliderValue3])
                                 .map(([s1, s2, s3]) =>
-                                    `Slider - ${Math.trunc(s1)} ${Math.trunc(s2)} ${Math.trunc(s3)}`
+                                    `${Math.trunc(s1)} ${Math.trunc(s2)} ${Math.trunc(s3)}`
                                 )}
                         />
                     </div>
@@ -149,9 +159,147 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
             },
         },
         {
+            title: 'Toggle',
+            category: 'inputs',
+            description: 'Simple toggle/switch component.',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Toggle.jsx',
+            component: () => {
+                const toggle1 = Observer.mutable(false);
+                const toggle2 = Observer.mutable(true);
+
+                return <div
+                    theme='column_center'
+                    style={{
+                        gap: 16,
+                        userSelect: 'none',
+                        WebkitUserSelect: 'none',
+                        MozUserSelect: 'none',
+                        msUserSelect: 'none',
+                    }}
+                >
+                    <Typography
+                        type='p1'
+                        label={Observer
+                            .all([toggle1, toggle2])
+                            .map(([t1, t2]) =>
+                                `${t1 ? '✅' : '❌'} | ${t2 ? '✅' : '❌'}`
+                            )}
+                    />
+
+                    <div theme='row' style={{ gap: 20, alignItems: 'center' }}>
+                        <div theme='column_center'>
+                            <Typography
+                                type='p2'
+                                label={toggle1.map(v => `Default: ${v ? '🔓' : '🔒'}`)}
+                            />
+                            <Toggle value={toggle1} />
+                        </div>
+
+                        <div theme='column_center'>
+                            <Typography
+                                type='p2'
+                                label={toggle2.map(v => `Primary: ${v ? '🌞' : '🌙'}`)}
+                            />
+                            <Toggle value={toggle2} type='primary' />
+                        </div>
+
+                        <div theme='column_center'>
+                            <Typography type='p2' label='Disabled: 🚫' />
+                            <Toggle value={Observer.immutable(true)} disabled />
+                        </div>
+                    </div>
+                </div>;
+            },
+        },
+        {
+            title: 'Date',
+            category: 'inputs',
+            description: 'Scrollable date picker with theming and programmatic changes.',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Date.jsx',
+            component: () => {
+                const date = Observer.mutable(new Date());
+                const fmt = d =>
+                    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+                return <div theme='column_center' style={{ gap: 10 }}>
+                    <Typography
+                        type='p1'
+                        label={date.map(d => `Selected date: 📅 ${fmt(d)}`)}
+                    />
+
+                    <DateComponent value={date} />
+
+                    <div theme='row' style={{ gap: 10 }}>
+                        <Button
+                            type='outlined'
+                            label='Today'
+                            onClick={() => date.set(new Date())}
+                        />
+                        <Button
+                            type='contained'
+                            label='Advance 1 year'
+                            onClick={() => {
+                                const d = new Date(date.get());
+                                d.setFullYear(d.getFullYear() + 1);
+                                date.set(d);
+                            }}
+                        />
+                    </div>
+
+                    <Typography
+                        type='p2'
+                        label={date.map(d => d.toString())}
+                    />
+                </div>;
+            },
+        },
+        {
+            title: 'TextField',
+            category: 'inputs',
+            description: 'Basic controlled text inputs with focus, error, and type variants.',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/TextField.jsx',
+            component: () => {
+                const text = Observer.mutable('');
+                const password = Observer.mutable('');
+                const focus = Observer.mutable(false);
+
+                return <div theme='column_center' style={{ gap: 16, maxWidth: 400, }}>
+                    <Typography type='p1' label={text} />
+
+                    <div theme='column_fill' style={{ gap: 10 }}>
+                        <TextField
+                            placeholder='Type something...'
+                            value={text}
+                            onEnter={() => { }}
+                        />
+
+                        <TextField
+                            placeholder='Password'
+                            type='password'
+                            value={password}
+                        />
+
+                        <div theme='row' style={{ gap: 10, alignItems: 'center' }}>
+                            <TextField
+                                placeholder='Click button to focus me'
+                                value={Observer.mutable('')}
+                                focus={focus}
+                            />
+                            <Button
+                                type='outlined'
+                                label='Focus'
+                                onClick={() => focus.set(true)}
+                            />
+                        </div>
+                    </div>
+                </div>;
+            },
+        },
+        {
             title: 'Typography',
             category: 'display',
             description: 'Type scale for headings and paragraphs.',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/display/Typography.jsx',
             component: () => {
                 return <div theme='column_fill_center'>
                     <Typography type='h2' label='Typography' />
@@ -166,13 +314,24 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
         },
     ];
 
-    const Examples = ({ each }) => { // TODO: It would be overengineering but it would be cool to have a live playground text area for each of these.
-
+    const Examples = ({ each }) => {
         const Comp = each.component;
         return <>
             <div theme='column_start_fill'>
-                <Typography type='h4' label={each.title} />
-                <Typography type='p1' label={each.description} />
+                <div theme='row_start_fill'>
+                    <Button
+                        type='text'
+                        label={<Typography type='h3' label={each.title} style={{ color: 'inherit' }} />}
+                        icon={<Icon name='external-link' size={'clamp(1.75rem, 1.75vw + 0.875rem, 3rem)'} style={{ marginLeft: 5 }} />}
+                        iconPosition='right'
+                        href={each.componentUrl}
+                        onClick={() => window.open(each.componentUrl, '_blank')}
+                    />
+                </div>
+                <div theme='divider' />
+                <div style={{ padding: '10px 15px 10px 15px' }}>
+                    <Typography type='p1' label={each.description} />
+                </div>
             </div>
 
             <div theme='row_fill_center' style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>
@@ -181,18 +340,39 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
         </>;
     };
 
-    return <>
-        <Paper theme='column_fill_center'>
-            <div theme='column_fill_center'>
-                <Typography type='h1' label='destamatic-ui' />
-                <Typography type='p1' label='Snappy, light-weight, and comprehensive UI framework.' />
-                <Typography type='p1' label='All the tools you could ever need for frontend development, and more.' />
-            </div>
+    const focused = Observer.mutable('inputs');
 
-            <Examples each={examples} />
+    const categories = Array.from(new Set(examples.map(e => e.category)))
+    console.log("THIS IS CATEGORIES: ", categories);
 
+    const Category = ({ each }) => <Button
+        label={String(each).charAt(0).toUpperCase() + String(each).slice(1)}
+        focused={focused.map(f => f === each)}
+        onClick={() => focused.set(each)}
+    />
+
+    const displayExmaples = focused.map(f => examples.filter(ex => ex.category === f));
+
+    return <Paper theme='column_fill_center'>
+        <div theme='column_fill_center'>
+            <Button
+                type='text'
+                label={<Typography type='h1' label='destamatic-ui' style={{ color: 'inherit' }} />}
+                icon={<Icon name='external-link' size={'clamp(1.75rem, 1.75vw + 0.875rem, 3rem)'} style={{ marginLeft: 5 }} />}
+                iconPosition='right'
+                href='https://github.com/torrinworx/destamatic-ui'
+                onClick={() => window.open('https://github.com/torrinworx/destamatic-ui', '_blank')}
+            />
+            <Typography type='p1' label='Snappy, light-weight, and comprehensive UI framework.' />
+            <Typography type='p1' label='All the tools you could ever need for frontend development, and more.' />
+        </div>
+
+        <Paper theme='row_tight' style={{ padding: 10 }}>
+            <Category each={categories} />
         </Paper>
-    </>;
+
+        <Examples each={displayExmaples} />
+    </Paper>;
 }));
 
 export default Demo;
