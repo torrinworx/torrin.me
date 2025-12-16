@@ -80,7 +80,7 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
             },
         },
         {
-            title: 'Checkboxe',
+            title: 'Checkbox',
             category: 'inputs',
             description: 'Modern checkbox group with reactive state management, ideal for dynamic forms, filters, and multi-select options.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Checkbox.jsx',
