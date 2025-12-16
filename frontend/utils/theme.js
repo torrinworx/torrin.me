@@ -95,7 +95,7 @@ const theme = OObject({
 		// 	src: "url('/IBM_Plex_Sans/IBMPlexSans-Italic-VariableFont_wdth,wght.ttf') format('truetype')"
 		// },
 		fontFamily: 'IBM Plex Sans',
-		fontWeight: 600,
+		fontWeight: 500,
 		fontSize: '100%',
 		boxSizing: 'border-box',
 		transition: `opacity ${transition}, box-shadow ${transition}, background-color ${transition}, color ${transition}, border-color ${transition}, stroke ${transition}, fill ${transition}`,
