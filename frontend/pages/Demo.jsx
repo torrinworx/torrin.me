@@ -356,6 +356,7 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
         },
         {
             title: 'Map',
+            disabled: is_node(),
             category: 'inputs',
             description: 'Interactive Leaflet map with click-to-set location, zoom controls, and geolocation fallback.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Map.jsx',
@@ -435,7 +436,6 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
         },
         {
             title: 'RichField',
-            disabled: is_node(),
             category: 'inputs',
             description: 'Rich text input with inline highlighting and live plain-text preview.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/RichField.jsx',
