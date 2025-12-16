@@ -25,7 +25,8 @@ import {
     is_node,
     suspend,
     Validate,
-    ValidateContext
+    ValidateContext,
+    Switch,
 } from 'destamatic-ui';
 
 const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s => () => {
@@ -764,6 +765,177 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
                     <Typography type='h6' label='Typography' />
                     <Typography type='p1' label='Typography' />
                     <Typography type='p2' label='Typography' />
+                </div>;
+            },
+        },
+        {
+            title: 'Suspend',
+            category: 'utils',
+            description:
+                'Lightweight async loader utility that shows a fallback state while awaiting a promise, perfect for lazy views and remote content.',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/utils/Suspend.jsx',
+            component: () => {
+                const AsyncHello = suspend(
+                    () => <div theme="row_fill_center" style={{ gap: 10 }}>
+                        <Typography type="h4" label="Loading greeting" />
+                        <LoadingDots />
+                    </div>,
+                    async () => {
+                        await new Promise(resolve => setTimeout(resolve, 2500));
+
+                        return <Typography
+                            type="h4"
+                            label="Hello from async content!"
+                            style={{ textAlign: 'center' }}
+                        />;
+                    }
+                );
+
+                return <div theme="column_fill_center" style={{ gap: 16, maxWidth: 600 }}>
+                    <Typography
+                        type="p1"
+                        label="This component uses suspend to wait 1 second before showing the greeting."
+                        style={{ textAlign: 'center', maxWidth: 500 }}
+                    />
+
+                    <Paper
+                        theme="column_fill_center"
+                        style={{ padding: 16, minHeight: 80, minWidth: 260 }}
+                    >
+                        <AsyncHello />
+                    </Paper>
+                </div>;
+            },
+        },
+        {
+            title: 'Switch',
+            category: 'utils',
+            description:
+                'Declarative conditional renderer with mark-based cases and a priority-aware mode for multiple boolean signals.',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/utils/Switch.jsx',
+            component: () => {
+                const color = Observer.mutable('red');
+
+                const one = Observer.mutable(false);
+                const two = Observer.mutable(false);
+                const three = Observer.mutable(false);
+
+                return <div theme="column_fill_center" style={{ gap: 24, maxWidth: 600 }}>
+                    <Paper theme="column_tight" style={{ padding: 12, gap: 12 }}>
+                        <Typography type="h4" label="Value-based Switch" />
+
+                        <Switch value={color}>
+                            <mark:case value="blue">
+                                <Typography
+                                    type="h5"
+                                    label="You picked blue."
+                                    style={{ color: 'var(--color-primary, blue)' }}
+                                />
+                            </mark:case>
+
+                            <mark:case value="green">
+                                <Typography
+                                    type="h5"
+                                    label="Green, nice choice."
+                                    style={{ color: 'green' }}
+                                />
+                            </mark:case>
+
+                            <mark:case value="pink">
+                                <Typography
+                                    type="h5"
+                                    label="Going bold with pink."
+                                    style={{ color: 'hotpink' }}
+                                />
+                            </mark:case>
+
+                            <mark:default>
+                                <Typography
+                                    type="h5"
+                                    label="Not blue, green, or pink (yet)."
+                                />
+                            </mark:default>
+                        </Switch>
+
+                        <div theme="row" style={{ gap: 10, flexWrap: 'wrap' }}>
+                            <Button
+                                type="contained"
+                                label="Green"
+                                style={{ backgroundColor: 'green' }}
+                                onClick={() => color.set('green')}
+                            />
+                            <Button
+                                type="outlined"
+                                label="Blue"
+                                style={{ backgroundColor: 'blue', color: 'white' }}
+                                onClick={() => color.set('blue')}
+                            />
+                            <Button
+                                type="outlined"
+                                label="Pink"
+                                style={{ backgroundColor: 'pink' }}
+                                onClick={() => color.set('pink')}
+                            />
+                            <Button
+                                type="text"
+                                label="Reset"
+                                onClick={() => color.set('red')}
+                            />
+                        </div>
+                    </Paper>
+
+                    <Paper theme="column_tight" style={{ padding: 12, gap: 12 }}>
+                        <Typography type="h4" label="Priority-based cases" />
+                        <Typography
+                            type="p2"
+                            label="The first truthy case wins; later cases only apply if earlier ones are off."
+                        />
+
+                        <div theme="row" style={{ gap: 16, alignItems: 'center' }}>
+                            <div theme="column_center" style={{ gap: 4 }}>
+                                <Typography type="p2" label="One" />
+                                <Toggle value={one} />
+                            </div>
+                            <div theme="column_center" style={{ gap: 4 }}>
+                                <Typography type="p2" label="Two" />
+                                <Toggle value={two} />
+                            </div>
+                            <div theme="column_center" style={{ gap: 4 }}>
+                                <Typography type="p2" label="Three" />
+                                <Toggle value={three} />
+                            </div>
+                        </div>
+
+                        <Switch cases={{ one, two, three }}>
+                            <mark:case value="one">
+                                <Typography
+                                    type="p1"
+                                    label="The first toggle is on and overrides the others."
+                                />
+                            </mark:case>
+
+                            <mark:case value="two">
+                                <Typography
+                                    type="p1"
+                                    label="The first toggle is off, and the second toggle is on."
+                                />
+                            </mark:case>
+
+                            <mark:case value="three">
+                                <Typography
+                                    type="p1"
+                                    label="Only the third toggle is on."
+                                />
+                            </mark:case>
+
+                            <mark:default>
+                                <Typography
+                                    type="p1"
+                                    label="No toggles are switched on."
+                                />
+                            </mark:default>
+                        </Switch>
+                    </Paper>
                 </div>;
             },
         },
