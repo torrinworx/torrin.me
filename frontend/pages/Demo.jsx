@@ -30,9 +30,9 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
     s.props.enabled.set(false);
     const examples = [
         {
-            title: 'Buttons',
+            title: 'Button',
             category: 'inputs',
-            description: 'Simple button components',
+            description: 'Versatile button component with contained, outlined, icon, loading, and async states for UI actions.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Button.jsx',
             component: () => {
                 const doneCheck = Observer.mutable(false);
@@ -67,7 +67,7 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
         {
             title: 'Checkboxes',
             category: 'inputs',
-            description: '',
+            description: 'Modern checkbox group with reactive state management, ideal for dynamic forms, filters, and multi-select options.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Checkbox.jsx',
             component: () => {
                 const checkboxCount = Observer.mutable(0);
@@ -107,7 +107,7 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
         {
             title: 'ColorPicker',
             category: 'inputs',
-            description: '',
+            description: 'Intuitive color picker with live theme binding, perfect for custom branding, design tools, and UI personalization.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/ColorPicker.jsx',
             component: () => {
                 const specialTheme = OObject({
@@ -133,9 +133,9 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
             },
         },
         {
-            title: 'Sliders',
+            title: 'Slider',
             category: 'inputs',
-            description: '',
+            description: 'Smooth, responsive slider control for numeric input, ranges, and real-time value adjustments in your UI.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Slider.jsx',
             component: () => {
                 const sliderValue1 = Observer.mutable(50);
@@ -167,7 +167,7 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
         {
             title: 'Toggle',
             category: 'inputs',
-            description: 'Simple toggle/switch component.',
+            description: 'Accessible toggle switch for on/off settings, dark mode, feature flags, and quick configuration controls.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Toggle.jsx',
             component: () => {
                 const toggle1 = Observer.mutable(false);
@@ -220,7 +220,7 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
         {
             title: 'Date',
             category: 'inputs',
-            description: 'Scrollable date picker with theming and programmatic changes.',
+            description: 'Scrollable date picker with rich theming and programmatic control, great for booking, scheduling, and forms.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Date.jsx',
             component: () => {
                 const date = Observer.mutable(new Date());
@@ -262,7 +262,7 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
         {
             title: 'TextField',
             category: 'inputs',
-            description: 'Basic controlled text inputs with focus, and type variants.',
+            description: 'Flexible text input component with password support, controlled focus, and keyboard-friendly submit handling.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/TextField.jsx',
             component: () => {
                 const text = Observer.mutable('');
@@ -319,7 +319,7 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
         {
             title: 'TextArea',
             category: 'inputs',
-            description: 'Multiline text input with auto-resize up to a max height.',
+            description: 'Auto-resizing multiline textarea with max-height control, ideal for comments, descriptions, and long-form input.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/TextArea.jsx',
             component: () => {
                 const text = Observer.mutable('This is a multiline textarea.\nTry typing more to see it grow.');
@@ -358,7 +358,7 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
             // disabled: is_node(),
             disabled: true, // TODO: Fix async import issue because leaflet doesn't work with ssg.
             category: 'inputs',
-            description: 'Interactive Leaflet map with click-to-set location, zoom controls, and geolocation fallback.',
+            description: 'Interactive Leaflet map with click-to-set location, zoom, and geolocation support for location-aware apps.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Map.jsx',
             component: suspend(LoadingDots, async () => {
                 let Map = (await import('destamatic-ui/components/inputs/Map')).default;
@@ -389,7 +389,7 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
         {
             title: 'Radio',
             category: 'inputs',
-            description: 'Single-select options using a shared Observer.',
+            description: 'Simple, accessible radio group for single-select options, powered by a shared observable state.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Radio.jsx',
             component: () => {
                 const selected = Observer.mutable(1);
@@ -402,43 +402,41 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
                     { value: 3, label: 'No label example (icon only)' },
                 ];
 
-                return (
-                    <div theme='column_center' style={{ gap: 16 }}>
-                        <Typography
-                            type='p1'
-                            label={selected.map(v => `Selected: ${v}`)}
-                        />
+                return <div theme='column_center' style={{ gap: 16 }}>
+                    <Typography
+                        type='p1'
+                        label={selected.map(v => `Selected: ${v}`)}
+                    />
 
-                        <div theme='column_fill' style={{ gap: 10 }}>
-                            {options.map(o => (
-                                <RadioGroup
-                                    key={o.value}
-                                    value={o.value}
-                                    label={o.value === 3 ? null : o.label}
-                                />
-                            ))}
-                        </div>
-
-                        <div theme='row' style={{ gap: 10 }}>
-                            <Button
-                                type='outlined'
-                                label='Select A'
-                                onClick={() => selected.set(0)}
+                    <div theme='column_fill' style={{ gap: 10 }}>
+                        {options.map(o => (
+                            <RadioGroup
+                                key={o.value}
+                                value={o.value}
+                                label={o.value === 3 ? null : o.label}
                             />
-                            <Button
-                                type='outlined'
-                                label='Select C'
-                                onClick={() => selected.set(2)}
-                            />
-                        </div>
+                        ))}
                     </div>
-                );
+
+                    <div theme='row' style={{ gap: 10 }}>
+                        <Button
+                            type='outlined'
+                            label='Select A'
+                            onClick={() => selected.set(0)}
+                        />
+                        <Button
+                            type='outlined'
+                            label='Select C'
+                            onClick={() => selected.set(2)}
+                        />
+                    </div>
+                </div>;
             },
         },
         {
             title: 'RichField',
             category: 'inputs',
-            description: 'Rich text input with inline highlighting and live plain-text preview.',
+            description: 'Inline rich text input built on our RichEngine and TextModifiers system for dynamic and truly rich text rendering.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/RichField.jsx',
             component: () => {
                 const value = Observer.mutable('Try typing: TODO, @mention, #tag, *emphasis*, or !!strong!! text.');
@@ -543,7 +541,7 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
         {
             title: 'RichArea',
             category: 'inputs',
-            description: 'Multiline rich text area with inline highlighting and live plain-text preview.',
+            description: 'Multiline rich text built on our RichEngine and TextModifiers system for dynamic and truly rich text rendering.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/RichArea.jsx',
             component: () => {
                 const value = Observer.mutable(
@@ -678,7 +676,7 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
             title: 'FileDrop',
             disabled: true,
             category: 'inputs',
-            description: 'Drag-and-drop file upload with optional loader and size limit.',
+            description: 'Drag-and-drop file uploader with size limits, async loader hooks, and upload status feedback.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/FileDrop.jsx',
             component: () => {
                 const files = OArray([]);
@@ -745,7 +743,7 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
         {
             title: 'Typography',
             category: 'display',
-            description: 'Type scale for headings and paragraphs.',
+            description: 'Consistent, responsive typography scale for headings and body text, tuned for clean, readable UI layouts.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/display/Typography.jsx',
             component: () => {
                 return <div theme='column_fill_center'>
