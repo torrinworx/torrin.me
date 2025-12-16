@@ -576,7 +576,6 @@ const { h, root, require } = __runtime;
 	return <Paper theme="column_fill" style={{ gap: 12, padding: 12 }}>
 		<div theme="row_spread" style={{ gap: 10 }}>
 			<Typography type="h4" label="Playground" />
-			<Button type='text' label='test' />
 			<Button
 				title='Copy example to clipboard'
 				type='icon'
