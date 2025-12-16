@@ -1,4 +1,4 @@
-import { Observer, OObject } from 'destam';
+import { Observer, OObject, OArray } from 'destam';
 import color from 'destamatic-ui/util/color';
 import {
     StageContext,
@@ -12,14 +12,12 @@ import {
     Theme,
     ThemeContext,
     LoadingDots,
-    // TextField,
-    TextModifiers,
-    Title,
     Toggle,
     TextField,
     Shown,
     Date as DateComponent,
     TextArea,
+    FileDrop,
 } from 'destamatic-ui';
 
 import Map from 'destamatic-ui/components/inputs/Map';
@@ -393,6 +391,73 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
                             type='outlined'
                             label='Reset to (0,0)'
                             onClick={() => location.set({ lat: 43.4643, lng: -80.5204 })}
+                        />
+                    </div>
+                </div>;
+            },
+        },
+        { // TODO: Disable, this component needs work before displaying like this.
+            title: 'FileDrop',
+            category: 'inputs',
+            description: 'Drag-and-drop file upload with optional loader and size limit.',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/FileDrop.jsx',
+            component: () => {
+                const files = OArray([]);
+                const ready = Observer.mutable(null);
+
+                const loader = (file, fileObj) => {
+                    return new Promise((resolve, reject) => {
+                        setTimeout(() => {
+                            if (file.size > 1024 * 1024 * 2) { // > 2MB
+                                reject('Simulated processing error (file too large for loader)');
+                            } else {
+                                resolve(`Loaded: ${file.name} (${file.size} bytes)`);
+                            }
+                        }, 1000);
+
+                        resolve();
+                    });
+                };
+
+                const limitBytes = 5 * 1024 * 1024;
+
+                return <div theme='column_center' style={{ gap: 16, width: '100%' }}>
+                    <Typography
+                        type='p1'
+                        label='Drop files here or click to browse.'
+                    />
+
+                    <Typography
+                        type='p2'
+                        label={ready.map(r => {
+                            if (!r) return 'No fully ready files yet.';
+                            if (Array.isArray(r)) {
+                                return `Ready results (${r.length}):\n` + r.join('\n');
+                            }
+                            return `Ready result: ${r}`;
+                        })}
+                        style={{ whiteSpace: 'pre-wrap', textAlign: 'center' }}
+                    />
+
+                    <FileDrop
+                        files={files}
+                        extensions={['.png', '.jpg', '.jpeg', '.pdf']}
+                        multiple
+                        loader={loader}
+                        limit={limitBytes}
+                        ready={ready}
+                        style={{ width: '100%', maxWidth: 500, minHeight: 120 }}
+                        clickable={true}
+                    />
+
+                    <div theme='row' style={{ gap: 10 }}>
+                        <Button
+                            type='outlined'
+                            label='Clear files'
+                            onClick={() => {
+                                files.splice(0, files.length);
+                                ready.set(null);
+                            }}
                         />
                     </div>
                 </div>;
