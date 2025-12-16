@@ -28,9 +28,20 @@ import {
     ValidateContext,
     Switch,
     useRipples,
+    Title,
+    Meta,
+    Link,
 } from 'destamatic-ui';
 
-const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s => () => {
+import JsonLd, {
+    SITE_NAME,
+    BASE_URL,
+    AUTHOR_NAME,
+    AUTHOR_ID,
+    WEBSITE_ID,
+} from '../utils/JsonLd';
+
+const Demo = ThemeContext.use(h => StageContext.use(s => () => {
     s.props.enabled.set(false);
     const examples = [
         {
@@ -1468,12 +1479,56 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
         onClick={() => focused.set(each)}
     />
 
+    const pageUrl = `${BASE_URL}/destamatic-ui`;
+    const pageTitle = `destamatic-ui Demo | ${SITE_NAME}`;
+    const pageDescription = 'Interactive demo of destamatic-ui components: inputs, display, utilities, theming, and more.';
+    const imageUrl = 'https://torrin.me/profile.dark.png';
+
     return <>
+        <Title>{pageTitle}</Title>
+
+        <Meta name="description" content={pageDescription} />
+        <Meta name="author" content={AUTHOR_NAME} />
+        <Meta name="robots" content="index,follow" />
+
+        <Link rel="canonical" href={pageUrl} />
+
+        <Meta property="og:type" content="website" />
+        <Meta property="og:title" content={pageTitle} />
+        <Meta property="og:description" content={pageDescription} />
+        <Meta property="og:url" content={pageUrl} />
+        <Meta property="og:site_name" content={SITE_NAME} />
+        <Meta property="og:image" content={imageUrl} />
+
+        <Meta name="twitter:card" content="summary_large_image" />
+        <Meta name="twitter:title" content={pageTitle} />
+        <Meta name="twitter:description" content={pageDescription} />
+        <Meta name="twitter:image" content={imageUrl} />
+
+        <JsonLd
+            extraNodes={[{
+                '@type': ['WebPage', 'Product', 'SoftwareApplication'],
+                '@id': `${pageUrl}#webpage`,
+                name: 'destamatic-ui Demo',
+                url: pageUrl,
+                description: pageDescription,
+                inLanguage: 'en-CA',
+                isPartOf: {
+                    '@id': WEBSITE_ID,
+                },
+                about: {
+                    '@id': AUTHOR_ID,
+                },
+                applicationCategory: 'WebApplication',
+                operatingSystem: 'Any',
+            }]}
+        />
+
         <div theme="row">
             <Button
                 type="outlined"
                 label="Back"
-                onClick={() => stage.open({ name: 'landing' })}
+                onClick={() => s.open({ name: 'landing' })}
                 href="/"
             />
         </div>
@@ -1500,6 +1555,6 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
             <Examples each={focused.map(f => examples.filter(ex => ex.category === f && !ex.disabled))} />
         </Paper>
     </>;
-})));
+}));
 
 export default Demo;
