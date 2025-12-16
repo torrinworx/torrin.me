@@ -384,6 +384,55 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
             },
         },
         {
+            title: 'Radio',
+            category: 'inputs',
+            description: 'Single-select options using a shared Observer.',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Radio.jsx',
+            component: () => {
+                const selected = Observer.mutable(1);
+                const RadioGroup = Radio(selected);
+
+                const options = [
+                    { value: 0, label: 'Option A' },
+                    { value: 1, label: 'Option B' },
+                    { value: 2, label: 'Option C' },
+                    { value: 3, label: 'No label example (icon only)' },
+                ];
+
+                return (
+                    <div theme='column_center' style={{ gap: 16 }}>
+                        <Typography
+                            type='p1'
+                            label={selected.map(v => `Selected: ${v}`)}
+                        />
+
+                        <div theme='column_fill' style={{ gap: 10 }}>
+                            {options.map(o => (
+                                <RadioGroup
+                                    key={o.value}
+                                    value={o.value}
+                                    label={o.value === 3 ? null : o.label}
+                                />
+                            ))}
+                        </div>
+
+                        <div theme='row' style={{ gap: 10 }}>
+                            <Button
+                                type='outlined'
+                                label='Select A'
+                                onClick={() => selected.set(0)}
+                            />
+                            <Button
+                                type='outlined'
+                                label='Select C'
+                                onClick={() => selected.set(2)}
+                            />
+                        </div>
+                    </div>
+                );
+            },
+        },
+        {
             title: 'RichField',
             category: 'inputs',
             description: 'Rich text input with inline highlighting and live plain-text preview.',
