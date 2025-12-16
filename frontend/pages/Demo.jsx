@@ -1492,16 +1492,14 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
 
 const count = Observer.mutable(0);
 
-const Demo = () => (
-  <div theme="column_center" style={{ gap: 12 }}>
+const Demo = () => <div theme="column_center" style={{ gap: 12 }}>
     <Typography type="h4" label={count.map(c => "Count: " + c)} />
     <Button
-      type="contained"
-      label="Increment"
-      onClick={() => count.set(count.get() + 1)}
+        type="contained"
+        label="Increment"
+        onClick={() => count.set(count.get() + 1)}
     />
-  </div>
-);
+</div>;
 
 mount(root, <Demo />);
 `
