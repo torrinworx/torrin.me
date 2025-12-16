@@ -1488,7 +1488,10 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
 
 
     const code = Observer.mutable(
-        `// Available globals: Observer, Button, Typography, mount, root
+        `
+import { Button, Typography } from 'destamatic-ui';
+import { mount } from 'destam-dom';
+import { Observer } from 'destam';
 
 const count = Observer.mutable(0);
 

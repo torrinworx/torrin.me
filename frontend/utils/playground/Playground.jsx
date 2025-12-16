@@ -1,4 +1,6 @@
+import * as destamCore from 'destam';
 import { Observer } from 'destam';
+import * as destamDom from 'destam-dom';
 import { mount as domMount } from 'destam-dom';
 
 import compileHTMLLiteral from './htmlLiteral';
@@ -14,7 +16,10 @@ import {
 	TextModifiers,
 	Theme,
 	is_node,
+	Icon,
 } from 'destamatic-ui';
+
+import * as destamaticUI from 'destamatic-ui';
 
 const codeColours = {
 	fg: '#D4D4D4',
@@ -346,6 +351,72 @@ const makeJsxModifiers = () => {
 
 const modifiers = makeJsxModifiers();
 
+const rewriteImports = (src) => {
+	const lines = String(src || '').split('\n');
+	const out = [];
+
+	const parseSpecifiers = (s) => {
+		// "a, b as c" -> "a, b: c"
+		return s
+			.split(',')
+			.map(x => x.trim())
+			.filter(Boolean)
+			.map(x => {
+				const m = x.match(/^([A-Za-z_$][\w$]*)\s+as\s+([A-Za-z_$][\w$]*)$/);
+				return m ? `${m[1]}: ${m[2]}` : x;
+			})
+			.join(', ');
+	};
+
+	for (const line of lines) {
+		// side-effect import
+		let m = line.match(/^\s*import\s+['"]([^'"]+)['"]\s*;?\s*$/);
+		if (m) {
+			out.push(`__runtime.require(${JSON.stringify(m[1])});`);
+			continue;
+		}
+
+		// import * as ns from 'mod'
+		m = line.match(/^\s*import\s+\*\s+as\s+([A-Za-z_$][\w$]*)\s+from\s+['"]([^'"]+)['"]\s*;?\s*$/);
+		if (m) {
+			const [, ns, mod] = m;
+			out.push(`const ${ns} = __runtime.require(${JSON.stringify(mod)});`);
+			continue;
+		}
+
+		// import { a, b as c } from 'mod'
+		m = line.match(/^\s*import\s+\{([\s\S]*?)\}\s+from\s+['"]([^'"]+)['"]\s*;?\s*$/);
+		if (m) {
+			const [, spec, mod] = m;
+			out.push(`const { ${parseSpecifiers(spec)} } = __runtime.require(${JSON.stringify(mod)});`);
+			continue;
+		}
+
+		// import defaultName from 'mod'
+		m = line.match(/^\s*import\s+([A-Za-z_$][\w$]*)\s+from\s+['"]([^'"]+)['"]\s*;?\s*$/);
+		if (m) {
+			const [, def, mod] = m;
+			out.push(`const ${def} = (__runtime.require(${JSON.stringify(mod)}).default ?? __runtime.require(${JSON.stringify(mod)}));`);
+			continue;
+		}
+
+		// import defaultName, { a as b } from 'mod'
+		m = line.match(/^\s*import\s+([A-Za-z_$][\w$]*)\s*,\s*\{([\s\S]*?)\}\s+from\s+['"]([^'"]+)['"]\s*;?\s*$/);
+		if (m) {
+			const [, def, spec, mod] = m;
+			const modVar = `__mod_${Math.random().toString(36).slice(2)}`;
+			out.push(`const ${modVar} = __runtime.require(${JSON.stringify(mod)});`);
+			out.push(`const ${def} = (${modVar}.default ?? ${modVar});`);
+			out.push(`const { ${parseSpecifiers(spec)} } = ${modVar};`);
+			continue;
+		}
+
+		out.push(line);
+	}
+
+	return out.join('\n');
+};
+
 export const Playground = ThemeContext.use((h) => ({ code }, cleanup, mounted) => {
 	if (is_node()) return null;
 
@@ -356,12 +427,20 @@ export const Playground = ThemeContext.use((h) => ({ code }, cleanup, mounted) =
 	const running = Observer.mutable(false);
 
 	// Keep destroy handle for reruns
-	let destroy = null;
+	// --- TODO #2: safer hot reload (keep last good preview) ------------
+	// Keep last "good" mounted output. On errors, keep it and only show error text.
+	let activeHost = null;
+	let activeDestroys = [];
 
+	const killAll = (arr) => {
+		for (const d of arr) {
+			try { if (typeof d === 'function') d(); } catch { /* ignore */ }
+		}
+		arr.length = 0;
+	};
 	const run = () => {
 		try {
 			running.set(true);
-			error.set('');
 
 			let root = rootRef.get();
 			if (!root) return;
@@ -371,38 +450,90 @@ export const Playground = ThemeContext.use((h) => ({ code }, cleanup, mounted) =
 				throw new Error('Playground root is not a mountable DOM node');
 			}
 
-			if (destroy) {
-				destroy();
-				destroy = null;
+			// ensure there's always an active host attached (so preview isn't blank on errors)
+			if (!activeHost || !activeHost.isConnected) {
+				root.innerHTML = '';
+				activeHost = document.createElement('div');
+				root.appendChild(activeHost);
 			}
-			root.innerHTML = '';
+
+			// staging host for this run
+			const stagingHost = document.createElement('div');
+			const stagingDestroys = [];
+
+			// runtime mount wrapper: track destroys for this run
+			const runtimeMount = (elem, node) => {
+				if (elem && elem.elem_) elem = elem.elem_;
+				const d = domMount(elem, node);
+				stagingDestroys.push(d);
+				return d;
+			};
+
+			// modules map for import-mimicking
+			const modules = {
+				'destamatic-ui': destamaticUI,
+				'destam-dom': { ...destamDom, mount: runtimeMount },
+				'destam': destamCore,
+			};
+			const runtimeRequire = (name) => {
+				const mod = modules[name];
+				if (!mod) throw new Error(`Playground: unknown module "${name}"`);
+				return mod;
+			};
 
 			const runtimeHeader = `
 "use strict";
-const { h, Observer, Button, Typography, mount, root } = __runtime;
+const { h, root, require } = __runtime;
 `;
 
-			const source = runtimeHeader + '\n' + (code.get() || '');
-
-			const { code: compiled } = compileHTMLLiteral(source, {
-				sourceFileName: 'Playground.jsx',
-				plugins: ['jsx'],
-			});
+			const userSrc = String(code.get() || '');
+			const rewritten = rewriteImports(userSrc);
+			const source = runtimeHeader + '\n' + rewritten;
+			// compile step first — if this throws, do NOT touch the active preview
+			let compiled;
+			try {
+				({ code: compiled } = compileHTMLLiteral(source, {
+					sourceFileName: 'Playground.jsx',
+					plugins: ['jsx'],
+				}));
+			} catch (e) {
+				console.error(e);
+				error.set(String(e?.stack || e?.message || e));
+				// discard anything created in this run
+				killAll(stagingDestroys);
+				return;
+			}
 
 			const fn = new Function('__runtime', compiled);
 
-			fn({
-				h: hRaw,
-				Observer,
-				Button,
-				Typography,
-				root,
-				mount: (elem, node) => {
-					if (elem && elem.elem_) elem = elem.elem_;
-					destroy = domMount(elem, node);
-					return destroy;
-				},
-			});
+			// runtime execute — only commit to preview if this run fully succeeds
+			try {
+				fn({
+					h: hRaw,
+					root: stagingHost,
+					mount: runtimeMount,
+					require: runtimeRequire,
+				});
+			} catch (e) {
+				console.error(e);
+				error.set(String(e?.stack || e?.message || e));
+				killAll(stagingDestroys);
+				return;
+			}
+
+			// success: swap staging into active
+			error.set('');
+			killAll(activeDestroys);
+
+			// Replace active host element in DOM
+			if (activeHost && activeHost.isConnected) {
+				activeHost.replaceWith(stagingHost);
+			} else {
+				root.innerHTML = '';
+				root.appendChild(stagingHost);
+			}
+			activeHost = stagingHost;
+			activeDestroys = stagingDestroys;
 		} catch (e) {
 			console.error(e);
 			error.set(String(e?.stack || e?.message || e));
@@ -411,39 +542,63 @@ const { h, Observer, Button, Typography, mount, root } = __runtime;
 		}
 	};
 
-	// effect renders initial dom and any changes when `code` changes.
-	let codeEffect;
-	mounted(() => codeEffect = code.effect(() => run()));
-	cleanup(codeEffect);
-
-	cleanup(() => {
-		if (destroy) destroy();
-		destroy = null;
-	});
-
 	const RichAreaTheme = {
 		field: {
 			extends: 'radius_typography_p1_regular_focusable',
 			outline: 0,
 			padding: 10,
-			background: 'none',
+			background: '$contrast_text($color_top)',
 			color: codeColours.fg,
 		},
 	};
 
+	// effect renders initial dom and any changes when `code` changes.
+	let codeEffect;
+	mounted(() => {
+		codeEffect = code.effect(() => run())
+	});
+	cleanup(codeEffect);
+
+	cleanup(() => {
+		killAll(activeDestroys);
+		activeHost = null;
+	});
+
+	const codeCheck = Observer.mutable(false);
+	cleanup(() => codeCheck.watch(() => {
+		if (codeCheck.get()) {
+			setTimeout(() => {
+				codeCheck.set(false);
+			}, 1500);
+		}
+	}));
+
 	return <Paper theme="column_fill" style={{ gap: 12, padding: 12 }}>
-		<div theme="row_spread" style={{gap: 10 }}>
+		<div theme="row_spread" style={{ gap: 10 }}>
 			<Typography type="h4" label="Playground" />
 			<Button type='text' label='test' />
+			<Button
+				title='Copy example to clipboard'
+				type='icon'
+				iconPosition='right'
+				icon={codeCheck.map(c => c
+					? <Icon name='check' style={{ fill: 'none' }} size={'clamp(0.75rem, 0.75vw + 0.375rem, 1.25rem)'} />
+					: <Icon name='copy' style={{ fill: 'none' }} size={'clamp(0.75rem, 0.75vw + 0.375rem, 1.25rem)'} />)}
+				onClick={async () => {
+					codeCheck.set(true);
+					await navigator.clipboard.writeText(code.get());
+				}}
+				loading={false}
+			/>
 		</div>
 
 		<div theme="row_fill" style={{ gap: 10, ualignItems: 'stretch' }}>
-			<div theme='column' style={{ gap: 10,flex: 2, minWidth: 320 }}>
+			<div theme='column' style={{ gap: 10, flex: 2, minWidth: 320 }}>
 				<Typography type="p2" label="Code" />
 
 				<Theme value={RichAreaTheme}>
 					<TextModifiers value={modifiers}>
-						<RichArea value={code} type="p1" style={{ background: '#0E0E0E', height: 500 }} maxHeight={500} />
+						<RichArea value={code} type="p1" style={{ height: 500 }} maxHeight={500} />
 					</TextModifiers>
 				</Theme>
 			</div>
