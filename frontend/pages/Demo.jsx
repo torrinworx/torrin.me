@@ -22,10 +22,9 @@ import {
     TextModifiers,
     RichField,
     RichArea,
-    is_node
+    is_node,
+    suspend,
 } from 'destamatic-ui';
-
-import Map from 'destamatic-ui/components/inputs/Map';
 
 const Demo = ThemeContext.use(h => StageContext.use(s => () => {
     s.props.enabled.set(false);
@@ -356,11 +355,13 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
         },
         {
             title: 'Map',
-            disabled: is_node(),
+            // disabled: is_node(),
+            disabled: true, // TODO: Fix async import issue because leaflet doesn't work with ssg.
             category: 'inputs',
             description: 'Interactive Leaflet map with click-to-set location, zoom controls, and geolocation fallback.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Map.jsx',
-            component: () => {
+            component: suspend(LoadingDots, async () => {
+                let Map = (await import('destamatic-ui/components/inputs/Map')).default;
                 const location = Observer.mutable({ lat: 43.4643, lng: -80.5204 });
 
                 return <div theme='column_center' style={{ gap: 10, width: '100%' }}>
@@ -371,8 +372,8 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
                         )}
                     />
 
-                    <div style={{ width: '100%', height: '400px', position: 'relative' }}>
-                        <Map location={location} style={{ height: '400px', }} />
+                    <div style={{ width: '100%', height: '1000px', position: 'relative' }}>
+                        <Map location={location} />
                     </div>
 
                     <div theme='row' style={{ gap: 10 }}>
@@ -383,7 +384,7 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
                         />
                     </div>
                 </div>;
-            },
+            }),
         },
         {
             title: 'Radio',
@@ -535,6 +536,140 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
                         }}
                     >
                         <Typography type='p1' label={value} />
+                    </Paper>
+                </div>;
+            },
+        },
+        {
+            title: 'RichArea',
+            category: 'inputs',
+            description: 'Multiline rich text area with inline highlighting and live plain-text preview.',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/RichArea.jsx',
+            component: () => {
+                const value = Observer.mutable(
+                    `Grocery list (try multi-line):
+
+- TODO buy milk
+- DONE grab coffee
+- Ask @sam about #party
+- Remember: *italics* and !!strong!! still work here.`
+                );
+
+                const modifiers = [
+                    {
+                        // TODO / DONE badges
+                        check: /\b(TODO|DONE)\b/g,
+                        atomic: true,
+                        return: match => (
+                            <span
+                                style={{
+                                    display: 'inline-block',
+                                    padding: '0 4px',
+                                    borderRadius: 4,
+                                    background: match === 'DONE' ? 'green' : 'orange',
+                                    color: 'white',
+                                    fontWeight: 600,
+                                }}
+                            >
+                                {match}
+                            </span>
+                        ),
+                    },
+                    {
+                        // @mentions
+                        check: /@\w+/g,
+                        atomic: false,
+                        return: match => (
+                            <span
+                                style={{
+                                    display: 'inline-block',
+                                    color: 'blue',
+                                    fontWeight: 500,
+                                }}
+                            >
+                                {match}
+                            </span>
+                        ),
+                    },
+                    {
+                        // #tags
+                        check: /#\w+/g,
+                        atomic: false,
+                        return: match => (
+                            <span
+                                style={{
+                                    display: 'inline-block',
+                                    color: 'green',
+                                    fontWeight: 500,
+                                }}
+                            >
+                                {match}
+                            </span>
+                        ),
+                    },
+                    {
+                        // !!strong!!
+                        check: /!!(.+?)!!/g,
+                        atomic: false,
+                        return: match => (
+                            <span style={{ fontWeight: 700, display: 'inline-block' }}>
+                                {match.slice(2, -2)}
+                            </span>
+                        ),
+                    },
+                    {
+                        // *emphasis*
+                        check: /\*(.+?)\*/g,
+                        atomic: false,
+                        return: match => (
+                            <span style={{ fontStyle: 'italic', display: 'inline-block' }}>
+                                {match.slice(1, -1)}
+                            </span>
+                        ),
+                    },
+                ];
+
+                return <div theme='column_fill' style={{ gap: 12, maxWidth: 700 }}>
+                    <Typography
+                        type='p2'
+                        label='RichArea: multiline rich text. Try new lines, TODO/DONE, @mentions, #tags, *italics*, and !!strong!!'
+                    />
+
+                    {/* Rich multiline area */}
+                    <Paper
+                        theme='tight'
+                        style={{
+                            padding: 10,
+                            gap: 0,
+                            width: '100%',
+                            maxWidth: '100%',
+                        }}
+                    >
+                        <TextModifiers value={modifiers}>
+                            <RichArea
+                                value={value}
+                                placeholder='Type a multi-line rich note...'
+                                maxHeight={200}
+                            />
+                        </TextModifiers>
+                    </Paper>
+
+                    {/* Raw text preview */}
+                    <Typography
+                        type='p2'
+                        label='Raw value:'
+                        style={{ marginTop: 4 }}
+                    />
+                    <Paper
+                        theme='row_tight'
+                        style={{
+                            padding: 10,
+                            maxWidth: '100%',
+                            whiteSpace: 'pre-wrap',
+                            fontFamily: 'monospace',
+                        }}
+                    >
+                        <Typography type='p2' label={value} />
                     </Paper>
                 </div>;
             },
