@@ -773,7 +773,7 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
                         onClick={() => window.open(each.componentUrl, '_blank')}
                     />
                 </div>
-                <div theme='divider' />
+                <div theme='divider' style={{ margin: '10px 15px 10px 15px' }} />
                 <div style={{ padding: '10px 15px 10px 15px' }}>
                     <Typography type='p1' label={each.description} />
                 </div>
