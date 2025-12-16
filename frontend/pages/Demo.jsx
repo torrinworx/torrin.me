@@ -41,6 +41,8 @@ import JsonLd, {
     WEBSITE_ID,
 } from '../utils/JsonLd';
 
+import Playground from '../utils/playground/Playground';
+
 const Demo = ThemeContext.use(h => StageContext.use(s => () => {
     s.props.enabled.set(false);
     const examples = [
@@ -818,7 +820,7 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
         {
             title: 'Theme',
             category: 'utils',
-            description: 'The Theme system allows for comprehensive and intuitive context based themeing, creating infinite possiblities with a seamless developer interface.',
+            description: 'Hell and back theming: comprehensive and intuitive context based theming, creating infinite possiblities with a seamless developer interface.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/utils/Theme.jsx',
             component: () => {
                 const candyTheme = OObject({
@@ -1484,6 +1486,26 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
     const pageDescription = 'Interactive demo of destamatic-ui components: inputs, display, utilities, theming, and more.';
     const imageUrl = 'https://torrin.me/profile.dark.png';
 
+
+    const code = Observer.mutable(
+        `// Available globals: Observer, Button, Typography, mount, root
+
+const count = Observer.mutable(0);
+
+const Demo = () => (
+  <div theme="column_center" style={{ gap: 12 }}>
+    <Typography type="h4" label={count.map(c => "Count: " + c)} />
+    <Button
+      type="contained"
+      label="Increment"
+      onClick={() => count.set(count.get() + 1)}
+    />
+  </div>
+);
+
+mount(root, <Demo />);
+`
+    );
     return <>
         <Title>{pageTitle}</Title>
 
@@ -1524,6 +1546,7 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
             }]}
         />
 
+        <Playground code={code} />
         <div theme="row">
             <Button
                 type="outlined"
@@ -1544,8 +1567,29 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
                     href='https://github.com/torrinworx/destamatic-ui'
                     onClick={() => window.open('https://github.com/torrinworx/destamatic-ui', '_blank')}
                 />
-                <Typography type='p1' label='Snappy, light-weight, and comprehensive UI framework.' />
-                <Typography type='p1' label='All the tools you could ever need for frontend development, and more.' />
+                <Typography type='p1' label='Snappy, light-weight, and comprehensive frontend framework.' />
+                <Typography type='p1' label='No React, no VDOM, no Next. Just a fast, tightly scoped, batteries-included frontend stack.' />
+                <Typography type='p1' label='UI, state, routing, SSG, SEO, themes, rich text, and more. All tightly integrated for the best frontend developer experience.' />
+                <Typography type='p1' label='  Why choose destamatic-ui? Simple: Less wiring, less boilerplate, fewer decisions, better performance.' />
+                {/* point to bench marks: https://krausest.github.io/js-framework-benchmark/current.html */}
+                {/* TODO: Create destamatic-ui landing page, explain destam, show side by side difference between destamatic-ui and react.
+                    landing page needs to be highly marketable.
+                    TODO: Fix header tag issues not rendering and being indexed for some reason on direct entry
+                    TODO: Look into some kind of live playground setup. vite in the browser? Or maybe just a js library that can do that so we don't spend to much time on that
+                    TODO: update destamatic-ui template repository, link here. Explain how to get started. 
+                    TODO: Create destamatic-ui/demo and migrate this code there
+                    TODO: Create destamatic-ui/docs and build a docs page, seo indexable through stages, dynamically built based on destamatic-ui/components folder in current submodule.
+                    
+
+                    NEED NEED NEED Interactive playground setup for users so that they can just test it out without investing time in setting up a repo.
+
+                    TODO: In docs, create a list of example projects, each project has a playground, each project has a nice big documentation, each project has a youtube tutorial on how to build it from scratch.
+
+                    Hero section:
+                    > A batteries-included frontend framework built on fine-grained Observers. No React, no VDOM, no Next. Just fast, reactive DOM, integrated components, routing, SSG/SEO, theming, and rich text in one lightweight stack.
+
+                    destamatic-ui is for: Indie devs and small teams who are tired of wiring React + Next + 6 other libraries
+                */}
             </div>
 
             <Paper theme='row_tight' style={{ padding: 10 }}>
