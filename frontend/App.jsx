@@ -96,7 +96,7 @@ const HeadTags = () => {
 			`}
 		</Style>
 
-		<Script type="module" crossorigin src="/index.js" />
+		{is_node() ? <Script type="module" crossorigin src="/index.js" /> : null}
 		<JsonLd />
 
 		<Script
