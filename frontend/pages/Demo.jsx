@@ -21,7 +21,8 @@ import {
     Radio,
     TextModifiers,
     RichField,
-    RichArea
+    RichArea,
+    is_node
 } from 'destamatic-ui';
 
 import Map from 'destamatic-ui/components/inputs/Map';
@@ -434,6 +435,7 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
         },
         {
             title: 'RichField',
+            disabled: is_node(),
             category: 'inputs',
             description: 'Rich text input with inline highlighting and live plain-text preview.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/RichField.jsx',
