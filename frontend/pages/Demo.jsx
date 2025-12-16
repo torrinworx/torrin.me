@@ -19,6 +19,7 @@ import {
     TextField,
     Shown,
     Date as DateComponent,
+    TextArea,
 } from 'destamatic-ui';
 
 const Demo = ThemeContext.use(h => StageContext.use(s => () => {
@@ -263,18 +264,18 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
                 const text = Observer.mutable('');
                 const password = Observer.mutable('');
                 const focus = Observer.mutable(false);
-                const fireworks = Observer.mutable(false);
-                const triggerFireworks = () => {
-                    fireworks.set(true);
-                    setTimeout(() => fireworks.set(false), 1200);
+                const submitted = Observer.mutable(false);
+                const submit = () => {
+                    submitted.set(true);
+                    setTimeout(() => submitted.set(false), 1200);
                 };
 
                 return <div theme='column_center' style={{ gap: 16, maxWidth: 400 }}>
                     <Typography type='p1' label={text} />
-                    <Shown value={fireworks}>
+                    <Shown value={submitted}>
                         <Typography
                             type='h4'
-                            label='✨'
+                            label='Submitted!'
                             style={{ textAlign: 'center' }}
                         />
                     </Shown>
@@ -284,19 +285,14 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
                         <TextField
                             placeholder='Type something...'
                             value={text}
-                            onEnter={() => {
-                                triggerFireworks();
-                                // you can also do other stuff here if needed
-                            }}
+                            onEnter={submit}
                         />
 
                         <TextField
                             placeholder='Password'
                             type='password'
                             value={password}
-                            onEnter={() => {
-                                triggerFireworks();
-                            }}
+                            onEnter={submit}
                         />
 
                         <div theme='row' style={{ gap: 10, alignItems: 'center' }}>
@@ -304,7 +300,7 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
                                 placeholder='Click button to focus me'
                                 value={Observer.mutable('')}
                                 focus={focus}
-                                onEnter={() => triggerFireworks()}
+                                onEnter={submit}
                             />
                             <Button
                                 type='outlined'
@@ -312,6 +308,43 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
                                 onClick={() => focus.set(true)}
                             />
                         </div>
+                    </div>
+                </div>;
+            },
+        },
+        {
+            title: 'TextArea',
+            category: 'inputs',
+            description: 'Multiline text input with auto-resize up to a max height.',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/TextArea.jsx',
+            component: () => {
+                const text = Observer.mutable('This is a multiline textarea.\nTry typing more to see it grow.');
+                const focus = Observer.mutable(false);
+                return <div theme='column_center' style={{ gap: 16, maxWidth: 500 }}>
+                    <Typography
+                        type='p2'
+                        label={text.map(t => `Length: ${t.length}`)}
+                    />
+
+                    <TextArea
+                        placeholder='Type your message here...'
+                        value={text}
+                        maxHeight={200}
+                        style={{ width: '100%' }}
+                    />
+
+                    <div theme='row' style={{ gap: 10, alignItems: 'center' }}>
+                        <TextArea
+                            placeholder='Click "Focus" to focus me'
+                            value={Observer.mutable('')}
+                            focus={focus}
+                            style={{ width: '100%' }}
+                        />
+                        <Button
+                            type='outlined'
+                            label='Focus'
+                            onClick={() => focus.set(true)}
+                        />
                     </div>
                 </div>;
             },
