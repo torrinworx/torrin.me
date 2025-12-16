@@ -17,6 +17,7 @@ import {
     Title,
     Toggle,
     TextField,
+    Shown,
     Date as DateComponent,
 } from 'destamatic-ui';
 
@@ -256,27 +257,46 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
         {
             title: 'TextField',
             category: 'inputs',
-            description: 'Basic controlled text inputs with focus, error, and type variants.',
+            description: 'Basic controlled text inputs with focus, and type variants.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/TextField.jsx',
             component: () => {
                 const text = Observer.mutable('');
                 const password = Observer.mutable('');
                 const focus = Observer.mutable(false);
+                const fireworks = Observer.mutable(false);
+                const triggerFireworks = () => {
+                    fireworks.set(true);
+                    setTimeout(() => fireworks.set(false), 1200);
+                };
 
-                return <div theme='column_center' style={{ gap: 16, maxWidth: 400, }}>
+                return <div theme='column_center' style={{ gap: 16, maxWidth: 400 }}>
                     <Typography type='p1' label={text} />
+                    <Shown value={fireworks}>
+                        <Typography
+                            type='h4'
+                            label='✨'
+                            style={{ textAlign: 'center' }}
+                        />
+                    </Shown>
+
 
                     <div theme='column_fill' style={{ gap: 10 }}>
                         <TextField
                             placeholder='Type something...'
                             value={text}
-                            onEnter={() => { }}
+                            onEnter={() => {
+                                triggerFireworks();
+                                // you can also do other stuff here if needed
+                            }}
                         />
 
                         <TextField
                             placeholder='Password'
                             type='password'
                             value={password}
+                            onEnter={() => {
+                                triggerFireworks();
+                            }}
                         />
 
                         <div theme='row' style={{ gap: 10, alignItems: 'center' }}>
@@ -284,6 +304,7 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
                                 placeholder='Click button to focus me'
                                 value={Observer.mutable('')}
                                 focus={focus}
+                                onEnter={() => triggerFireworks()}
                             />
                             <Button
                                 type='outlined'
@@ -341,17 +362,13 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
     };
 
     const focused = Observer.mutable('inputs');
-
     const categories = Array.from(new Set(examples.map(e => e.category)))
-    console.log("THIS IS CATEGORIES: ", categories);
 
     const Category = ({ each }) => <Button
         label={String(each).charAt(0).toUpperCase() + String(each).slice(1)}
         focused={focused.map(f => f === each)}
         onClick={() => focused.set(each)}
     />
-
-    const displayExmaples = focused.map(f => examples.filter(ex => ex.category === f));
 
     return <Paper theme='column_fill_center'>
         <div theme='column_fill_center'>
@@ -371,7 +388,7 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
             <Category each={categories} />
         </Paper>
 
-        <Examples each={displayExmaples} />
+        <Examples each={focused.map(f => examples.filter(ex => ex.category === f))} />
     </Paper>;
 }));
 
