@@ -27,6 +27,7 @@ import {
     Validate,
     ValidateContext,
     Switch,
+    useRipples,
 } from 'destamatic-ui';
 
 const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s => () => {
@@ -74,10 +75,6 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Checkbox.jsx',
             component: () => {
                 const checkboxCount = Observer.mutable(0);
-                const boxes = Array.from({ length: 10 }).map(() =>
-                    Observer.mutable(false)
-                );
-
                 return <div theme='column_center'>
                     <Typography
                         type='p1'
@@ -85,7 +82,7 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
                     />
 
                     <div theme='row'>
-                        {boxes.map(box =>
+                        {Array.from({ length: 10 }).map(() => Observer.mutable(false)).map(box =>
                             <Checkbox
                                 value={box}
                                 onChange={val => {
@@ -808,10 +805,310 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
             },
         },
         {
-            title: 'Switch',
+            title: 'Theme',
+            category: 'utils',
+            description: 'The Theme system allows for comprehensive and intuitive context based themeing, creating infinite possiblities with a seamless developer interface.',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/utils/Theme.jsx',
+            component: () => {
+                const candyTheme = OObject({
+                    '*': {
+                        fontFamily: '"Roboto", system-ui',
+                        transition: '150ms ease-in-out',
+                    },
+
+                    candyPrimary: OObject({
+                        $color: '#ff4da6',
+                        $color_alt: '#ffd54f',
+                        $color_bg: '#1a1a1f',
+                        $color_text: '$contrast_text($color)',
+                        $color_text_subtle: '$alpha($color_text, 0.7)',
+                    }),
+
+                    primary: {
+                        extends: 'candyPrimary',
+                        $color_main: '$color',
+                        $color_top: '$contrast_text($color_main)',
+                        $color_hover: '$saturate($shiftBrightness($color_main, -.25), -.25)',
+                    },
+
+                    typography_h1_candy: {
+                        extends: 'typography_h1',
+                        color: '$color',
+                        textShadow: '0 0 12px $alpha($color, 0.6)',
+                    },
+                    typography_p1_muted: {
+                        extends: 'typography_p1',
+                        color: '$color_text_subtle',
+                    },
+
+                    candyCard: {
+                        extends: 'paper_radius',
+                        background: 'radial-gradient(circle at top left, $color, $color_alt)',
+                        color: '$contrast_text($color)',
+                        padding: 30,
+                        gap: 18,
+                        maxWidth: 520,
+                        boxShadow: '0 12px 35px $alpha($color_black, 0.6)',
+                    },
+
+                    button: {
+                        borderRadius: 999,
+                        padding: '12px 22px',
+                        letterSpacing: '0.04em',
+                        textTransform: 'uppercase',
+                        userSelect: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        position: 'relative',
+                        overflow: 'clip',
+                    },
+
+                    button_contained: {
+                        extends: 'button',
+                        background: 'linear-gradient(135deg, $color, $color_alt)',
+                        color: '$contrast_text($color)',
+                        boxShadow: '0 6px 16px $alpha($color, 0.5)',
+                    },
+
+                    button_contained_hovered: {
+                        extends: 'button_contained',
+                        background:
+                            'linear-gradient(135deg, $shiftBrightness($color, .1), $shiftBrightness($color_alt, .1))',
+                        transform: 'translateY(-1px)',
+                        boxShadow: '0 10px 24px $alpha($color, 0.7)',
+                    },
+
+                    button_outlined: {
+                        extends: 'button',
+                        borderWidth: 2,
+                        borderStyle: 'solid',
+                        borderColor: '$color',
+                        color: '$color',
+                        background: 'transparent',
+                    },
+
+                    button_outlined_hovered: {
+                        extends: 'button_outlined',
+                        borderColor: '$color_alt',
+                        color: '$color_alt',
+                    },
+                });
+
+                const useCandy = Observer.mutable(true);
+
+                // shared card body so both sides stay identical structurally
+                const CardBody = ({ title, subtitleType = 'p2', subtitle }) => (
+                    <>
+                        <Typography type="h3" label={title} />
+                        <Typography type={subtitleType} label={subtitle} />
+
+                        <div style={{ height: 16 }} />
+
+                        <Typography type="h4" label="Primary Button" />
+
+                        <div theme="row" style={{ gap: 12, flexWrap: 'wrap' }}>
+                            <Button type="contained" label="Contained" />
+                            <Button type="outlined" label="Outlined" />
+                        </div>
+
+                        <div style={{ height: 16 }} />
+
+                        <Typography
+                            type="p1"
+                            label="This text shows how typography + colors change with the theme."
+                        />
+                    </>
+                );
+
+                return (
+                    <div theme="column_fill_center" style={{ gap: 24 }}>
+                        <div theme="row" style={{ gap: 12, alignItems: 'center' }}>
+                            <Typography
+                                type="p2"
+                                label={useCandy.map(on =>
+                                    on ? 'Using custom candy theme on the right' : 'Candy theme disabled'
+                                )}
+                            />
+                            <Toggle value={useCandy} type="primary" />
+                        </div>
+
+                        <div
+                            theme="row_fill_center"
+                            style={{
+                                gap: 24,
+                                alignItems: 'stretch',
+                                flexWrap: 'wrap',
+                            }}
+                        >
+                            {/* LEFT: app theme card (no Theme wrapper) */}
+                            <div
+                                style={{
+                                    flex: 1,
+                                    minWidth: 260,
+                                    display: 'flex',
+                                }}
+                            >
+                                <Paper
+                                    theme="column_tight"
+                                    style={{
+                                        padding: 24,
+                                        width: '100%',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        flex: 1,
+                                    }}
+                                >
+                                    <CardBody
+                                        title="App Theme"
+                                        subtitle="This card uses the global app theme."
+                                    />
+                                </Paper>
+                            </div>
+
+                            {/* RIGHT: same layout + content, optionally wrapped in candy Theme */}
+                            <div
+                                style={{
+                                    flex: 1,
+                                    minWidth: 260,
+                                    display: 'flex',
+                                }}
+                            >
+                                <Shown value={useCandy}>
+                                    <Theme value={candyTheme}>
+                                        <Paper
+                                            theme="candyCard"
+                                            style={{
+                                                width: '100%',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                flex: 1,
+                                            }}
+                                        >
+                                            {/* use candy-specific title style, but layout is identical */}
+                                            <Typography type="h1_candy" label="Candy Theme" />
+                                            <Typography
+                                                type="p1_muted"
+                                                label="Same layout as the left, but themed via a local Theme wrapper."
+                                            />
+
+                                            <div style={{ height: 16 }} />
+
+                                            <Typography type="h4" label="Primary Button" />
+
+                                            <div theme="row" style={{ gap: 12, flexWrap: 'wrap' }}>
+                                                <Button type="contained" label="Contained" />
+                                                <Button type="outlined" label="Outlined" />
+                                            </div>
+
+                                            <div style={{ height: 16 }} />
+
+                                            <Typography
+                                                type="p1"
+                                                label="Typography + button styles here are driven by candyTheme."
+                                            />
+                                        </Paper>
+                                    </Theme>
+
+                                    <mark:else>
+                                        {/* When disabled, show the same layout but faded, still structurally identical */}
+                                        <Paper
+                                            theme="column_tight"
+                                            style={{
+                                                padding: 24,
+                                                width: '100%',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                flex: 1,
+                                                opacity: 0.4,
+                                            }}
+                                        >
+                                            <CardBody
+                                                title="Candy Theme (off)"
+                                                subtitle="Toggle on to apply the custom Theme to this card."
+                                            />
+                                        </Paper>
+                                    </mark:else>
+                                </Shown>
+                            </div>
+                        </div>
+                    </div>
+                );
+            },
+        },
+        {
+            title: 'Shown',
             category: 'utils',
             description:
-                'Declarative conditional renderer with mark-based cases and a priority-aware mode for multiple boolean signals.',
+                'Tiny conditional renderer with then/else marks for clean inline branching, ideal for loading, empty, and success states.',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/utils/Shown.jsx',
+            component: () => {
+                const loading = Observer.mutable(false);
+                const loggedIn = Observer.mutable(false);
+
+                return <div theme="column_fill_center" style={{ gap: 20, maxWidth: 600 }}>
+                    <Paper theme="column_tight_center" style={{ padding: 12, gap: 12 }}>
+                        <Typography type="h4" label="Then / Else states" />
+
+                        <div theme="row" style={{ gap: 10 }}>
+                            <Button
+                                type="outlined"
+                                label={loading.map(l => (l ? 'Set idle' : 'Set loading'))}
+                                onClick={() => loading.set(!loading.get())}
+                            />
+                        </div>
+
+                        <Shown value={loading}>
+                            <mark:then>
+                                <div theme="row_fill_center" style={{ gap: 8 }}>
+                                    <LoadingDots />
+                                    <Typography
+                                        type="p1"
+                                        label="Fetching data…"
+                                    />
+                                </div>
+                            </mark:then>
+
+                            <mark:else>
+                                <Typography
+                                    type="p1"
+                                    label="Content is ready. Nothing is loading."
+                                />
+                            </mark:else>
+                        </Shown>
+                    </Paper>
+
+                    <Paper theme="column_tight_center" style={{ padding: 12, gap: 12 }}>
+                        <Typography type="h4" label="Login / Logout UI" />
+
+                        <div theme="row" style={{ gap: 10 }}>
+                            <Button
+                                type="outlined"
+                                label={loggedIn.map(v => (v ? 'Log out' : 'Log in'))}
+                                onClick={() => loggedIn.set(!loggedIn.get())}
+                            />
+                        </div>
+
+                        <Shown value={loggedIn}>
+                            <Typography
+                                type="p1"
+                                label="Welcome back! You are logged in."
+                            />
+
+                            <mark:else>
+                                <Typography
+                                    type="p1"
+                                    label="You are logged out. Please sign in to continue."
+                                />
+                            </mark:else>
+                        </Shown>
+                    </Paper>
+                </div>;
+            },
+        },
+        {
+            title: 'Switch',
+            category: 'utils',
+            description: 'Declarative conditional renderer with mark-based cases and a priority-aware mode for multiple boolean signals.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/utils/Switch.jsx',
             component: () => {
                 const color = Observer.mutable('red');
@@ -936,6 +1233,66 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
                             </mark:default>
                         </Switch>
                     </Paper>
+                </div>;
+            },
+        },
+        {
+            title: 'Ripple',
+            category: 'utils',
+            description:
+                'Hook for material-style click ripples. Attach it to any element to get animated, theme-aware ripple feedback.',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/utils/Ripple.jsx',
+            component: () => {
+                const [ripples, createRipple] = useRipples();
+
+                const clickCount = Observer.mutable(0);
+
+                return <div
+                    theme="column_fill_center"
+                    style={{
+                        gap: 16,
+                        maxWidth: 500,
+                        textAlign: 'center',
+                        userSelect: 'none',
+                    }}
+                >
+                    <Typography
+                        type="p2"
+                        label={clickCount.map(c => `Clicks: ${c}`)}
+                    />
+
+                    <div
+                        onClick={e => {
+                            createRipple(e);
+                            clickCount.set(clickCount.get() + 1);
+                        }}
+                        theme='center'
+                        style={{
+                            position: 'relative',
+                            overflow: 'hidden',
+                            borderRadius: 12,
+                            padding: '20px 40px',
+                            cursor: 'pointer',
+                            background:
+                                'linear-gradient(135deg, var(--color-primary, #3b82f6), var(--color-primary-alt, #1d4ed8))',
+                            color: 'white',
+                            minWidth: 220,
+                            minHeight: 220,
+                        }}
+                    >
+                        <Typography
+                            type="p1"
+                            label="Click me"
+                            style={{ pointerEvents: 'none' }}
+                        />
+                        {ripples}
+                    </div>
+
+                    <Typography
+                        type="p2"
+                        label="The ripple expands from the click position and fades out automatically."
+                        style={{ maxWidth: 400 }}
+                    />
                 </div>;
             },
         },
