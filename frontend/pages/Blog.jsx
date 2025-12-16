@@ -7,7 +7,6 @@ import {
 	suspend,
 	Default,
 	Stage,
-	Head,
 	Title,
 	Meta,
 	Link,
