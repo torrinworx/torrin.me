@@ -24,6 +24,8 @@ import {
     RichArea,
     is_node,
     suspend,
+    Validate,
+    ValidateContext
 } from 'destamatic-ui';
 
 const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s => () => {
@@ -65,7 +67,7 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
             },
         },
         {
-            title: 'Checkboxes',
+            title: 'Checkboxe',
             category: 'inputs',
             description: 'Modern checkbox group with reactive state management, ideal for dynamic forms, filters, and multi-select options.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Checkbox.jsx',
@@ -130,6 +132,56 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
                         <ColorPicker value={specialTheme.observer.path(['special', '$color_text']).setter((val, set) => set(color.toCSS(val)))} />
                     </div>
                 </div>
+            },
+        },
+        {
+            title: 'Country',
+            category: 'inputs',
+            disabled: true,
+            description: '',
+            componentUrl: '',
+            component: () => { },
+        },
+        {
+            title: 'Date',
+            category: 'inputs',
+            description: 'Scrollable date picker with rich theming and programmatic control, great for booking, scheduling, and forms.',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Date.jsx',
+            component: () => {
+                const date = Observer.mutable(new Date());
+                const fmt = d =>
+                    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+                return <div theme='column_center' style={{ gap: 10 }}>
+                    <Typography
+                        type='p1'
+                        label={date.map(d => `Selected date: 📅 ${fmt(d)}`)}
+                    />
+
+                    <DateComponent value={date} />
+
+                    <div theme='row' style={{ gap: 10 }}>
+                        <Button
+                            type='outlined'
+                            label='Today'
+                            onClick={() => date.set(new Date())}
+                        />
+                        <Button
+                            type='contained'
+                            label='Advance 1 year'
+                            onClick={() => {
+                                const d = new Date(date.get());
+                                d.setFullYear(d.getFullYear() + 1);
+                                date.set(d);
+                            }}
+                        />
+                    </div>
+
+                    <Typography
+                        type='p2'
+                        label={date.map(d => d.toString())}
+                    />
+                </div>;
             },
         },
         {
@@ -214,48 +266,6 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
                             <Toggle value={Observer.immutable(true)} disabled />
                         </div>
                     </div>
-                </div>;
-            },
-        },
-        {
-            title: 'Date',
-            category: 'inputs',
-            description: 'Scrollable date picker with rich theming and programmatic control, great for booking, scheduling, and forms.',
-            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Date.jsx',
-            component: () => {
-                const date = Observer.mutable(new Date());
-                const fmt = d =>
-                    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-
-                return <div theme='column_center' style={{ gap: 10 }}>
-                    <Typography
-                        type='p1'
-                        label={date.map(d => `Selected date: 📅 ${fmt(d)}`)}
-                    />
-
-                    <DateComponent value={date} />
-
-                    <div theme='row' style={{ gap: 10 }}>
-                        <Button
-                            type='outlined'
-                            label='Today'
-                            onClick={() => date.set(new Date())}
-                        />
-                        <Button
-                            type='contained'
-                            label='Advance 1 year'
-                            onClick={() => {
-                                const d = new Date(date.get());
-                                d.setFullYear(d.getFullYear() + 1);
-                                date.set(d);
-                            }}
-                        />
-                    </div>
-
-                    <Typography
-                        type='p2'
-                        label={date.map(d => d.toString())}
-                    />
                 </div>;
             },
         },
@@ -754,6 +764,141 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
                     <Typography type='h6' label='Typography' />
                     <Typography type='p1' label='Typography' />
                     <Typography type='p2' label='Typography' />
+                </div>;
+            },
+        },
+        {
+            title: 'Validate',
+            category: 'test',
+            description:
+                'Validation helpers for text inputs, with built-in rules (phone, email, card, date, etc.) and group validation via ValidateContext.',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/utils/Validate.jsx',
+            component: () => {
+                const phone = Observer.mutable('');
+                const email = Observer.mutable('');
+                const pan = Observer.mutable('');
+                const expDate = Observer.mutable('');
+                const postalCode = Observer.mutable('');
+                const date = Observer.mutable('');
+                const number = Observer.mutable('');
+                const float = Observer.mutable('');
+
+                const name = Observer.mutable('');
+                const age = Observer.mutable('');
+                const submit = Observer.mutable(false);
+                const allValid = Observer.mutable(true);
+
+                return <div theme="column_fill" style={{ gap: 20, maxWidth: 600 }}>
+                    <Paper theme="column_tight" style={{ padding: 10, gap: 12 }}>
+                        <Typography type="h4" label="Built-in validators" />
+
+                        <div theme="column_fill" style={{ gap: 8 }}>
+                            <Typography type="p2" label="Phone" />
+                            <TextField placeholder="Phone" value={phone} />
+                            <Validate value={phone} validate="phone" />
+
+                            <Typography type="p2" label="Email" />
+                            <TextField placeholder="Email" value={email} />
+                            <Validate value={email} validate="email" />
+
+                            <Typography type="p2" label="Credit Card (PAN)" />
+                            <TextField placeholder="16-digit card" value={pan} />
+                            <Validate value={pan} validate="pan" />
+
+                            <Typography type="p2" label="Expiration (MM/YY)" />
+                            <TextField placeholder="MM/YY" value={expDate} />
+                            <Validate value={expDate} validate="expDate" />
+
+                            <Typography type="p2" label="Postal Code (US ZIP or Canadian)" />
+                            <TextField placeholder="Postal Code" value={postalCode} />
+                            <Validate value={postalCode} validate="postalCode" />
+
+                            <Typography type="p2" label="Date (dd/mm/yyyy)" />
+                            <TextField placeholder="dd/mm/yyyy" value={date} />
+                            <Validate value={date} validate="date" />
+
+                            <Typography type="p2" label="Integer" />
+                            <TextField placeholder="Number" value={number} />
+                            <Validate value={number} validate="number" />
+
+                            <Typography type="p2" label="Float" />
+                            <TextField placeholder="Float (e.g. 12.34)" value={float} />
+                            <Validate value={float} validate="float" />
+                        </div>
+                    </Paper>
+
+                    <Paper theme="column_tight" style={{ padding: 10, gap: 12 }}>
+                        <Typography
+                            type="h4"
+                            label="Form validation with ValidateContext"
+                        />
+                        <Typography
+                            type="p2"
+                            label="Click submit to trigger validations for all fields in this context."
+                        />
+
+                        <ValidateContext value={allValid}>
+                            <div theme="column_fill" style={{ gap: 8 }}>
+                                <Typography type="p2" label="Name (no numbers)" />
+                                <TextField placeholder="Name" value={name} />
+                                <Validate
+                                    value={name}
+                                    validate={val => {
+                                        const v = val.get() || '';
+                                        if (!v.trim()) return 'Name is required.';
+                                        if (/\d/.test(v)) return 'Name cannot contain numbers.';
+                                        return '';
+                                    }}
+                                    signal={submit}
+                                />
+
+                                <Typography type="p2" label="Age (number)" />
+                                <TextField placeholder="Age" value={age} />
+                                <Validate
+                                    value={age}
+                                    validate={val => {
+                                        const v = (val.get() || '').trim();
+                                        if (!v) return 'Age is required.';
+                                        if (isNaN(v)) return 'Age must be a number.';
+                                        if (Number(v) <= 0) return 'Age must be greater than 0.';
+                                        return '';
+                                    }}
+                                    signal={submit}
+                                />
+
+                                <div
+                                    theme="row"
+                                    style={{ gap: 10, alignItems: 'center', marginTop: 8 }}
+                                >
+                                    <Button
+                                        type="contained"
+                                        label="Submit"
+                                        onClick={() => {
+                                            // trigger all validators that use this signal
+                                            submit.set({ value: true });
+
+                                            // small timeout allows ValidateContext to aggregate
+                                            setTimeout(() => {
+                                                if (allValid.get()) {
+                                                    console.log('Form submitted!');
+                                                } else {
+                                                    console.log(
+                                                        'Please fix validation errors before submitting.'
+                                                    );
+                                                }
+                                            }, 0);
+                                        }}
+                                    />
+                                    <Typography
+                                        type="p2"
+                                        label={allValid.map(v =>
+                                            v ? '✅ All fields valid' : '❌ Some fields invalid'
+                                        )}
+                                    />
+                                </div>
+                            </div>
+                        </ValidateContext>
+                    </Paper>
                 </div>;
             },
         },
