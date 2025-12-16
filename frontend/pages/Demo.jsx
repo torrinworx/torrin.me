@@ -769,7 +769,7 @@ const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s 
         },
         {
             title: 'Validate',
-            category: 'test',
+            category: 'utils',
             description:
                 'Validation helpers for text inputs, with built-in rules (phone, email, card, date, etc.) and group validation via ValidateContext.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/utils/Validate.jsx',
