@@ -77,11 +77,20 @@ export default defineConfig({
 	base: '',
 	resolve: {
 		extensions: ['.js', '.ts', '.tsx', '.jsx'],
+		alias: {
+			util: 'util/',
+		},
+	},
+	define: {
+		'process.env': {},
+		'process.env.NODE_ENV': '"development"',
+		global: 'globalThis',
 	},
 	server: {
 		port: process.env.PORT || 3000,
 	},
 	optimizeDeps: {
+		include: ['@babel/parser', '@babel/generator', '@babel/types', 'util'],
 		exclude: ['destamatic-ui', 'destam-dom', 'destam'],
 	},
 	build: {
