@@ -22,6 +22,8 @@ import {
     TextArea,
 } from 'destamatic-ui';
 
+import Map from 'destamatic-ui/components/inputs/Map';
+
 const Demo = ThemeContext.use(h => StageContext.use(s => () => {
     s.props.enabled.set(false);
     const examples = [
@@ -363,6 +365,36 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
                     <Typography type='h6' label='Typography' />
                     <Typography type='p1' label='Typography' />
                     <Typography type='p2' label='Typography' />
+                </div>;
+            },
+        },
+        {
+            title: 'Map',
+            category: 'inputs',
+            description: 'Interactive Leaflet map with click-to-set location, zoom controls, and geolocation fallback.',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Map.jsx',
+            component: () => {
+                const location = Observer.mutable({ lat: 43.4643, lng: -80.5204 });
+
+                return <div theme='column_center' style={{ gap: 10, width: '100%' }}>
+                    <Typography
+                        type='p1'
+                        label={location.map(loc =>
+                            `Location: ${loc.lat.toFixed(5)}, ${loc.lng.toFixed(5)}`
+                        )}
+                    />
+
+                    <div style={{ width: '100%', height: '400px', position: 'relative' }}>
+                        <Map location={location} style={{ height: '400px', }} />
+                    </div>
+
+                    <div theme='row' style={{ gap: 10 }}>
+                        <Button
+                            type='outlined'
+                            label='Reset to (0,0)'
+                            onClick={() => location.set({ lat: 43.4643, lng: -80.5204 })}
+                        />
+                    </div>
                 </div>;
             },
         },
