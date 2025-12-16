@@ -18,6 +18,10 @@ import {
     Date as DateComponent,
     TextArea,
     FileDrop,
+    Radio,
+    TextModifiers,
+    RichField,
+    RichArea
 } from 'destamatic-ui';
 
 import Map from 'destamatic-ui/components/inputs/Map';
@@ -350,23 +354,6 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
             },
         },
         {
-            title: 'Typography',
-            category: 'display',
-            description: 'Type scale for headings and paragraphs.',
-            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/display/Typography.jsx',
-            component: () => {
-                return <div theme='column_fill_center'>
-                    <Typography type='h2' label='Typography' />
-                    <Typography type='h3' label='Typography' />
-                    <Typography type='h4' label='Typography' />
-                    <Typography type='h5' label='Typography' />
-                    <Typography type='h6' label='Typography' />
-                    <Typography type='p1' label='Typography' />
-                    <Typography type='p2' label='Typography' />
-                </div>;
-            },
-        },
-        {
             title: 'Map',
             category: 'inputs',
             description: 'Interactive Leaflet map with click-to-set location, zoom controls, and geolocation fallback.',
@@ -389,15 +376,121 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
                     <div theme='row' style={{ gap: 10 }}>
                         <Button
                             type='outlined'
-                            label='Reset to (0,0)'
+                            label='Reset'
                             onClick={() => location.set({ lat: 43.4643, lng: -80.5204 })}
                         />
                     </div>
                 </div>;
             },
         },
+        {
+            title: 'RichField',
+            category: 'inputs',
+            description: 'Rich text input with inline highlighting and live plain-text preview.',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/RichField.jsx',
+            component: () => {
+                const value = Observer.mutable('Try typing: TODO, @mention, #tag, *emphasis*, or !!strong!! text.');
+
+                const modifiers = [
+                    {
+                        check: /\b(TODO|DONE)\b/g,
+                        atomic: true,
+                        return: match => (
+                            <span
+                                style={{
+                                    display: 'inline-block',
+                                    padding: '0 4px',
+                                    borderRadius: 4,
+                                    background: match === 'DONE' ? 'green' : 'orange',
+                                    color: 'white',
+                                    fontWeight: 600,
+                                }}
+                            >
+                                {match}
+                            </span>
+                        ),
+                    },
+                    {
+                        check: /@\w+/g,
+                        atomic: false,
+                        return: match => (
+                            <span
+                                style={{
+                                    display: 'inline-block',
+                                    color: 'blue',
+                                    fontWeight: 500,
+                                }}
+                            >
+                                {match}
+                            </span>
+                        ),
+                    },
+                    {
+                        check: /#\w+/g,
+                        atomic: false,
+                        return: match => (
+                            <span
+                                style={{
+                                    display: 'inline-block',
+                                    color: 'green',
+                                    fontWeight: 500,
+                                }}
+                            >
+                                {match}
+                            </span>
+                        ),
+                    },
+                    {
+                        check: /!!(.+?)!!/g,
+                        atomic: false,
+                        return: match => (
+                            <span style={{ fontWeight: 700, display: 'inline-block' }}>
+                                {match.slice(2, -2)}
+                            </span>
+                        ),
+                    },
+                    {
+                        check: /\*(.+?)\*/g,
+                        atomic: false,
+                        return: match => (
+                            <span style={{ fontStyle: 'italic', display: 'inline-block' }}>
+                                {match.slice(1, -1)}
+                            </span>
+                        ),
+                    },
+                ];
+
+                return <div theme='column_fill' style={{ gap: 12, maxWidth: 600 }}>
+                    <Typography
+                        type='p2'
+                        label='Rich note editor: type TODO, @mentions, #tags, or *emphasis* / **strong**.'
+                    />
+                    <Paper theme='tight' style={{ padding: 10, gap: 0 }}>
+                        <TextModifiers value={modifiers}>
+                            <RichField value={value} type='p1' />
+                        </TextModifiers>
+                    </Paper>
+
+                    <Typography
+                        type='p2'
+                        label='Raw value:'
+                        style={{ marginTop: 4 }}
+                    />
+                    <Paper
+                        theme='row_tight'
+                        style={{
+                            padding: 10,
+                            maxWidth: '100%'
+                        }}
+                    >
+                        <Typography type='p1' label={value} />
+                    </Paper>
+                </div>;
+            },
+        },
         { // TODO: Disable, this component needs work before displaying like this.
             title: 'FileDrop',
+            disabled: true,
             category: 'inputs',
             description: 'Drag-and-drop file upload with optional loader and size limit.',
             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/FileDrop.jsx',
@@ -463,6 +556,23 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
                 </div>;
             },
         },
+        {
+            title: 'Typography',
+            category: 'display',
+            description: 'Type scale for headings and paragraphs.',
+            componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/display/Typography.jsx',
+            component: () => {
+                return <div theme='column_fill_center'>
+                    <Typography type='h2' label='Typography' />
+                    <Typography type='h3' label='Typography' />
+                    <Typography type='h4' label='Typography' />
+                    <Typography type='h5' label='Typography' />
+                    <Typography type='h6' label='Typography' />
+                    <Typography type='p1' label='Typography' />
+                    <Typography type='p2' label='Typography' />
+                </div>;
+            },
+        },
     ];
 
     const Examples = ({ each }) => {
@@ -518,7 +628,7 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
             <Category each={categories} />
         </Paper>
 
-        <Examples each={focused.map(f => examples.filter(ex => ex.category === f))} />
+        <Examples each={focused.map(f => examples.filter(ex => ex.category === f && !ex.disabled))} />
     </Paper>;
 }));
 
