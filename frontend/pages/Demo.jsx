@@ -26,7 +26,7 @@ import {
     suspend,
 } from 'destamatic-ui';
 
-const Demo = ThemeContext.use(h => StageContext.use(s => () => {
+const Demo = StageContext.use(stage => ThemeContext.use(h => StageContext.use(s => () => {
     s.props.enabled.set(false);
     const examples = [
         {
@@ -796,26 +796,38 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
         onClick={() => focused.set(each)}
     />
 
-    return <Paper theme='column_fill_center'>
-        <div theme='column_fill_center'>
+    return <>
+        <div theme="row">
             <Button
-                type='text'
-                label={<Typography type='h1' label='destamatic-ui' style={{ color: 'inherit' }} />}
-                icon={<Icon name='external-link' size={'clamp(1.75rem, 1.75vw + 0.875rem, 3rem)'} style={{ marginLeft: 5 }} />}
-                iconPosition='right'
-                href='https://github.com/torrinworx/destamatic-ui'
-                onClick={() => window.open('https://github.com/torrinworx/destamatic-ui', '_blank')}
+                type="outlined"
+                label="Back"
+                onClick={() => stage.open({ name: 'landing' })}
+                href="/"
             />
-            <Typography type='p1' label='Snappy, light-weight, and comprehensive UI framework.' />
-            <Typography type='p1' label='All the tools you could ever need for frontend development, and more.' />
         </div>
 
-        <Paper theme='row_tight' style={{ padding: 10 }}>
-            <Category each={categories} />
-        </Paper>
+        <Paper theme='column_fill_center'>
 
-        <Examples each={focused.map(f => examples.filter(ex => ex.category === f && !ex.disabled))} />
-    </Paper>;
-}));
+            <div theme='column_fill_center'>
+                <Button
+                    type='text'
+                    label={<Typography type='h1' label='destamatic-ui' style={{ color: 'inherit' }} />}
+                    icon={<Icon name='external-link' size={'clamp(1.75rem, 1.75vw + 0.875rem, 3rem)'} style={{ marginLeft: 5 }} />}
+                    iconPosition='right'
+                    href='https://github.com/torrinworx/destamatic-ui'
+                    onClick={() => window.open('https://github.com/torrinworx/destamatic-ui', '_blank')}
+                />
+                <Typography type='p1' label='Snappy, light-weight, and comprehensive UI framework.' />
+                <Typography type='p1' label='All the tools you could ever need for frontend development, and more.' />
+            </div>
+
+            <Paper theme='row_tight' style={{ padding: 10 }}>
+                <Category each={categories} />
+            </Paper>
+
+            <Examples each={focused.map(f => examples.filter(ex => ex.category === f && !ex.disabled))} />
+        </Paper>
+    </>;
+})));
 
 export default Demo;
