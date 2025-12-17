@@ -1400,7 +1400,7 @@ const examples = [
 				}
 			});
 
-			return <>
+			return <div theme='row_spread' style={{ gap: 10 }}>
 				<Button type='contained' label='Contained' onClick={() => { }} />
 				<Button type='outlined' label='Outlined' onClick={() => { }} />
 				<Button type='text' label='Text' onClick={() => { }} />
@@ -1417,14 +1417,14 @@ const examples = [
 					onClick={async () => new Promise(ok => setTimeout(() => { doneCheck.set(true); ok(); }, 800))}
 				/>
 				<Button type='contained' label='Disabled' onClick={() => { }} disabled />
-			</>
+			</div>
 		},
 	},
 	{
 		title: 'Typography',
 		category: 'display',
 		description: 'Consistent, responsive typography scale for headings and body text, tuned for clean, readable UI layouts.',
-		componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/display/Typography.jsx',
+		componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/display/Typography/',
 		code: TypographyExample,
 		component: () => {
 			return <div theme='column_fill_center'>
