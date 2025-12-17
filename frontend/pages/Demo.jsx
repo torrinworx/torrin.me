@@ -1,5 +1,5 @@
-import { Observer } from 'destam';
 import {
+    Observer,
     StageContext,
     Paper,
     Typography,
@@ -11,8 +11,6 @@ import {
     Link,
 } from 'destamatic-ui';
 
-import theme from '../utils/theme';
-
 import JsonLd, {
     SITE_NAME,
     BASE_URL,
@@ -20,15 +18,14 @@ import JsonLd, {
     AUTHOR_ID,
     WEBSITE_ID,
 } from '../utils/JsonLd';
-
-import Playground from '../utils/playground/Playground';
-
+import theme from '../utils/theme';
 import examples from '../utils/Examples';
+import Playground from '../utils/playground/Playground';
 
 const Demo = ThemeContext.use(h => StageContext.use(s => () => {
     s.props.enabled.set(false);
 
-    const Examples = ({ each }) => <Paper theme='column' style={{ gap: 10 }}>
+    const Examples = ({ each }) => <Paper theme='column_fill' style={{ gap: 10 }}>
         <div theme='column'>
             <div theme='row'>
                 <Button
@@ -126,7 +123,6 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
         </div>
 
         <Paper theme='column_fill_center'>
-
             <div theme='column_fill_center'>
                 <Button
                     type='text'
@@ -137,9 +133,8 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
                     onClick={() => window.open('https://github.com/torrinworx/destamatic-ui', '_blank')}
                 />
                 <Typography type='p1' label='Snappy, light-weight, and comprehensive frontend framework.' />
-                <Typography type='p1' label='No React, no VDOM, no Next. Just a fast, tightly scoped, batteries-included frontend stack.' />
-                <Typography type='p1' label='UI, state, routing, SSG, SEO, themes, rich text, and more. All tightly integrated for the best frontend developer experience.' />
-                <Typography type='p1' label='  Why choose destamatic-ui? Simple: Less wiring, less boilerplate, fewer decisions, better performance.' />
+                <Typography type='p1' label='Less wiring, less boilerplate, fewer decisions, better performance.' />
+
                 {/* point to bench marks: https://krausest.github.io/js-framework-benchmark/current.html */}
                 {/* TODO: Create destamatic-ui landing page, explain destam, show side by side difference between destamatic-ui and react.
                     landing page needs to be highly marketable.
@@ -149,6 +144,7 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
                     TODO: Create destamatic-ui/demo and migrate this code there
                     TODO: Create destamatic-ui/docs and build a docs page, seo indexable through stages, dynamically built based on destamatic-ui/components folder in current submodule.
                     
+                <Typography type='p1' label='No React, no VDOM. UI, state, routing, SSG, SEO, themes, rich text, and more. All tightly integrated for the best frontend developer experience.' />
 
                     NEED NEED NEED Interactive playground setup for users so that they can just test it out without investing time in setting up a repo.
 

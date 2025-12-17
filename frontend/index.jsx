@@ -1,6 +1,5 @@
 import App from './App';
-import { mount } from 'destam-dom';
-import { wipe } from 'destamatic-ui';
+import { wipe, mount } from 'destamatic-ui';
 
 wipe()
 mount(document.body, <App />);

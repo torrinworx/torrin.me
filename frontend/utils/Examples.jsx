@@ -36,6 +36,7 @@ import {
 import TypographyExample from "destamatic-ui/components/display/Typography/typography.example.jsx?raw";
 import ButtonExample from "destamatic-ui/components/inputs/Button/button.example.jsx?raw";
 import CheckboxExample from 'destamatic-ui/components/inputs/Checkbox/checkbox.example.jsx?raw';
+import ThemeExample from 'destamatic-ui/components/utils/Theme/theme.example.jsx?raw';
 
 const examples = [
 
@@ -722,237 +723,7 @@ const examples = [
 	//                 </div>;
 	//             },
 	//         },
-	//         {
-	//             title: 'Theme',
-	//             category: 'utils',
-	//             description: 'Hell and back theming: comprehensive and intuitive context based theming, creating infinite possiblities with a seamless developer interface.',
-	//             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/utils/Theme.jsx',
-	//             component: () => {
-	//                 const candyTheme = OObject({
-	//                     '*': {
-	//                         fontFamily: '"Roboto", system-ui',
-	//                         transition: '150ms ease-in-out',
-	//                     },
-
-	//                     candyPrimary: OObject({
-	//                         $color: '#ff4da6',
-	//                         $color_alt: '#ffd54f',
-	//                         $color_bg: '#1a1a1f',
-	//                         $color_text: '$contrast_text($color)',
-	//                         $color_text_subtle: '$alpha($color_text, 0.7)',
-	//                     }),
-
-	//                     primary: {
-	//                         extends: 'candyPrimary',
-	//                         $color_main: '$color',
-	//                         $color_top: '$contrast_text($color_main)',
-	//                         $color_hover: '$saturate($shiftBrightness($color_main, -.25), -.25)',
-	//                     },
-
-	//                     typography_h1_candy: {
-	//                         extends: 'typography_h1',
-	//                         color: '$color',
-	//                         textShadow: '0 0 12px $alpha($color, 0.6)',
-	//                     },
-	//                     typography_p1_muted: {
-	//                         extends: 'typography_p1',
-	//                         color: '$color_text_subtle',
-	//                     },
-
-	//                     candyCard: {
-	//                         extends: 'paper_radius',
-	//                         background: 'radial-gradient(circle at top left, $color, $color_alt)',
-	//                         color: '$contrast_text($color)',
-	//                         padding: 30,
-	//                         gap: 18,
-	//                         maxWidth: 520,
-	//                         boxShadow: '0 12px 35px $alpha($color_black, 0.6)',
-	//                     },
-
-	//                     button: {
-	//                         borderRadius: 999,
-	//                         padding: '12px 22px',
-	//                         letterSpacing: '0.04em',
-	//                         textTransform: 'uppercase',
-	//                         userSelect: 'none',
-	//                         border: 'none',
-	//                         cursor: 'pointer',
-	//                         position: 'relative',
-	//                         overflow: 'clip',
-	//                     },
-
-	//                     button_contained: {
-	//                         extends: 'button',
-	//                         background: 'linear-gradient(135deg, $color, $color_alt)',
-	//                         color: '$contrast_text($color)',
-	//                         boxShadow: '0 6px 16px $alpha($color, 0.5)',
-	//                     },
-
-	//                     button_contained_hovered: {
-	//                         extends: 'button_contained',
-	//                         background:
-	//                             'linear-gradient(135deg, $shiftBrightness($color, .1), $shiftBrightness($color_alt, .1))',
-	//                         transform: 'translateY(-1px)',
-	//                         boxShadow: '0 10px 24px $alpha($color, 0.7)',
-	//                     },
-
-	//                     button_outlined: {
-	//                         extends: 'button',
-	//                         borderWidth: 2,
-	//                         borderStyle: 'solid',
-	//                         borderColor: '$color',
-	//                         color: '$color',
-	//                         background: 'transparent',
-	//                     },
-
-	//                     button_outlined_hovered: {
-	//                         extends: 'button_outlined',
-	//                         borderColor: '$color_alt',
-	//                         color: '$color_alt',
-	//                     },
-	//                 });
-
-	//                 const useCandy = Observer.mutable(true);
-
-	//                 // shared card body so both sides stay identical structurally
-	//                 const CardBody = ({ title, subtitleType = 'p2', subtitle }) => (
-	//                     <>
-	//                         <Typography type="h3" label={title} />
-	//                         <Typography type={subtitleType} label={subtitle} />
-
-	//                         <div style={{ height: 16 }} />
-
-	//                         <Typography type="h4" label="Primary Button" />
-
-	//                         <div theme="row" style={{ gap: 12, flexWrap: 'wrap' }}>
-	//                             <Button type="contained" label="Contained" />
-	//                             <Button type="outlined" label="Outlined" />
-	//                         </div>
-
-	//                         <div style={{ height: 16 }} />
-
-	//                         <Typography
-	//                             type="p1"
-	//                             label="This text shows how typography + colors change with the theme."
-	//                         />
-	//                     </>
-	//                 );
-
-	//                 return (
-	//                     <div theme="column_fill_center" style={{ gap: 24 }}>
-	//                         <div theme="row" style={{ gap: 12, alignItems: 'center' }}>
-	//                             <Typography
-	//                                 type="p2"
-	//                                 label={useCandy.map(on =>
-	//                                     on ? 'Using custom candy theme on the right' : 'Candy theme disabled'
-	//                                 )}
-	//                             />
-	//                             <Toggle value={useCandy} type="primary" />
-	//                         </div>
-
-	//                         <div
-	//                             theme="row_fill_center"
-	//                             style={{
-	//                                 gap: 24,
-	//                                 alignItems: 'stretch',
-	//                                 flexWrap: 'wrap',
-	//                             }}
-	//                         >
-	//                             {/* LEFT: app theme card (no Theme wrapper) */}
-	//                             <div
-	//                                 style={{
-	//                                     flex: 1,
-	//                                     minWidth: 260,
-	//                                     display: 'flex',
-	//                                 }}
-	//                             >
-	//                                 <Paper
-	//                                     theme="column_tight"
-	//                                     style={{
-	//                                         padding: 24,
-	//                                         width: '100%',
-	//                                         display: 'flex',
-	//                                         flexDirection: 'column',
-	//                                         flex: 1,
-	//                                     }}
-	//                                 >
-	//                                     <CardBody
-	//                                         title="App Theme"
-	//                                         subtitle="This card uses the global app theme."
-	//                                     />
-	//                                 </Paper>
-	//                             </div>
-
-	//                             {/* RIGHT: same layout + content, optionally wrapped in candy Theme */}
-	//                             <div
-	//                                 style={{
-	//                                     flex: 1,
-	//                                     minWidth: 260,
-	//                                     display: 'flex',
-	//                                 }}
-	//                             >
-	//                                 <Shown value={useCandy}>
-	//                                     <Theme value={candyTheme}>
-	//                                         <Paper
-	//                                             theme="candyCard"
-	//                                             style={{
-	//                                                 width: '100%',
-	//                                                 display: 'flex',
-	//                                                 flexDirection: 'column',
-	//                                                 flex: 1,
-	//                                             }}
-	//                                         >
-	//                                             {/* use candy-specific title style, but layout is identical */}
-	//                                             <Typography type="h1_candy" label="Candy Theme" />
-	//                                             <Typography
-	//                                                 type="p1_muted"
-	//                                                 label="Same layout as the left, but themed via a local Theme wrapper."
-	//                                             />
-
-	//                                             <div style={{ height: 16 }} />
-
-	//                                             <Typography type="h4" label="Primary Button" />
-
-	//                                             <div theme="row" style={{ gap: 12, flexWrap: 'wrap' }}>
-	//                                                 <Button type="contained" label="Contained" />
-	//                                                 <Button type="outlined" label="Outlined" />
-	//                                             </div>
-
-	//                                             <div style={{ height: 16 }} />
-
-	//                                             <Typography
-	//                                                 type="p1"
-	//                                                 label="Typography + button styles here are driven by candyTheme."
-	//                                             />
-	//                                         </Paper>
-	//                                     </Theme>
-
-	//                                     <mark:else>
-	//                                         {/* When disabled, show the same layout but faded, still structurally identical */}
-	//                                         <Paper
-	//                                             theme="column_tight"
-	//                                             style={{
-	//                                                 padding: 24,
-	//                                                 width: '100%',
-	//                                                 display: 'flex',
-	//                                                 flexDirection: 'column',
-	//                                                 flex: 1,
-	//                                                 opacity: 0.4,
-	//                                             }}
-	//                                         >
-	//                                             <CardBody
-	//                                                 title="Candy Theme (off)"
-	//                                                 subtitle="Toggle on to apply the custom Theme to this card."
-	//                                             />
-	//                                         </Paper>
-	//                                     </mark:else>
-	//                                 </Shown>
-	//                             </div>
-	//                         </div>
-	//                     </div>
-	//                 );
-	//             },
-	//         },
+	//         
 	//         {
 	//             title: 'Shown',
 	//             category: 'utils',
@@ -1419,6 +1190,241 @@ const examples = [
 							}}
 						/>
 					)}
+				</div>
+			</div>;
+		},
+	},
+	{
+		title: 'Theme',
+		category: 'utils',
+		description: 'Hell and back theming: comprehensive and intuitive context based theming, creating infinite possiblities with a seamless developer interface.',
+		componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/utils/Theme.jsx',
+		code: ThemeExample,
+		component: () => {
+			const candyTheme = OObject({
+				'*': {
+					fontFamily: '"Roboto", system-ui',
+					transition: '150ms ease-in-out',
+				},
+
+				candyPrimary: OObject({
+					$color: '#ff4da6',
+					$color_alt: '#ffd54f',
+					$color_bg: '#1a1a1f',
+					$color_text: '$contrast_text($color)',
+					$color_text_subtle: '$alpha($color_text, 0.7)',
+				}),
+
+				primary: {
+					extends: 'candyPrimary',
+					$color_main: '$color',
+					$color_top: '$contrast_text($color_main)',
+					$color_hover: '$saturate($shiftBrightness($color_main, -.25), -.25)',
+				},
+
+				typography_h1_candy: {
+					extends: 'typography_h1',
+					color: '$color_alt',
+					textShadow: '0 0 12px $alpha($color, 0.6)',
+				},
+				typography_p1_muted: {
+					extends: 'typography_p1',
+					color: '$color_text_subtle',
+				},
+
+				paper: {
+					extends: 'candyPrimary',
+					background: 'linear-gradient(135deg, $shiftBrightness($color, .1), $shiftBrightness($color_alt, .1))',
+				},
+
+				candyCard: {
+					extends: 'paper_radius',
+					background: 'radial-gradient(circle at top left, $color, $color_alt)',
+					color: '$contrast_text($color)',
+					padding: 30,
+					gap: 18,
+					maxWidth: 520,
+					boxShadow: '0 12px 35px $alpha($color_black, 0.6)',
+				},
+
+				button: {
+					borderRadius: 999,
+					padding: '12px 22px',
+					letterSpacing: '0.04em',
+					textTransform: 'uppercase',
+					userSelect: 'none',
+					border: 'none',
+					cursor: 'pointer',
+					position: 'relative',
+					overflow: 'clip',
+				},
+
+				button_contained: {
+					extends: 'button',
+					background: 'linear-gradient(135deg, $color, $color_alt)',
+					color: '$contrast_text($color)',
+					boxShadow: '0 6px 16px $alpha($color, 0.5)',
+				},
+
+				button_contained_hovered: {
+					extends: 'button_contained',
+					background:
+						'linear-gradient(135deg, $shiftBrightness($color, .1), $shiftBrightness($color_alt, .1))',
+					transform: 'translateY(-1px)',
+					boxShadow: '0 10px 24px $alpha($color, 0.7)',
+				},
+
+				button_outlined: {
+					extends: 'button',
+					borderWidth: 2,
+					borderStyle: 'solid',
+					borderColor: '$color',
+					color: '$color',
+					background: 'transparent',
+				},
+
+				button_outlined_hovered: {
+					extends: 'button_outlined',
+					borderColor: '$color_alt',
+					color: '$color_alt',
+				},
+			});
+
+			const useCandy = Observer.mutable(true);
+
+			// shared card body so both sides stay identical structurally
+			const CardBody = ({ title, subtitleType = 'p2', subtitle }) => (
+				<>
+					<Typography type="h3" label={title} />
+					<Typography type={subtitleType} label={subtitle} />
+
+					<div style={{ height: 16 }} />
+
+					<Typography type="h4" label="Primary Button" />
+
+					<div theme="row" style={{ gap: 12, flexWrap: 'wrap' }}>
+						<Button type="contained" label="Contained" />
+						<Button type="outlined" label="Outlined" />
+					</div>
+
+					<div style={{ height: 16 }} />
+
+					<Typography
+						type="p1"
+						label="This text shows how typography + colors change with the theme."
+					/>
+				</>
+			);
+
+			return <div theme="column_fill_center" style={{ gap: 24 }}>
+				<div theme="column" style={{ gap: 12, alignItems: 'center' }}>
+					<Typography
+						type="p2"
+						label={useCandy.map(on =>
+							on ? 'Using custom candy theme on the right' : 'Candy theme disabled'
+						)}
+					/>
+					<Toggle value={useCandy} type="primary" />
+				</div>
+
+				<div
+					theme="row_fill_center"
+					style={{
+						gap: 24,
+						alignItems: 'stretch',
+						flexWrap: 'wrap',
+					}}
+				>
+					{/* LEFT: app theme card (no Theme wrapper) */}
+					<div
+						style={{
+							flex: 1,
+							minWidth: 260,
+							display: 'flex',
+						}}
+					>
+						<Paper
+							theme="column_tight"
+							style={{
+								padding: 24,
+								width: '100%',
+								display: 'flex',
+								flexDirection: 'column',
+								flex: 1,
+							}}
+						>
+							<CardBody
+								title="App Theme"
+								subtitle="This card uses the global app theme."
+							/>
+						</Paper>
+					</div>
+
+					{/* RIGHT: same layout + content, optionally wrapped in candy Theme */}
+					<div
+						style={{
+							flex: 1,
+							minWidth: 260,
+							display: 'flex',
+						}}
+					>
+						<Shown value={useCandy}>
+							<Theme value={candyTheme}>
+								<Paper
+									theme="candyCard"
+									style={{
+										width: '100%',
+										display: 'flex',
+										flexDirection: 'column',
+										flex: 1,
+									}}
+								>
+									{/* use candy-specific title style, but layout is identical */}
+									<Typography type="h1_candy" label="Candy Theme" />
+									<Typography
+										type="p1_muted"
+										label="Same layout as the left, but themed via a local Theme wrapper."
+									/>
+
+									<div style={{ height: 16 }} />
+
+									<Typography type="h4" label="Primary Button" />
+
+									<div theme="row" style={{ gap: 12, flexWrap: 'wrap' }}>
+										<Button type="contained" label="Contained" />
+										<Button type="outlined" label="Outlined" />
+									</div>
+
+									<div style={{ height: 16 }} />
+
+									<Typography
+										type="p1"
+										label="Typography + button styles here are driven by candyTheme."
+									/>
+								</Paper>
+							</Theme>
+
+							<mark:else>
+								{/* When disabled, show the same layout but faded, still structurally identical */}
+								<Paper
+									theme="column_tight"
+									style={{
+										padding: 24,
+										width: '100%',
+										display: 'flex',
+										flexDirection: 'column',
+										flex: 1,
+										opacity: 0.4,
+									}}
+								>
+									<CardBody
+										title="Candy Theme (off)"
+										subtitle="Toggle on to apply the custom Theme to this card."
+									/>
+								</Paper>
+							</mark:else>
+						</Shown>
+					</div>
 				</div>
 			</div>;
 		},
