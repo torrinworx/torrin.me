@@ -20,6 +20,7 @@ import {
 } from 'destamatic-ui';
 
 import * as destamaticUI from 'destamatic-ui';
+import IconifyIcons from 'destamatic-ui/components/icons/IconifyIcons/IconifyIcons';
 
 const codeColours = {
 	fg: '#D4D4D4',
@@ -417,7 +418,7 @@ const rewriteImports = (src) => {
 	return out.join('\n');
 };
 
-export const Playground = ThemeContext.use((h) => ({ code }, cleanup, mounted) => {
+export const Playground = ThemeContext.use((h) => ({ code, ...props }, cleanup, mounted) => {
 	if (is_node()) return null;
 
 	if (!(code instanceof Observer)) code = Observer.mutable(code);
@@ -472,6 +473,7 @@ export const Playground = ThemeContext.use((h) => ({ code }, cleanup, mounted) =
 			// modules map for import-mimicking
 			const modules = {
 				'destamatic-ui': destamaticUI,
+				'destamatic-ui/components/icons/IconifyIcons/IconifyIcons': IconifyIcons,
 				'destam-dom': { ...destamDom, mount: runtimeMount },
 				'destam': destamCore,
 			};
@@ -483,7 +485,7 @@ export const Playground = ThemeContext.use((h) => ({ code }, cleanup, mounted) =
 
 			const runtimeHeader = `
 "use strict";
-const { h, root, require } = __runtime;
+const { h, root, require, ${Object.keys(props).join(", ")} } = __runtime;
 `;
 
 			const userSrc = String(code.get() || '');
@@ -513,6 +515,7 @@ const { h, root, require } = __runtime;
 					root: stagingHost,
 					mount: runtimeMount,
 					require: runtimeRequire,
+					...props,
 				});
 			} catch (e) {
 				console.error(e);
@@ -557,15 +560,15 @@ const { h, root, require } = __runtime;
 	mounted(() => {
 		codeEffect = code.effect(() => run())
 	});
-	cleanup(codeEffect);
 
 	cleanup(() => {
+		codeEffect()
 		killAll(activeDestroys);
 		activeHost = null;
 	});
 
 	const codeCheck = Observer.mutable(false);
-	cleanup(() => codeCheck.watch(() => {
+	cleanup(codeCheck.watch(() => {
 		if (codeCheck.get()) {
 			setTimeout(() => {
 				codeCheck.set(false);
@@ -573,27 +576,27 @@ const { h, root, require } = __runtime;
 		}
 	}));
 
-	return <Paper theme="column_fill" style={{ gap: 12, padding: 12 }}>
-		<div theme="row_spread" style={{ gap: 10 }}>
-			<Typography type="h4" label="Playground" />
-			<Button
-				title='Copy example to clipboard'
-				type='icon'
-				iconPosition='right'
-				icon={codeCheck.map(c => c
-					? <Icon name='check' style={{ fill: 'none' }} size={'clamp(0.75rem, 0.75vw + 0.375rem, 1.25rem)'} />
-					: <Icon name='copy' style={{ fill: 'none' }} size={'clamp(0.75rem, 0.75vw + 0.375rem, 1.25rem)'} />)}
-				onClick={async () => {
-					codeCheck.set(true);
-					await navigator.clipboard.writeText(code.get());
-				}}
-				loading={false}
-			/>
-		</div>
-
+	return <div theme="column_fill" style={{ gap: 12, padding: 12 }}>
 		<div theme="row_fill" style={{ gap: 10, ualignItems: 'stretch' }}>
 			<div theme='column' style={{ gap: 10, flex: 2, minWidth: 320 }}>
-				<Typography type="p2" label="Code" />
+				<div theme="row_spread" style={{ gap: 10, padding: 10 }}>
+					<Typography type="p2" label="Code" />
+
+					<Button
+						title='Copy example to clipboard'
+						type='icon'
+						iconPosition='right'
+						icon={codeCheck.map(c => c
+							? <Icon name='check' style={{ fill: 'none' }} size={'clamp(0.50rem, 0.50vw + 0.375rem, 1.25rem)'} />
+							: <Icon name='copy' style={{ fill: 'none' }} size={'clamp(0.50rem, 0.50vw + 0.375rem, 1.25rem)'} />)}
+						onClick={async () => {
+							codeCheck.set(true);
+							await navigator.clipboard.writeText(code.get());
+						}}
+						loading={false}
+						style={{ padding: 3 }}
+					/>
+				</div>
 
 				<Theme value={RichAreaTheme}>
 					<TextModifiers value={modifiers}>
@@ -603,11 +606,14 @@ const { h, root, require } = __runtime;
 			</div>
 
 			<div theme='column' style={{ gap: 10, flex: 1, minWidth: 320 }}>
-				<Typography type="p2" label="Preview" />
+				<div theme='row_spread' style={{ gap: 10, padding: 10 }}>
+					<Typography type="p2" label="Preview" />
+				</div>
 				<div
 					theme='radius_field'
 					ref={rootRef}
 					style={{
+						height: 500,
 						minHeight: 500,
 						background: 'none',
 					}}
@@ -618,15 +624,7 @@ const { h, root, require } = __runtime;
 		<Shown value={error.map((e) => !!e)}>
 			<Typography type="p2" label={error} style={{ whiteSpace: 'pre-wrap' }} />
 		</Shown>
-	</Paper>;
+	</div>;
 });
 
 export default Playground;
-
-/*
-TODO: Library import mimicking, mimic 'import { Button } from 'destamatic-ui'', all exports from destamatic-ui, destam-dom, and destam.
-
-TODO: Update hot reloading logic:
-hot reloading on each character change of code string, however, if any given update results in a compiling error, display the error and don't
-update until in a safe compile state again. normal console errors should just appear as normal in the actual console.
-*/

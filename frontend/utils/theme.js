@@ -1,7 +1,8 @@
 import { atomic } from 'destam/Network';
 import { OObject, Observer } from 'destam-dom';
-import SimpleIcons from "destamatic-ui/components/icons/SimpleIcons";
-import FeatherIcons from "destamatic-ui/components/icons/FeatherIcons";
+import SimpleIcons from "destamatic-ui/components/icons/SimpleIcons/SimpleIcons";
+import FeatherIcons from "destamatic-ui/components/icons/FeatherIcons/FeatherIcons";
+import IconifyIcons from "destamatic-ui/components/icons/IconifyIcons/IconifyIcons";
 
 import color from 'destamatic-ui/util/color';
 
@@ -546,7 +547,8 @@ export default {
 		githubFI: FeatherIcons('github'),
 	},
 		FeatherIcons,
-		SimpleIcons
+		SimpleIcons,
+		IconifyIcons,
 	],
 	define: (...args) => atomic(() => {
 		let prefix = '';
