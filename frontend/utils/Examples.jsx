@@ -35,44 +35,10 @@ import {
 
 import TypographyExample from "destamatic-ui/components/display/Typography/typography.example.jsx?raw";
 import ButtonExample from "destamatic-ui/components/inputs/Button/button.example.jsx?raw";
+import CheckboxExample from 'destamatic-ui/components/inputs/Checkbox/checkbox.example.jsx?raw';
 
 const examples = [
-	//         {
-	//             title: 'Checkbox',
-	//             category: 'inputs',
-	//             description: 'Modern checkbox group with reactive state management, ideal for dynamic forms, filters, and multi-select options.',
-	//             componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Checkbox.jsx',
-	//             component: () => {
-	//                 const checkboxCount = Observer.mutable(0);
-	//                 return <div theme='column_center'>
-	//                     <Typography
-	//                         type='p1'
-	//                         label={checkboxCount.map(c => `Boxes checked: ${c}`)}
-	//                     />
 
-	//                     <div theme='row'>
-	//                         {Array.from({ length: 10 }).map(() => Observer.mutable(false)).map(box =>
-	//                             <Checkbox
-	//                                 value={box}
-	//                                 onChange={val => {
-	//                                     if (val) {
-	//                                         checkboxCount.set(checkboxCount.get() + 1);
-	//                                         setTimeout(() => {
-	//                                             if (box.get()) {
-	//                                                 box.set(false);
-	//                                                 checkboxCount.set(checkboxCount.get() - 1);
-	//                                             }
-	//                                         }, 2500);
-	//                                     } else {
-	//                                         checkboxCount.set(checkboxCount.get() - 1);
-	//                                     }
-	//                                 }}
-	//                             />
-	//                         )}
-	//                     </div>
-	//                 </div>;
-	//             },
-	//         },
 	//         {
 	//             title: 'ColorPicker',
 	//             category: 'inputs',
@@ -1418,6 +1384,43 @@ const examples = [
 				/>
 				<Button type='contained' label='Disabled' onClick={() => { }} disabled />
 			</div>
+		},
+	},
+	{
+		title: 'Checkbox',
+		category: 'inputs',
+		description: 'Modern checkbox group with reactive state management, ideal for dynamic forms, filters, and multi-select options.',
+		componentUrl: 'https://github.com/torrinworx/destamatic-ui/blob/main/components/inputs/Checkbox.jsx',
+		code: CheckboxExample,
+		component: () => {
+			const checkboxCount = Observer.mutable(0);
+			return <div theme='column_center'>
+				<Typography
+					type='p1'
+					label={checkboxCount.map(c => `Boxes checked: ${c}`)}
+				/>
+
+				<div theme='row'>
+					{Array.from({ length: 10 }).map(() => Observer.mutable(false)).map(box =>
+						<Checkbox
+							value={box}
+							onChange={val => {
+								if (val) {
+									checkboxCount.set(checkboxCount.get() + 1);
+									setTimeout(() => {
+										if (box.get()) {
+											box.set(false);
+											checkboxCount.set(checkboxCount.get() - 1);
+										}
+									}, 2500);
+								} else {
+									checkboxCount.set(checkboxCount.get() - 1);
+								}
+							}}
+						/>
+					)}
+				</div>
+			</div>;
 		},
 	},
 	{
