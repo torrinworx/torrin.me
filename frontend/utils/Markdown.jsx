@@ -1,5 +1,4 @@
-import { Observer } from "destam-dom";
-import { ThemeContext, mark, Typography } from 'destamatic-ui'
+import { ThemeContext, mark, Typography, Observer } from 'destamatic-ui'
 
 ////////////////////////////////////////////////////////////////////////////////
 // 1) A Simple Block Parser (for illustrative example)

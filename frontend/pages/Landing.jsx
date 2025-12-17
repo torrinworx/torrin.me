@@ -1,5 +1,4 @@
-import { Observer } from 'destam-dom';
-import { Button, Typography, Paper, Icon, StageContext, Shown, mark, ThemeContext } from 'destamatic-ui';
+import { Observer, Button, Typography, Paper, Icon, StageContext, Shown, mark, ThemeContext } from 'destamatic-ui';
 
 const work = [
     {

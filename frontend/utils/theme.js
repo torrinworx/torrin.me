@@ -1,10 +1,9 @@
-import { atomic } from 'destam/Network';
-import { OObject, Observer } from 'destam-dom';
+import color from 'destamatic-ui/util/color';
+import { OObject, Observer, atomic } from 'destamatic-ui'
 import SimpleIcons from "destamatic-ui/components/icons/SimpleIcons/SimpleIcons";
 import FeatherIcons from "destamatic-ui/components/icons/FeatherIcons/FeatherIcons";
 import IconifyIcons from "destamatic-ui/components/icons/IconifyIcons/IconifyIcons";
 
-import color from 'destamatic-ui/util/color';
 
 const transformHSV = callback => (c, ...params) => {
 	let [r, g, b, a] = color(c);

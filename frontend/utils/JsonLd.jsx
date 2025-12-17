@@ -1,4 +1,3 @@
-import { Observer } from 'destam-dom';
 import { Script } from 'destamatic-ui';
 
 export const SITE_NAME = 'Torrin | Full-Stack Developer, Software Engineer';
