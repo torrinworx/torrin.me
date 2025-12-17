@@ -1,4 +1,4 @@
-import { Observer, OObject, OArray } from 'destam';
+import { Observer } from 'destam';
 import {
     StageContext,
     Paper,
@@ -28,7 +28,7 @@ import examples from '../utils/Examples';
 const Demo = ThemeContext.use(h => StageContext.use(s => () => {
     s.props.enabled.set(false);
 
-    const Examples = ({ each }) => <Paper theme='column'>
+    const Examples = ({ each }) => <Paper theme='column' style={{ gap: 10 }}>
         <div theme='column'>
             <div theme='row'>
                 <Button
@@ -40,20 +40,24 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
                     onClick={() => window.open(each.componentUrl, '_blank')}
                 />
             </div>
-            <div theme='divider' style={{ margin: '10px 15px 10px 15px' }} />
             <div style={{ padding: '10px 15px 10px 15px' }}>
                 <Typography type='p1' label={each.description} />
             </div>
         </div>
 
+        <div theme='divider' style={{ margin: '10px 15px 10px 15px' }} />
+
         {/* Themed examples that blend in with app: */}
         <div theme='column' style={{ gap: 10, padding: '10px 15px 10px 15px' }}>
-            <Typography type='p1' label='Examples: ' />
+            <Typography type='h6' label='Examples: ' />
             <each.component />
         </div>
+
+        <div theme='divider' style={{ margin: '10px 15px 10px 15px' }} />
+
         {/* Raw playground with default destamatic-ui themes: */}
         <div theme='column' style={{ padding: '10px 15px 10px 15px' }}>
-            <Typography type='p1' label='Playground:' />
+            <Typography type='h6' label='Playground:' />
             <Playground code={each.code} rootTheme={theme} />
         </div>
     </Paper>;
