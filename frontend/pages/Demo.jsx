@@ -49,7 +49,7 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
 
         {/* Themed examples that blend in with app: */}
         <div theme='column' style={{ gap: 10, padding: '10px 15px 10px 15px' }}>
-            <Typography type='h6' label='Examples: ' />
+            <Typography type='h6' label='Demo: ' />
             <each.component />
         </div>
 
