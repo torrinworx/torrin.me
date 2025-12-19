@@ -24,92 +24,7 @@ import JsonLd, {
 import examples from './Examples';
 import Playground from './Playground';
 
-const Hero = () => (
-    <Paper
-        theme="column_fill_center"
-        style={{ gap: 20 }}
-    >
-        <div theme="column_fill_center" style={{ gap: 12 }}>
-            <Button
-                type="text"
-                label={
-                    <Typography
-                        type="h1"
-                        label="destamatic-ui"
-                        style={{ color: 'inherit' }}
-                    />
-                }
-                icon={
-                    <Icon
-                        name="external-link"
-                        size="clamp(1.75rem, 1.75vw + 0.875rem, 3rem)"
-                        style={{ marginLeft: 5 }}
-                    />
-                }
-                iconPosition="right"
-                href="https://github.com/torrinworx/destamatic-ui"
-                onClick={() =>
-                    window.open(
-                        'https://github.com/torrinworx/destamatic-ui',
-                        '_blank'
-                    )
-                }
-            />
-
-            <Typography
-                type="p1"
-                label="A batteries-included frontend framework built on fine-grained Observers."
-            />
-            <Typography
-                type="p1"
-                label="No React, no VDOM, no Next, no Redux. Just fast DOM updates, integrated components, routing, SSG/SEO, theming, and rich text in one lightweight stack."
-            />
-        </div>
-
-        <div theme="row" style={{ gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
-            <Button
-                type="contained"
-                label="Try in the browser"
-                href="/destamatic-ui/playground"
-                onClick={() => window.open('/destamatic-ui/playground', '_self')}
-                icon={
-                    <Icon
-                        name="feather:terminal"
-                        size="clamp(0.85rem, 0.85vw + 0.4rem, 1.4rem)"
-                        style={{ marginLeft: 4 }}
-                    />
-                }
-                iconPosition="right"
-
-            />
-            <Button
-                type="outlined"
-                label="GitHub"
-                href="https://github.com/torrinworx/destamatic-ui"
-                onClick={() =>
-                    window.open('https://github.com/torrinworx/destamatic-ui', '_blank')
-                }
-                icon={
-                    <Icon
-                        name="feather:github"
-                        size="clamp(0.85rem, 0.85vw + 0.4rem, 1.4rem)"
-                        style={{ marginRight: 4 }}
-                    />
-                }
-                iconPosition="left"
-            />
-        </div>
-
-        <div theme="row" style={{ gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
-            <Typography
-                type="p2"
-                label="Used in production for 5+ years at Equator Studios and across personal projects."
-            />
-        </div>
-    </Paper>
-);
-
-const DestamaticUI = ThemeContext.use(h => StageContext.use(s => () => {
+const Landing = ThemeContext.use(h => StageContext.use(s => () => {
     s.parent.props.enabled.set(false);
 
     const Examples = ({ each }) => <Paper theme='column_fill_center' style={{ gap: 20 }}>
@@ -195,12 +110,95 @@ const DestamaticUI = ThemeContext.use(h => StageContext.use(s => () => {
                 />
             </div> */}
 
-            <Hero />
+            <Paper
+                theme="column_fill_center"
+                style={{ gap: 20 }}
+            >
+                <div theme="column_fill_center" style={{ gap: 12 }}>
+                    <Button
+                        type="text"
+                        label={
+                            <Typography
+                                type="h1"
+                                label="destamatic-ui"
+                                style={{ color: 'inherit' }}
+                            />
+                        }
+                        icon={
+                            <Icon
+                                name="external-link"
+                                size="clamp(1.75rem, 1.75vw + 0.875rem, 3rem)"
+                                style={{ marginLeft: 5 }}
+                            />
+                        }
+                        iconPosition="right"
+                        href="https://github.com/torrinworx/destamatic-ui"
+                        onClick={() =>
+                            window.open(
+                                'https://github.com/torrinworx/destamatic-ui',
+                                '_blank'
+                            )
+                        }
+                    />
+
+                    <Typography
+                        type="p1"
+                        label="A batteries-included frontend framework built on fine-grained Observers."
+                    />
+                    <Typography
+                        type="p1"
+                        label="No React, no VDOM, no Next, no Redux. Just fast DOM updates, integrated components, routing, SSG/SEO, theming, and rich text in one lightweight stack."
+                    />
+                </div>
+
+                <div theme="row" style={{ gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <Button
+                        type="contained"
+                        label="Try in the browser"
+                        href="/destamatic-ui/playground"
+                        onClick={() => {
+                            s.open({ name: 'playground' })
+                        }}
+                        icon={
+                            <Icon
+                                name="feather:terminal"
+                                size="clamp(0.85rem, 0.85vw + 0.4rem, 1.4rem)"
+                                style={{ marginLeft: 4 }}
+                            />
+                        }
+                        iconPosition="right"
+
+                    />
+                    <Button
+                        type="outlined"
+                        label="GitHub"
+                        href="https://github.com/torrinworx/destamatic-ui"
+                        onClick={() =>
+                            window.open('https://github.com/torrinworx/destamatic-ui', '_blank')
+                        }
+                        icon={
+                            <Icon
+                                name="feather:github"
+                                size="clamp(0.85rem, 0.85vw + 0.4rem, 1.4rem)"
+                                style={{ marginRight: 4 }}
+                            />
+                        }
+                        iconPosition="left"
+                    />
+                </div>
+
+                <div theme="row" style={{ gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <Typography
+                        type="p2"
+                        label="Used in production for 5+ years at Equator Studios and across personal projects."
+                    />
+                </div>
+            </Paper>
             <Paper theme='column_fill_center' style={{ background: 'none' }}>
                 <Typography type='h1' label='Components' />
                 <Typography type='p1' label='A sample of some of the components and tools built into destamatic-ui.' />
 
-                <Paper theme='row_tight' style={{ padding: 10 }}>
+                <Paper theme='row_tight' style={{ padding: 5 }}>
                     <Category each={categories} />
                 </Paper>
             </Paper>
@@ -210,11 +208,10 @@ const DestamaticUI = ThemeContext.use(h => StageContext.use(s => () => {
     </>;
 }));
 
-
-const Something = () => {
+const DestamaticUI = () => {
     const config = {
         acts: {
-            landing: DestamaticUI,
+            landing: Landing,
             playground: Playground,
         },
         initial: 'landing',
@@ -222,20 +219,17 @@ const Something = () => {
         ssg: true,
     };
 
-
     return <StageContext value={config}>
         <Stage />
     </StageContext>
 }
 
-export default Something;
+export default DestamaticUI;
 
 
 {/* point to bench marks: https://krausest.github.io/js-framework-benchmark/current.html */ }
 {/* TODO: Create destamatic-ui landing page, explain destam, show side by side difference between destamatic-ui and react.
     landing page needs to be highly marketable.
-    TODO: Fix header tag issues not rendering and being indexed for some reason on direct entry
-    TODO: Look into some kind of live playground setup. vite in the browser? Or maybe just a js library that can do that so we don't spend to much time on that
     TODO: update destamatic-ui template repository, link here. Explain how to get started. 
     TODO: Create destamatic-ui/demo and migrate this code there
     TODO: Create destamatic-ui/docs and build a docs page, seo indexable through stages, dynamically built based on destamatic-ui/components folder in current submodule.
