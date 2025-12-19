@@ -4,7 +4,6 @@ import SimpleIcons from "destamatic-ui/components/icons/SimpleIcons/SimpleIcons"
 import FeatherIcons from "destamatic-ui/components/icons/FeatherIcons/FeatherIcons";
 import IconifyIcons from "destamatic-ui/components/icons/IconifyIcons/IconifyIcons";
 
-
 const transformHSV = callback => (c, ...params) => {
 	let [r, g, b, a] = color(c);
 	let [h, s, v] = color.rgbToHsv(r, g, b);
@@ -420,11 +419,13 @@ const theme = OObject({
 		height: '100%',
 		minHeight: '100vh'
 	},
+
 	pages: {
 		extends: 'column_center',
 		padding: '10vh clamp(0rem, 10vw, 0rem)',
-		gap: '3vh',
+		gap: '2vh',
 	},
+
 	divider: {
 		width: '100%',
 		height: '2px',
