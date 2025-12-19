@@ -21,7 +21,7 @@ import JsonLd, {
     AUTHOR_ID,
     WEBSITE_ID,
 } from '../utils/JsonLd';
-import examples from '../utils/Examples';
+import examples from './Examples';
 import Playground from './Playground';
 
 const Hero = () => (
