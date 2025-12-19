@@ -2,7 +2,7 @@ import { suspend, LoadingDots, StageContext, Observer } from 'destamatic-ui';
 import { h as domH } from 'destam-dom';
 
 import theme from '../utils/theme';
-import Editor from '../utils/editor/Editor';
+import Editor from './editor/Editor';
 
 /*
 	   <div theme='divider' style={{ margin: '10px 15px 10px 15px' }} />
@@ -16,8 +16,6 @@ const destamaticUiExamples = import.meta.glob(
 	'../../destamatic-ui/components/**/**/*.example.jsx',
 	{ as: 'raw', eager: true }
 );
-
-
 
 const fetchDestamDomExamples = async ({
 	owner = "Nefsen402",
