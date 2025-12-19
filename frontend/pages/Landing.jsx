@@ -412,7 +412,7 @@ const Landing = ThemeContext.use(h => StageContext.use(s => (_, cleanup, mounted
             url: 'https://github.com/torrinworx/destamatic-ui',
             header: 'destamatic ui',
             description: 'A custom UI component library built on destam and destam-dom reactivity libraries. Similar in style and functionality to MaterialUI components, but snappier thanks to the speed of destam-dom\'s lack of a virtual DOM.',
-            cta: <Button type='outlined' label='Live Demo' onClick={() => s.open({ name: 'destamatic-ui-demo' })} href='/destamatic-ui-demo' />,
+            cta: <Button type='outlined' label='Live Demo' onClick={() => s.open({ name: 'destamatic-ui' })} href='/destamatic-ui' />,
         },
         {
             url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',

@@ -80,5 +80,3 @@ Donald from INVINCIBLE Season 2 Episode 7 25:44: We're not our bodies, we're the
 Need to rewrite and work some of the wording around presenting science and religion in the same light, they should be "interpretive frameworks" that help people interpret the agnostic god/universe. This can help avoid the issue with people associating science with religion, even though they function the same way in the subjective sense.
 
 People coming froma scientific or religious background will staunchly defend their opposition to the other side, scientific backgrounds will view religeon as immoral on the basis that it is not a provably true system that is based on empirical evidence and peer review and debate. Religion will see science as a system of academea, pompus, wrong at times, and structurally biased towards those in power.
-
-

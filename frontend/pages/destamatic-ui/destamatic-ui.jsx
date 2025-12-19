@@ -9,6 +9,7 @@ import {
     Title,
     Meta,
     Link,
+    Head,
 } from 'destamatic-ui';
 
 import JsonLd, {
@@ -17,12 +18,13 @@ import JsonLd, {
     AUTHOR_NAME,
     AUTHOR_ID,
     WEBSITE_ID,
-} from '../utils/JsonLd';
-import theme from '../utils/theme';
-import examples from '../utils/Examples';
-import Playground from '../utils/playground/Playground';
+} from '../../utils/JsonLd';
+import theme from '../../utils/theme';
+import examples from '../../utils/Examples';
+import Playground from '../../utils/playground/Playground';
 
-const Demo = ThemeContext.use(h => StageContext.use(s => () => {
+// Hero/Landing
+const DestamaticUI = ThemeContext.use(h => StageContext.use(s => () => {
     s.props.enabled.set(false);
 
     const Examples = ({ each }) => <Paper theme='column_fill' style={{ gap: 10 }}>
@@ -74,69 +76,70 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
     const imageUrl = 'https://torrin.me/profile.dark.png';
 
     return <>
-        <Title>{pageTitle}</Title>
+        <Head>
+            <Title>{pageTitle}</Title>
 
-        <Meta name="description" content={pageDescription} />
-        <Meta name="author" content={AUTHOR_NAME} />
-        <Meta name="robots" content="index,follow" />
+            <Meta name="description" content={pageDescription} />
+            <Meta name="author" content={AUTHOR_NAME} />
+            <Meta name="robots" content="index,follow" />
 
-        <Link rel="canonical" href={pageUrl} />
+            <Link rel="canonical" href={pageUrl} />
 
-        <Meta property="og:type" content="website" />
-        <Meta property="og:title" content={pageTitle} />
-        <Meta property="og:description" content={pageDescription} />
-        <Meta property="og:url" content={pageUrl} />
-        <Meta property="og:site_name" content={SITE_NAME} />
-        <Meta property="og:image" content={imageUrl} />
+            <Meta property="og:type" content="website" />
+            <Meta property="og:title" content={pageTitle} />
+            <Meta property="og:description" content={pageDescription} />
+            <Meta property="og:url" content={pageUrl} />
+            <Meta property="og:site_name" content={SITE_NAME} />
+            <Meta property="og:image" content={imageUrl} />
 
-        <Meta name="twitter:card" content="summary_large_image" />
-        <Meta name="twitter:title" content={pageTitle} />
-        <Meta name="twitter:description" content={pageDescription} />
-        <Meta name="twitter:image" content={imageUrl} />
+            <Meta name="twitter:card" content="summary_large_image" />
+            <Meta name="twitter:title" content={pageTitle} />
+            <Meta name="twitter:description" content={pageDescription} />
+            <Meta name="twitter:image" content={imageUrl} />
 
-        <JsonLd
-            extraNodes={[{
-                '@type': ['WebPage', 'Product', 'SoftwareApplication'],
-                '@id': `${pageUrl}#webpage`,
-                name: 'destamatic-ui Demo',
-                url: pageUrl,
-                description: pageDescription,
-                inLanguage: 'en-CA',
-                isPartOf: {
-                    '@id': WEBSITE_ID,
-                },
-                about: {
-                    '@id': AUTHOR_ID,
-                },
-                applicationCategory: 'WebApplication',
-                operatingSystem: 'Any',
-            }]}
-        />
-
-        <div theme="row">
-            <Button
-                type="outlined"
-                label="Back"
-                onClick={() => s.open({ name: 'landing' })}
-                href="/"
+            <JsonLd
+                extraNodes={[{
+                    '@type': ['WebPage', 'Product', 'SoftwareApplication'],
+                    '@id': `${pageUrl}#webpage`,
+                    name: 'destamatic-ui Demo',
+                    url: pageUrl,
+                    description: pageDescription,
+                    inLanguage: 'en-CA',
+                    isPartOf: {
+                        '@id': WEBSITE_ID,
+                    },
+                    about: {
+                        '@id': AUTHOR_ID,
+                    },
+                    applicationCategory: 'WebApplication',
+                    operatingSystem: 'Any',
+                }]}
             />
-        </div>
 
-        <Paper theme='column_fill_center'>
-            <div theme='column_fill_center'>
+            <div theme="row">
                 <Button
-                    type='text'
-                    label={<Typography type='h1' label='destamatic-ui' style={{ color: 'inherit' }} />}
-                    icon={<Icon name='external-link' size={'clamp(1.75rem, 1.75vw + 0.875rem, 3rem)'} style={{ marginLeft: 5 }} />}
-                    iconPosition='right'
-                    href='https://github.com/torrinworx/destamatic-ui'
-                    onClick={() => window.open('https://github.com/torrinworx/destamatic-ui', '_blank')}
+                    type="outlined"
+                    label="Back"
+                    onClick={() => s.open({ name: 'landing' })}
+                    href="/"
                 />
-                <Typography type='p1' label='Snappy, light-weight, and comprehensive frontend framework.' />
-                <Typography type='p1' label='Less wiring, less boilerplate, fewer decisions, better performance.' />
+            </div>
 
-                {/* point to bench marks: https://krausest.github.io/js-framework-benchmark/current.html */}
-                {/* TODO: Create destamatic-ui landing page, explain destam, show side by side difference between destamatic-ui and react.
+            <Paper theme='column_fill_center'>
+                <div theme='column_fill_center'>
+                    <Button
+                        type='text'
+                        label={<Typography type='h1' label='destamatic-ui' style={{ color: 'inherit' }} />}
+                        icon={<Icon name='external-link' size={'clamp(1.75rem, 1.75vw + 0.875rem, 3rem)'} style={{ marginLeft: 5 }} />}
+                        iconPosition='right'
+                        href='https://github.com/torrinworx/destamatic-ui'
+                        onClick={() => window.open('https://github.com/torrinworx/destamatic-ui', '_blank')}
+                    />
+                    <Typography type='p1' label='Snappy, light-weight, and comprehensive frontend framework.' />
+                    <Typography type='p1' label='Less wiring, less boilerplate, fewer decisions, better performance.' />
+
+                    {/* point to bench marks: https://krausest.github.io/js-framework-benchmark/current.html */}
+                    {/* TODO: Create destamatic-ui landing page, explain destam, show side by side difference between destamatic-ui and react.
                     landing page needs to be highly marketable.
                     TODO: Fix header tag issues not rendering and being indexed for some reason on direct entry
                     TODO: Look into some kind of live playground setup. vite in the browser? Or maybe just a js library that can do that so we don't spend to much time on that
@@ -155,14 +158,16 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
 
                     destamatic-ui is for: Indie devs and small teams who are tired of wiring React + Next + 6 other libraries
                 */}
-            </div>
-            <Paper theme='row_tight' style={{ padding: 10 }}>
-                <Category each={categories} />
+                </div>
+                <Paper theme='row_tight' style={{ padding: 10 }}>
+                    <Category each={categories} />
+                </Paper>
             </Paper>
-        </Paper>
 
-        <Examples each={focused.map(f => examples.filter(ex => ex.category === f && !ex.disabled))} />
+            <Examples each={focused.map(f => examples.filter(ex => ex.category === f && !ex.disabled))} />
+        </Head>
+
     </>;
 }));
 
-export default Demo;
+export default DestamaticUI;
