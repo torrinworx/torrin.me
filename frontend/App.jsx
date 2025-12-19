@@ -5,13 +5,13 @@ import {
 } from 'destamatic-ui';
 
 import Blog from './pages/Blog';
-import Demo from './pages/Demo';
 import theme from './utils/theme';
+import JsonLd from './utils/JsonLd';
 import Landing from './pages/Landing';
 import Controls from './utils/Controls';
 import NotFound from './pages/NotFound';
 import Collision from './utils/Collision';
-import JsonLd from './utils/JsonLd';
+import DestamaticUI from './pages/destamatic-ui/destamatic-ui';
 
 const enabled = Observer.mutable(true);
 const pages = {
@@ -19,7 +19,7 @@ const pages = {
 		landing: Landing,
 		blog: Blog,
 		fallback: NotFound,
-		'destamatic-ui-demo': Demo,
+		'destamatic-ui': DestamaticUI,
 	},
 	template: ({ children }) => children,
 	ssg: true,
@@ -37,7 +37,7 @@ const HeadTags = () => {
 	const imageUrl = `${siteUrl}/site-card.png`;
 
 	return <>
-		<Title text={pageTitle} group="title" />
+		<Title text={pageTitle} />
 
 		<Meta name="description" content={description} />
 		<Meta name="author" content="Torrin Leonard" />
