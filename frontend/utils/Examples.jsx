@@ -33,12 +33,6 @@ import {
 	Icons,
 } from 'destamatic-ui';
 
-import IconifyIcons from "destamatic-ui/components/icons/IconifyIcons/IconifyIcons";
-
-// import TypographyExample from "destamatic-ui/components/display/Typography/typography.example.jsx?raw";
-// import ButtonExample from "destamatic-ui/components/inputs/Button/button.example.jsx?raw";
-// import CheckboxExample from 'destamatic-ui/components/inputs/Checkbox/checkbox.example.jsx?raw';
-// import ThemeExample from 'destamatic-ui/components/utils/Theme/theme.example.jsx?raw';
 
 const examples = [
 	{
