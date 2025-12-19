@@ -137,11 +137,11 @@ const App = () => <Head>
 							<div theme='center_clear' >
 								<Typography type='p2'> © Torrin Leonard {new Date().getFullYear()} 🇨🇦</Typography>
 							</div>
-							<Popup />
 						</div>
 					</StageContext>
 				</Gradient>
 				<Controls />
+				<Popup />
 			</PopupContext>
 		</Icons>
 	</Theme>
