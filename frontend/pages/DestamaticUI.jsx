@@ -10,6 +10,8 @@ import {
     Meta,
     Link,
     Head,
+    Stage,
+    Default,
 } from 'destamatic-ui';
 
 import JsonLd, {
@@ -18,18 +20,9 @@ import JsonLd, {
     AUTHOR_NAME,
     AUTHOR_ID,
     WEBSITE_ID,
-} from '../../utils/JsonLd';
-import theme from '../../utils/theme';
-import examples from '../../utils/Examples';
-import Playground from '../../utils/playground/Playground';
-
-/*
-       <div theme='divider' style={{ margin: '10px 15px 10px 15px' }} />
-       <div theme='column' style={{ padding: '10px 15px 10px 15px' }}>
-            <Typography type='h6' label='Playground:' />
-            <Playground code={each.code} rootTheme={theme} />
-        </div>
-*/
+} from '../utils/JsonLd';
+import examples from '../utils/Examples';
+import Playground from './Playground';
 
 const Hero = () => (
     <Paper
@@ -117,7 +110,7 @@ const Hero = () => (
 );
 
 const DestamaticUI = ThemeContext.use(h => StageContext.use(s => () => {
-    s.props.enabled.set(false);
+    s.parent.props.enabled.set(false);
 
     const Examples = ({ each }) => <Paper theme='column_fill_center' style={{ gap: 20 }}>
         <div theme='column_fill_start'>
@@ -217,7 +210,25 @@ const DestamaticUI = ThemeContext.use(h => StageContext.use(s => () => {
     </>;
 }));
 
-export default DestamaticUI;
+
+const Something = () => {
+    const config = {
+        acts: {
+            landing: DestamaticUI,
+            playground: Playground,
+        },
+        initial: 'landing',
+        template: Default,
+        ssg: true,
+    };
+
+
+    return <StageContext value={config}>
+        <Stage />
+    </StageContext>
+}
+
+export default Something;
 
 
 {/* point to bench marks: https://krausest.github.io/js-framework-benchmark/current.html */ }

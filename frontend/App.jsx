@@ -11,7 +11,7 @@ import Landing from './pages/Landing';
 import Controls from './utils/Controls';
 import NotFound from './pages/NotFound';
 import Collision from './utils/Collision';
-import DestamaticUI from './pages/destamatic-ui/destamatic-ui';
+import DestamaticUI from './pages/DestamaticUI';
 
 const enabled = Observer.mutable(true);
 const pages = {

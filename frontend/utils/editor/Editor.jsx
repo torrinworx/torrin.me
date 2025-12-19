@@ -418,7 +418,22 @@ const rewriteImports = (src) => {
 	return out.join('\n');
 };
 
-export const Playground = ThemeContext.use((h) => ({ code, ...props }, cleanup, mounted) => {
+const rewriteExports = (src) => {
+	let s = String(src || '');
+
+	// `export default <JSX />;` or `export default expr;`
+	// Turn into: `__runtime.exports.default = <JSX />;`
+	s = s.replace(/^\s*export\s+default\s+/m, '__runtime.exports.default = ');
+
+	// (optional) handle `export { foo as default }`
+	s = s.replace(/^\s*export\s*\{\s*([A-Za-z_$][\w$]*)\s+as\s+default\s*\}\s*;?\s*$/m,
+		'__runtime.exports.default = $1;'
+	);
+
+	return s;
+};
+
+export const Editor = ThemeContext.use(h => ({ code, libs = {}, ...props }, cleanup, mounted) => {
 	if (is_node()) return null;
 
 	if (!(code instanceof Observer)) code = Observer.mutable(code);
@@ -448,7 +463,7 @@ export const Playground = ThemeContext.use((h) => ({ code, ...props }, cleanup, 
 			if (root && root.elem_) root = root.elem_;
 
 			if (!root.insertBefore || !root.replaceChild || !root.removeChild) {
-				throw new Error('Playground root is not a mountable DOM node');
+				throw new Error('Editor root is not a mountable DOM node');
 			}
 
 			// ensure there's always an active host attached (so preview isn't blank on errors)
@@ -479,7 +494,7 @@ export const Playground = ThemeContext.use((h) => ({ code, ...props }, cleanup, 
 			};
 			const runtimeRequire = (name) => {
 				const mod = modules[name];
-				if (!mod) throw new Error(`Playground: unknown module "${name}"`);
+				if (!mod) throw new Error(`Editor: unknown module "${name}"`);
 				return mod;
 			};
 
@@ -489,13 +504,13 @@ const { h, root, require, ${Object.keys(props).join(", ")} } = __runtime;
 `;
 
 			const userSrc = String(code.get() || '');
-			const rewritten = rewriteImports(userSrc);
+			const rewritten = rewriteExports(rewriteImports(userSrc));
 			const source = runtimeHeader + '\n' + rewritten;
 			// compile step first — if this throws, do NOT touch the active preview
 			let compiled;
 			try {
 				({ code: compiled } = compileHTMLLiteral(source, {
-					sourceFileName: 'Playground.jsx',
+					sourceFileName: 'Editor.jsx',
 					plugins: ['jsx'],
 				}));
 			} catch (e) {
@@ -505,16 +520,17 @@ const { h, root, require, ${Object.keys(props).join(", ")} } = __runtime;
 				killAll(stagingDestroys);
 				return;
 			}
-
+			const exportsBag = {};
 			const fn = new Function('__runtime', compiled);
 
 			// runtime execute — only commit to preview if this run fully succeeds
 			try {
 				fn({
-					h: hRaw,
+					h: libs.h ?? hRaw,
 					root: stagingHost,
 					mount: runtimeMount,
 					require: runtimeRequire,
+					exports: exportsBag,
 					...props,
 				});
 			} catch (e) {
@@ -528,6 +544,11 @@ const { h, root, require, ${Object.keys(props).join(", ")} } = __runtime;
 			error.set('');
 			killAll(activeDestroys);
 
+			if (exportsBag.default != null) {
+				// Clear whatever the script may have appended, then mount the export.
+				stagingHost.innerHTML = '';
+				runtimeMount(stagingHost, exportsBag.default);
+			}
 			// Replace active host element in DOM
 			if (activeHost && activeHost.isConnected) {
 				activeHost.replaceWith(stagingHost);
@@ -627,4 +648,4 @@ const { h, root, require, ${Object.keys(props).join(", ")} } = __runtime;
 	</div>;
 });
 
-export default Playground;
+export default Editor;
