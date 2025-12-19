@@ -597,9 +597,11 @@ const { h, root, require, ${Object.keys(props).join(", ")} } = __runtime;
 		}
 	}));
 
+	// TODO: make rendered output appear in an iframe so that it doesn't interact with the rest of the app.
+	// TODO: allow for pure js running and in preview just show the console output without any dom rendering
 	return <div theme="column_fill" style={{ gap: 12, padding: 12 }}>
 		<div theme="row_fill" style={{ gap: 10, ualignItems: 'stretch' }}>
-			<div theme='column' style={{ gap: 10, flex: 2, minWidth: 320 }}>
+			<div theme='column' style={{ gap: 10, flex: 1, minWidth: 320 }}>
 				<div theme="row_spread" style={{ gap: 10, padding: 10 }}>
 					<Typography type="p2" label="Code" />
 
