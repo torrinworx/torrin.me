@@ -3,11 +3,12 @@ import { Observer } from 'destam';
 import * as destamDom from 'destam-dom';
 import { mount as domMount } from 'destam-dom';
 
+import { h as hRaw } from 'destamatic-ui';
+import { h as domH } from 'destam-dom';
+
 import compileHTMLLiteral from './htmlLiteral';
 
 import {
-	h as hRaw,
-	Paper,
 	Typography,
 	Button,
 	Shown,
@@ -433,7 +434,7 @@ const rewriteExports = (src) => {
 	return s;
 };
 
-export const Editor = ThemeContext.use(h => ({ code, libs = {}, ...props }, cleanup, mounted) => {
+export const Editor = ThemeContext.use(h => ({ code, h: hSelector = 'destam-dom', ...props }, cleanup, mounted) => {
 	if (is_node()) return null;
 
 	if (!(code instanceof Observer)) code = Observer.mutable(code);
@@ -487,10 +488,16 @@ export const Editor = ThemeContext.use(h => ({ code, libs = {}, ...props }, clea
 
 			// modules map for import-mimicking
 			const modules = {
-				'destamatic-ui': destamaticUI,
+				'destamatic-ui': { ...destamaticUI, h: hRaw },
 				'destamatic-ui/components/icons/IconifyIcons/IconifyIcons': IconifyIcons,
-				'destam-dom': { ...destamDom, mount: runtimeMount },
+
+				'destam-dom': { ...destamDom, mount: runtimeMount, h: domH },
+
 				'destam': destamCore,
+				'destam/Object': destamCore.OObject,
+				'destam/Array': destamCore.OArray,
+				'destam/Network': { ...destamCore.Network },
+				'destam/Observer': destamCore.Observer,
 			};
 			const runtimeRequire = (name) => {
 				const mod = modules[name];
@@ -498,10 +505,19 @@ export const Editor = ThemeContext.use(h => ({ code, libs = {}, ...props }, clea
 				return mod;
 			};
 
-			const runtimeHeader = `
-"use strict";
-const { h, root, require, ${Object.keys(props).join(", ")} } = __runtime;
-`;
+			const runtimeH =
+				hSelector === 'destam-dom' ? domH
+					: hSelector === 'destamatic-ui' ? hRaw
+						: null;
+
+			const propKeys = Object.keys(props);
+			const headerParts = [
+				`"use strict";`,
+				hSelector === null
+					? `const { root, require, ${propKeys.join(", ")} } = __runtime;`
+					: `const { h, root, require, ${propKeys.join(", ")} } = __runtime;`
+			];
+			const runtimeHeader = headerParts.join("\n") + "\n";
 
 			const userSrc = String(code.get() || '');
 			const rewritten = rewriteExports(rewriteImports(userSrc));
@@ -525,14 +541,17 @@ const { h, root, require, ${Object.keys(props).join(", ")} } = __runtime;
 
 			// runtime execute — only commit to preview if this run fully succeeds
 			try {
-				fn({
-					h: libs.h ?? hRaw,
+				const runtimeObj = {
 					root: stagingHost,
 					mount: runtimeMount,
 					require: runtimeRequire,
 					exports: exportsBag,
 					...props,
-				});
+				};
+
+				if (hSelector !== null) runtimeObj.h = runtimeH;
+
+				fn(runtimeObj);
 			} catch (e) {
 				console.error(e);
 				error.set(String(e?.stack || e?.message || e));
@@ -598,7 +617,7 @@ const { h, root, require, ${Object.keys(props).join(", ")} } = __runtime;
 	}));
 
 	// TODO: make rendered output appear in an iframe so that it doesn't interact with the rest of the app.
-	// TODO: allow for pure js running and in preview just show the console output without any dom rendering
+	// TODO: allow for pure js running and in preview just show the console output without any dom rendering 
 	return <div theme="column_fill" style={{ gap: 12, padding: 12 }}>
 		<div theme="row_fill" style={{ gap: 10, ualignItems: 'stretch' }}>
 			<div theme='column' style={{ gap: 10, flex: 1, minWidth: 320 }}>
@@ -623,7 +642,7 @@ const { h, root, require, ${Object.keys(props).join(", ")} } = __runtime;
 
 				<Theme value={RichAreaTheme}>
 					<TextModifiers value={modifiers}>
-						<RichArea value={code} type="p1" style={{ height: 500 }} maxHeight={500} />
+						<RichArea value={code} type="p1" style={{ height: 1000 }} maxHeight={1000} />
 					</TextModifiers>
 				</Theme>
 			</div>
@@ -636,9 +655,12 @@ const { h, root, require, ${Object.keys(props).join(", ")} } = __runtime;
 					theme='radius_field'
 					ref={rootRef}
 					style={{
-						height: 500,
-						minHeight: 500,
+						height: 1000,
+						minHeight: 1000,
 						background: 'none',
+						position: 'relative',
+						width: '100%',
+						overflow: 'auto',
 					}}
 				/>
 			</div>

@@ -9,11 +9,8 @@ import {
 	Icon,
 	Stage,
 	Select,
-	Default
+	Default,
 } from 'destamatic-ui';
-import { h as domH } from 'destam-dom';
-
-import theme from '../utils/theme';
 import Editor from './editor/Editor';
 
 const destamaticUiExamples = import.meta.glob(
@@ -21,7 +18,7 @@ const destamaticUiExamples = import.meta.glob(
 	{ as: 'raw', eager: true }
 );
 
-const fetchDestamDomExamples = async ({
+const fetchDestamDomExamples = async ({ // TODO filter out index.jsx file from being included
 	owner = "Nefsen402",
 	repo = "destam-dom",
 	branch = "main",
@@ -97,58 +94,97 @@ This is not the documentation for the stack, this is simply a page built to disp
 
 Documentation will be built out on another page, that documentation may have playground style examples within it,
 but the primary purposes between /playground and /docs is distinct.
-
-
 */
+
 const Playground = StageContext.use(s => () => {
 	s.parent.props.enabled.set(false);
 
 	const libs = ['destamatic-ui', 'destam-dom', 'destam'];
-	const Libraris = ({ each }) => <Button
-		label={each}
-		focused={focused.map(f => f === each)}
-		onClick={() => focused.set(each)}
-	/>
 	const focused = Observer.mutable('destamatic-ui');
 
-	const config = {
+	const libraryConfig = {
 		acts: {},
-		initial: 'destamatic-ui-button.example',
+		initial: 'destamatic-ui',
 		template: Default,
 		ssg: true
 	};
 
-	const options = Observer.mutable({});
-
 	const Loader = StageContext.use(stage => suspend(LoadingDots, async () => {
-		console.log(stage.current);
 		const examples = {
 			...normalize('destamatic-ui', destamaticUiExamples),
 			...normalize('destam-dom', await fetchDestamDomExamples()),
 			// ...normalizeToDict('destam', destamExamples),
 		};
+
+		const options = Observer.mutable({});
+
 		options.set(examples);
 
-		{/* TODO: Convert this into a function that each act returns in the acts object as the value */ }
-		{/* TODO: Pass in h for destam-dom examples, set h to null for destam only examples, only load js, need to confirm if Editor can do that.
-		Maybe in Editor, if h is set to null by the user, we show the console logs and output from the compnent in the preview instead of rendered
-		code.
-		*/}
-		{/* <Editor code={destamDomTest} libs={{ h: domH }} /> */ }
-		const exampleActs = Object.entries(examples).reduce(
-			(acc, [key, value]) => {
-				acc[key] = StageContext.use(stage => () => <Editor
-					code={stage.observer.path('current').map(s => Observer.mutable(examples[s].code)).unwrap()} />);
-				return acc;
-			},
-			{}
-		);
-		stage.acts = exampleActs;
+		const currentOptions = Observer.all([focused, options]).map(([foc, opt]) => {
+			const selected = Object.entries(opt)
+				.filter(([key, value]) => value.library === foc)
+				.map(([key, value]) => value.name);
+
+			return selected;
+		});
+
+		const libActs = libs.reduce((acc, lib) => {
+			acc[lib] = StageContext.use(libStage => () => {
+				const exActs = Object.fromEntries(
+					Object.entries(examples).filter(([key, value]) => value.library === lib)
+				)
+
+				// why is something not a key value object with keys being the value.name and value being the () => <Editor...? 
+				const exampleActs = Object.entries(exActs).reduce((exAcc, [key, value]) => {
+					console.log(lib)
+					// I hate this:
+					const hSelector = lib === 'destam' ? null : lib === 'destam-dom' ? 'destam-dom' : lib === 'destamatic-ui' ? 'destamatic-ui' : undefined
+					exAcc[value.name] = () => {
+						return <Editor
+							code={Observer.mutable(value.code)}
+							h={hSelector}
+						/>
+					};
+					return exAcc;
+				}, {});
+
+				const exampleConfig = {
+					acts: exampleActs,
+					initial: Object.keys(exampleActs)[0],
+					template: Default,
+					ssg: true,
+				};
+
+				return <StageContext value={exampleConfig}>
+					<div theme='row' style={{ gap: 10 }}>
+						<Typography type='p1' label='Example:  ' />
+						<Select
+							type='outlined'
+							options={currentOptions}
+							value={libStage.observer.path('current')}
+							style={{ width: 200 }}
+						/>
+					</div>
+					<Stage />
+				</StageContext>
+			});
+
+			return acc;
+		}, {});
+
+		stage.acts = libActs;
+
+
 		return <Stage />
 	}));
 
 	const Hero = StageContext.use(stage => () => {
-		console.log("THIS IS STAGE: ", stage.current);
+		const Libraris = ({ each }) => <Button
+			label={each}
+			focused={stage.observer.path('current').map(c => c === each)}
+			onClick={() => stage.open({ name: each })}
+		/>;
+
 		return <>
 			<Paper theme='column_fill_center' style={{ background: 'none' }}>
 				<div theme="column_fill_center" style={{ gap: 12 }}>
@@ -195,21 +231,15 @@ const Playground = StageContext.use(s => () => {
 				<Paper theme='row_tight' style={{ padding: 5 }}>
 					<Libraris each={libs} />
 				</Paper>
-				<div theme='row' style={{ gap: 10 }}>
-					<Typography type='p1' label='Example:  ' />
-					<Select
-						type='outlined'
-						options={options.map(o => Object.keys(o))}
-						value={stage.observer.path('current')}
-						style={{ width: 200 }}
-					/>
-				</div>
 			</div>
 			<Loader />
 		</>
 	});
 
-	return <StageContext value={config}>
+	// TODO: Filter Select examples to only include ones from the current focused library
+	// TODO: Pass in h: domH to editor for destam-dom examples, and h: null for just destam examples
+
+	return <StageContext value={libraryConfig}>
 		<Hero />
 	</StageContext>;
 });
