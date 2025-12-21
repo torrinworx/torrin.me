@@ -217,12 +217,13 @@ const DestamaticUI = () => {
         initial: 'landing',
         template: Default,
         ssg: true,
+        truncateInitial: true,
     };
 
     return <StageContext value={config}>
         <Stage />
-    </StageContext>
-}
+    </StageContext>;
+};
 
 export default DestamaticUI;
 
