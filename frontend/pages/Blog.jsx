@@ -251,6 +251,7 @@ const Blog = () => {
 		initial: 'blog',
 		template: Default,
 		ssg: true,
+		truncateInitial: true,
 	};
 
 	const BlogLoader = StageContext.use(s =>
