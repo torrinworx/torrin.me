@@ -87,6 +87,7 @@ export default defineConfig({
 		global: 'globalThis',
 	},
 	server: {
+		host: true,
 		port: process.env.PORT || 3000,
 	},
 	optimizeDeps: {
