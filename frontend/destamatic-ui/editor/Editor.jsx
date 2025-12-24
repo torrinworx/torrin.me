@@ -587,7 +587,7 @@ export const Editor = ThemeContext.use(h => ({ code, h: hSelector = 'destam-dom'
 
 	const RichAreaTheme = {
 		field: {
-			extends: 'radius_typography_p1_regular_focusable',
+			extends: 'radius_typography_p1_regular',
 			outline: 0,
 			padding: 10,
 			background: '$contrast_text($color_top)',
