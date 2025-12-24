@@ -58,7 +58,6 @@ const themeModes = {
 		$color_main: '$color',
 		$color_text: '$contrast_text($color)',
 		$color_top: '$contrast_text($color)',
-		$color_hover_top: '$color_white',
 		$color_grad_tr: '$color_white',
 		$color_grad_bl: '$color',
 	},
@@ -67,7 +66,6 @@ const themeModes = {
 		$color_main: '$color',
 		$color_text: '$contrast_text($color)',
 		$color_top: '$contrast_text($color)',
-		$color_hover_top: '$color_white',
 		$color_grad_tr: '$color_black',
 		$color_grad_bl: '$color',
 	}
@@ -98,6 +96,11 @@ const theme = OObject({
 		fontSize: '100%',
 		boxSizing: 'border-box',
 		transition: `opacity ${transition}, box-shadow ${transition}, background-color ${transition}, color ${transition}, border-color ${transition}, stroke ${transition}, fill ${transition}`,
+
+		/*
+		Adjusts the brightness of the input colour by shifting its value in the HSV colour space. Accepts colours
+		in hexadecimal, RGB, or HSV.
+		*/
 		$shiftBrightness: transformHSV((h, s, v, amount) => {
 			if (v > 0.5) {
 				v -= amount;
@@ -372,20 +375,12 @@ const theme = OObject({
 		color: '$color_hover'
 	},
 
-	focusable: {
-		borderStyle: 'solid',
-		borderWidth: 2,
-		borderColor: '$color_top',
-		transitionDuration: '0.3s',
-		transitionProperty: 'border-color, background-color, box-shadow',
-	},
-
 	focused: {
 		boxShadow: '$color_hover 0 0 0 0.2rem',
 	},
 
 	field: {
-		extends: 'radius_typography_p1_regular_focusable',
+		extends: 'radius_typography_p1_regular',
 		outline: 0,
 		padding: 10,
 		background: '$color_main',
