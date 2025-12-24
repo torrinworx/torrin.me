@@ -219,18 +219,14 @@ const Playground = StageContext.use(s => () => {
 						<Libraries each={libs} />
 					</Paper>
 				</div>
-
-				{/* KEY FIX: Stage always exists */}
 				<Stage />
 			</>
 		);
 	});
 
-	return (
-		<StageContext value={libraryConfig}>
+	return <StageContext value={libraryConfig}>
 			<Hero />
-		</StageContext>
-	);
+		</StageContext>;
 });
 
 export default Playground;
