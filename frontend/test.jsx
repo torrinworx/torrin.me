@@ -50,6 +50,7 @@ doneCheck.watch(() => {
 
 const disable_buttons = Observer.mutable(false);
 const disable_textfields = Observer.mutable(false);
+const disable_toggles = Observer.mutable(false);
 
 const test = () => <Theme value={theme}>
 	<Icons value={[IconifyIcons]} >
@@ -567,7 +568,7 @@ body {
 				iconClose={<Icon name="feather:chevron-down" />}
 			>
 				<div theme='row_fill_center' style={{ margin: 10 }}>
-					<Typography type='p1' label='Disable Buttons: ' />
+					<Typography type='p1' label='Disable TextFields: ' />
 					<Toggle value={disable_textfields} />
 				</div>
 
@@ -600,6 +601,23 @@ body {
 						value={Observer.mutable('')}
 					/>
 				</div>
+			</DropDown>
+
+			<DropDown
+				open
+				label={<Typography type='p1' label='Toggle' />}
+				iconOpen={<Icon name="feather:chevron-up" />}
+				iconClose={<Icon name="feather:chevron-down" />}
+			>
+				<div theme='row_fill_center' style={{ margin: 10 }}>
+					<Typography type='p1' label='Disable Buttons: ' />
+					<Toggle value={disable_toggles} />
+				</div>
+
+				<Typography type='h2' label='Contained' />
+				<div theme='row_center_wrap'></div>
+				<Toggle type='contained' value={Observer.mutable(false)} disabled={disable_toggles} />
+				<Toggle type='outlined' value={Observer.mutable(false)} disabled={disable_toggles} />
 			</DropDown>
 		</Head>
 	</Icons>
