@@ -1,4 +1,4 @@
-import { Typography, Head, Theme, Style, Button, TextField, Observer, DropDown, Icons, Icon, Toggle, Slider } from 'destamatic-ui';
+import { Typography, Head, Theme, Style, Button, TextField, Observer, DropDown, Icons, Icon, Toggle, Slider, TextArea, Shown } from 'destamatic-ui';
 
 import IconifyIcons from "destamatic-ui/components/icons/IconifyIcons/IconifyIcons";
 
@@ -50,6 +50,8 @@ doneCheck.watch(() => {
 
 const disable_buttons = Observer.mutable(false);
 const disable_textfields = Observer.mutable(false);
+const expand_textfields = Observer.mutable(false);
+
 const disable_toggles = Observer.mutable(false);
 
 const disable_slider = Observer.mutable(false);
@@ -63,6 +65,32 @@ const step_value = Observer.mutable(1); // user types: 1, 5, 10, etc.
 const slider_step = step_value.map(s => {
 	const n = parseFloat(s);
 	return Number.isFinite(n) && n > 0 ? n : 1;
+});
+
+const disable_textarea = Observer.mutable(false);
+const expand_textarea = Observer.mutable(false);
+
+const ta_value = Observer.mutable(
+	`TextArea demo...
+
+- controlled via Observer
+- disable toggle
+- expand toggle
+- auto-expands with optional maxHeight`
+);
+
+// Toggle between mutable vs immutable behavior
+const ta_readonly = Observer.mutable(false);
+
+// Derived immutable view that always mirrors ta_value,
+// but is immutable from TextArea's perspective
+const ta_value_readonly = ta_value.map(v => v);
+
+// Text input for maxHeight (similar pattern to slider_step)
+const ta_maxHeight_value = Observer.mutable(160);
+const ta_maxHeight = ta_maxHeight_value.map(s => {
+	const n = parseFloat(s);
+	return Number.isFinite(n) && n > 0 ? n : null;
 });
 
 const test = () => <Theme value={theme}>
@@ -574,9 +602,11 @@ body {
 				iconOpen={<Icon name="feather:chevron-up" />}
 				iconClose={<Icon name="feather:chevron-down" />}
 			>
-				<div theme='row_fill_center' style={{ margin: 10 }}>
-					<Typography type='p1' label='Disable TextFields: ' />
+				<div theme='row_fill_center_wrap'>
+					<Typography type='p1' label='Disable: ' />
 					<Toggle value={disable_textfields} />
+					<Typography type='p1' label='Expand: ' />
+					<Toggle value={expand_textfields} />
 				</div>
 
 				<Typography type='h2' label='Contained' />
@@ -586,12 +616,14 @@ body {
 						disabled={disable_textfields}
 						placeholder='textfield'
 						value={Observer.mutable('')}
+						expand={expand_textfields}
 					/>
 				</div>
 
 				<Typography type='h2' label='outlined' />
 				<div theme='row_center_wrap'>
 					<TextField
+						expand={expand_textfields}
 						type='outlined'
 						disabled={disable_textfields}
 						placeholder='textfield'
@@ -602,6 +634,7 @@ body {
 				<Typography type='h2' label='text' />
 				<div theme='row_center_wrap'>
 					<TextField
+						expand={expand_textfields}
 						type='text'
 						disabled={disable_textfields}
 						placeholder='textfield'
@@ -614,7 +647,7 @@ body {
 				iconOpen={<Icon name="feather:chevron-up" />}
 				iconClose={<Icon name="feather:chevron-down" />}
 			>
-				<div theme='row_fill_center' style={{ margin: 10 }}>
+				<div theme='row_fill_center_wrap'>
 					<Typography type='p1' label='Disable Toggles: ' />
 					<Toggle value={disable_toggles} />
 				</div>
@@ -635,7 +668,7 @@ body {
 				iconOpen={<Icon name="feather:chevron-up" />}
 				iconClose={<Icon name="feather:chevron-down" />}
 			>
-				<div theme='row_fill_center' style={{ margin: 10, gap: 20, flexWrap: 'wrap' }}>
+				<div theme='row_fill_center_wrap'>
 					<div theme='row_center_wrap' style={{ gap: 8 }}>
 						<Typography type='p1' label='Disabled:' />
 						<Toggle value={disable_slider} />
@@ -705,6 +738,162 @@ body {
 						min={Observer.immutable(0)}
 						max={Observer.immutable(100)}
 					/>
+				</div>
+			</DropDown>
+			<DropDown
+				label={<Typography type='p1' label='TextArea' />}
+				iconOpen={<Icon name="feather:chevron-up" />}
+				iconClose={<Icon name="feather:chevron-down" />}
+			>
+				<div
+					theme='row_fill_center'
+					style={{ margin: 10, gap: 20, flexWrap: 'wrap' }}
+				>
+					<div theme='row_center_wrap' style={{ gap: 8 }}>
+						<Typography type='p1' label='Disabled:' />
+						<Toggle value={disable_textarea} />
+					</div>
+
+					<div theme='row_center_wrap' style={{ gap: 8 }}>
+						<Typography type='p1' label='Expand:' />
+						<Toggle value={expand_textarea} />
+					</div>
+
+					<div theme='row_center_wrap' style={{ gap: 8 }}>
+						<Typography type='p1' label='Immutable:' />
+						<Toggle value={ta_readonly} />
+					</div>
+
+					<div theme='row_center_wrap' style={{ gap: 8 }}>
+						<Typography type='p1' label='maxHeight (px):' />
+						<TextField
+							type='outlined'
+							value={ta_maxHeight_value}
+							disabled={disable_textarea}
+							placeholder='auto'
+							style={{ width: 100 }}
+							inputMode='numeric'
+						/>
+						<Typography
+							type='p1'
+							label={ta_maxHeight.map(h =>
+								h ? `→ ${h}px` : '→ auto'
+							)}
+						/>
+					</div>
+
+					<div theme='row_center_wrap' style={{ gap: 8 }}>
+						<Button
+							type='text'
+							disabled={disable_textarea}
+							label='Clear'
+							onClick={() => ta_value.set('')}
+						/>
+						<Button
+							type='text'
+							disabled={disable_textarea}
+							label='Fill'
+							onClick={() =>
+								ta_value.set(
+									`Here's some content.
+
+You can:
+- type normally
+- paste big blocks
+- auto-expand until maxHeight
+- use expand to fill layout`
+								)
+							}
+						/>
+					</div>
+				</div>
+
+				<Typography
+					type='p1'
+					label={Observer.all([ta_value, ta_maxHeight]).map(([v, h]) => {
+						const text = String(v || '');
+						const lines = text.split('\n').length;
+						return `Length: ${text.length} chars · Lines: ${lines} · maxHeight: ${h ? h + 'px' : 'auto'}`;
+					})}
+				/>
+
+				{/* 1. Contained */}
+				<Typography type='h2' label='Contained' />
+				<div theme='row_fill_center' style={{ width: '100%' }}>
+					{/* Mutable view */}
+					<Shown value={ta_readonly.map(r => !r)}>
+						<TextArea
+							type='contained'
+							value={ta_value}
+							disabled={disable_textarea}
+							expand={expand_textarea}
+							maxHeight={ta_maxHeight}
+							placeholder='Type here...'
+						/>
+					</Shown>
+
+					{/* Immutable view (derived from same ta_value) */}
+					<Shown value={ta_readonly}>
+						<TextArea
+							type='contained'
+							value={ta_value_readonly}
+							disabled={disable_textarea}
+							expand={expand_textarea}
+							maxHeight={ta_maxHeight}
+							placeholder='Type here...'
+						/>
+					</Shown>
+				</div>
+
+				<Typography type='h2' label='Outlined (reactive maxHeight)' />
+				<div theme='row_fill_center' style={{ width: '100%' }}>
+					{/* Mutable */}
+					<Shown value={ta_readonly.map(r => !r)}>
+						<TextArea
+							type='outlined'
+							value={ta_value}
+							disabled={disable_textarea}
+							expand={expand_textarea}
+							maxHeight={ta_maxHeight}
+							placeholder='Type here...'
+						/>
+					</Shown>
+
+					<Shown value={ta_readonly}>
+						<TextArea
+							type='outlined'
+							value={ta_value_readonly}
+							disabled={disable_textarea}
+							expand={expand_textarea}
+							maxHeight={ta_maxHeight}
+							placeholder='Type here...'
+						/>
+					</Shown>
+				</div>
+
+				<Typography type='h2' label='Text' />
+				<div theme='row_fill_center' style={{ width: '100%' }}>
+					<Shown value={ta_readonly.map(r => !r)}>
+						<TextArea
+							type='text'
+							value={ta_value}
+							disabled={disable_textarea}
+							expand={expand_textarea}
+							maxHeight={ta_maxHeight}
+							placeholder='Type here...'
+						/>
+					</Shown>
+
+					<Shown value={ta_readonly}>
+						<TextArea
+							type='text'
+							value={ta_value_readonly}
+							disabled={disable_textarea}
+							expand={expand_textarea}
+							maxHeight={ta_maxHeight}
+							placeholder='Type here...'
+						/>
+					</Shown>
 				</div>
 			</DropDown>
 		</Head>
