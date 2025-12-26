@@ -1,4 +1,4 @@
-import { Typography, Head, Theme, Style, Button, TextField, Observer, DropDown, Icons, Icon, Toggle } from 'destamatic-ui';
+import { Typography, Head, Theme, Style, Button, TextField, Observer, DropDown, Icons, Icon, Toggle, Slider } from 'destamatic-ui';
 
 import IconifyIcons from "destamatic-ui/components/icons/IconifyIcons/IconifyIcons";
 
@@ -51,6 +51,19 @@ doneCheck.watch(() => {
 const disable_buttons = Observer.mutable(false);
 const disable_textfields = Observer.mutable(false);
 const disable_toggles = Observer.mutable(false);
+
+const disable_slider = Observer.mutable(false);
+const show_cover = Observer.mutable(true);
+const expand_slider = Observer.mutable(false);
+
+const hValue = Observer.mutable(50);
+const vValue = Observer.mutable(50);
+
+const step_value = Observer.mutable(1); // user types: 1, 5, 10, etc.
+const slider_step = step_value.map(s => {
+	const n = parseFloat(s);
+	return Number.isFinite(n) && n > 0 ? n : 1;
+});
 
 const test = () => <Theme value={theme}>
 	<Icons value={[IconifyIcons]} >
@@ -345,7 +358,6 @@ body {
 				</div>
 			</DropDown>
 			<DropDown
-				open
 				label={<Typography type='p1' label='Button' />}
 				iconOpen={<Icon name="feather:chevron-up" />}
 				iconClose={<Icon name="feather:chevron-down" />}
@@ -557,12 +569,7 @@ body {
 					/>
 				</div>
 			</DropDown>
-
-			{/* 
-			TODO: Add contained, outlined, text style textfields.
-			*/}
 			<DropDown
-				open
 				label={<Typography type='p1' label='TextField' />}
 				iconOpen={<Icon name="feather:chevron-up" />}
 				iconClose={<Icon name="feather:chevron-down" />}
@@ -602,22 +609,103 @@ body {
 					/>
 				</div>
 			</DropDown>
-
 			<DropDown
-				open
 				label={<Typography type='p1' label='Toggle' />}
 				iconOpen={<Icon name="feather:chevron-up" />}
 				iconClose={<Icon name="feather:chevron-down" />}
 			>
 				<div theme='row_fill_center' style={{ margin: 10 }}>
-					<Typography type='p1' label='Disable Buttons: ' />
+					<Typography type='p1' label='Disable Toggles: ' />
 					<Toggle value={disable_toggles} />
 				</div>
 
 				<Typography type='h2' label='Contained' />
-				<div theme='row_center_wrap'></div>
-				<Toggle type='contained' value={Observer.mutable(false)} disabled={disable_toggles} />
-				<Toggle type='outlined' value={Observer.mutable(false)} disabled={disable_toggles} />
+				<div theme='row_center_wrap'>
+					<Toggle type='contained' value={Observer.mutable(false)} disabled={disable_toggles} />
+				</div>
+
+				<Typography type='h2' label='Outlined' />
+				<div theme='row_center_wrap'>
+					<Toggle type='outlined' value={Observer.mutable(false)} disabled={disable_toggles} />
+				</div>
+			</DropDown>
+
+			<DropDown
+				label={<Typography type='p1' label='Slider' />}
+				iconOpen={<Icon name="feather:chevron-up" />}
+				iconClose={<Icon name="feather:chevron-down" />}
+			>
+				<div theme='row_fill_center' style={{ margin: 10, gap: 20, flexWrap: 'wrap' }}>
+					<div theme='row_center_wrap' style={{ gap: 8 }}>
+						<Typography type='p1' label='Disabled:' />
+						<Toggle value={disable_slider} />
+					</div>
+
+					<div theme='row_center_wrap' style={{ gap: 8 }}>
+						<Typography type='p1' label='Cover:' />
+						<Toggle value={show_cover} />
+					</div>
+
+					<div theme='row_center_wrap' style={{ gap: 8 }}>
+						<Typography type='p1' label='Expand:' />
+						<Toggle value={expand_slider} />
+					</div>
+
+					<div theme='row_center_wrap' style={{ gap: 8 }}>
+						<Typography type='p1' label='Steps:' />
+						<TextField
+							type='outlined'
+							value={step_value}
+							disabled={disable_slider}
+							placeholder='1'
+							style={{ width: 80 }}
+							inputMode='numeric'
+						/>
+						<Typography type='p1' label={slider_step.map(s => `step=${s}`)} />
+					</div>
+				</div>
+
+				<Typography
+					type='p1'
+					label={Observer.all([hValue, vValue]).map(([h, v]) =>
+						`Horizontal: ${Math.round(h)} | Vertical: ${Math.round(v)}`
+					)}
+				/>
+
+				<Typography type='h2' label='Horizontal' />
+				<div theme='row_fill_center' style={{ width: '100%' }}>
+					<Slider
+						type='horizontal'
+						disabled={disable_slider}
+						cover={show_cover}
+						expand={expand_slider}
+						value={hValue}
+						step={slider_step}
+						min={Observer.immutable(0)}
+						max={Observer.immutable(100)}
+					/>
+				</div>
+
+				<Typography type='h2' label='Vertical' />
+				<div
+					theme='row_center_wrap'
+					style={{
+						height: expand_slider.map(e => e ? 600 : null),
+						padding: 10,
+						boxSizing: 'border-box',
+					}}
+				>
+					<Slider
+						type='vertical'
+						disabled={disable_slider}
+						cover={show_cover}
+						expand={expand_slider}
+						value={vValue}
+						step={slider_step}
+						min={Observer.immutable(0)}
+						max={Observer.immutable(100)}
+					/>
+				</div>
 			</DropDown>
 		</Head>
 	</Icons>
