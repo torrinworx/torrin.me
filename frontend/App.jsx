@@ -1,39 +1,36 @@
-import {
-	Theme, Typography, Gradient, Icons, PopupContext,
-	StageContext, Stage, Shown, Popup, is_node, Head,
-	Title, Script, Style, Meta, Link, Observer,
-} from 'destamatic-ui';
+import { Typography, Button, Head, Title, Theme, Style, Icons, Icon, Stage, StageContext, Link, Meta, is_node, Script } from 'destamatic-ui';
+import IconifyIcons from "destamatic-ui/components/icons/IconifyIcons/IconifyIcons";
 
 import Blog from './pages/Blog';
-import theme from './utils/theme';
-import JsonLd from './utils/JsonLd';
-import Landing from './pages/Landing';
-import Controls from './utils/Controls';
-import NotFound from './pages/NotFound';
-import Collision from './utils/Collision';
-import DestamaticUI from './destamatic-ui/DestamaticUI';
+// import DestamaticUI from './destamatic-ui/DestamaticUI';
 
-const enabled = Observer.mutable(true);
-const pages = {
-	acts: {
-		landing: Landing,
-		blog: Blog,
-		fallback: NotFound,
-		'destamatic-ui': DestamaticUI,
-	},
-	template: ({ children }) => children,
-	ssg: true,
-	initial: 'landing',
-	urlRouting: true,
-	enabled,
-	fallback: 'fallback'
-};
+import fonts from './utils/fonts.js';
+import theme from './utils/theme.js';
+import JsonLd from './utils/JsonLd.jsx';
+import Landing from './pages/Landing.jsx';
+import NotFound from './pages/NotFound.jsx';
+
+/*
+Notes on theme and styles:
+
+JetBrains Mono is used for headers, and any text used in inputs like button labels.
+
+IBM Plex Sans is used for paragraph text.
+
+Purposefully chose only three typography styles for simplicity:
+h1: main hero style headers
+h2: sub headers/content headers to be used inside text content
+body: text body content
+
+This drastically reduces the multiplicity of font sizes around the site that need to be
+worried about.
+*/
 
 const HeadTags = () => {
 	const siteUrl = 'https://torrin.me';
-	const pageTitle = 'Torrin | Full-Stack Developer, Software Engineer';
+	const pageTitle = 'Torrin Leonard | Full-Stack Engineer';
 	const description =
-		'Full-stack developer with 8+ years of professional experience building production-grade web apps, AI-driven tools, and custom UI frameworks with a focus on performance, accessibility, and scalability.';
+		'Full-stack software engineer building AI-powered web apps, custom UI frameworks, and the infrastructure they run on.';
 	const imageUrl = `${siteUrl}/site-card.png`;
 
 	return <>
@@ -44,14 +41,14 @@ const HeadTags = () => {
 		<Meta name="robots" content="index, follow" />
 		<Meta name="geo.placename" content="Waterloo, Ontario, Canada" />
 		<Meta name="geo.region" content="CA-ON" />
-		<Meta name="theme-color" content="#000000" />
+		<Meta name="theme-color" content="#ffffff" />
 
 		<Meta property="og:title" content={pageTitle} />
 		<Meta property="og:description" content={description} />
 		<Meta property="og:type" content="website" />
 		<Meta property="og:url" content={siteUrl} />
 		<Meta property="og:image" content={imageUrl} />
-		<Meta property="og:site_name" content="Torrin's Portfolio" />
+		<Meta property="og:site_name" content="Torrin Leonard" />
 		<Meta property="og:locale" content="en_CA" />
 
 		<Meta name="twitter:card" content="summary_large_image" />
@@ -67,32 +64,19 @@ const HeadTags = () => {
 			type="image/svg+xml"
 		/>
 
-		<Link rel="preconnect" href="https://fonts.googleapis.com" />
-		<Link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-		<Link
-			rel="stylesheet"
-			href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap"
-		/>
-		<Link
-			rel="preload"
-			as="font"
-			type="font/woff2"
-			href="/fonts/ibm-plex-sans-latin.woff2"
-			crossorigin=""
-		/>
-
 		<Style>
 			{`
-			/* Hide body content while we're "preloading" */
-			html.preload body {
-				visibility: hidden;
-			}
+            /* Hide body content while we're "preloading" */
+            html.preload body {
+                visibility: hidden;
+            }
 
-			/* Explicit white background so users just see a blank screen */
-			html.preload {
-				background: #ffffff;
-			}
-			`}
+            /* Explicit white background so users just see a blank screen */
+            html.preload {
+                background: #ffffff;
+            }
+			${fonts}
+            `}
 		</Style>
 
 		{is_node() ? <Script type="module" crossorigin src="/index.js" /> : null}
@@ -110,41 +94,53 @@ const HeadTags = () => {
 			type="text/javascript"
 		>
 			{`
-				window.plausible = window.plausible || function() {
-				(plausible.q = plausible.q || []).push(arguments)
-				};
-				plausible.init = plausible.init || function (opts) {
-				plausible.o = opts || {};
-				};
-				plausible.init();
-			`}
+                window.plausible = window.plausible || function() {
+                  (plausible.q = plausible.q || []).push(arguments)
+                };
+                plausible.init = plausible.init || function (opts) {
+                  plausible.o = opts || {};
+                };
+                plausible.init();
+            `}
 		</Script>
 	</>;
 };
+const config = {
+	acts: {
+		landing: Landing,
+		blog: Blog,
+		// 'destamatic-ui': DestamaticUI,
+		fallback: NotFound,
+	},
+	template: ({ children }) => children,
+	ssg: true,
+	initial: 'landing',
+	urlRouting: true,
+	fallback: 'fallback'
+};
 
-const App = () => <Head>
-	<HeadTags />
-	<Theme value={theme.theme}>
-		<Icons value={theme.icons}>
-			<PopupContext>
-				<Gradient>
-					<Shown value={enabled.map(e => e && !is_node())}>
-						<Collision />
-					</Shown>
-					<StageContext value={pages}>
-						<div theme='pages'>
-							<Stage />
-							<div theme='center_clear' >
-								<Typography type='p2'> © Torrin Leonard {new Date().getFullYear()} 🇨🇦</Typography>
-							</div>
-						</div>
-					</StageContext>
-				</Gradient>
-				<Controls />
-				<Popup />
-			</PopupContext>
-		</Icons>
-	</Theme>
-</Head>;
+const App = () => <Theme value={theme}>
+	<Icons value={[IconifyIcons]} >
+		<Head>
+			<HeadTags />
+			<StageContext value={config}>
+				<div theme='column_center_fill'>
+					<Stage />
+					<div theme='row_center_fill_wrap_tight' style={{ padding: 40, maxWidth: 800 }}>
+						<Typography style={{ textAlign: 'center' }} type='p1' label={`© Torrin Leonard ${new Date().getFullYear()} 🇨🇦 | Built with `} />
+						<Button
+							type='link'
+							iconPosition='right'
+							icon={<Icon name='feather:external-link' />}
+							label='destamatic-ui'
+							onClick={() => window.open('https://github.com/torrinworx/destamatic-ui', '_blank')}
+							href='https://github.com/torrinworx/destamatic-ui'
+						/>
+					</div>
+				</div>
+			</StageContext>
+		</Head>
+	</Icons>
+</Theme>;
 
 export default App;
