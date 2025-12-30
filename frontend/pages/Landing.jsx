@@ -113,8 +113,7 @@ const projects = [
     {
         header: 'destamatic-ui',
         headerUrl: 'https://github.com/torrinworx/destamatic-ui',
-        position: 'Author',
-        description: 'A batteries-included frontend framework built on fine-grained Observers',
+        description: 'A batteries-included frontend framework built on fine-grained Observers.',
         bullets: [
             'No React, no VDOM. Components, routing, SSG/SEO, theming, icons, and rich text in one stack.',
             'Used for Equator Studios Mapping/AI platform, torrin.me, and my project OpenGig.org.',
@@ -124,7 +123,6 @@ const projects = [
     {
         header: 'OpenGig.org',
         headerUrl: 'https://opengig.org',
-        position: 'Creator / Full Stack Engineer',
         description: 'Open-source platform for gig workers and customers.',
         bullets: [
             'Built a full-stack app in JavaScript with a custom UI framework, database state-sync, and websocket layer.',
@@ -133,7 +131,6 @@ const projects = [
     },
     {
         header: 'MangoSync',
-        position: 'Creator',
         headerUrl: 'https://github.com/torrinworx/MangoSync',
         description: 'Local music player with AI-assisted lyrics and metadata.',
         bullets: [
@@ -144,7 +141,6 @@ const projects = [
     },
     {
         header: 'Blend_My_NFTs',
-        position: 'Author',
         headerUrl: 'https://github.com/torrinworx/Blend_My_NFTs',
         description: 'Blender add-on for generating 3D NFT collections.',
         bullets: [
@@ -283,6 +279,10 @@ const skills = [
     {
         bold: 'AI & ML:',
         text: ' OpenAI API, Whisper, Hugging Face, Qdrant, LangChain, vector search'
+    },
+    {
+        bold: 'Certifications:',
+        text: ' Harvard CS50 (Intro to Computer Science), W3C Web Accessibility (WAI0.1x)'
     }
 ];
 
