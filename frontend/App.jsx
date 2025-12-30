@@ -128,20 +128,22 @@ const App = () => <Theme value={theme}>
 				<div theme='column_fill_center'>
 					<div theme='column_fill_center' style={{ padding: 20, gap: 60, maxWidth: 800 }} >
 						<Stage />
-						<Typography style={{ textAlign: 'center' }} type='p1' label={`© Torrin Leonard ${new Date().getFullYear()} 🇨🇦 | Built with `} />
-						<Button
-							type='link'
-							iconPosition='right'
-							icon={<Icon name='feather:external-link' />}
-							label='destamatic-ui'
-							onClick={() => window.open('https://github.com/torrinworx/destamatic-ui', '_blank')}
-							href='https://github.com/torrinworx/destamatic-ui'
-						/>
+						<div theme='row_center_fill_wrap_tight'>
+							<Typography style={{ textAlign: 'center' }} type='p1' label={`© Torrin Leonard ${new Date().getFullYear()} 🇨🇦 | Built with `} />
+							<Button
+								type='link'
+								iconPosition='right'
+								icon={<Icon name='feather:external-link' />}
+								label='destamatic-ui'
+								onClick={() => window.open('https://github.com/torrinworx/destamatic-ui', '_blank')}
+								href='https://github.com/torrinworx/destamatic-ui'
+							/>
+						</div>
 					</div>
 				</div>
 			</StageContext>
 		</Head>
 	</Icons>
-</Theme>;
+</Theme >;
 
 export default App;
