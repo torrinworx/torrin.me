@@ -55,6 +55,7 @@ const HeadTags = () => {
 		<Meta name="twitter:title" content={pageTitle} />
 		<Meta name="twitter:description" content={description} />
 		<Meta name="twitter:image" content={imageUrl} />
+		<Meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
 		<Link rel="canonical" href={siteUrl} />
 		<Link
