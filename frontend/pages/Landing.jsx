@@ -112,7 +112,7 @@ const work = [
 const projects = [
     {
         header: 'destamatic-ui',
-        headerUrl: 'https://github.com/torrinworx/destamatic-ui',
+        headerUrl: '/destamatic-ui',
         description: 'A batteries-included frontend framework built on fine-grained Observers.',
         bullets: [
             'No React, no VDOM. Components, routing, SSG/SEO, theming, icons, and rich text in one stack.',
@@ -342,14 +342,14 @@ const SocialButton = ({ each }) => <Button
 />;
 
 const Landing = () => {
-    return <div theme='column_center_fill' style={{ padding: 20, gap: 60, maxWidth: 800 }}>
+    return <>
         <div theme='column_center_fill_start' style={{ gap: 10 }}>
             <div>
                 <Typography theme='row_fill_start' type='h1' label='Torrin Leonard' />
                 <Typography theme='row_fill_start' type='p1' label={`Full-stack software engineer, ${new Date().getFullYear() - 2017} years professional experience.`} />
                 <Typography theme='row_fill_start' type='p1_bold' label='Open to roles and contracts.' />
 
-                <div theme='divider' style={{ marginTop: 10, marginBottom: 10 }} />
+                <div theme='divider'/>
                 <Typography
                     theme='row_fill_start'
                     type='p1'
@@ -398,7 +398,7 @@ const Landing = () => {
                 <SocialButton each={socialLinks} />
             </div>
         </div>
-    </div>;
+    </>;
 };
 
 export default Landing;
