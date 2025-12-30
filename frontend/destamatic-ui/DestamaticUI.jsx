@@ -1,5 +1,4 @@
 import {
-    Observer,
     StageContext,
     Paper,
     Typography,
@@ -12,6 +11,7 @@ import {
     Head,
     Stage,
     Default,
+    DropDown,
 } from 'destamatic-ui';
 
 import JsonLd, {
@@ -21,39 +21,29 @@ import JsonLd, {
     AUTHOR_ID,
     WEBSITE_ID,
 } from '../utils/JsonLd';
-import examples from './Examples';
-import Playground from './Playground';
+// import examples from './Examples';
+// import Playground from './Playground';
 
 const Landing = ThemeContext.use(h => StageContext.use(s => () => {
-    s.parent.props.enabled.set(false);
+    const examples = Object.values(
+        import.meta.glob(
+            '../../destamatic-ui//components/**/**/*.example.jsx',
+            { eager: true }
+        )
+    ).map(e => e.default);
 
-    const Examples = ({ each }) => <Paper theme='column_fill_center' style={{ gap: 20 }}>
-        <div theme='column_fill_start'>
-            <div theme='row'>
-                <Button
-                    type='text'
-                    label={<Typography type='h3' label={each.title} style={{ color: 'inherit' }} />}
-                    icon={<Icon name='external-link' size={'clamp(1.75rem, 1.75vw + 0.875rem, 3rem)'} style={{ marginLeft: 5 }} />}
-                    iconPosition='right'
-                    href={each.componentUrl}
-                    onClick={() => window.open(each.componentUrl, '_blank')}
-                />
-            </div>
-            <div style={{ padding: '10px 15px 10px 15px' }}>
-                <Typography type='p1' label={each.description} />
-            </div>
-        </div>
-        <each.component />
-    </Paper>;
-
-    const focused = Observer.mutable('inputs');
-    const categories = Array.from(new Set(examples.map(e => e.category)))
-
-    const Category = ({ each }) => <Button
-        label={String(each).charAt(0).toUpperCase() + String(each).slice(1)}
-        focused={focused.map(f => f === each)}
-        onClick={() => focused.set(each)}
-    />
+    const Examples = ({ each: example }) => {
+        const { header, example: ExampleComp } = example;
+        console.log(s.props._theme)
+        return <DropDown
+            open={example.open}
+            label={<Typography type="p1" label={header} />}
+            iconOpen={<Icon name="feather:chevron-up" />}
+            iconClose={<Icon name="feather:chevron-down" />}
+        >
+            <ExampleComp globalTheme={s.props._theme} />
+        </DropDown>;
+    };
 
     const pageUrl = `${BASE_URL}/destamatic-ui`;
     const pageTitle = `destamatic-ui Demo | ${SITE_NAME}`;
@@ -110,7 +100,7 @@ const Landing = ThemeContext.use(h => StageContext.use(s => () => {
                 />
             </div> */}
 
-            <Paper
+            <div
                 theme="column_fill_center"
                 style={{ gap: 20 }}
             >
@@ -126,7 +116,7 @@ const Landing = ThemeContext.use(h => StageContext.use(s => () => {
                         }
                         icon={
                             <Icon
-                                name="external-link"
+                                name="feather:external-link"
                                 size="clamp(1.75rem, 1.75vw + 0.875rem, 3rem)"
                                 style={{ marginLeft: 5 }}
                             />
@@ -152,7 +142,7 @@ const Landing = ThemeContext.use(h => StageContext.use(s => () => {
                 </div>
 
                 <div theme="row" style={{ gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
-                    <Button
+                    {/* <Button
                         type="contained"
                         label="Try in the browser"
                         href="/destamatic-ui/playground"
@@ -168,7 +158,7 @@ const Landing = ThemeContext.use(h => StageContext.use(s => () => {
                         }
                         iconPosition="right"
 
-                    />
+                    /> */}
                     <Button
                         type="outlined"
                         label="GitHub"
@@ -193,37 +183,43 @@ const Landing = ThemeContext.use(h => StageContext.use(s => () => {
                         label="Used in production for 5+ years at Equator Studios and across personal projects."
                     />
                 </div>
-            </Paper>
-            <Paper theme='column_fill_center' style={{ background: 'none' }}>
+            </div>
+            {/* <Paper theme='column_fill_center' style={{ background: 'none' }}>
                 <Typography type='h1' label='Components' />
                 <Typography type='p1' label='A sample of some of the components and tools built into destamatic-ui.' />
 
                 <Paper theme='row_tight' style={{ padding: 5 }}>
                     <Category each={categories} />
                 </Paper>
-            </Paper>
+            </Paper> */}
 
-            <Examples each={focused.map(f => examples.filter(ex => ex.category === f && !ex.disabled))} />
+            <div theme='column_fill' style={{
+                height: '100%',
+                minHeight: '100vh'
+            }}>
+                <Examples each={examples} />
+            </div>
         </Head>
     </>;
 }));
 
-const DestamaticUI = () => {
+const DestamaticUI = StageContext.use(s => () => {
     const config = {
         acts: {
             landing: Landing,
-            playground: Playground,
+            // playground: Playground,
         },
         initial: 'landing',
         template: Default,
         ssg: true,
         truncateInitial: true,
+        _theme: s.props._theme,
     };
 
     return <StageContext value={config}>
         <Stage />
     </StageContext>;
-};
+});
 
 export default DestamaticUI;
 

@@ -30,6 +30,11 @@ const theme = OObject({
 		color: '$color',
 		textDecoration: 'underline',
 	},
+
+	divider: {
+		marginTop: 10,
+		marginBottom: 10
+	}
 });
 
 export default theme

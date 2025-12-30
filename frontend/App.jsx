@@ -2,7 +2,7 @@ import { Typography, Button, Head, Title, Theme, Style, Icons, Icon, Stage, Stag
 import IconifyIcons from "destamatic-ui/components/icons/IconifyIcons/IconifyIcons";
 
 import Blog from './pages/Blog';
-// import DestamaticUI from './destamatic-ui/DestamaticUI';
+import DestamaticUI from './destamatic-ui/DestamaticUI';
 
 import fonts from './utils/fonts.js';
 import theme from './utils/theme.js';
@@ -109,14 +109,15 @@ const config = {
 	acts: {
 		landing: Landing,
 		blog: Blog,
-		// 'destamatic-ui': DestamaticUI,
+		'destamatic-ui': DestamaticUI,
 		fallback: NotFound,
 	},
 	template: ({ children }) => children,
 	ssg: true,
 	initial: 'landing',
 	urlRouting: true,
-	fallback: 'fallback'
+	fallback: 'fallback',
+	_theme: theme
 };
 
 const App = () => <Theme value={theme}>
@@ -124,9 +125,9 @@ const App = () => <Theme value={theme}>
 		<Head>
 			<HeadTags />
 			<StageContext value={config}>
-				<div theme='column_center_fill'>
-					<Stage />
-					<div theme='row_center_fill_wrap_tight' style={{ padding: 40, maxWidth: 800 }}>
+				<div theme='column_fill_center'>
+					<div theme='column_fill_center' style={{ padding: 20, gap: 60, maxWidth: 800 }} >
+						<Stage />
 						<Typography style={{ textAlign: 'center' }} type='p1' label={`© Torrin Leonard ${new Date().getFullYear()} 🇨🇦 | Built with `} />
 						<Button
 							type='link'
