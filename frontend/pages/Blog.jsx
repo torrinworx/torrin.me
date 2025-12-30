@@ -24,7 +24,6 @@ const BlogPage = StageContext.use(s => suspend(LoadingDots, async (_, cleanup) =
 	const slug = s.current;
 	const meta = s.blogs?.[`${slug}.md`] || s.blogs?.[slug];
 
-	s.parent.props.enabled.set(false);
 	const response = await fetch(`/blog/${meta.name}`);
 	let content = await response.text();
 
@@ -47,8 +46,6 @@ const BlogPage = StageContext.use(s => suspend(LoadingDots, async (_, cleanup) =
 			hour12: false,
 		}).format(date);
 	};
-
-	cleanup(() => s.parent.props.enabled.set(true));
 
 	const postUrl = `${BASE_URL}/blog/${slug}`;
 	const title = meta.header || slug;
