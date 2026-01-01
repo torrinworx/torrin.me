@@ -1,4 +1,4 @@
-import { StageContext, Typography, Button, Icon, Shown, ValidateContext, Validate, TextField, TextArea, Observer } from 'destamatic-ui';
+import { StageContext, Typography, Button, Icon, Shown, ValidateContext, Validate, TextField, TextArea, Observer, ThemeContext } from 'destamatic-ui';
 
 import Email from '../utils/Email.jsx';
 
@@ -148,7 +148,7 @@ const ListItem = ({ each, arr }) => <li key={arr.indexOf(each)}>
 	<Typography type='body' label={each.text ? each.text : each} />
 </li>;
 
-const Services = StageContext.use(s => () => {
+const Services = ThemeContext.use(h => StageContext.use(s => () => {
 	const submitted = Observer.mutable(false);
 
 	const sendContactForm = async (data) => {
@@ -279,6 +279,9 @@ const Services = StageContext.use(s => () => {
 		</div>;
 	};
 
+	const contactRef = Observer.mutable(null);
+	const focused = Observer.mutable(false);
+
 	return <>
 		<div theme="column_center_fill_start" style={{ gap: 10 }}>
 			<div>
@@ -309,7 +312,12 @@ const Services = StageContext.use(s => () => {
 					type="contained"
 					icon={<Icon name="feather:mail" />}
 					iconPosition="right"
-					onClick={() => { }}
+					onClick={() => {
+						if (contactRef.get()) {
+							contactRef.get().scrollIntoView({ behavior: 'smooth', block: 'start' });
+							focused.set(true);
+						}
+					}}
 				/>
 				<Email />
 				<Button
@@ -380,7 +388,20 @@ const Services = StageContext.use(s => () => {
 			</ul>
 		</div>
 
-		<div theme='column_center_fill' style={{ gap: 10 }}>
+		<div
+			ref={contactRef}
+			theme={[
+				'column_center_fill_radius',
+				Observer.timer(500).map(t => t % 2 === 1 && focused.get() ? 'focused' : null)
+			]}
+			style={{ gap: 10 }}
+			onMouseDown={() => {
+				focused.set(false);
+			}}
+			onMouseEnter={() => {
+				focused.set(false);
+			}}
+		>
 			<Typography theme='row_fill_start' type='h2' label="Interested? Let\'s talk! " />
 			<div theme='divider' />
 			<Typography
@@ -407,6 +428,6 @@ const Services = StageContext.use(s => () => {
 			</Shown>
 		</div>
 	</>;
-});
+}));
 
 export default Services;
