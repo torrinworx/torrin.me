@@ -22,10 +22,9 @@ npx esbuild ./server.js \
   --target=node25 \
   --outfile="$BUILD_DIR/server.js" \
   --format=esm \
-  --external:fs \
-  --external:path \
-  --external:os \
-  --external:crypto \
+  --external:node:* \
+  --external:dotenv \
+  --external:nodemailer \
   --external:vite \
   --external:lightningcss
 
