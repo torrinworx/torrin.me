@@ -1,4 +1,6 @@
-import { Typography, Button, Icon, Observer, Shown } from 'destamatic-ui';
+import { Typography, Button, Icon, Observer, Shown, StageContext } from 'destamatic-ui';
+
+import Email from '../utils/Email.jsx';
 
 const Resume = () => {
     const downloadCheck = Observer.mutable(false);
@@ -29,32 +31,6 @@ const Resume = () => {
 
             downloadCheck.set(true);
         }}
-    />;
-};
-
-const Email = () => {
-    const emailCheck = Observer.mutable(false);
-    emailCheck.watch(() => {
-        if (emailCheck.get()) {
-            setTimeout(() => {
-                emailCheck.set(false);
-            }, 5000);
-        }
-    });
-
-    return <Button
-        title='Copy email to clipboard.'
-        type='outlined'
-        iconPosition='right'
-        label={emailCheck.map(c => c ? 'Copied!' : 'Email')}
-        icon={emailCheck.map(c => c
-            ? <Icon name='feather:check' />
-            : <Icon name='feather:copy' />)}
-        onClick={async () => {
-            emailCheck.set(true);
-            await navigator.clipboard.writeText('torrin@torrin.me')
-        }}
-        loading={false}
     />;
 };
 
@@ -294,54 +270,7 @@ const Skill = ({ each }) => {
     </li>;
 };
 
-const socialLinks = [
-    {
-        title: 'Instagram',
-        icon: 'simpleIcons:instagram',
-        href: 'https://www.instagram.com/torrinleonard/',
-    },
-    {
-        title: 'GitHub',
-        icon: 'simpleIcons:github',
-        href: 'https://github.com/torrinworx',
-    },
-    {
-        title: 'GitLab',
-        icon: 'simpleIcons:gitlab',
-        href: 'https://gitlab.com/torrin1',
-    },
-    {
-        title: 'YouTube',
-        icon: 'simpleIcons:youtube',
-        href: 'https://www.youtube.com/@TorrinZLeonard',
-    },
-    {
-        title: 'Medium',
-        icon: 'simpleIcons:medium',
-        href: 'https://medium.com/@torrin_1169',
-    },
-    {
-        title: 'dev.to',
-        icon: 'simpleIcons:devdotto',
-        href: 'https://dev.to/torrin',
-    },
-    {
-        title: 'Hacker News',
-        icon: 'simpleIcons:ycombinator',
-        href: 'https://news.ycombinator.com/user?id=torrinleonard',
-    },
-];
-
-const SocialButton = ({ each }) => <Button
-    style={{ height: 50, width: 50 }}
-    title={each.title}
-    type='text'
-    icon={<Icon name={each.icon} size={30} />}
-    onClick={() => window.open(each.href, '_blank')}
-    href={each.href}
-/>;
-
-const Landing = () => {
+const Landing = StageContext.use(s => () => {
     return <>
         <div theme='column_center_fill_start' style={{ gap: 10 }}>
             <div>
@@ -349,7 +278,7 @@ const Landing = () => {
                 <Typography theme='row_fill_start' type='p1' label={`Full-stack software engineer, ${new Date().getFullYear() - 2017} years professional experience.`} />
                 <Typography theme='row_fill_start' type='p1_bold' label='Open to roles and contracts.' />
 
-                <div theme='divider'/>
+                <div theme='divider' />
                 <Typography
                     theme='row_fill_start'
                     type='p1'
@@ -368,6 +297,16 @@ const Landing = () => {
                     icon={<Icon name='feather:github' />}
                     onClick={() => window.open('https://github.com/torrinworx', '_blank')}
                     href='https://github.com/torrinworx'
+                    iconPosition='right'
+                />
+                <Button
+                    title={`Torrin Leonard's services for hire.`}
+                    label='Services'
+                    type='outlined'
+                    icon={<Icon name='feather:briefcase' />}
+                    onClick={() => s.open({ name: 'services' })}
+                    href='/services'
+                    iconPosition='right'
                 />
             </div>
         </div>
@@ -392,13 +331,7 @@ const Landing = () => {
                 <Skill each={skills} />
             </ul>
         </div>
-
-        <div theme='column_center_fill' style={{ gap: 10 }}>
-            <div theme='row_wrap_fill_center' style={{ gap: 10 }}>
-                <SocialButton each={socialLinks} />
-            </div>
-        </div>
     </>;
-};
+});
 
 export default Landing;
