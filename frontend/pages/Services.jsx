@@ -149,8 +149,9 @@ const ListItem = ({ each, arr }) => <li key={arr.indexOf(each)}>
 </li>;
 
 const Services = StageContext.use(s => () => {
+	const submitted = Observer.mutable(false);
+
 	const sendContactForm = async (data) => {
-		console.log(data);
 		const res = await fetch('/contact', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -175,9 +176,8 @@ const Services = StageContext.use(s => () => {
 
 		return <div theme='column_center_fill' style={{ gap: 10 }}>
 			<ValidateContext value={allValid}>
-				<div theme="column" style={{ gap: 10 }}>
-
-					<TextField placeholder="Full Name*" value={fullName} type='outlined' />
+				<div theme="column_center_fill" style={{ gap: 10, maxWidth: 400 }}>
+					<TextField placeholder="Full Name*" value={fullName} type='outlined_fill' />
 					<Validate
 						value={fullName}
 						validate={val => {
@@ -189,7 +189,7 @@ const Services = StageContext.use(s => () => {
 						signal={submit}
 					/>
 
-					<TextField placeholder="Email*" value={email} type='outlined' />
+					<TextField placeholder="Email*" value={email} type='outlined_fill' />
 					<Validate
 						value={email}
 						validate={value => {
@@ -214,8 +214,7 @@ const Services = StageContext.use(s => () => {
 						signal={submit}
 					/>
 
-					{/* TODO: Live input validation for phone number and signal validation? */}
-					<TextField placeholder="Phone Number*" value={phone} type='outlined' />
+					<TextField placeholder="Phone Number*" value={phone} type='outlined_fill' />
 					<Validate
 						value={phone}
 						validate={value => {
@@ -246,7 +245,7 @@ const Services = StageContext.use(s => () => {
 						signal={submit}
 					/>
 
-					<TextArea placeholder='Message*' value={message} type='outlined' />
+					<TextArea placeholder='Message*' value={message} type='outlined_fill' />
 					<Validate
 						value={message}
 						validate={val => {
@@ -257,8 +256,8 @@ const Services = StageContext.use(s => () => {
 						}}
 						signal={submit}
 					/>
-
 				</div>
+				<Typography />
 				<Button
 					type="contained"
 					label="Submit"
@@ -267,12 +266,12 @@ const Services = StageContext.use(s => () => {
 
 						if (allValid.get()) {
 							await sendContactForm({
-								fullName: 'John Doe',
-								email: 'user@example.com',
-								phone: '123-456-7890',
-								message: 'Hi, I want to talk about...',
+								fullName: fullName.get(),
+								email: email.get(),
+								phone: phone.get(),
+								message: message.get(),
 							});
-							// TODO: Wipe all fields, show success, disable form
+							submitted.set(true)
 						}
 					}}
 				/>
@@ -369,12 +368,13 @@ const Services = StageContext.use(s => () => {
 		<div theme='column_center_fill' style={{ gap: 10 }}>
 			<Typography theme='row_fill_start' type='h2' label='Pricing' />
 			<div theme='divider' />
-			<Typography
-				type='p1'
-				theme='row_fill_start'
-			>
-				What you'll pay when you hire me. <b>Founding client pricing!</b>
-			</Typography>
+			<div theme='row_fill_start'>
+				<Typography
+					type='p1'
+				>
+					What you'll pay when you hire me. <b>Founding client pricing!</b>
+				</Typography>
+			</div>
 			<ul style={{ paddingLeft: 25 }}>
 				<ListItem each={pricing} arr={pricing} />
 			</ul>
@@ -389,7 +389,22 @@ const Services = StageContext.use(s => () => {
 			>
 				Fill out the form bellow, email me directly, or dm me on LinkedIn. Either way I'll get back to you quickly!
 			</Typography>
-			<FormThing />
+			<div>
+			</div>
+			<Shown value={submitted}>
+				<mark:then>
+					<div theme='row_fill_radius_primary' style={{ background: '$color', color: '$contrast_text($color_top)', padding: 20 }}>
+						<div theme='column_fill'>
+							<Typography type='h2_primary' label='Received!' style={{ color: '$contrast_text($color_top)' }} />
+							<Typography type='body' label='Thank you for reaching out, I will get back to you shortly.' style={{ color: '$contrast_text($color_top)' }} />
+						</div>
+						<Icon name='feather:check' size={40} style={{ color: '$contrast_text($color_top)' }} />
+					</div>
+				</mark:then>
+				<mark:else>
+					<FormThing />
+				</mark:else>
+			</Shown>
 		</div>
 	</>;
 });
