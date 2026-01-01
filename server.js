@@ -1,14 +1,20 @@
+import 'dotenv/config';
+
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import url from 'url';
 import { fileURLToPath } from 'url';
+import nodemailer from 'nodemailer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const rootDir = path.resolve(__dirname, process.argv[2] || './dist');
-const port = Number(process.argv[3]) || 3001;
+const rootDir = path.resolve(
+    __dirname,
+    process.argv[2] || process.env.ROOT_DIR || './dist'
+);
+const port = Number(process.argv[3] || process.env.PORT || 3001);
 
 const fallbackFile = path.join(rootDir, 'fallback.html');
 
@@ -26,19 +32,87 @@ const mimeTypes = {
     '.txt': 'text/plain; charset=utf-8',
 };
 
-const server = http.createServer((req, res) => {
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+    },
+});
+
+// Helper to parse JSON body from POST
+const parseJsonBody = (req) =>
+    new Promise((resolve, reject) => {
+        let body = '';
+        req.on('data', (chunk) => {
+            body += chunk.toString();
+            // basic guard against huge payloads
+            if (body.length > 1e6) {
+                req.destroy();
+                reject(new Error('Body too large'));
+            }
+        });
+        req.on('end', () => {
+            try {
+                const data = JSON.parse(body || '{}');
+                resolve(data);
+            } catch (err) {
+                reject(err);
+            }
+        });
+        req.on('error', reject);
+    });
+
+const server = http.createServer(async (req, res) => {
     const parsedUrl = url.parse(req.url || '/');
     let pathname = decodeURIComponent(parsedUrl.pathname || '/');
 
-    // Normalize and prevent directory traversal
-    pathname = path.normalize(pathname).replace(/^(\.\.[/\\])+/, '');
+    if (pathname === '/contact' && req.method === 'POST') {
+        try {
+            const data = await parseJsonBody(req);
 
-    // Map URL to filesystem path
+            const { email, fullName, phone, message } = data;
+
+            if (!email || !fullName || !message) {
+                res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+                res.end(JSON.stringify({ ok: false, error: 'Missing required fields' }));
+                return;
+            }
+
+            const mailOptions = {
+                from: `"${fullName}" <${process.env.SMTP_USER}>`,
+                to: process.env.SMTP_TO || process.env.SMTP_USER,
+                subject: 'New contact form submission',
+                text: `
+New contact submission:
+
+Name: ${fullName}
+Email: ${email}
+Phone: ${phone || 'N/A'}
+
+Message:
+${message}
+`.trim(),
+            };
+
+            await transporter.sendMail(mailOptions);
+
+            res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+            res.end(JSON.stringify({ ok: true }));
+        } catch (err) {
+            console.error('Error in /contact handler:', err);
+            res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+            res.end(JSON.stringify({ ok: false, error: 'Internal server error' }));
+        }
+        return;
+    }
+
+    // --- STATIC FILE HANDLING (your existing stuff) ---
+    pathname = path.normalize(pathname).replace(/^(\.\.[/\\])+/, '');
     let filePath = path.join(rootDir, pathname);
 
     fs.stat(filePath, (err, stats) => {
         if (!err && stats.isDirectory()) {
-            // Directory: look for index.html
             const indexPath = path.join(filePath, 'index.html');
             return fs.stat(indexPath, (indexErr, indexStats) => {
                 if (!indexErr && indexStats.isFile()) {
@@ -49,7 +123,6 @@ const server = http.createServer((req, res) => {
             });
         }
 
-        // If not found as-is, try .html extension
         if (err || !stats.isFile()) {
             const htmlPath = filePath + '.html';
             return fs.stat(htmlPath, (htmlErr, htmlStats) => {
@@ -61,12 +134,11 @@ const server = http.createServer((req, res) => {
             });
         }
 
-        // Regular file
         serveFile(filePath, res);
     });
 });
 
-function serveFile(filePath, res, statusCode = 200) {
+const serveFile = (filePath, res, statusCode = 200) => {
     const ext = path.extname(filePath).toLowerCase();
     const contentType = mimeTypes[ext] || 'application/octet-stream';
 
@@ -78,20 +150,18 @@ function serveFile(filePath, res, statusCode = 200) {
             sendFallback(res);
         })
         .pipe(res);
-}
+};
 
-function sendFallback(res) {
+const sendFallback = (res) => {
     fs.stat(fallbackFile, (err, stats) => {
         if (!err && stats.isFile()) {
-            // Still respond with 404, just render fallback.html
             serveFile(fallbackFile, res, 404);
         } else {
-            // If fallback is missing, fall back to plain text 404
             res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
             res.end('404 Not Found');
         }
     });
-}
+};
 
 server.listen(port, () => {
     console.log(`Serving "${rootDir}" at http://localhost:${port}`);
