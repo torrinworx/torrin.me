@@ -25,20 +25,22 @@
 		"@babel/generator": "^7.25.6",
 		"@babel/parser": "^7.25.6",
 		"@babel/plugin-syntax-jsx": "^7.24.7",
+		"@iconify-json/feather": "^1.2.1",
+		"@iconify-json/lineicons": "^1.2.6",
+		"@iconify-json/simple-icons": "^1.2.1",
+		"@iconify-json/svg-spinners": "^1.2.4",
+		"@iconify-json/tabler": "^1.2.22",
 		"cannon-es": "^0.20.0",
 		"destam": "^0.8.0",
 		"destam-dom": "^0.14.0",
 		"destamatic-ui": "file:destamatic-ui",
 		"esbuild": "^0.25.5",
 		"feather-icons": "^4.29.2",
+		"nodemailer": "^7.0.12",
 		"nodemon": "^3.1.7",
 		"simple-icons": "^15.1.0",
 		"three": "^0.176.0",
 		"vite": "^7.2.7",
-		"@iconify-json/tabler": "^1.2.22",
-		"@iconify-json/feather": "^1.2.1",
-		"@iconify-json/lineicons": "^1.2.6",
-		"@iconify-json/simple-icons": "^1.2.1",
-		"@iconify-json/svg-spinners": "^1.2.4"
+		"dotenv": "^17.2.3"
 	}
 }
