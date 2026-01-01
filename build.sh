@@ -23,9 +23,11 @@ cp ./package-lock.json "$BUILD_DIR/package-lock.json"
 # Create run.sh inside build
 cat << 'EOF' > "$BUILD_DIR/run.sh"
 #!/bin/bash
-npm i --production
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-. ~/.nvm/nvm.sh use 25
+. ~/.nvm/nvm.sh
+nvm use 25
+cd "$SCRIPT_DIR"
+npm i --production
 node "$SCRIPT_DIR/server.js"
 EOF
 
