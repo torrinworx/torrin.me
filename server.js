@@ -32,6 +32,9 @@ const mimeTypes = {
     '.txt': 'text/plain; charset=utf-8',
 };
 
+
+console.log(process.env.SMTP_USER, process.env.SMTP_PASS);
+
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
