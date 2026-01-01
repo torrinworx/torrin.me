@@ -8,6 +8,7 @@ import fonts from './utils/fonts.js';
 import theme from './utils/theme.js';
 import JsonLd from './utils/JsonLd.jsx';
 import Landing from './pages/Landing.jsx';
+import Services from './pages/Services.jsx';
 import NotFound from './pages/NotFound.jsx';
 
 /*
@@ -106,9 +107,58 @@ const HeadTags = () => {
 		</Script>
 	</>;
 };
+
+const socialLinks = [
+	{
+		title: 'Instagram',
+		icon: 'simpleIcons:instagram',
+		href: 'https://www.instagram.com/torrinleonard/',
+	},
+	{
+		title: 'GitHub',
+		icon: 'simpleIcons:github',
+		href: 'https://github.com/torrinworx',
+	},
+	{
+		title: 'GitLab',
+		icon: 'simpleIcons:gitlab',
+		href: 'https://gitlab.com/torrin1',
+	},
+	{
+		title: 'YouTube',
+		icon: 'simpleIcons:youtube',
+		href: 'https://www.youtube.com/@TorrinZLeonard',
+	},
+	{
+		title: 'Medium',
+		icon: 'simpleIcons:medium',
+		href: 'https://medium.com/@torrin_1169',
+	},
+	{
+		title: 'dev.to',
+		icon: 'simpleIcons:devdotto',
+		href: 'https://dev.to/torrin',
+	},
+	{
+		title: 'Hacker News',
+		icon: 'simpleIcons:ycombinator',
+		href: 'https://news.ycombinator.com/user?id=torrinleonard',
+	},
+];
+
+const SocialButton = ({ each }) => <Button
+	style={{ height: 50, width: 50 }}
+	title={each.title}
+	type='text'
+	icon={<Icon name={each.icon} size={30} />}
+	onClick={() => window.open(each.href, '_blank')}
+	href={each.href}
+/>;
+
 const config = {
 	acts: {
 		landing: Landing,
+		services: Services,
 		blog: Blog,
 		'destamatic-ui': DestamaticUI,
 		fallback: NotFound,
@@ -129,16 +179,23 @@ const App = () => <Theme value={theme}>
 				<div theme='column_fill_center'>
 					<div theme='column_fill_center' style={{ padding: 20, gap: 60, maxWidth: 800 }} >
 						<Stage />
-						<div theme='row_center_fill_wrap_tight'>
-							<Typography style={{ textAlign: 'center' }} type='p1' label={`© Torrin Leonard ${new Date().getFullYear()} 🇨🇦 | Built with `} />
-							<Button
-								type='link'
-								iconPosition='right'
-								icon={<Icon name='feather:external-link' />}
-								label='destamatic-ui'
-								onClick={() => window.open('https://github.com/torrinworx/destamatic-ui', '_blank')}
-								href='https://github.com/torrinworx/destamatic-ui'
-							/>
+						<div theme='column_fill_center' >
+							<div theme='column_center_fill' style={{ gap: 10 }}>
+								<div theme='row_wrap_fill_center' style={{ gap: 10 }}>
+									<SocialButton each={socialLinks} />
+								</div>
+							</div>
+							<div theme='row_center_fill_wrap_tight'>
+								<Typography style={{ textAlign: 'center' }} type='p1' label={`© Torrin Leonard ${new Date().getFullYear()} 🇨🇦 | Built with `} />
+								<Button
+									type='link'
+									iconPosition='right'
+									icon={<Icon name='feather:external-link' />}
+									label='destamatic-ui'
+									onClick={() => window.open('https://github.com/torrinworx/destamatic-ui', '_blank')}
+									href='https://github.com/torrinworx/destamatic-ui'
+								/>
+							</div>
 						</div>
 					</div>
 				</div>
