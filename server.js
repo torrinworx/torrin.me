@@ -183,7 +183,7 @@ const server = http.createServer(async (req, res) => {
                 to: process.env.SMTP_TO || process.env.SMTP_USER,
                 subject: 'New contact form submission',
                 text: `
-New contact submission:
+New message from torrin.me/services form:
 
 Name: ${fullName}
 Email: ${email}
