@@ -1,3 +1,4 @@
+// vite.config.js
 import path from 'path';
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'url';
@@ -5,7 +6,7 @@ import { fileURLToPath } from 'url';
 import assertRemove from 'destam-dom/transform/assertRemove';
 import compileHTMLLiteral from 'destam-dom/transform/htmlLiteral';
 
-import buildBlog from './buildBlog';
+import buildBlog from './buildBlog.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,7 +33,7 @@ const plugins = [];
 plugins.push(createTransform('transform-literal-html', compileHTMLLiteral, true, {
 	jsx_auto_import: {
 		h: 'destamatic-ui',
-		'mark': 'destamatic-ui',
+		mark: 'destamatic-ui',
 		raw: {
 			name: 'h',
 			location: 'destam-dom'
@@ -59,7 +60,7 @@ plugins.push({
 		const onChange = async (file) => {
 			if (!file.endsWith('.md')) return;
 			if (!file.startsWith(srcDir)) return;
-			await buildBlog();
+			await buildBlog({ srcDir, outFile });
 		};
 
 		server.watcher.on('add', onChange);
@@ -82,8 +83,9 @@ export default defineConfig({
 		},
 	},
 	define: {
-		'process.env': {},
 		'process.env.NODE_ENV': '"development"',
+		'process.env.BABEL_TYPES_8_BREAKING': 'false',
+		'process.env.BABEL_8_BREAKING': 'false',
 		global: 'globalThis',
 	},
 	server: {
