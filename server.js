@@ -1,5 +1,6 @@
 import http from 'http';
 import fs from 'fs';
+import fsp from 'fs/promises';
 import path from 'path';
 import url from 'url';
 import { fileURLToPath } from 'url';
@@ -8,12 +9,43 @@ import nodemailer from 'nodemailer';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const isProd = process.env.NODE_ENV === 'production';
+
+console.log(isProd, process.env.NODE_ENV, process.env.ENV);
+
+/**
+ * Load a simple KEY=VALUE .env file into process.env
+ * Only used in development.
+ */
+async function loadEnv(filePath = path.join(__dirname, '.env')) {
+    try {
+        const data = await fsp.readFile(filePath, { encoding: 'utf8' });
+        for (const rawLine of data.split('\n')) {
+            const line = rawLine.trim();
+            if (!line || line.startsWith('#')) continue;
+            const eqIdx = line.indexOf('=');
+            if (eqIdx === -1) continue;
+            const key = line.slice(0, eqIdx).trim();
+            const value = line.slice(eqIdx + 1).trim();
+            if (!key) continue;
+            process.env[key] = value;
+        }
+    } catch (e) {
+        console.error(`Failed to load .env file (${filePath}): ${e.message}`);
+    }
+}
+
+// in dev, load .env before anything else
+if (!isProd) {
+    await loadEnv();
+}
+
+// paths / config
 const rootDir = path.resolve(
     __dirname,
-    process.argv[2] || './dist'
+    process.argv[2] || (isProd ? './dist' : './frontend')
 );
 const port = Number(process.argv[3] || process.env.PORT || 3001);
-
 const fallbackFile = path.join(rootDir, 'fallback.html');
 
 const mimeTypes = {
@@ -30,9 +62,6 @@ const mimeTypes = {
     '.txt': 'text/plain; charset=utf-8',
 };
 
-
-console.log(process.env.SMTP_USER, process.env.SMTP_PASS);
-
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -47,7 +76,6 @@ const parseJsonBody = (req) =>
         let body = '';
         req.on('data', (chunk) => {
             body += chunk.toString();
-            // basic guard against huge payloads
             if (body.length > 1e6) {
                 req.destroy();
                 reject(new Error('Body too large'));
@@ -64,14 +92,84 @@ const parseJsonBody = (req) =>
         req.on('error', reject);
     });
 
-const server = http.createServer(async (req, res) => {
+let vite = null;
+if (!isProd) {
+    const { createServer: createViteServer } = await import('vite');
+
+    vite = await createViteServer({
+        configFile: path.resolve(__dirname, 'vite.config.js'),
+        server: {
+            middlewareMode: 'html',
+        },
+    });
+}
+
+const serveFile = (filePath, res, statusCode = 200) => {
+    const ext = path.extname(filePath).toLowerCase();
+    const contentType = mimeTypes[ext] || 'application/octet-stream';
+
+    fs.createReadStream(filePath)
+        .on('open', () => {
+            res.writeHead(statusCode, { 'Content-Type': contentType });
+        })
+        .on('error', () => {
+            sendFallback(res);
+        })
+        .pipe(res);
+};
+
+const sendFallback = (res) => {
+    fs.stat(fallbackFile, (err, stats) => {
+        if (!err && stats.isFile()) {
+            serveFile(fallbackFile, res, 404);
+        } else {
+            res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+            res.end('404 Not Found');
+        }
+    });
+};
+
+const handleStatic = (req, res) => {
     const parsedUrl = url.parse(req.url || '/');
     let pathname = decodeURIComponent(parsedUrl.pathname || '/');
+    pathname = path.normalize(pathname).replace(/^(\.\.[/\\])+/, '');
+    let filePath = path.join(rootDir, pathname);
 
+    fs.stat(filePath, (err, stats) => {
+        if (!err && stats.isDirectory()) {
+            const indexPath = path.join(filePath, 'index.html');
+            return fs.stat(indexPath, (indexErr, indexStats) => {
+                if (!indexErr && indexStats.isFile()) {
+                    serveFile(indexPath, res);
+                } else {
+                    sendFallback(res);
+                }
+            });
+        }
+
+        if (err || !stats.isFile()) {
+            const htmlPath = filePath + '.html';
+            return fs.stat(htmlPath, (htmlErr, htmlStats) => {
+                if (!htmlErr && htmlStats.isFile()) {
+                    serveFile(htmlPath, res);
+                } else {
+                    sendFallback(res);
+                }
+            });
+        }
+
+        serveFile(filePath, res);
+    });
+};
+
+const server = http.createServer(async (req, res) => {
+    const parsedUrl = url.parse(req.url || '/');
+    const pathname = decodeURIComponent(parsedUrl.pathname || '/');
+
+    // API: /contact
     if (pathname === '/contact' && req.method === 'POST') {
         try {
             const data = await parseJsonBody(req);
-
             const { email, fullName, phone, message } = data;
 
             if (!email || !fullName || !message) {
@@ -108,62 +206,25 @@ ${message}
         return;
     }
 
-    // --- STATIC FILE HANDLING (your existing stuff) ---
-    pathname = path.normalize(pathname).replace(/^(\.\.[/\\])+/, '');
-    let filePath = path.join(rootDir, pathname);
+    // Dev: pass everything else through Vite dev server
+    if (!isProd && vite) {
+        vite.middlewares(req, res, (err) => {
+            if (err) {
+                res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
+                res.end(`Error: ${err.message}`);
+                vite.ssrFixStacktrace(err);
+                console.error('Error in Vite middlewares:', err);
+            }
+        });
+        return;
+    }
 
-    fs.stat(filePath, (err, stats) => {
-        if (!err && stats.isDirectory()) {
-            const indexPath = path.join(filePath, 'index.html');
-            return fs.stat(indexPath, (indexErr, indexStats) => {
-                if (!indexErr && indexStats.isFile()) {
-                    serveFile(indexPath, res);
-                } else {
-                    sendFallback(res);
-                }
-            });
-        }
-
-        if (err || !stats.isFile()) {
-            const htmlPath = filePath + '.html';
-            return fs.stat(htmlPath, (htmlErr, htmlStats) => {
-                if (!htmlErr && htmlStats.isFile()) {
-                    serveFile(htmlPath, res);
-                } else {
-                    sendFallback(res);
-                }
-            });
-        }
-
-        serveFile(filePath, res);
-    });
+    // Prod: static file handler
+    handleStatic(req, res);
 });
 
-const serveFile = (filePath, res, statusCode = 200) => {
-    const ext = path.extname(filePath).toLowerCase();
-    const contentType = mimeTypes[ext] || 'application/octet-stream';
-
-    fs.createReadStream(filePath)
-        .on('open', () => {
-            res.writeHead(statusCode, { 'Content-Type': contentType });
-        })
-        .on('error', () => {
-            sendFallback(res);
-        })
-        .pipe(res);
-};
-
-const sendFallback = (res) => {
-    fs.stat(fallbackFile, (err, stats) => {
-        if (!err && stats.isFile()) {
-            serveFile(fallbackFile, res, 404);
-        } else {
-            res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-            res.end('404 Not Found');
-        }
-    });
-};
-
 server.listen(port, () => {
-    console.log(`Serving "${rootDir}" at http://localhost:${port}`);
+    console.log(
+        `${isProd ? 'Production' : 'Development'} server serving "${rootDir}" at http://localhost:${port}`
+    );
 });
