@@ -1,5 +1,3 @@
-import 'dotenv/config';
-
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
@@ -12,7 +10,7 @@ const __dirname = path.dirname(__filename);
 
 const rootDir = path.resolve(
     __dirname,
-    process.argv[2] || process.env.ROOT_DIR || './dist'
+    process.argv[2] || './dist'
 );
 const port = Number(process.argv[3] || process.env.PORT || 3001);
 
