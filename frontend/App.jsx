@@ -168,6 +168,7 @@ const config = {
 	initial: 'landing',
 	urlRouting: true,
 	fallback: 'fallback',
+	truncateInitial: true,
 	_theme: theme
 };
 
