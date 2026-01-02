@@ -5,60 +5,32 @@ import useShine from '../utils/Shine.jsx'
 
 const deliverables = [
 	{
-		bold: 'Done-for-you website',
-		text: 'I design and build a clean, modern site tailored to your brand, so you never have to touch WordPress or page builders.',
+		bold: 'Professional online presence',
+		text: 'A clean, modern, accessible website that makes your business look credible and up to date.',
 	},
 	{
-		bold: 'Clear structure',
-		text: 'Up to 5 simple pages (Home, Services, About, Pricing/FAQ, Contact, or Custom) that clearly explain what you do and how to reach you.',
+		bold: 'Clear info about your business',
+		text: 'Simple pages that explain who you are, what you offer, where you are, and how to reach you.',
 	},
 	{
-		bold: 'Lead capture',
-		text: 'A contact / quote form that emails you and logs each lead so nothing gets lost in DMs or random inboxes.',
+		bold: 'Easy contact and quotes',
+		text: 'A contact/quote form that sends leads straight to your inbox so customers don\'t get lost in DMs.',
 	},
 	{
-		bold: 'Simple stats & leads page',
-		text: 'A small dashboard showing visitors, leads, and a log of contact details so you know what your site is doing for you.',
+		bold: 'Works on phones and computers',
+		text: 'Mobile-friendly, fast, and easy to read so customers can use it anywhere.',
 	},
 	{
-		bold: 'Modern, accessible design',
-		text: 'Mobile-friendly, fast, and easy to read, following basic accessibility practices so more people can actually use it.',
+		bold: 'Managed hosting and security',
+		text: 'I host the site for you, keep it secure with SSL, and handle domains and DNS.',
 	},
 	{
-		bold: 'Custom branding',
-		text: 'Colors, typography, and layout matched to your logo and existing brand so your site feels like “you.”',
-	},
-	{
-		bold: 'Search engine friendly',
-		text: 'Static pages and structured data so Google can understand your business and surface the right info in search.',
-	},
-	{
-		bold: 'Hosting & SSL included',
-		text: 'I host the site, keep it secure with SSL, and make sure it stays online — no separate hosting account for you to manage.',
-	},
-	{
-		bold: 'DNS & domain help',
-		text: 'I handle connecting your domain, DNS records, and any transfers so you don\'t have to poke around in registrar settings.',
-	},
-	{
-		bold: 'Ongoing tweaks',
-		text: 'Up to 5 small changes per month (text updates, buttons, minor layout tweaks) included so your site stays up to date.',
+		bold: 'Simple stats and lead log',
+		text: 'A small page where you can see how many people visit and who has contacted you.',
 	},
 	{
 		bold: 'One person to call',
-		text: 'If something breaks or you want a change, you email or call me. No tickets, no call centers, no plugin hunting.',
-	},
-	{
-		bold: 'Photography (optional)',
-		text: 'If you\'re local, I can come on site with my camera and shoot photos of your space, products, or work to use on the site.',
-	},
-	{
-		bold: 'Blog / updates (optional)',
-		text: 'If you send me text and images (or markdown), I can turn them into simple blog posts or updates on your site.',
-	},
-	{
-		bold: 'Event booking (Coming Soon)',
-		text: 'Display your schedule to your customers and allow them to book your services, hooking right into your Google Calendar.',
+		text: 'If something breaks or you want a change, you email or call me and I take care of it.',
 	},
 ];
 
@@ -131,7 +103,7 @@ const pricing = [
 	},
 	{
 		bold: 'Additional pages (optional)',
-		text: <>If you need more than the standard set of pages, extra pages can be added for <b>$10 CAD per page</b>. This includes page design, implementation, and deployment to your existing site.</>,
+		text: <>If you need more than the standard set of pages, extra pages can be added for <b>$50 CAD per page</b>. This includes page design, implementation, and deployment to your existing site.</>,
 	},
 ];
 
@@ -286,7 +258,6 @@ const Services = ThemeContext.use(h => StageContext.use(s => ({ }, cleanup, moun
 		</div>;
 	};
 
-
 	return <>
 		<div theme="column_center_fill_start" style={{ gap: 10 }}>
 			<div>
@@ -340,6 +311,19 @@ const Services = ThemeContext.use(h => StageContext.use(s => ({ }, cleanup, moun
 		</div>
 
 		<div theme='column_center_fill' style={{ gap: 10 }}>
+			<Typography theme='row_fill_start' type='h2' label='Deliverables' />
+			<div theme='divider' />
+			<Typography
+				type='p1'
+				theme='row_fill_start'
+				label='What I will deliver to you when you hire me.'
+			/>
+			<ul style={{ paddingLeft: 25 }}>
+				<ListItem each={deliverables} arr={deliverables} />
+			</ul>
+		</div>
+
+		<div theme='column_center_fill' style={{ gap: 10 }}>
 			<Typography theme='row_fill_start' type='h2' label='Process' />
 			<div theme='divider' />
 			<Typography
@@ -354,18 +338,6 @@ const Services = ThemeContext.use(h => StageContext.use(s => ({ }, cleanup, moun
 			</div>
 		</div>
 
-		<div theme='column_center_fill' style={{ gap: 10 }}>
-			<Typography theme='row_fill_start' type='h2' label='Deliverables' />
-			<div theme='divider' />
-			<Typography
-				type='p1'
-				theme='row_fill_start'
-				label='What I will deliver to you when you hire me.'
-			/>
-			<ul style={{ paddingLeft: 25 }}>
-				<ListItem each={deliverables} arr={deliverables} />
-			</ul>
-		</div>
 
 		<div theme='column_center_fill' style={{ gap: 10 }}>
 			<Typography theme='row_fill_start' type='h2' label='Prerequisites' />
