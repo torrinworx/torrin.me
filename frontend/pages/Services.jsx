@@ -1,6 +1,7 @@
 import { StageContext, Typography, Button, Icon, Shown, ValidateContext, Validate, TextField, TextArea, Observer, ThemeContext } from 'destamatic-ui';
 
 import Email from '../utils/Email.jsx';
+import useShine from '../utils/Shine.jsx'
 
 const deliverables = [
 	{
@@ -125,11 +126,11 @@ const pricing = [
 		text: <>Recurring fee of <b>$20/month CAD</b> that will cover hosting your website, hosting your stats / lead dashboard, and 5 monthly revisions to keep your website up to date.</>
 	},
 	{
-		bold: 'Photography',
+		bold: 'Photography (optional)',
 		text: <>Hourly fee of <b>$25/hour CAD</b> where I will photograph your business, employees, services, and products to feature on your website. (Must be located within Waterloo Region)</>
 	},
 	{
-		bold: 'Additional pages',
+		bold: 'Additional pages (optional)',
 		text: <>If you need more than the standard set of pages, extra pages can be added for <b>$10 CAD per page</b>. This includes page design, implementation, and deployment to your existing site.</>,
 	},
 ];
@@ -148,8 +149,14 @@ const ListItem = ({ each, arr }) => <li key={arr.indexOf(each)}>
 	<Typography type='body' label={each.text ? each.text : each} />
 </li>;
 
-const Services = ThemeContext.use(h => StageContext.use(s => () => {
+const Services = ThemeContext.use(h => StageContext.use(s => ({ }, cleanup, mounted) => {
 	const submitted = Observer.mutable(false);
+	const contactRef = Observer.mutable(null);
+	const focused = Observer.mutable(false);
+
+	const [shines, createShine] = useShine();
+	cleanup(Observer.timer(2000).watch(t => t.value % 2 === 0 && createShine()));
+	mounted(() => createShine());
 
 	const sendContactForm = async (data) => {
 		const res = await fetch('/contact', {
@@ -279,8 +286,6 @@ const Services = ThemeContext.use(h => StageContext.use(s => () => {
 		</div>;
 	};
 
-	const contactRef = Observer.mutable(null);
-	const focused = Observer.mutable(false);
 
 	return <>
 		<div theme="column_center_fill_start" style={{ gap: 10 }}>
@@ -318,7 +323,9 @@ const Services = ThemeContext.use(h => StageContext.use(s => () => {
 							focused.set(true);
 						}
 					}}
-				/>
+				>
+					{shines}
+				</Button>
 				<Email />
 				<Button
 					title="View my portfolio and past work."

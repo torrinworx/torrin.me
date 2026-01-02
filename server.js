@@ -11,13 +11,12 @@ const __dirname = path.dirname(__filename);
 
 const isProd = process.env.NODE_ENV === 'production';
 
-console.log(isProd, process.env.NODE_ENV, process.env.ENV);
-
 /**
  * Load a simple KEY=VALUE .env file into process.env
  * Only used in development.
  */
-async function loadEnv(filePath = path.join(__dirname, '.env')) {
+const loadEnv = async (filePath = path.join(__dirname, '.env')) => {
+    console.log(filePath);
     try {
         const data = await fsp.readFile(filePath, { encoding: 'utf8' });
         for (const rawLine of data.split('\n')) {

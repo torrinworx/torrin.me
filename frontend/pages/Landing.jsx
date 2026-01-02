@@ -1,8 +1,9 @@
 import { Typography, Button, Icon, Observer, Shown, StageContext } from 'destamatic-ui';
 
 import Email from '../utils/Email.jsx';
+import useShine from '../utils/Shine.jsx'
 
-const Resume = () => {
+const Resume = ({ }, cleanup, mounted) => {
     const downloadCheck = Observer.mutable(false);
     downloadCheck.watch(() => {
         if (downloadCheck.get()) {
@@ -11,6 +12,10 @@ const Resume = () => {
             }, 5000);
         }
     });
+
+    const [shines, createShine] = useShine();
+    cleanup(Observer.timer(2000).watch(t => t.value % 2 === 0 && createShine()));
+    mounted(() => createShine());
 
     return <Button
         title='Download resume PDF.'
@@ -31,7 +36,9 @@ const Resume = () => {
 
             downloadCheck.set(true);
         }}
-    />;
+    >
+        {shines}
+    </Button>;
 };
 
 const work = [
@@ -88,7 +95,10 @@ const work = [
 const projects = [
     {
         header: 'destamatic-ui',
-        headerUrl: '/destamatic-ui',
+        headerUrl: {
+            func: (s) => s.open({ name: 'destamatic-ui' }),
+            href: '/destamatic-ui'
+        },
         description: 'A batteries-included frontend framework built on fine-grained Observers.',
         bullets: [
             'No React, no VDOM. Components, routing, SSG/SEO, theming, icons, and rich text in one stack.',
@@ -153,7 +163,7 @@ const formatDateRange = (start, end) => {
     return `${startStr} --> ${endStr}`;
 };
 
-const Card = ({ each }) => <div theme='column_fill'>
+const Card = StageContext.use(s => ({ each }) => <div theme='column_fill'>
     <Shown value={each.headerUrl}>
         <mark:then>
             <div theme='row'>
@@ -162,8 +172,8 @@ const Card = ({ each }) => <div theme='column_fill'>
                     icon={<Icon style={{ marginLeft: 3 }} name='feather:external-link' />}
                     type='link'
                     label={<Typography type='p1_bold' label={each.header} />}
-                    onClick={() => window.open(each.headerUrl, '_blank')}
-                    href={each.headerUrl}
+                    onClick={() => each.headerUrl.func ? each.headerUrl.func(s) : window.open(each.headerUrl, '_blank')}
+                    href={each.headerUrl?.href ? each.headerUrl.href : each.headerUrl}
                 />
             </div>
         </mark:then>
@@ -225,7 +235,7 @@ const Card = ({ each }) => <div theme='column_fill'>
             ))}
         </ul>
     </Shown>
-</div>;
+</div>);
 
 const skills = [
     {
@@ -272,41 +282,108 @@ const Skill = ({ each }) => {
 
 const Landing = StageContext.use(s => () => {
     return <>
-        <div theme='column_center_fill_start' style={{ gap: 10 }}>
-            <div>
-                <Typography theme='row_fill_start' type='h1' label='Torrin Leonard' />
-                <Typography theme='row_fill_start' type='p1' label={`Full-stack software engineer, ${new Date().getFullYear() - 2017} years professional experience.`} />
-                <Typography theme='row_fill_start' type='p1_bold' label='Open to roles and contracts.' />
+        <div
+            theme="column_center_fill_start"
+            style={{
+                padding: '20px 0',
+            }}
+        >
+            <div
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                }}
+            >
+                {/* LEFT: text, always on the left */}
+                <div
+                    style={{
+                        flex: '1 1 0',
+                        minWidth: 0,
+                    }}
+                >
+                    <Typography
+                        theme="row_fill_start"
+                        type="h1"
+                        label="Torrin Leonard"
+                    />
+                    <Typography
+                        theme="row_fill_start"
+                        type="p1"
+                        label={`Full-stack software engineer, ${new Date().getFullYear() - 2017
+                            } years professional experience.`}
+                    />
+                    <Typography
+                        theme="row_fill_start"
+                        type="p1_bold"
+                        label="Open to roles and contracts."
+                    />
+                </div>
 
-                <div theme='divider' />
-                <Typography
-                    theme='row_fill_start'
-                    type='p1'
-                    label='I build AI-powered web apps, custom UI frameworks, and the infrastructure they run on.'
-                />
-                <Typography type='p1_bold' label='Based in Waterloo, Ontario 🇨🇦' />
+                {/* RIGHT: headshot, always on the right */}
+                <div
+                    style={{
+                        flex: '0 0 auto',
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                    }}
+                >
+                    <img
+                        src="/headshot.webp"
+                        theme="primary_focused"
+                        style={{
+                            borderRadius: 20,
+                            // scales with viewport, but clamped
+                            width: '20vw',          // base on viewport width
+                            maxWidth: 180,          // don’t get huge on desktop
+                            minWidth: 140,           // don’t get microscopic on tiny phones
+                            height: 'auto',
+                            objectFit: 'cover',
+                            display: 'block',
+                        }}
+                    />
+                </div>
             </div>
 
-            <div theme='row_wrap_fill_start' style={{ marginTop: 10, gap: 10 }}>
+            <div theme="divider" style={{ marginTop: 16 }} />
+
+            <Typography
+                theme="row_fill_start"
+                type="p1"
+                label="I build AI-powered web apps, custom UI frameworks, and the infrastructure they run on."
+            />
+            <Typography
+                theme="row_fill_start"
+                type="p1_bold"
+                label="Based in Waterloo, Ontario 🇨🇦"
+            />
+
+            <div
+                theme="row_wrap_fill_start"
+                style={{
+                    marginTop: 10,
+                    gap: 10,
+                }}
+            >
                 <Resume />
                 <Email />
                 <Button
                     title={`Torrin Leonard's Github.`}
-                    label='Github'
-                    type='outlined'
-                    icon={<Icon name='feather:github' />}
+                    label="Github"
+                    type="outlined"
+                    icon={<Icon name="feather:github" />}
                     onClick={() => window.open('https://github.com/torrinworx', '_blank')}
-                    href='https://github.com/torrinworx'
-                    iconPosition='right'
+                    href="https://github.com/torrinworx"
+                    iconPosition="right"
                 />
                 <Button
                     title={`Torrin Leonard's services for hire.`}
-                    label='Services'
-                    type='outlined'
-                    icon={<Icon name='feather:briefcase' />}
+                    label="Services"
+                    type="outlined"
+                    icon={<Icon name="feather:briefcase" />}
                     onClick={() => s.open({ name: 'services' })}
-                    href='/services'
-                    iconPosition='right'
+                    href="/services"
+                    iconPosition="right"
                 />
             </div>
         </div>
