@@ -2,7 +2,8 @@ import { OObject } from 'destamatic-ui'
 
 const theme = OObject({
 	'*': {
-		fontFamily: '"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
+		fontFamily: '"IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif',
+
 	},
 
 	primary: OObject({
@@ -12,6 +13,14 @@ const theme = OObject({
 		$color_top: 'black',
 		$color_background: '#0B3954',
 	}),
+
+	jetbrains: {
+		fontFamily: '"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
+	},
+
+	typography: {
+		extends: 'jetbrains'
+	},
 
 	typography_body: {
 		extends: 'typography',

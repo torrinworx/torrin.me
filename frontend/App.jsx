@@ -1,4 +1,4 @@
-import { Typography, Button, Head, Title, Theme, Style, Icons, Icon, Stage, StageContext, Link, Meta, is_node, Script } from 'destamatic-ui';
+import { Typography, Button, Head, Title, Theme, Style, Icons, Icon, Stage, StageContext, Link, Meta, is_node, Script, OObject } from 'destamatic-ui';
 import IconifyIcons from "destamatic-ui/components/icons/IconifyIcons/IconifyIcons";
 
 import Blog from './pages/Blog';
@@ -171,6 +171,18 @@ const config = {
 	_theme: theme
 };
 
+const Footer = StageContext.use(s => () => <>
+	<Typography style={{ textAlign: 'center' }} type='p1' label={`© Torrin Leonard ${new Date().getFullYear()} 🇨🇦 | Built with `} />
+	<Button
+		type='link'
+		iconPosition='right'
+		icon={<Icon name='feather:external-link' />}
+		label='destamatic-ui'
+		onClick={() => s.open({ name: 'destamatic-ui' })}
+		href='https://github.com/torrinworx/destamatic-ui'
+	/>
+</>)
+
 const App = () => <Theme value={theme}>
 	<Icons value={[IconifyIcons]} >
 		<Head>
@@ -186,15 +198,7 @@ const App = () => <Theme value={theme}>
 								</div>
 							</div>
 							<div theme='row_center_fill_wrap_tight'>
-								<Typography style={{ textAlign: 'center' }} type='p1' label={`© Torrin Leonard ${new Date().getFullYear()} 🇨🇦 | Built with `} />
-								<Button
-									type='link'
-									iconPosition='right'
-									icon={<Icon name='feather:external-link' />}
-									label='destamatic-ui'
-									onClick={() => window.open('https://github.com/torrinworx/destamatic-ui', '_blank')}
-									href='https://github.com/torrinworx/destamatic-ui'
-								/>
+								<Footer />
 							</div>
 						</div>
 					</div>
