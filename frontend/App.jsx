@@ -110,6 +110,11 @@ const HeadTags = () => {
 
 const socialLinks = [
 	{
+		title: 'LinkedIn',
+		icon: 'simpleIcons:linkedin',
+		href: 'https://www.linkedin.com/in/torrin-leonard-8343a1154/'
+	},
+	{
 		title: 'Instagram',
 		icon: 'simpleIcons:instagram',
 		href: 'https://www.instagram.com/torrinleonard/',
@@ -162,6 +167,9 @@ const config = {
 		blog: Blog,
 		'destamatic-ui': DestamaticUI,
 		fallback: NotFound,
+	},
+	onOpen: () => {
+		window.scrollTo(0, 0);
 	},
 	template: ({ children }) => children,
 	ssg: true,

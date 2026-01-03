@@ -11,7 +11,6 @@ const theme = OObject({
 		$color_hover: '$shiftBrightness($color, 0.1)',
 		$color_error: 'red',
 		$color_top: 'black',
-		$color_background: '#0B3954',
 	}),
 
 	jetbrains: {
