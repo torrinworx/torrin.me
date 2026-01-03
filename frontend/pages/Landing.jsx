@@ -291,17 +291,14 @@ const Landing = StageContext.use(s => ({ }, cleanup, mounted) => {
 
 
     return <>
-        <div
-            theme="column_center_fill_start"
-            style={{
-                padding: '20px 0',
-            }}
-        >
+        <div theme="column_center_fill_start" >
             <div
+                theme='row_fill_start'
                 style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
+                    gap: 10
                 }}
             >
                 <div
