@@ -1,4 +1,4 @@
-import { StageContext, Typography, Button, Icon, Shown, Observer, ThemeContext } from 'destamatic-ui';
+import { StageContext, Typography, Button, Icon, Shown, Observer, ThemeContext, Paper } from 'destamatic-ui';
 
 import Email from '../utils/Email.jsx';
 import useShine from '../utils/Shine.jsx'
@@ -7,7 +7,7 @@ import Contact from '../utils/Contact.jsx';
 const deliverables = [
 	{
 		bold: 'Professional online presence',
-		text: 'A clean, modern, accessible website that makes your business look credible and up to date.',
+		text: 'A clean, modern, accessible website that makes your business look credible and up to date when people Google you.',
 	},
 	{
 		bold: 'Clear info about your business',
@@ -68,16 +68,12 @@ const process = [
 		bold: 'Ongoing',
 		text: "After deployment I will continue to maintain and revise your site. You will have continuous access to the statistics and lead dashboard to view your site\'s performance live."
 	},
-	{
-		bold: 'More',
-		text: 'If you need larger changes after deployment, such as new pages, new features, or a bigger redesign, we can scope that work separately and agree on a fair additional fee.',
-	},
 ];
 
 const prerequisites = [
 	{
 		bold: 'Iconography & Branding',
-		text: 'I expect assets for your businesses logos, iconography, and branding to be provided to me in the design phase. I will help you create web themes based on these assets, but I am not in the business of logo and brand design.'
+		text: 'If you have logos/branding, I\'ll use them. If not, I\'ll still build you a clean, simple theme. I just don\'t design logos from scratch.'
 	},
 	{
 		bold: 'Email',
@@ -85,7 +81,7 @@ const prerequisites = [
 	},
 	{
 		bold: 'DNS Records Access',
-		text: 'If you already have a domain and want to own it yourself, I will need access to your domains DNS records in order to deploy your website.'
+		text: 'If you already have a domain, I\'ll need access to your DNS records to point it to the new site. If this sounds confusing, don\'t worry, I\'ll guide you through it or work with your current provider.'
 	},
 ];
 
@@ -99,20 +95,15 @@ const pricing = [
 		text: <>Recurring fee of <b>$20/month CAD</b> that will cover hosting your website, hosting your stats / lead dashboard, and 5 monthly revisions to keep your website up to date.</>
 	},
 	{
-		bold: 'Photography (optional)',
-		text: <>Hourly fee of <b>$25/hour CAD</b> where I will photograph your business, employees, services, and products to feature on your website. (Must be located within Waterloo Region)</>
-	},
-	{
 		bold: 'Additional pages (optional)',
 		text: <>If you need more than the standard set of pages, extra pages can be added for <b>$50 CAD per page</b>. This includes page design, implementation, and deployment to your existing site.</>,
 	},
 ];
 
 const hero = [
-	<>Available for <b>local shops and contractors.</b></>,
-	<><b>I take full ownership of your website</b> so you don't have to think about design, hosting, tech, and lead tracking. <b>I handle it all for you.</b></>,
-	<>I'll build you a <b>modern, accessible, and fully customized</b> website for your business.</>,
-	<>You get <b>one person to call when something breaks</b>, a simple link that just works, and a clear form where customers can contact you.</>,
+	<>A <b>clean, modern, accessible</b> site that looks good on phones and computers.</>,
+	<>A <b>clear contact/quote form</b> that sends leads straight to your inbox.</>,
+	<>One person to call when something breaks. <b>I handle design, development, hosting, security, and updates for you.</b></>,
 ];
 
 const ListItem = ({ each, arr }) => <li key={arr.indexOf(each)}>
@@ -121,8 +112,6 @@ const ListItem = ({ each, arr }) => <li key={arr.indexOf(each)}>
 	</Shown>
 	<Typography type='body' label={each.text ? each.text : each} />
 </li>;
-
-
 
 const Services = ThemeContext.use(h => StageContext.use(s => ({ }, cleanup, mounted) => {
 	const contactRef = Observer.mutable(null);
@@ -133,29 +122,76 @@ const Services = ThemeContext.use(h => StageContext.use(s => ({ }, cleanup, moun
 	mounted(() => createShine());
 
 	return <>
-		<div theme="column_center_fill_start" style={{ gap: 10 }}>
-			<div>
-				<Typography
-					type="h1"
-					label="Torrin's Services"
-				/>
-				<Typography
-					type='p1_bold'
-					label='I build and maintain websites for small businesses.'
-				/>
-				<div theme="divider" />
-				<Typography
-					type="body"
+		<div theme="column_center_fill_start">
+			<div
+				theme='row_fill_start'
+				style={{
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'space-between',
+					gap: 10,
+				}}
+			>
+				<div
+					style={{
+						flex: '1 1 0',
+						minWidth: 0,
+					}}
 				>
-					I'm a full-stack software engineer with {new Date().getFullYear() - 2017} years of professional experience. <b>Based in Waterloo, Ontario 🇨🇦.</b><br />
-				</Typography>
+					<Typography
+						theme="row_fill_start"
+						type="h1"
+						label="I Build Websites"
+					/>
+					<Typography
+						theme="row_fill_start"
+						type='p1_bold'
+						label='Build your business, not websites.'
+					/>
+				</div>
 
-				<ul style={{ paddingLeft: 25 }}>
-					<ListItem each={hero} arr={hero} />
-				</ul>
+				<div
+					style={{
+						flex: '0 0 auto',
+						display: 'flex',
+						justifyContent: 'flex-end',
+					}}
+				>
+					<img
+						src="/headshot.webp"
+						theme="primary_focused"
+						style={{
+							borderRadius: 20,
+							width: '20vw',
+							maxWidth: 180,
+							minWidth: 140,
+							height: 'auto',
+							objectFit: 'cover',
+							display: 'block',
+						}}
+					/>
+				</div>
 			</div>
 
-			<div theme="row_wrap_fill_start" style={{ marginTop: 10, gap: 10 }}>
+			<div theme="divider" style={{ marginTop: 16 }} />
+
+			<div theme='row_fill_start'>
+				<Typography type='body'>
+					I design, build, and maintain websites for small businesses in Waterloo Region. <b>You get</b>:
+				</Typography>
+			</div>
+
+			<ul style={{ paddingLeft: 25 }}>
+				<ListItem each={hero} arr={hero} />
+			</ul>
+
+			<div
+				theme="row_wrap_fill_start"
+				style={{
+					marginTop: 10,
+					gap: 10,
+				}}
+			>
 				<Button
 					title="Get in touch about a new or updated website."
 					label="Request a website"
@@ -165,7 +201,7 @@ const Services = ThemeContext.use(h => StageContext.use(s => ({ }, cleanup, moun
 					onClick={() => {
 						if (contactRef.get()) {
 							contactFocused.set(true);
-							contactRef.get().scrollIntoView({ behavior: 'smooth', block: 'start' });
+							contactRef.get().scrollIntoView({ behavior: 'smooth', block: 'center' });
 						}
 					}}
 				>
@@ -198,6 +234,37 @@ const Services = ThemeContext.use(h => StageContext.use(s => ({ }, cleanup, moun
 		</div>
 
 		<div theme='column_center_fill' style={{ gap: 10 }}>
+			<Typography theme='row_fill_start' type='h2' label='Pricing' />
+			<div theme='divider' />
+			<Typography
+				type='p1'
+				theme='row_fill_start'
+			>
+				What you'll pay when you hire me.
+			</Typography>
+			<Paper theme='row_fill' style={{ padding: 20, gap: 10 }}>
+
+				<div theme='column_fill'>
+					<Typography type='body_primary'>
+						<b>Founding client pricing! My first 5 clients receive a heavily discounted setup fee and locked-in monthly rate.</b> After my first 5 clients, my pricing will increase.
+					</Typography>
+				</div>
+				<Icon name='feather:gift' size={40} />
+			</Paper>
+
+			<div theme='row_fill_start'>
+				<Typography type='p1'>
+					A standard site comes to <b>$150 setup + $20/month.</b>
+				</Typography>
+			</div>
+			<ul style={{ paddingLeft: 25 }}>
+				<ListItem each={pricing} arr={pricing} />
+			</ul>
+		</div>
+
+		<Contact ref={contactRef} focused={contactFocused} />
+
+		<div theme='column_center_fill' style={{ gap: 10 }}>
 			<Typography theme='row_fill_start' type='h2' label='Process' />
 			<div theme='divider' />
 			<Typography
@@ -205,6 +272,7 @@ const Services = ThemeContext.use(h => StageContext.use(s => ({ }, cleanup, moun
 				theme='row_fill_start'
 				label='What to expect when you hire me.'
 			/>
+			<Typography type='body' label='My goal is to keep this as low-effort for you as possible. You give me the basics about your business, I handle the tech, and you review the draft twice before we go live.' />
 			<div theme='column_fill' style={{ gap: 20 }}>
 				<ol>
 					<ListItem each={process} arr={process} />
@@ -226,22 +294,6 @@ const Services = ThemeContext.use(h => StageContext.use(s => ({ }, cleanup, moun
 			</ul>
 		</div>
 
-		<div theme='column_center_fill' style={{ gap: 10 }}>
-			<Typography theme='row_fill_start' type='h2' label='Pricing' />
-			<div theme='divider' />
-			<div theme='row_fill_start'>
-				<Typography
-					type='p1'
-				>
-					What you'll pay when you hire me. <b>Founding client pricing!</b>
-				</Typography>
-			</div>
-			<ul style={{ paddingLeft: 25 }}>
-				<ListItem each={pricing} arr={pricing} />
-			</ul>
-		</div>
-
-		<Contact ref={contactRef} focused={contactFocused} />
 	</>;
 }));
 
