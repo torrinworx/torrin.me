@@ -180,7 +180,10 @@ const Contact = StageContext.use(s => ThemeContext.use(h => ({ focused }) => {
 								}}
 								signal={submit}
 							/>
-
+							{/*
+							TODO: Weird issue on mobile when clicking a button that scrolls to this ref, for some reason the text area is focused on
+							automatically even though I don't tap on it.
+							*/}
 							<TextArea placeholder='Message*' value={message} type='outlined_fill' />
 							<Validate
 								value={message}
