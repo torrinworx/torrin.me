@@ -173,9 +173,9 @@ const server = http.createServer(async (req, res) => {
                 return;
             }
 
-            resend.emails.send({
-                from: `"${fullName}" <${process.env.SMTP_USER}>`,
-                to: process.env.SMTP_TO || process.env.SMTP_USER,
+            await resend.emails.send({
+                from: `"${fullName}" <${process.env.EMAIL}>`,
+                to: process.env.SMTP_TO || process.env.EMAIL,
                 subject: 'New contact form submission',
                 text: `
 New message from torrin.me/services form:
