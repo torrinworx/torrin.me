@@ -264,6 +264,12 @@ const Services = ThemeContext.use(h => StageContext.use(s => ({ }, cleanup, moun
 
 		<Contact ref={contactRef} focused={contactFocused} />
 
+		<div >
+			<Typography theme='row_fill_start' type='h2' label='Why Me?' />
+			<div theme='divider' />
+			<Typography type='body' label={`I've been a software engineer for ${new Date().getFullYear() - 2021} years, building web apps and tools for companies. I'm now focusing on helping local businesses in Waterloo get simple, effective websites without agency overhead. I'm currently taking on my first 5 small-business clients at a discounted rate while I build out this portfolio. That's why my pricing is lower than typical agencies.`} />
+		</div>
+
 		<div theme='column_center_fill' style={{ gap: 10 }}>
 			<Typography theme='row_fill_start' type='h2' label='Process' />
 			<div theme='divider' />
@@ -279,7 +285,6 @@ const Services = ThemeContext.use(h => StageContext.use(s => ({ }, cleanup, moun
 				</ol>
 			</div>
 		</div>
-
 
 		<div theme='column_center_fill' style={{ gap: 10 }}>
 			<Typography theme='row_fill_start' type='h2' label='Prerequisites' />
