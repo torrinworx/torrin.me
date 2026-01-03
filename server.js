@@ -178,12 +178,11 @@ const server = http.createServer(async (req, res) => {
                 to: process.env.SMTP_TO || process.env.EMAIL,
                 subject: 'New contact form submission',
                 text: `
-New message from torrin.me/services form:
+New message from torrin.me/${page} form:
 
 Name: ${fullName}
 Email: ${email}
 Phone: ${phone || 'N/A'}
-Page: ${page}
 
 Message:
 ${message}
