@@ -4,7 +4,7 @@ import fsp from 'fs/promises';
 import path from 'path';
 import url from 'url';
 import { fileURLToPath } from 'url';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -39,6 +39,8 @@ if (!isProd) {
     await loadEnv();
 }
 
+const resend = new Resend(process.env.RESEND_API);
+
 // paths / config
 const rootDir = path.resolve(
     __dirname,
@@ -60,14 +62,6 @@ const mimeTypes = {
     '.ico': 'image/x-icon',
     '.txt': 'text/plain; charset=utf-8',
 };
-
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
-});
 
 // Helper to parse JSON body from POST
 const parseJsonBody = (req) =>
@@ -165,7 +159,6 @@ const server = http.createServer(async (req, res) => {
     const parsedUrl = url.parse(req.url || '/');
     const pathname = decodeURIComponent(parsedUrl.pathname || '/');
 
-    // API: /contact
     if (pathname === '/contact' && req.method === 'POST') {
         try {
             const data = await parseJsonBody(req);
@@ -177,7 +170,7 @@ const server = http.createServer(async (req, res) => {
                 return;
             }
 
-            const mailOptions = {
+            resend.emails.send({
                 from: `"${fullName}" <${process.env.SMTP_USER}>`,
                 to: process.env.SMTP_TO || process.env.SMTP_USER,
                 subject: 'New contact form submission',
@@ -190,10 +183,8 @@ Phone: ${phone || 'N/A'}
 
 Message:
 ${message}
-`.trim(),
-            };
-
-            await transporter.sendMail(mailOptions);
+`.trim()
+            });
 
             res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
             res.end(JSON.stringify({ ok: true }));
