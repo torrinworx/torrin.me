@@ -16,7 +16,6 @@ const isProd = process.env.NODE_ENV === 'production';
  * Only used in development.
  */
 const loadEnv = async (filePath = path.join(__dirname, '.env')) => {
-    console.log(filePath);
     try {
         const data = await fsp.readFile(filePath, { encoding: 'utf8' });
         for (const rawLine of data.split('\n')) {
@@ -40,9 +39,6 @@ if (!isProd) {
 }
 
 const resend = new Resend(process.env.RESEND_API);
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('RESEND_API:', process.env.RESEND_API ? 'set' : 'MISSING');
-console.log('resend: ', resend);
 
 // paths / config
 const rootDir = path.resolve(
@@ -174,9 +170,9 @@ const server = http.createServer(async (req, res) => {
             }
 
             await resend.emails.send({
-                from: `"${fullName}" <${process.env.EMAIL}>`,
-                to: process.env.SMTP_TO || process.env.EMAIL,
-                subject: 'New contact form submission',
+                from: `"${fullName}" <${process.env.EMAIL_FROM}>`,
+                to: process.env.EMAIL_TO.split(',').map(s => s.trim()),
+                subject: process.env.EMAIL_SUBJECT,
                 text: `
 New message from torrin.me/${page} form:
 
