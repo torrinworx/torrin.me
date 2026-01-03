@@ -2,6 +2,7 @@ import { Typography, Button, Icon, Observer, Shown, StageContext } from 'destama
 
 import Email from '../utils/Email.jsx';
 import useShine from '../utils/Shine.jsx'
+import Contact from '../utils/Contact.jsx';
 
 const Resume = ({ }, cleanup, mounted) => {
     const downloadCheck = Observer.mutable(false);
@@ -18,7 +19,7 @@ const Resume = ({ }, cleanup, mounted) => {
     mounted(() => createShine());
 
     return <Button
-        title='Download resume PDF.'
+        title={`Download Torrin Leonard's resume PDF.`}
         type='contained'
         iconPosition='right'
         label={downloadCheck.map(c => c ? 'Downloaded!' : 'Resume')}
@@ -280,7 +281,15 @@ const Skill = ({ each }) => {
     </li>;
 };
 
-const Landing = StageContext.use(s => () => {
+const Landing = StageContext.use(s => ({ }, cleanup, mounted) => {
+    const contactRef = Observer.mutable(null);
+    const contactFocused = Observer.mutable(false);
+
+    const [shines, createShine] = useShine();
+    cleanup(Observer.timer(2000).watch(t => t.value % 2 === 0 && createShine()));
+    mounted(() => createShine());
+
+
     return <>
         <div
             theme="column_center_fill_start"
@@ -295,7 +304,6 @@ const Landing = StageContext.use(s => () => {
                     justifyContent: 'space-between',
                 }}
             >
-                {/* LEFT: text, always on the left */}
                 <div
                     style={{
                         flex: '1 1 0',
@@ -320,7 +328,6 @@ const Landing = StageContext.use(s => () => {
                     />
                 </div>
 
-                {/* RIGHT: headshot, always on the right */}
                 <div
                     style={{
                         flex: '0 0 auto',
@@ -333,10 +340,9 @@ const Landing = StageContext.use(s => () => {
                         theme="primary_focused"
                         style={{
                             borderRadius: 20,
-                            // scales with viewport, but clamped
-                            width: '20vw',          // base on viewport width
-                            maxWidth: 180,          // don’t get huge on desktop
-                            minWidth: 140,           // don’t get microscopic on tiny phones
+                            width: '20vw',
+                            maxWidth: 180,
+                            minWidth: 140,
                             height: 'auto',
                             objectFit: 'cover',
                             display: 'block',
@@ -366,6 +372,30 @@ const Landing = StageContext.use(s => () => {
                 }}
             >
                 <Resume />
+                <Button
+                    title="Get in touch with Torrin Leonard."
+                    label="Contact"
+                    type="contained"
+                    icon={<Icon name="feather:mail" />}
+                    iconPosition="right"
+                    onClick={() => {
+                        if (contactRef.get()) {
+                            contactFocused.set(true);
+                            contactRef.get().scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }}
+                >
+                    {shines}
+                </Button>
+                <Button
+                    title={`Torrin Leonard's services for hire.`}
+                    label="Services"
+                    type="outlined"
+                    icon={<Icon name="feather:briefcase" />}
+                    onClick={() => s.open({ name: 'services' })}
+                    href="/services"
+                    iconPosition="right"
+                />
                 <Email />
                 <Button
                     title={`Torrin Leonard's Github.`}
@@ -374,15 +404,6 @@ const Landing = StageContext.use(s => () => {
                     icon={<Icon name="feather:github" />}
                     onClick={() => window.open('https://github.com/torrinworx', '_blank')}
                     href="https://github.com/torrinworx"
-                    iconPosition="right"
-                />
-                <Button
-                    title={`Torrin Leonard's services for hire.`}
-                    label="Services"
-                    type="outlined"
-                    icon={<Icon name="feather:briefcase" />}
-                    onClick={() => s.open({ name: 'services' })}
-                    href="/services"
                     iconPosition="right"
                 />
             </div>
@@ -408,6 +429,8 @@ const Landing = StageContext.use(s => () => {
                 <Skill each={skills} />
             </ul>
         </div>
+
+        <Contact ref={contactRef} focused={contactFocused} />
     </>;
 });
 

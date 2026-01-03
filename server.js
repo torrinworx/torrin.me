@@ -165,7 +165,7 @@ const server = http.createServer(async (req, res) => {
     if (pathname === '/contact' && req.method === 'POST') {
         try {
             const data = await parseJsonBody(req);
-            const { email, fullName, phone, message } = data;
+            const { email, fullName, phone, message, page } = data;
 
             if (!email || !fullName || !message) {
                 res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -183,6 +183,7 @@ New message from torrin.me/services form:
 Name: ${fullName}
 Email: ${email}
 Phone: ${phone || 'N/A'}
+Page: ${page}
 
 Message:
 ${message}
