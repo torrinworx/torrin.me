@@ -43,7 +43,16 @@ const theme = OObject({
 	divider: {
 		marginTop: 10,
 		marginBottom: 10
-	}
+	},
+
+	paper: {
+		extends: 'radius_shadow_primary',
+		background: '$color',
+		color: '$contrast_text($color_top)',
+		padding: 10,
+		maxWidth: 'inherit',
+		maxHeight: 'inherit',
+	},
 });
 
 export default theme
