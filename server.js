@@ -40,6 +40,9 @@ if (!isProd) {
 }
 
 const resend = new Resend(process.env.RESEND_API);
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('RESEND_API:', process.env.RESEND_API ? 'set' : 'MISSING');
+console.log('resend: ', resend);
 
 // paths / config
 const rootDir = path.resolve(
