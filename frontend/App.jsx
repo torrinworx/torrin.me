@@ -164,6 +164,7 @@ const config = {
 	acts: {
 		landing: Landing,
 		freelance: Freelance,
+		services: Freelance,
 		blog: Blog,
 		'destamatic-ui': DestamaticUI,
 		fallback: NotFound,
