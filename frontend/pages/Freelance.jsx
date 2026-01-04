@@ -4,6 +4,9 @@ import Email from '../utils/Email.jsx';
 import useShine from '../utils/Shine.jsx'
 import Contact from '../utils/Contact.jsx';
 
+const setup = 200;
+const monthly = 30;
+
 const deliverables = [
 	{
 		bold: 'Professional online presence',
@@ -88,11 +91,11 @@ const prerequisites = [
 const pricing = [
 	{
 		bold: 'Setup',
-		text: <>A setup fee of <b>$150 CAD</b> for the work needed to design, implement, and deploy your website.</>,
+		text: <>A setup fee of <b>${setup} CAD</b> for the work needed to design, implement, and deploy your website.</>,
 	},
 	{
 		bold: 'Maintenance',
-		text: <>Recurring fee of <b>$20/month CAD</b> that will cover hosting your website, hosting your stats / lead dashboard, and 5 monthly revisions to keep your website up to date.</>
+		text: <>Recurring fee of <b>${monthly}/month CAD</b> that will cover hosting your website, hosting your stats / lead dashboard, and 5 monthly revisions to keep your website up to date.</>
 	},
 	{
 		bold: 'Additional pages (optional)',
@@ -113,7 +116,7 @@ const ListItem = ({ each, arr }) => <li key={arr.indexOf(each)}>
 	<Typography type='body' label={each.text ? each.text : each} />
 </li>;
 
-const Services = ThemeContext.use(h => StageContext.use(s => ({ }, cleanup, mounted) => {
+const Freelance = ThemeContext.use(h => StageContext.use(s => ({ }, cleanup, mounted) => {
 	const contactRef = Observer.mutable(null);
 	const contactFocused = Observer.mutable(false);
 
@@ -254,7 +257,7 @@ const Services = ThemeContext.use(h => StageContext.use(s => ({ }, cleanup, moun
 
 			<div theme='row_fill_start'>
 				<Typography type='p1'>
-					A standard site comes to <b>$150 setup + $20/month.</b>
+					A standard site comes to <b>${setup} setup + ${monthly}/month.</b>
 				</Typography>
 			</div>
 			<ul style={{ paddingLeft: 25 }}>
@@ -302,4 +305,4 @@ const Services = ThemeContext.use(h => StageContext.use(s => ({ }, cleanup, moun
 	</>;
 }));
 
-export default Services;
+export default Freelance;

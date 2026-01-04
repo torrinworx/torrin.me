@@ -8,7 +8,7 @@ import fonts from './utils/fonts.js';
 import theme from './utils/theme.js';
 import JsonLd from './utils/JsonLd.jsx';
 import Landing from './pages/Landing.jsx';
-import Services from './pages/Services.jsx';
+import Freelance from './pages/Freelance.jsx';
 import NotFound from './pages/NotFound.jsx';
 
 /*
@@ -163,7 +163,7 @@ const SocialButton = ({ each }) => <Button
 const config = {
 	acts: {
 		landing: Landing,
-		services: Services,
+		freelance: Freelance,
 		blog: Blog,
 		'destamatic-ui': DestamaticUI,
 		fallback: NotFound,
