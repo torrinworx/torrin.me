@@ -31,10 +31,14 @@ npm i --production
 node "$SCRIPT_DIR/server.js"
 EOF
 
-chmod +x "$BUILD_DIR/run.sh"
+cp ./setup.sh "$BUILD_DIR/setup.sh"
 
-# Create zip with everything inside build/
-zip -r "$ZIP_FILE" "$BUILD_DIR"
+chmod +x "$BUILD_DIR/run.sh"
+chmod +x "$BUILD_DIR/setup.sh"
+
+pushd "$BUILD_DIR" >/dev/null
+zip -r "../$ZIP_FILE" .
+popd >/dev/null
 
 # Show sizes
 du -sh "$BUILD_DIR"
