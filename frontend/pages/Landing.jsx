@@ -385,12 +385,12 @@ const Landing = StageContext.use(s => ({ }, cleanup, mounted) => {
                     {shines}
                 </Button>
                 <Button
-                    title={`Torrin Leonard's services for hire.`}
-                    label="Services"
+                    title={`Torrin's freelance services for hire.`}
+                    label="Freelance"
                     type="outlined"
                     icon={<Icon name="feather:briefcase" />}
-                    onClick={() => s.open({ name: 'services' })}
-                    href="/services"
+                    onClick={() => s.open({ name: 'freelance' })}
+                    href="/freelance"
                     iconPosition="right"
                 />
                 <Email />
