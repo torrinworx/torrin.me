@@ -151,35 +151,6 @@ const Contact = StageContext.use(s => ThemeContext.use(h => ({ focused }) => {
 								signal={submit}
 							/>
 
-							<TextField placeholder="Phone Number*" value={phone} type='outlined_fill' />
-							<Validate
-								value={phone}
-								validate={value => {
-									let val = value.get() || '';
-									const digits = val.replace(/\D/g, '');
-
-									if (!digits) {
-										value.set('');
-										return 'Phone number is required.';
-									}
-
-									let formatted = digits;
-									if (digits.length > 3) {
-										formatted = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}`;
-									}
-									if (digits.length > 6) {
-										formatted = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
-									}
-
-									value.set(formatted);
-
-									if (digits.length < 10) {
-										return 'Please enter a valid 10-digit phone number.';
-									}
-									return '';
-								}}
-								signal={submit}
-							/>
 							{/*
 							TODO: Weird issue on mobile when clicking a button that scrolls to this ref, for some reason the text area is focused on
 							automatically even though I don't tap on it.
@@ -209,7 +180,6 @@ const Contact = StageContext.use(s => ThemeContext.use(h => ({ focused }) => {
 									await sendContactForm({
 										fullName: fullName.get(),
 										email: email.get(),
-										phone: phone.get(),
 										message: message.get(),
 										page: s.observer.path('current').get(),
 									});
