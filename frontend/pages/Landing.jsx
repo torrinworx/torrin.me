@@ -82,7 +82,7 @@ const work = [
         start: '2013-06-01',
         end: '2025-06-01',
         image: '/worX4youLogo.jpg',
-        url: 'https://www.worx4you.com/',
+        url: 'https://worx4you.com/',
         style: { borderRadius: '50%' },
         imgName: 'worX4you',
         header: 'Automation and Accessibility QA',
