@@ -56,9 +56,9 @@ const HeadTags = () => {
 		<Link rel="canonical" href={siteUrl} />
 		<Link
 			rel="icon"
-			href="/favicon.svg"
+			href="/favicon.png"
 			sizes="any"
-			type="image/svg+xml"
+			type="image/png"
 		/>
 
 		<Style>
