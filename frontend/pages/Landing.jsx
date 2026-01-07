@@ -370,6 +370,7 @@ const Landing = StageContext.use(s => ({ }, cleanup, mounted) => {
             >
                 <Resume />
                 <Button
+                    id='get-in-touch'
                     title="Get in touch with Torrin Leonard."
                     label="Contact"
                     type="contained"
