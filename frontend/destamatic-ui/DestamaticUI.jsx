@@ -34,7 +34,7 @@ const Landing = ThemeContext.use(h => StageContext.use(s => () => {
 
     const Examples = ({ each: example }) => {
         const { header, example: ExampleComp } = example;
-        console.log(s.props._theme)
+
         return <DropDown
             open={example.open}
             label={<Typography type="p1" label={header} />}
