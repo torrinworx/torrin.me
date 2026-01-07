@@ -11,12 +11,16 @@ import Landing from './pages/Landing.jsx';
 import Freelance from './pages/Freelance.jsx';
 import NotFound from './pages/NotFound.jsx';
 
-import { init, track } from '@plausible-analytics/tracker'
+let track;
 
-init({
-	domain: 'torrin.me',
-	endpoint: 'https://stats.torrin.me/api/event',
-});
+if (!is_node()) {
+  const plausible = await import('@plausible-analytics/tracker');
+  plausible.init({
+    domain: 'torrin.me',
+    endpoint: 'https://stats.torrin.me/api/event',
+  });
+  track = plausible.track;
+}
 
 const HeadTags = () => {
 	const siteUrl = 'https://torrin.me';
