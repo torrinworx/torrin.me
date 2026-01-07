@@ -1,4 +1,4 @@
-import { Typography, Button, Head, Title, Theme, Style, Icons, Icon, Stage, StageContext, Link, Meta, is_node, Script, OObject } from 'destamatic-ui';
+import { Typography, Button, Head, Title, Theme, Style, Icons, Icon, Stage, StageContext, Link, Meta, is_node, Script, InputContext } from 'destamatic-ui';
 import IconifyIcons from "destamatic-ui/components/icons/IconifyIcons/IconifyIcons";
 
 import Blog from './pages/Blog';
@@ -11,21 +11,12 @@ import Landing from './pages/Landing.jsx';
 import Freelance from './pages/Freelance.jsx';
 import NotFound from './pages/NotFound.jsx';
 
-/*
-Notes on theme and styles:
+import { init, track } from '@plausible-analytics/tracker'
 
-JetBrains Mono is used for headers, and any text used in inputs like button labels.
-
-IBM Plex Sans is used for paragraph text.
-
-Purposefully chose only three typography styles for simplicity:
-h1: main hero style headers
-h2: sub headers/content headers to be used inside text content
-body: text body content
-
-This drastically reduces the multiplicity of font sizes around the site that need to be
-worried about.
-*/
+init({
+	domain: 'torrin.me',
+	endpoint: 'https://stats.torrin.me/api/event',
+});
 
 const HeadTags = () => {
 	const siteUrl = 'https://torrin.me';
@@ -160,7 +151,7 @@ const SocialButton = ({ each }) => <Button
 	href={each.href}
 />;
 
-const config = {
+const stage = {
 	acts: {
 		landing: Landing,
 		freelance: Freelance,
@@ -191,31 +182,43 @@ const Footer = StageContext.use(s => () => <>
 		onClick={() => s.open({ name: 'destamatic-ui' })}
 		href='https://github.com/torrinworx/destamatic-ui'
 	/>
-</>)
+</>);
+
+const onClick = (event) => {
+	console.log("event", event);
+	track(event.type, { props: { id: event.id } });
+};
+
+const inputs = {
+	meta: { scope: 'root' },
+	onClick: onClick,
+};
 
 const App = () => <Theme value={theme}>
-	<Icons value={[IconifyIcons]} >
-		<Head>
-			<HeadTags />
-			<StageContext value={config}>
-				<div theme='column_fill_center'>
-					<div theme='column_fill_center' style={{ padding: 20, gap: 60, maxWidth: 800 }} >
-						<Stage />
-						<div theme='column_fill_center' >
-							<div theme='column_center_fill' style={{ gap: 10 }}>
-								<div theme='row_wrap_fill_center' style={{ gap: 10 }}>
-									<SocialButton each={socialLinks} />
+	<InputContext value={inputs} >
+		<Icons value={[IconifyIcons]} >
+			<Head>
+				<HeadTags />
+				<StageContext value={stage}>
+					<div theme='column_fill_center'>
+						<div theme='column_fill_center' style={{ padding: 20, gap: 60, maxWidth: 800 }} >
+							<Stage />
+							<div theme='column_fill_center' >
+								<div theme='column_center_fill' style={{ gap: 10 }}>
+									<div theme='row_wrap_fill_center' style={{ gap: 10 }}>
+										<SocialButton each={socialLinks} />
+									</div>
 								</div>
-							</div>
-							<div theme='row_center_fill_wrap_tight'>
-								<Footer />
+								<div theme='row_center_fill_wrap_tight'>
+									<Footer />
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-			</StageContext>
-		</Head>
-	</Icons>
-</Theme >;
+				</StageContext>
+			</Head>
+		</Icons>
+	</InputContext>
+</Theme>;
 
 export default App;

@@ -1,5 +1,20 @@
 import { OObject } from 'destamatic-ui'
 
+/*
+Notes on theme and styles:
+
+JetBrains Mono is used for headers, and any text used in inputs like button labels.
+
+IBM Plex Sans is used for paragraph text.
+
+Purposefully chose only three typography styles for simplicity:
+h1: main hero style headers
+h2: sub headers/content headers to be used inside text content
+body: text body content
+
+This drastically reduces the multiplicity of font sizes around the site that need to be
+worried about.
+*/
 const theme = OObject({
 	'*': {
 		fontFamily: '"IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif',
