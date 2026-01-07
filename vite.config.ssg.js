@@ -53,7 +53,7 @@ export default defineConfig({
 		extensions: ['.js', '.ts', '.tsx', '.jsx'],
 	},
 	ssr: {
-		noExternal: ['country-region-data', 'three'],
+		noExternal: ['country-region-data'],
 	},
 	build: {
 		ssr: true,
