@@ -1,4 +1,20 @@
-import { Typography, Button, Head, Title, Theme, Style, Icons, Icon, Stage, StageContext, Link, Meta, is_node, Script, InputContext } from 'destamatic-ui';
+import {
+	Typography,
+	Button,
+	Head,
+	Title,
+	Theme,
+	Style,
+	Icons,
+	Icon,
+	Stage,
+	StageContext,
+	Link,
+	Meta,
+	is_node,
+	Script,
+	InputContext
+} from 'destamatic-ui';
 import IconifyIcons from "destamatic-ui/components/icons/IconifyIcons/IconifyIcons";
 
 import Blog from './pages/Blog';
@@ -14,12 +30,12 @@ import NotFound from './pages/NotFound.jsx';
 let track;
 
 if (!is_node()) {
-  const plausible = await import('@plausible-analytics/tracker');
-  plausible.init({
-    domain: 'torrin.me',
-    endpoint: 'https://stats.torrin.me/api/event',
-  });
-  track = plausible.track;
+	const plausible = await import('@plausible-analytics/tracker');
+	plausible.init({
+		domain: 'torrin.me',
+		endpoint: 'https://stats.torrin.me/api/event',
+	});
+	track = plausible.track;
 }
 
 const HeadTags = () => {
@@ -189,7 +205,6 @@ const Footer = StageContext.use(s => () => <>
 </>);
 
 const onClick = (event) => {
-	console.log("event", event);
 	track(event.type, { props: { id: event.id } });
 };
 

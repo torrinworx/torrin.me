@@ -189,6 +189,7 @@ const Card = StageContext.use(s => ({ each }) => <div theme='column_fill'>
             <Shown value={each.image}>
                 <img
                     src={each.image}
+                    alt={`Logo of ${each.imgName}`}
                     style={{
                         boxSizing: 'border-box',
                         width: 'clamp(1rem, 15vw, 2rem)',
@@ -335,6 +336,7 @@ const Landing = StageContext.use(s => ({ }, cleanup, mounted) => {
                     <img
                         src="/headshot.webp"
                         theme="primary_focused"
+                        alt='Profile image of Torrin Leonard.'
                         style={{
                             borderRadius: 20,
                             width: '20vw',
