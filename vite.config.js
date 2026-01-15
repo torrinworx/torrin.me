@@ -1,4 +1,3 @@
-// vite.config.js
 import path from 'path';
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'url';

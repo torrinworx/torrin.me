@@ -23,7 +23,6 @@ const theme = OObject({
 
 	primary: OObject({
 		$color: '#4AA9FC',
-		$color_hover: '$shiftBrightness($color, 0.1)',
 		$color_error: 'red',
 		$color_top: 'black',
 	}),

@@ -168,8 +168,6 @@ const Contact = StageContext.use(s => ThemeContext.use(h => ({ focused }) => {
 							/>
 						</div>
 
-						<Typography />
-
 						<Button
 							type="contained"
 							label="Submit"
