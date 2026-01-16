@@ -15,6 +15,7 @@ body: text body content
 This drastically reduces the multiplicity of font sizes around the site that need to be
 worried about.
 */
+
 const theme = OObject({
 	'*': {
 		fontFamily: '"IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif',
@@ -25,6 +26,11 @@ const theme = OObject({
 		$color: '#4AA9FC',
 		$color_error: 'red',
 		$color_top: 'black',
+	}),
+
+	antiPrimary: OObject({
+		$color: 'white',
+		$color_top: '#4AA9FC',
 	}),
 
 	jetbrains: {
