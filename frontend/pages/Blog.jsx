@@ -175,6 +175,7 @@ const BlogLanding = StageContext.use(stage => () => {
 			<Typography type="p1" label={each.description} />
 			<div theme="row_center">
 				<Button
+					theme='antiPrimary'
 					type="outlined"
 					label="View"
 					onClick={() => stage.open({ name })}
