@@ -105,39 +105,26 @@ const Landing = ThemeContext.use(h => StageContext.use(s => () => {
                 style={{ gap: 20 }}
             >
                 <div theme="column_fill_center" style={{ gap: 12 }}>
-                    <Button
-                        type="text"
-                        label={
-                            <Typography
-                                type="h1"
-                                label="destamatic-ui"
-                                style={{ color: 'inherit' }}
-                            />
-                        }
-                        icon={
-                            <Icon
-                                name="feather:external-link"
-                                size="clamp(1.75rem, 1.75vw + 0.875rem, 3rem)"
-                                style={{ marginLeft: 5 }}
-                            />
-                        }
-                        iconPosition="right"
-                        href="https://github.com/torrinworx/destamatic-ui"
-                        onClick={() =>
-                            window.open(
-                                'https://github.com/torrinworx/destamatic-ui',
-                                '_blank'
-                            )
-                        }
+                    <Typography
+                        type="h1"
+                        label="destamatic-ui"
+                        style={{ color: '$color' }}
                     />
 
                     <Typography
+                        style={{ textAlign: 'center' }}
                         type="p1"
                         label="A batteries-included frontend framework built on fine-grained Observers."
                     />
                     <Typography
+                        style={{ textAlign: 'center' }}
                         type="p1"
                         label="No React, no VDOM, no Next, no Redux. Just fast DOM updates, integrated components, routing, SSG/SEO, theming, and rich text in one lightweight stack."
+                    />
+                    <Typography
+                        style={{ textAlign: 'center' }}
+                        type="p1"
+                        label="Used in production for 5+ years at Equator Studios and across personal projects."
                     />
                 </div>
 
@@ -175,12 +162,21 @@ const Landing = ThemeContext.use(h => StageContext.use(s => () => {
                         }
                         iconPosition="left"
                     />
-                </div>
-
-                <div theme="row" style={{ gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
-                    <Typography
-                        type="p2"
-                        label="Used in production for 5+ years at Equator Studios and across personal projects."
+                    <Button
+                        type="outlined"
+                        label="Discord"
+                        href="https://discord.gg/BJMPpVwdhz"
+                        onClick={() =>
+                            window.open('https://discord.gg/BJMPpVwdhz', '_blank')
+                        }
+                        icon={
+                            <Icon
+                                name="simpleIcons:discord"
+                                size="clamp(0.85rem, 0.85vw + 0.4rem, 1.4rem)"
+                                style={{ marginRight: 4 }}
+                            />
+                        }
+                        iconPosition="left"
                     />
                 </div>
             </div>
