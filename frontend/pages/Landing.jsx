@@ -290,7 +290,6 @@ const Landing = StageContext.use(s => ({ }, cleanup, mounted) => {
     cleanup(Observer.timer(2000).watch(t => t.value % 2 === 0 && createShine()));
     mounted(() => createShine());
 
-
     return <>
         <div theme="column_center_fill_start" >
             <div
