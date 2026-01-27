@@ -13,7 +13,8 @@ import {
 	Meta,
 	is_node,
 	Script,
-	InputContext
+	InputContext,
+	PopupContext,
 } from 'destamatic-ui';
 import IconifyIcons from "destamatic-ui/components/icons/IconifyIcons/IconifyIcons";
 
@@ -219,21 +220,24 @@ const App = () => <Theme value={theme}>
 			<Head>
 				<HeadTags />
 				<StageContext value={stage}>
-					<div theme='column_fill_center'>
-						<div theme='column_fill_center' style={{ padding: 20, gap: 60, maxWidth: 800 }} >
-							<Stage />
-							<div theme='column_fill_center' >
-								<div theme='column_center_fill' style={{ gap: 10 }}>
-									<div theme='row_wrap_fill_center' style={{ gap: 10 }}>
-										<SocialButton each={socialLinks} />
+					<PopupContext>
+						<div theme='column_fill_center'>
+							<div theme='column_fill_center' style={{ padding: 20, gap: 60, maxWidth: 800 }} >
+								<Stage />
+								<div theme='column_fill_center' >
+									<div theme='column_center_fill' style={{ gap: 10 }}>
+										<div theme='row_wrap_fill_center' style={{ gap: 10 }}>
+											<SocialButton each={socialLinks} />
+										</div>
 									</div>
-								</div>
-								<div theme='row_center_fill_wrap_tight'>
-									<Footer />
+									<div theme='row_center_fill_wrap_tight'>
+										<Footer />
+									</div>
 								</div>
 							</div>
 						</div>
-					</div>
+					</PopupContext>
+
 				</StageContext>
 			</Head>
 		</Icons>
