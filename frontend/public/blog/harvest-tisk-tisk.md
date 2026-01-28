@@ -165,4 +165,4 @@ Which is… honestly kind of great imo.
 
 ---
 
-If you wanna read more, checkout my other posts [here](/blog) or visit my [home page](/).
+Checkout my guide to setting up Kimai [here](/blog/kimai-setup). If you wanna read more, checkout my other posts [here](/blog) or visit my [home page](/).
