@@ -88,7 +88,7 @@ But I *have* seen this pattern enough times to recognize the shape of it:
 4. Squeeze revenue now, worry about retention later  
 5. If customers leave… that’s a next-quarter problem
 
-A pretty common term people use for the worst version of this is asset stripping **asset stripping**, extracting value (cash, fees, whatever) and leaving the company weaker on the other side. I theorize a version of this is happening over at Harvest right now. In extreme scinarios, the company dies as a result. The recent Hudson's Bay bankruptcy is a good example of this process. A 356 year old company, one that shaped the fabric of Canadian nationhood, obliterated in 2 years of private equity management.
+A pretty common term people use for the worst version of this is **asset stripping**, extracting value (cash, fees, whatever) and leaving the company weaker on the other side. I theorize a version of this is happening over at Harvest right now. In extreme scinarios, the company dies as a result. The recent Hudson's Bay bankruptcy is a good example of this process. A 356 year old company, one that shaped the fabric of Canadian nationhood, obliterated in 2 years of private equity management.
 
 And here’s the funny part:
 
@@ -165,4 +165,4 @@ Which is… honestly kind of great imo.
 
 ---
 
-If you wanna read more, checkout my other posts [here](/blog).
+If you wanna read more, checkout my other posts [here](/blog) or visit my [home page](/).
