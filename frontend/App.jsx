@@ -168,7 +168,6 @@ const SocialButton = ({ each }) => <Button
 	title={each.title}
 	type='text'
 	icon={<Icon name={each.icon} size={30} />}
-	onClick={() => window.open(each.href, '_blank')}
 	href={each.href}
 />;
 
