@@ -149,7 +149,7 @@ const socialLinks = [
 	{
 		title: 'Medium',
 		icon: 'simpleIcons:medium',
-		href: 'https://medium.com/@torrin_1169',
+		href: 'https://medium.com/@torrin_49072',
 	},
 	{
 		title: 'dev.to',
