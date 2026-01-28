@@ -70,7 +70,7 @@ Our homelab was basically a one-time hardware purchase. After that, it’s a fix
 
 ## What I actually did
 ---
-I’m a fullstack dev, I main Ubuntu on a framework 16, and I LOVE homelab stuff. Been building out a full height rack for years. Currently I have three machines: one is a dedicated 70Tb NAS, another has 2 3080 Ti's for llms + docker containers, the other is dedicated to nginx, routing and more docker. This wasn’t heroicly built. It was just modern infra being very accessible now. I spun up the Kimai, an open source Harvest alternative in an afternoon of tinkering.
+I’m a fullstack dev, I main Ubuntu on a framework 16, and I LOVE homelab stuff. Been building out a full height rack for years. Currently I have three machines: one is a dedicated 70Tb NAS, another has 2 3080 Ti's for llms + docker containers, the other is dedicated to nginx, routing and more docker. This wasn’t heroicly built. It was just modern infra being very accessible now. I spun up the Kimai in an afternoon of tinkering.
 
 At a high level, it’s Kimai running in Docker, with Docker running inside a VM on Proxmox. I put Nginx in front so it’s reachable at a clean URL, used Cloudflare for DNS and proxying, and got HTTPS set up with free SSL through Cloudflare. For backups, I rely on Proxmox ZFS snapshots, because I enjoy sleeping.
 
