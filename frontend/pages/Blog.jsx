@@ -20,7 +20,7 @@ import JsonLd, {
 	WEBSITE_ID,
 } from '../utils/JsonLd';
 
-const BlogPage = StageContext.use(s => suspend(LoadingDots, async (_, cleanup) => {
+const BlogPage = StageContext.use(s => suspend(LoadingDots, async () => {
 	const slug = s.current;
 	const meta = s.blogs?.[`${slug}.md`] || s.blogs?.[slug];
 
@@ -144,17 +144,15 @@ const BlogPage = StageContext.use(s => suspend(LoadingDots, async (_, cleanup) =
 					href="/blog"
 				/>
 			</div>
-			<Paper>
-				<Typography
-					type="p1"
-					label={`Created on: ${formatDate(meta.created)}`}
-				/>
-				<Typography
-					type="p1"
-					label={`Modified on: ${formatDate(meta.modified)}`}
-				/>
-				<Markdown value={content} />
-			</Paper>
+			{/* <Typography
+				type="p1"
+				label={`Created on: ${formatDate(meta.created)}`}
+			/>
+			<Typography
+				type="p1"
+				label={`Modified on: ${formatDate(meta.modified)}`}
+			/> */}
+			<Markdown value={content} />
 		</div>
 	</>;
 }));
