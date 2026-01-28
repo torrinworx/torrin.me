@@ -5,6 +5,7 @@ A Time Tracking App Wanted $28,800, So I Replaced It With a Homelab
 A time tracking tool tried to turn a boring $9.99/seat SaaS into a $28,800/year line item with “usage fees” and forced credit card billing. So I self-hosted Kimai on our homelab instead, and it got me thinking: private equity price hikes might be accidentally accelerating open source adoption as more teams realize they can run the tools they need on a cheap VPS or a Mac mini.
 
 # A Time Tracking App Wanted **$28,800**, So I Replaced It With a Homelab
+---
 
 My parents run a software testing + consulting company called [worX4you](https://worx4you.com). They’ve been doing it for **17 years**. They’re stable, they’re good at what they do, and their business is not complicated:
 
