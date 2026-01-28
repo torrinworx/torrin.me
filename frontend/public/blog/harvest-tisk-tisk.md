@@ -13,7 +13,7 @@ My parents run a software testing + consulting company called [worX4you](https:/
 
 For years they used **Harvest** for time tracking. Simple product, fair price. Everyone moves on with their life.
 
-Then Harvest changed their pricing after an acquisition (reported in 2024 as involving private equity firms Montagu and TA Associates). And the vibe went from “boring SaaS you forget about” to “wait, are you serious?” pretty fast.
+Then Harvest changed their pricing after an acquisition (in 2025 Harvest was acquired by Bending Spoons, an Italian technology conglomerate.). The vibe went from “boring SaaS you forget about” to “wait, are you serious?” pretty fast.
 
 We were paying **$9.99 USD per seat**. Then my parents recieved an email about a pricing change: **$17.50 per seat**, plus a new “usage” layer where the options were either:
 
