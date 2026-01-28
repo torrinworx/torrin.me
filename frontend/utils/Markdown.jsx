@@ -177,8 +177,7 @@ const defaultModifiers = [
       href={p.href}
       title={p.title || p.href}
       label={p.text}
-      onClick={() => window.open(p.href, "_blank")}
-      iconPosition="right"
+	  iconPosition="right"
       icon={<Icon name="feather:external-link" style={{ display: "inline-block" }} />}
     />
   </span>;

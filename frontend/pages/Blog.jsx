@@ -178,7 +178,7 @@ const BlogLanding = StageContext.use(stage => () => {
 					label="View"
 					onClick={() => stage.open({ name })}
 					href={`/blog/${name}`}
-				/>
+					/>
 			</div>
 		</Paper>;
 	};
