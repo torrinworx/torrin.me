@@ -3,44 +3,8 @@ import { Typography, Button, Icon, Observer, Shown, StageContext } from 'destama
 import Email from '../utils/Email.jsx';
 import useShine from '../utils/Shine.jsx'
 import Contact from '../utils/Contact.jsx';
+import Resume from '../utils/Resume.jsx';
 
-const Resume = ({ }, cleanup, mounted) => {
-    const downloadCheck = Observer.mutable(false);
-    downloadCheck.watch(() => {
-        if (downloadCheck.get()) {
-            setTimeout(() => {
-                downloadCheck.set(false);
-            }, 5000);
-        }
-    });
-
-    const [shines, createShine] = useShine();
-    cleanup(Observer.timer(2000).watch(t => t.value % 2 === 0 && createShine()));
-    mounted(() => createShine());
-
-    return <Button
-        title={`Download Torrin Leonard's resume PDF.`}
-        type='contained'
-        iconPosition='right'
-        label={downloadCheck.map(c => c ? 'Downloaded!' : 'Resume')}
-        icon={downloadCheck.map(c => c
-            ? <Icon name='feather:check' />
-            : <Icon name='feather:download' />)}
-        onClick={() => {
-            const a = document.createElement('a');
-            a.href = 'Torrin_Leonard_Resume.pdf';
-            a.download = 'Torrin_Leonard_Resume.pdf';
-            a.style.display = 'none';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-
-            downloadCheck.set(true);
-        }}
-    >
-        {shines}
-    </Button>;
-};
 
 const work = [
     {

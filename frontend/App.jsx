@@ -26,7 +26,9 @@ import theme from './utils/theme.js';
 import JsonLd from './utils/JsonLd.jsx';
 import Landing from './pages/Landing.jsx';
 import Freelance from './pages/Freelance.jsx';
+import ContactPage from './pages/Contact.jsx';
 import NotFound from './pages/NotFound.jsx';
+import Header from './utils/Header.jsx';
 
 let track;
 
@@ -177,6 +179,7 @@ const stage = {
 		freelance: Freelance,
 		services: Freelance,
 		blog: Blog,
+		contact: ContactPage,
 		'destamatic-ui': DestamaticUI,
 		fallback: NotFound,
 	},
@@ -221,7 +224,8 @@ const App = () => <Theme value={theme}>
 				<StageContext value={stage}>
 					<PopupContext>
 						<div theme='column_fill_center'>
-							<div theme='column_fill_center' style={{ padding: 20, gap: 60, maxWidth: 800 }} >
+							<div theme='column_fill_center' style={{ padding: 20, gap: 60, maxWidth: 800, width: '100%', boxSizing: 'border-box' }} >
+								<Header />
 								<Stage />
 								<div theme='column_fill_center' >
 									<div theme='column_center_fill' style={{ gap: 10 }}>

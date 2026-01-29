@@ -1,6 +1,6 @@
 import { Button, Icon, Observer } from 'destamatic-ui'
 
-const Email = () => {
+const Email = ({ type = 'outlined'}) => {
     const emailCheck = Observer.mutable(false);
     emailCheck.watch(() => {
         if (emailCheck.get()) {
@@ -11,8 +11,8 @@ const Email = () => {
     });
 
     return <Button
+        type={type}
         title='Copy email to clipboard.'
-        type='outlined'
         iconPosition='right'
         label={emailCheck.map(c => c ? 'Copied!' : 'Email')}
         icon={emailCheck.map(c => c
