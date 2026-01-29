@@ -10,6 +10,7 @@ Theme.define({
 	},
 
 	markdown_codeblock: {
+		display: 'block',
 		marginTop: 10,
 		marginBottom: 10,
 		padding: 10,
@@ -18,6 +19,11 @@ Theme.define({
 		whiteSpace: 'pre',
 		fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
 		background: 'rgba(0, 0, 0, 0.08)',
+		width: '100%',
+		maxWidth: '100%',
+		minWidth: 0,
+		boxSizing: 'border-box',
+		overflowWrap: 'normal',
 	},
 
 	markdown_inlinecode: {
@@ -170,17 +176,17 @@ const defaultModifiers = [
 			const p = parseLinkToken(match);
 			if (!p) return match;
 
-			return   <span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle" }}>
-    <Button
-      type="link"
-      track={false}
-      href={p.href}
-      title={p.title || p.href}
-      label={p.text}
-	  iconPosition="right"
-      icon={<Icon name="feather:external-link" style={{ display: "inline-block" }} />}
-    />
-  </span>;
+			return <span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle" }}>
+				<Button
+					type="link"
+					track={false}
+					href={p.href}
+					title={p.title || p.href}
+					label={p.text}
+					iconPosition="right"
+					icon={<Icon name="feather:external-link" style={{ display: "inline-block" }} />}
+				/>
+			</span>;
 		},
 	},
 

@@ -135,23 +135,7 @@ const BlogPage = StageContext.use(s => suspend(LoadingDots, async () => {
 			}}
 		/>
 
-		<div theme="column" style={{ gap: 40 }}>
-			<div theme="row_spread">
-				<Button
-					type="outlined"
-					label="Back"
-					onClick={() => s.open({ name: 'blog' })}
-					href="/blog"
-				/>
-			</div>
-			{/* <Typography
-				type="p1"
-				label={`Created on: ${formatDate(meta.created)}`}
-			/>
-			<Typography
-				type="p1"
-				label={`Modified on: ${formatDate(meta.modified)}`}
-			/> */}
+		<div theme="column" style={{ gap: 40, width: '100%', minWidth: 0 }}>
 			<Markdown value={content} />
 		</div>
 	</>;
@@ -178,7 +162,7 @@ const BlogLanding = StageContext.use(stage => () => {
 					label="View"
 					onClick={() => stage.open({ name })}
 					href={`/blog/${name}`}
-					/>
+				/>
 			</div>
 		</Paper>;
 	};
@@ -225,15 +209,6 @@ const BlogLanding = StageContext.use(stage => () => {
 				},
 			}}
 		/>
-
-		<div theme="row">
-			<Button
-				type="outlined"
-				label="Back"
-				onClick={() => stage.parent.open({ name: 'landing' })}
-				href="/"
-			/>
-		</div>
 
 		<Card each={blogs} />
 	</>;
