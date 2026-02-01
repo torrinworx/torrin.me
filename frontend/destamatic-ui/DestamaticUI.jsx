@@ -1,6 +1,5 @@
 import {
     StageContext,
-    Paper,
     Typography,
     Button,
     Icon,
