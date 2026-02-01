@@ -14,7 +14,7 @@ import {
 import Editor from '../editor/Editor';
 
 const destamaticUiExamples = import.meta.glob(
-	'../../destamatic-ui/components/**/**/*.example.jsx',
+	'../../../destamatic-ui/components/**/**/*.example.jsx',
 	{ as: 'raw', eager: true }
 );
 
@@ -144,8 +144,6 @@ const DestamLib = () => <Paper>
 </Paper>;
 
 const Playground = StageContext.use(s => () => {
-	s.parent.props.enabled.set(false);
-
 	const libs = ['destamatic-ui', 'destam-dom', 'destam'];
 
 	// KEY FIX: acts are defined immediately (not later in an async loader)

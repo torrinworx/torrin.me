@@ -4,29 +4,14 @@ import {
     Button,
     Icon,
     ThemeContext,
-    Title,
-    Meta,
-    Link,
-    Head,
-    Stage,
-    Default,
+
     DropDown,
 } from 'destamatic-ui';
-
-import JsonLd, {
-    SITE_NAME,
-    BASE_URL,
-    AUTHOR_NAME,
-    AUTHOR_ID,
-    WEBSITE_ID,
-} from '../../utils/JsonLd';
-// import examples from './Examples';
-// import Playground from './Playground';
 
 const Demo = ThemeContext.use(h => StageContext.use(s => () => {
     const examples = Object.values(
         import.meta.glob(
-            '../../destamatic-ui//components/**/**/*.example.jsx',
+            '../../../destamatic-ui/components/**/**/*.example.jsx',
             { eager: true }
         )
     ).map(e => e.default);
@@ -44,61 +29,8 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
         </DropDown>;
     };
 
-    const pageUrl = `${BASE_URL}/destamatic-ui`;
-    const pageTitle = `destamatic-ui Demo | ${SITE_NAME}`;
-    const pageDescription = 'Interactive demo of destamatic-ui components: inputs, display, utilities, theming, and more.';
-    const imageUrl = 'https://torrin.me/profile.dark.png';
 
     return <>
-        <Head>
-            <Title>{pageTitle}</Title>
-
-            <Meta name="description" content={pageDescription} />
-            <Meta name="author" content={AUTHOR_NAME} />
-            <Meta name="robots" content="index,follow" />
-
-            <Link rel="canonical" href={pageUrl} />
-
-            <Meta property="og:type" content="website" />
-            <Meta property="og:title" content={pageTitle} />
-            <Meta property="og:description" content={pageDescription} />
-            <Meta property="og:url" content={pageUrl} />
-            <Meta property="og:site_name" content={SITE_NAME} />
-            <Meta property="og:image" content={imageUrl} />
-
-            <Meta name="twitter:card" content="summary_large_image" />
-            <Meta name="twitter:title" content={pageTitle} />
-            <Meta name="twitter:description" content={pageDescription} />
-            <Meta name="twitter:image" content={imageUrl} />
-
-            <JsonLd
-                extraNodes={[{
-                    '@type': ['WebPage', 'Product', 'SoftwareApplication'],
-                    '@id': `${pageUrl}#webpage`,
-                    name: 'destamatic-ui Demo',
-                    url: pageUrl,
-                    description: pageDescription,
-                    inLanguage: 'en-CA',
-                    isPartOf: {
-                        '@id': WEBSITE_ID,
-                    },
-                    about: {
-                        '@id': AUTHOR_ID,
-                    },
-                    applicationCategory: 'WebApplication',
-                    operatingSystem: 'Any',
-                }]}
-            />
-            {/* TODO: Move back button to controls somehow?  */}
-            {/* <div theme="row">
-                <Button
-                    type="outlined"
-                    label="Back"
-                    onClick={() => s.open({ name: 'landing' })}
-                    href="/"
-                />
-            </div> */}
-
             <div
                 theme="column_fill_center"
                 style={{ gap: 20 }}
@@ -179,14 +111,6 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
                     />
                 </div>
             </div>
-            {/* <Paper theme='column_fill_center' style={{ background: 'none' }}>
-                <Typography type='h1' label='Components' />
-                <Typography type='p1' label='A sample of some of the components and tools built into destamatic-ui.' />
-
-                <Paper theme='row_tight' style={{ padding: 5 }}>
-                    <Category each={categories} />
-                </Paper>
-            </Paper> */}
 
             <div theme='column_fill' style={{
                 height: '100%',
@@ -194,46 +118,7 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
             }}>
                 <Examples each={examples} />
             </div>
-        </Head>
     </>;
 }));
 
-const DestamaticUI = StageContext.use(s => () => {
-    const config = {
-        acts: {
-            landing: Landing,
-            // playground: Playground,
-        },
-        initial: 'landing',
-        template: Default,
-        ssg: true,
-        truncateInitial: true,
-        _theme: s.props._theme,
-    };
-
-    return <StageContext value={config}>
-        <Stage />
-    </StageContext>;
-});
-
 export default Demo;
-
-
-{/* point to bench marks: https://krausest.github.io/js-framework-benchmark/current.html */ }
-{/* TODO: Create destamatic-ui landing page, explain destam, show side by side difference between destamatic-ui and react.
-    landing page needs to be highly marketable.
-    TODO: update destamatic-ui template repository, link here. Explain how to get started. 
-    TODO: Create destamatic-ui/demo and migrate this code there
-    TODO: Create destamatic-ui/docs and build a docs page, seo indexable through stages, dynamically built based on destamatic-ui/components folder in current submodule.
-    
-<Typography type='p1' label='No React, no VDOM. UI, state, routing, SSG, SEO, themes, rich text, and more. All tightly integrated for the best frontend developer experience.' />
-
-    NEED NEED NEED Interactive playground setup for users so that they can just test it out without investing time in setting up a repo.
-
-    TODO: In docs, create a list of example projects, each project has a playground, each project has a nice big documentation, each project has a youtube tutorial on how to build it from scratch.
-
-    Hero section:
-    > A batteries-included frontend framework built on fine-grained Observers. No React, no VDOM, no Next. Just fast, reactive DOM, integrated components, routing, SSG/SEO, theming, and rich text in one lightweight stack.
-
-    destamatic-ui is for: Indie devs and small teams who are tired of wiring React + Next + 6 other libraries
-*/}

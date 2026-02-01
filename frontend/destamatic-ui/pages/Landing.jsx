@@ -1,4 +1,4 @@
-import { Typography, Icon, Theme, Button, Observer, LoadingDots, suspend } from 'destamatic-ui';
+import { Typography, Icon, Theme, Button, Observer, LoadingDots, suspend, StageContext } from 'destamatic-ui';
 
 import useShine from '../../utils/Shine.jsx';
 import JsxBlock from '../utils/JsxBlock.jsx';
@@ -6,27 +6,6 @@ import Paper from '../../utils/Paper.jsx';
 import OnlinePulse from '../../utils/OnlinePulse.jsx';
 
 Theme.define({
-	landingHero: {
-		gap: 18,
-		alignItems: 'center',
-	},
-
-	landingHeroCopy: {
-		gap: 12,
-		alignItems: 'center',
-		width: '100%',
-		maxWidth: 980,
-	},
-
-	landingChipDot: {
-		width: 8,
-		height: 8,
-		borderRadius: 99,
-		background: '$color',
-		boxShadow: '0 0 0 0 $alpha($color, 0.55)',
-		animation: 'landingPulse 1.4s infinite',
-	},
-
 	landingStats: {
 		display: 'grid',
 		gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -77,19 +56,12 @@ Theme.define({
 		gap: 16,
 		width: '100%',
 	},
-
-	landingFooterCta: {
-		padding: 20,
-		borderRadius: 22,
-		border: '1px solid $alpha($color_top, 0.10)',
-		background: '$alpha($color, 0.06)',
-	},
 });
 
 const size2 = 'clamp(1.45rem, 1.2rem + 1.1vw, 2rem)';
 const size3 = 'clamp(1.05rem, 0.95rem + 0.5vw, 1.25rem)';
 
-const Cta = (_, cleanup, mounted) => {
+const Cta = StageContext.use(stage => (_, cleanup, mounted) => {
 	const [shines, createShine] = useShine();
 	cleanup(Observer.timer(2000).watch(t => t.value % 2 === 0 && createShine()));
 	mounted(() => createShine());
@@ -99,9 +71,9 @@ const Cta = (_, cleanup, mounted) => {
 			<Button
 				type="contained"
 				label="Get started"
-				href="https://github.com/torrinworx/destamatic-ui"
+				href="/destamatic-ui/docs"
 				onClick={() =>
-					window.open('https://github.com/torrinworx/destamatic-ui', '_blank')
+					stage.open({ name: 'docs' })
 				}
 				iconPosition="right"
 				icon={<Icon name="feather:arrow-right" />}
@@ -130,7 +102,7 @@ const Cta = (_, cleanup, mounted) => {
 			icon={<Icon name="simpleIcons:discord" />}
 		/>
 	</div>;
-};
+});
 
 const Landing = () => {
 	const codeDestam = `import { Observer, Button } from 'destamatic-ui';
@@ -195,7 +167,7 @@ const Counter = () => {
 		return <Button inline type='link' label={`${release.tag_name}`} href='https://github.com/torrinworx/destamatic-ui/releases/latest' />
 	})
 
-	return <div theme='column_fill_center' style={{ gap: 200 }}>
+	return <div theme='content_col' style={{ gap: 200 }}>
 		<div theme='row_center' style={{ gap: 10 }}>
 			<OnlinePulse />
 			<Typography type="p1" label='Live now' />

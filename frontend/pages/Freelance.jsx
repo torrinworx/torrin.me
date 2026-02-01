@@ -125,7 +125,7 @@ const Freelance = ThemeContext.use(h => StageContext.use(s => ({ }, cleanup, mou
 	mounted(() => createShine());
 
 	return <>
-		<div theme="column_center_fill_start">
+		<div theme="content_col_start">
 			<div
 				theme='row_fill_start'
 				style={{
@@ -223,7 +223,7 @@ const Freelance = ThemeContext.use(h => StageContext.use(s => ({ }, cleanup, mou
 			</div>
 		</div>
 
-		<div theme='column_center_fill' style={{ gap: 10 }}>
+		<div theme='content_col'>
 			<Typography theme='row_fill_start' type='h2' label='Deliverables' />
 			<div theme='divider' />
 			<Typography
@@ -236,7 +236,7 @@ const Freelance = ThemeContext.use(h => StageContext.use(s => ({ }, cleanup, mou
 			</ul>
 		</div>
 
-		<div theme='column_center_fill' style={{ gap: 10 }}>
+		<div theme='content_col'>
 			<Typography theme='row_fill_start' type='h2' label='Pricing' />
 			<div theme='divider' />
 			<Typography
@@ -267,13 +267,13 @@ const Freelance = ThemeContext.use(h => StageContext.use(s => ({ }, cleanup, mou
 
 		<Contact ref={contactRef} focused={contactFocused} />
 
-		<div >
+		<div theme='content_col'>
 			<Typography theme='row_fill_start' type='h2' label='Why Me?' />
 			<div theme='divider' />
 			<Typography type='body' label={`I've been a software engineer for ${new Date().getFullYear() - 2021} years, building web apps and tools for companies. I'm now focusing on helping local businesses in Waterloo get simple, effective websites without agency overhead. I'm currently taking on my first 5 small-business clients at a discounted rate while I build out this portfolio. That's why my pricing is lower than typical agencies.`} />
 		</div>
 
-		<div theme='column_center_fill' style={{ gap: 10 }}>
+		<div theme='content_col'>
 			<Typography theme='row_fill_start' type='h2' label='Process' />
 			<div theme='divider' />
 			<Typography
@@ -289,7 +289,7 @@ const Freelance = ThemeContext.use(h => StageContext.use(s => ({ }, cleanup, mou
 			</div>
 		</div>
 
-		<div theme='column_center_fill' style={{ gap: 10 }}>
+		<div theme='content_col'>
 			<Typography theme='row_fill_start' type='h2' label='Prerequisites' />
 			<div theme='divider' />
 			<Typography

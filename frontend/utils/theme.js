@@ -75,6 +75,16 @@ const theme = OObject({
 		maxWidth: 'inherit',
 		maxHeight: 'inherit',
 	},
+
+	content: {
+		padding: 20,
+		maxWidth: 800,
+		gap: 20,
+	},
+
+	content_col: {
+		extends: 'column_fill_center'
+	}
 });
 
 export default theme

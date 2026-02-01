@@ -22,12 +22,12 @@ import fonts from './utils/fonts.js';
 import theme from './utils/theme.js';
 import JsonLd from './utils/JsonLd.jsx';
 import Header from './utils/Header.jsx';
+import Contact from './utils/Contact.jsx';
 
 import Blog from './pages/Blog';
 import Landing from './pages/Landing.jsx';
 import NotFound from './pages/NotFound.jsx';
 import Freelance from './pages/Freelance.jsx';
-import ContactPage from './pages/Contact.jsx';
 
 import DestamaticUI from './destamatic-ui/App.jsx';
 
@@ -180,7 +180,7 @@ const stage = {
 		freelance: Freelance,
 		services: Freelance,
 		blog: Blog,
-		contact: ContactPage,
+		contact: () => <Contact />,
 		'destamatic-ui': DestamaticUI,
 		fallback: NotFound,
 	},
@@ -196,17 +196,23 @@ const stage = {
 	_theme: theme
 };
 
-const Footer = StageContext.use(s => () => <>
-	<Typography style={{ textAlign: 'center' }} type='p1' label={`© Torrin Leonard ${new Date().getFullYear()} 🇨🇦 | Built with `} />
-	<Button
-		type='link'
-		iconPosition='right'
-		icon={<Icon name='feather:external-link' />}
-		label='destamatic-ui'
-		onClick={() => s.open({ name: 'destamatic-ui' })}
-		href='https://github.com/torrinworx/destamatic-ui'
-	/>
-</>);
+const Footer = StageContext.use(s => () => <div theme='content_col' >
+	<div theme='column_center_fill' style={{ gap: 10 }}>
+		<div theme='row_wrap_fill_center' style={{ gap: 10 }}>
+			<SocialButton each={socialLinks} />
+		</div>
+	</div>
+	<div theme='row_center_fill_wrap_tight'>
+		<Typography style={{ textAlign: 'center' }} type='p1' label={`© Torrin Leonard ${new Date().getFullYear()} 🇨🇦 | Built with `} />
+		<Button
+			type='link'
+			iconPosition='right'
+			icon={<Icon name='feather:external-link' />}
+			label='destamatic-ui'
+			onClick={() => s.open({ name: 'destamatic-ui' })}
+			href='https://github.com/torrinworx/destamatic-ui'
+		/>		</div>
+</div>);
 
 const onClick = (event) => {
 	track(event.type, { props: { id: event.id } });
@@ -224,24 +230,12 @@ const App = () => <Theme value={theme}>
 				<HeadTags />
 				<StageContext value={stage}>
 					<PopupContext>
-						<div theme='column_fill_center'>
-							<div theme='column_fill_center' style={{ padding: 20, gap: 60, maxWidth: 800 }} >
-								<Header />
-								<Stage />
-								<div theme='column_fill_center' >
-									<div theme='column_center_fill' style={{ gap: 10 }}>
-										<div theme='row_wrap_fill_center' style={{ gap: 10 }}>
-											<SocialButton each={socialLinks} />
-										</div>
-									</div>
-									<div theme='row_center_fill_wrap_tight'>
-										<Footer />
-									</div>
-								</div>
-							</div>
+						<div theme='column_fill_center' style={{ padding: 20, gap: 60 }} >
+							<Header />
+							<Stage />
+							<Footer />
 						</div>
 					</PopupContext>
-
 				</StageContext>
 			</Head>
 		</Icons>

@@ -19,7 +19,6 @@ const Contact = StageContext.use(s => ThemeContext.use(h => ({ focused }) => {
 
 	const fullName = Observer.mutable('');
 	const email = Observer.mutable('');
-	const phone = Observer.mutable('');
 	const message = Observer.mutable('');
 	const submit = Observer.mutable(false);
 	const allValid = Observer.mutable(true);
@@ -66,10 +65,9 @@ const Contact = StageContext.use(s => ThemeContext.use(h => ({ focused }) => {
 	return <div
 		ref
 		theme={[
-			'column_center_fill_radius',
+			'content_col_radius',
 			visualFocusTheme,
 		]}
-		style={{ gap: 10 }}
 		onMouseDown={() => {
 			focused.set(false);
 		}}
