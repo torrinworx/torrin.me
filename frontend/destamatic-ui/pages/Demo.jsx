@@ -19,11 +19,11 @@ import JsonLd, {
     AUTHOR_NAME,
     AUTHOR_ID,
     WEBSITE_ID,
-} from '../utils/JsonLd';
+} from '../../utils/JsonLd';
 // import examples from './Examples';
 // import Playground from './Playground';
 
-const Landing = ThemeContext.use(h => StageContext.use(s => () => {
+const Demo = ThemeContext.use(h => StageContext.use(s => () => {
     const examples = Object.values(
         import.meta.glob(
             '../../destamatic-ui//components/**/**/*.example.jsx',
@@ -216,7 +216,7 @@ const DestamaticUI = StageContext.use(s => () => {
     </StageContext>;
 });
 
-export default DestamaticUI;
+export default Demo;
 
 
 {/* point to bench marks: https://krausest.github.io/js-framework-benchmark/current.html */ }

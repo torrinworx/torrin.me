@@ -18,19 +18,18 @@ import {
 } from 'destamatic-ui';
 import IconifyIcons from "destamatic-ui/components/icons/IconifyIcons/IconifyIcons";
 
-import Blog from './pages/Blog';
-import DestamaticUI from './destamatic-ui/DestamaticUI';
-
 import fonts from './utils/fonts.js';
 import theme from './utils/theme.js';
 import JsonLd from './utils/JsonLd.jsx';
+import Header from './utils/Header.jsx';
+
+import Blog from './pages/Blog';
 import Landing from './pages/Landing.jsx';
+import NotFound from './pages/NotFound.jsx';
 import Freelance from './pages/Freelance.jsx';
 import ContactPage from './pages/Contact.jsx';
-import NotFound from './pages/NotFound.jsx';
-import Header from './utils/Header.jsx';
-import { default as DUILanding } from './destamatic-ui/Landing.jsx';
 
+import DestamaticUI from './destamatic-ui/App.jsx';
 
 let track;
 
@@ -182,7 +181,7 @@ const stage = {
 		services: Freelance,
 		blog: Blog,
 		contact: ContactPage,
-		'destamatic-ui': DUILanding,
+		'destamatic-ui': DestamaticUI,
 		fallback: NotFound,
 	},
 	onOpen: () => {

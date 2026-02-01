@@ -1,3 +1,5 @@
+// Old and not used anywhere. Might get rid of? 
+
 import {
 	Paper,
 	Typography,
