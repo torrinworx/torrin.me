@@ -3,6 +3,8 @@ import Hamburger from './Hamburger.jsx';
 import Email from './Email.jsx';
 import Resume from './Resume.jsx';
 
+// TODO: json-ld, link/meta/title tags etc.
+
 const Header = StageContext.use(s => () => {
     // Get the root stage (for navigation and visibility check)
     const getRootStage = (stage) => {

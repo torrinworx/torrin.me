@@ -175,7 +175,7 @@ const Counter = () => {
 				label="destamatic-ui"
 				style={{
 					textAlign: 'center',
-					fontSize: 'clamp(2.4rem, 3rem + 4vw, 6rem)',
+					fontSize: 'clamp(2.4rem, 2.6rem + 2.6vw, 10rem)',
 					color: '$color',
 				}}
 			/>
@@ -183,14 +183,14 @@ const Counter = () => {
 			<Typography
 				type="h2"
 				label="The tools you need to start building now."
-				style={{ textAlign: 'center' }}
+				style={{ textAlign: 'center', maxWidth: '400px' }}
 			/>
 		</div>
 
-		<div theme='column_fill_contentContainer' style={{ gap: 50 }}>
+		<div theme='column_fill_contentContainer' style={{ gap: 20 }}>
 			<div theme='column_fill_center'>
 				<Typography
-					type="h2"
+					type="h2_bold"
 					label="An all-in-one alternative to the React + MUI + Redux + Next stack."
 					style={{ color: '$color', textAlign: 'center' }}
 				/>
@@ -245,35 +245,32 @@ const Counter = () => {
 			</div>
 		</div>
 
-		<div theme='column_fill_contentContainer'>
-			<div theme='column_fill_center' style={{ gap: 60 }}>
-
-				<div theme='column_fill_center_landingHeroCopy'>
-
-
-
-					<div theme="landingStats">
-						<div theme="landingStat">
-							<Typography type="p1_bold" label="No VDOM" />
-							<Typography type="p1" label="Observers update exactly what changed. No rerender trees." style={{ opacity: 0.85 }} />
-						</div>
-						<div theme="landingStat">
-							<Typography type="p1_bold" label="Batteries included" />
-							<Typography type="p1" label="Components, themes, routing/SSG, rich text, validation, inputs." style={{ opacity: 0.85 }} />
-						</div>
-						<div theme="landingStat">
-							<Typography type="p1_bold" label="One package" />
-							<Typography type="p1" label="Less glue code, fewer dependencies, less framework tax." style={{ opacity: 0.85 }} />
-						</div>
-					</div>
+		<div theme='column_fill_center_contentContainer'>
+			<div theme="landingStats">
+				<div theme="landingStat">
+					<Typography type="p1_bold" label="No VDOM" />
+					<Typography type="p2" label="Observers update exactly what changed. No rerender trees." />
+				</div>
+				<div theme="landingStat">
+					<Typography type="p1_bold" label="Batteries included" />
+					<Typography type="p2" label="Components, themes, routing/SSG, rich text, validation, inputs." />
+				</div>
+				<div theme="landingStat">
+					<Typography type="p1_bold" label="One package" />
+					<Typography type="p2" label="Less glue code, fewer dependencies, less framework tax." />
 				</div>
 			</div>
+		</div>
 
-			<div theme="divider" />
+		<div theme='column_fill_contentContainer' style={{ gap: 20 }}>
+			<div theme='column_fill_center'>
+				<Typography type="h2_bold" label="Simple mental model." style={{ color: '$color', textAlign: 'center' }} />
+				<Typography type="h2_bold" label="Serious performance." style={{ color: '$color', textAlign: 'center' }} />
+				<div theme="divider" />
+			</div>
 
 			<div theme="landingSplit">
 				<div>
-					<Typography type="h2_bold" label="Simple mental model. Serious performance." style={{ color: '$color' }} />
 					<Typography
 						type="p1"
 						label="Stop juggling state libraries, effects, memo rules, and rerender gotchas. Build UI with a tiny set of primitives that compose cleanly."
@@ -282,19 +279,19 @@ const Counter = () => {
 
 					<div theme="landingBullets">
 						<div theme="landingBullet">
-							<Icon name="feather:check" size={size3} />
+							<Icon name="feather:check" />
 							<Typography type="p1" label="Observers drive UI updates directly — no reconciliation step." />
 						</div>
 						<div theme="landingBullet">
-							<Icon name="feather:check" size={size3} />
+							<Icon name="feather:check" />
 							<Typography type="p1" label="Theming is reactive and cascading (context-based), without a styling maze." />
 						</div>
 						<div theme="landingBullet">
-							<Icon name="feather:check" size={size3} />
+							<Icon name="feather:check" />
 							<Typography type="p1" label="Stage handles routing, URL resolution, and SSG/SEO-friendly rendering." />
 						</div>
 						<div theme="landingBullet">
-							<Icon name="feather:check" size={size3} />
+							<Icon name="feather:check" />
 							<Typography type="p1" label="Input components + optional tracking hooks built into the stack." />
 						</div>
 					</div>
@@ -338,6 +335,13 @@ const Counter = () => {
 					</Paper>
 				</div>
 			</div>
+		</div>
+
+
+		{/* Everything below this point needs to be updated: */}
+
+		<div theme='column_fill_contentContainer'>
+
 
 			<div theme="divider" />
 
