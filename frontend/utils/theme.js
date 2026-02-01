@@ -40,6 +40,10 @@ const theme = OObject({
 		extends: 'jetbrains'
 	},
 
+	radius: {
+		borderRadius: 18,
+	},
+
 	typography_body: {
 		extends: 'typography',
 		fontFamily: '"IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif',
@@ -67,7 +71,7 @@ const theme = OObject({
 		extends: 'radius_shadow_primary',
 		background: '$color',
 		color: '$contrast_text($color_top)',
-		padding: 10,
+		padding: 16,
 		maxWidth: 'inherit',
 		maxHeight: 'inherit',
 	},

@@ -11,7 +11,7 @@ import {
 	Select,
 	Default,
 } from 'destamatic-ui';
-import Editor from './editor/Editor';
+import Editor from '../editor/Editor';
 
 const destamaticUiExamples = import.meta.glob(
 	'../../destamatic-ui/components/**/**/*.example.jsx',
@@ -169,64 +169,61 @@ const Playground = StageContext.use(s => () => {
 			/>
 		);
 
-		return (
-			<>
-				{/* your existing hero UI... */}
-				<Paper theme='column_fill_center' style={{ background: 'none', paddingBottom: 10 }}>
-					<div theme="column_fill_center" style={{ gap: 12 }}>
-						<Typography type='h1' label='Playground' />
-						<Typography type='p1' label='Try building with the destam stack before installing anything.' />
-					</div>
-
-					<div theme="row" style={{ gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
-						<Button
-							type="contained"
-							label="Documentation"
-							href="/destamatic-ui/documentation"
-							onClick={() => window.open('/destamatic-ui/documentation', '_self')}
-							icon={
-								<Icon
-									name="feather:book-open"
-									size="clamp(0.85rem, 0.85vw + 0.4rem, 1.4rem)"
-									style={{ marginLeft: 4 }}
-								/>
-							}
-							iconPosition="right"
-						/>
-						<Button
-							type="outlined"
-							label="GitHub"
-							href="https://github.com/torrinworx/destamatic-ui"
-							onClick={() =>
-								window.open('https://github.com/torrinworx/destamatic-ui', '_blank')
-							}
-							icon={
-								<Icon
-									name="feather:github"
-									size="clamp(0.85rem, 0.85vw + 0.4rem, 1.4rem)"
-									style={{ marginRight: 4 }}
-								/>
-							}
-							iconPosition="left"
-						/>
-					</div>
-				</Paper>
-
-				<Typography type='p1' label='Explore examples from the three libraries to see how they are built!' />
-
-				<div theme='column_center' style={{ gap: 10 }}>
-					<Paper theme='row_tight' style={{ padding: 5 }}>
-						<Libraries each={libs} />
-					</Paper>
+		return <>
+			<Paper theme='column_fill_center' style={{ background: 'none', paddingBottom: 10 }}>
+				<div theme="column_fill_center" style={{ gap: 12 }}>
+					<Typography type='h1' label='Playground' />
+					<Typography type='p1' label='Try building with the destam stack before installing anything.' />
 				</div>
-				<Stage />
-			</>
-		);
+
+				<div theme="row" style={{ gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+					<Button
+						type="contained"
+						label="Documentation"
+						href="/destamatic-ui/documentation"
+						onClick={() => window.open('/destamatic-ui/documentation', '_self')}
+						icon={
+							<Icon
+								name="feather:book-open"
+								size="clamp(0.85rem, 0.85vw + 0.4rem, 1.4rem)"
+								style={{ marginLeft: 4 }}
+							/>
+						}
+						iconPosition="right"
+					/>
+					<Button
+						type="outlined"
+						label="GitHub"
+						href="https://github.com/torrinworx/destamatic-ui"
+						onClick={() =>
+							window.open('https://github.com/torrinworx/destamatic-ui', '_blank')
+						}
+						icon={
+							<Icon
+								name="feather:github"
+								size="clamp(0.85rem, 0.85vw + 0.4rem, 1.4rem)"
+								style={{ marginRight: 4 }}
+							/>
+						}
+						iconPosition="left"
+					/>
+				</div>
+			</Paper>
+
+			<Typography type='p1' label='Explore examples from the three libraries to see how they are built!' />
+
+			<div theme='column_center' style={{ gap: 10 }}>
+				<Paper theme='row_tight' style={{ padding: 5 }}>
+					<Libraries each={libs} />
+				</Paper>
+			</div>
+			<Stage />
+		</>;
 	});
 
 	return <StageContext value={libraryConfig}>
-			<Hero />
-		</StageContext>;
+		<Hero />
+	</StageContext>;
 });
 
 export default Playground;
