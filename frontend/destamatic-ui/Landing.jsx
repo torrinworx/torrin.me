@@ -201,7 +201,7 @@ const Counter = () => {
 				type="p1"
 				style={{ textAlign: 'center' }}
 			>
-				Direct no VDOM, fine-grained Observers, component library, page routing, SSG/SEO tools, extensive theming, and more.
+				No VDOM, fine-grained Observers, component library, page routing, SSG/SEO tools, extensive theming, and more.
 			</Typography>
 
 			<Typography
