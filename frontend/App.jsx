@@ -29,6 +29,8 @@ import Freelance from './pages/Freelance.jsx';
 import ContactPage from './pages/Contact.jsx';
 import NotFound from './pages/NotFound.jsx';
 import Header from './utils/Header.jsx';
+import { default as DUILanding } from './destamatic-ui/Landing.jsx';
+
 
 let track;
 
@@ -180,7 +182,7 @@ const stage = {
 		services: Freelance,
 		blog: Blog,
 		contact: ContactPage,
-		'destamatic-ui': DestamaticUI,
+		'destamatic-ui': DUILanding,
 		fallback: NotFound,
 	},
 	onOpen: () => {
@@ -224,7 +226,7 @@ const App = () => <Theme value={theme}>
 				<StageContext value={stage}>
 					<PopupContext>
 						<div theme='column_fill_center'>
-							<div theme='column_fill_center' style={{ padding: 20, gap: 60, maxWidth: 800, width: '100%', boxSizing: 'border-box' }} >
+							<div theme='column_fill_center' style={{ padding: 20, gap: 60, maxWidth: 800 }} >
 								<Header />
 								<Stage />
 								<div theme='column_fill_center' >

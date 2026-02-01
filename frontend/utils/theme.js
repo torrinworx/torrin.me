@@ -19,7 +19,6 @@ worried about.
 const theme = OObject({
 	'*': {
 		fontFamily: '"IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif',
-
 	},
 
 	primary: OObject({
