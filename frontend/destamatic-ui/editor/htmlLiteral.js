@@ -2,7 +2,6 @@ import * as parser from '@babel/parser';
 import generateMod from '@babel/generator';
 import * as t from '@babel/types';
 
-// import util from 'util';
 import htm, { validTags } from 'destam-dom/htm.js';
 import { collectVariables, createIdent, createUse, assignVariables, checkImport } from './util';
 

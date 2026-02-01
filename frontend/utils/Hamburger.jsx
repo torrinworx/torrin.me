@@ -60,7 +60,7 @@ const Hamburger = ({
                     type='text'
                     title='Menu'
                     onClick={toggle}
-                    icon={<Icon name='feather:menu' size={30} />}
+                    icon={<Icon name='feather:menu' />}
                 />
             }
         </mark:anchor>

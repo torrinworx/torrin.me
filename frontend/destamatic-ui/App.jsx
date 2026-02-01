@@ -7,10 +7,16 @@ import {
 	Meta,
 	Link,
 	Head,
+	Observer,
+	Button,
+	Icon,
+	Popup,
+	Typography,
 } from 'destamatic-ui';
 import IconifyIcons from "destamatic-ui/components/icons/IconifyIcons/IconifyIcons";
 
 import Demo from './pages/Demo.jsx';
+import Docs from './pages/Docs.jsx';
 import Landing from './pages/Landing.jsx';
 import Playground from './pages/Playground';
 
@@ -29,6 +35,7 @@ const stage = {
 	acts: {
 		landing: Landing,
 		demo: Demo,
+		docs: Docs,
 		playground: Playground,
 		fallback: NotFound,
 	},
@@ -48,6 +55,123 @@ const pageUrl = `${BASE_URL}/destamatic-ui`;
 const pageTitle = `destamatic-ui`;
 const pageDescription = 'An all-in-one alternative to the React + MUI + Redux + Next stack.';
 const imageUrl = 'https://torrin.me/profile.dark.png';
+
+const SideBar = StageContext.use(stage => () => {
+	const sidebar = Observer.mutable(true);
+
+	const transformStyle = sidebar.map(open => open ? 'translateX(0)' : 'translateX(-100%)');
+	return <Popup>
+		<Button
+			type='contained'
+			icon={<Icon name='feather:sidebar' />}
+			onClick={() => sidebar.set(!sidebar.get())}
+			style={{ position: 'fixed', top: 0, left: 0, margin: 10 }}
+		/>
+		<div
+			theme={[sidebar.bool('shadow', null)]}
+			style={{
+				borderRadius: '0 50px 50px 0',
+				position: 'fixed',
+				top: 0,
+				left: 0,
+				height: '100vh',
+				background: '#f5f5f5',
+				maxWidth: 400,
+				transform: transformStyle,
+				transition: 'transform 0.3s ease',
+				padding: 20,
+				gap: 20,
+				display: 'flex',
+				flexDirection: 'column',
+			}}
+		>
+			<div>
+
+				<div theme='row_spread' style={{ gap: 20 }}>
+					<Typography type='h2' label='destamatic-ui' style={{ color: '$color' }} />
+					<Button
+						type="contained"
+						icon={<Icon name='feather:x' />}
+						onClick={() => sidebar.set(false)}
+					/>
+				</div>
+
+				<div theme='divider' />
+
+				<div theme='column' style={{ gap: 4 }}>
+					<Button
+						// type="text_row_spread"
+						type={stage.observer.path('current').map(c => c === 'landing' ? 'contained_row_spread' : 'text_row_spread')}
+						label="Home"
+						href="/destamatic-ui/"
+						onClick={() => stage.open({ name: 'landing' })}
+						icon={<Icon name="feather:home" />}
+						iconPosition="right"
+						style={{ padding: '4px 10px' }}
+					/>
+					<Button
+						type={stage.observer.path('current').map(c => c === 'playground' ? 'contained_row_spread' : 'text_row_spread')}
+						label="Playground"
+						href="/destamatic-ui/playground"
+						onClick={() => stage.open({ name: 'playground' })}
+						icon={<Icon name="feather:terminal" />}
+						iconPosition="right"
+						style={{ padding: '4px 10px' }}
+					/>
+					<Button
+						type={stage.observer.path('current').map(c => c === 'docs' ? 'contained_row_spread' : 'text_row_spread')}
+						label="Docs"
+						href="/destamatic-ui/docs"
+						onClick={() => stage.open({ name: 'docs' })}
+						icon={<Icon name="feather:book-open" />}
+						iconPosition="right"
+						style={{ padding: '4px 10px' }}
+					/>
+					<Button
+						type={stage.observer.path('current').map(c => c === 'demo' ? 'contained_row_spread' : 'text_row_spread')}
+						label="Component Demos"
+						href="/destamatic-ui/demo"
+						onClick={() => stage.open({ name: 'demo' })}
+						icon={<Icon name="feather:grid" />}
+						iconPosition="right"
+						style={{ padding: '4px 10px' }}
+					/>
+				</div>
+			</div>
+
+			<div style={{ flex: 1, overflowY: 'auto' }}>
+				<Typography type='h2' label='On This Page' style={{ color: '$color' }} />
+				<div theme='divider' />
+
+			</div>
+
+
+
+			{/* {children} */}
+			{/* Footer, above content scrolls if it's longer but this always stays */}
+			<div theme='column'>
+				<div theme='divider' />
+				<Button
+					type="text_row_spread"
+					label="Github"
+					href="https://github.com/torrinworx/destamatic-ui"
+					icon={<Icon name="feather:github" />}
+					iconPosition="right"
+				/>
+				<Button
+					type="text_row_spread"
+					label="Discord"
+					iconPosition="right"
+					href="https://discord.gg/BJMPpVwdhz"
+					onClick={() =>
+						window.open('https://discord.gg/BJMPpVwdhz', '_blank')
+					}
+					icon={<Icon name="simpleIcons:discord" />}
+				/>
+			</div>
+		</div>
+	</Popup>;
+});
 
 const App = () => <Theme value={theme}>
 	<Icons value={[IconifyIcons]} >
@@ -91,6 +215,7 @@ const App = () => <Theme value={theme}>
 				}]}
 			/>
 			<StageContext value={stage}>
+				<SideBar />
 				<Stage />
 			</StageContext>
 		</Head>
