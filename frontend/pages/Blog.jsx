@@ -135,7 +135,7 @@ const BlogPage = StageContext.use(s => suspend(LoadingDots, async () => {
 			}}
 		/>
 
-		<div theme="column" style={{ gap: 40, width: '100%', minWidth: 0 }}>
+		<div theme="content_col " style={{ gap: 40, width: '100%', minWidth: 0 }}>
 			<Markdown value={content} />
 		</div>
 	</>;
@@ -210,7 +210,9 @@ const BlogLanding = StageContext.use(stage => () => {
 			}}
 		/>
 
-		<Card each={blogs} />
+		<div theme='content_col'>
+			<Card each={blogs} />
+		</div>
 	</>;
 });
 

@@ -17,7 +17,7 @@ const Header = StageContext.use(s => () => {
 
     const rootStage = getRootStage(s);
 
-    return <div theme='row_fill_spread_end'>
+    return <div theme='row_fill_spread_end_content'>
         <Hamburger>
             <div theme='column_tight' style={{ gap: 5, minWidth: 150 }}>
                 <Button

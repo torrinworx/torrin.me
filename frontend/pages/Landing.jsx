@@ -5,7 +5,6 @@ import useShine from '../utils/Shine.jsx'
 import Contact from '../utils/Contact.jsx';
 import Resume from '../utils/Resume.jsx';
 
-
 const work = [
     {
         start: '2023-03-01',
@@ -255,7 +254,7 @@ const Landing = StageContext.use(s => ({ }, cleanup, mounted) => {
     mounted(() => createShine());
 
     return <>
-        <div theme="column_center_fill_start" >
+        <div theme="content_col_start" >
             <div
                 theme='row_fill_start'
                 style={{
@@ -372,21 +371,21 @@ const Landing = StageContext.use(s => ({ }, cleanup, mounted) => {
             </div>
         </div>
 
-        <div theme='column_center_fill' style={{ gap: 10 }}>
+        <div theme='content_col'>
             <Typography theme='row_fill_start' type='h2' label='Positions' />
             <div theme='column_fill' style={{ gap: 20 }}>
                 <Card each={work} />
             </div>
         </div>
 
-        <div theme='column_center_fill' style={{ gap: 10 }}>
+        <div theme='content_col'>
             <Typography theme='row_fill_start' type='h2' label='Projects' />
             <div theme='column_fill' style={{ gap: 20 }}>
                 <Card each={projects} />
             </div>
         </div>
 
-        <div theme='column_center_fill' style={{ gap: 10 }}>
+        <div theme='content_col'>
             <Typography theme='row_fill_start' type='h2' label='Skills' />
             <ul style={{ paddingLeft: 25 }}>
                 <Skill each={skills} />
