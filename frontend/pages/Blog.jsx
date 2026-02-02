@@ -174,7 +174,7 @@ const BlogLanding = StageContext.use(stage => () => {
 	blogs.sort((a, b) => toTime(b) - toTime(a));
 
 	const pageUrl = `${BASE_URL}/blog`;
-	const pageTitle = 'Blog | Torrin.me';
+	const pageTitle = 'Blog | Torrin Leonard';
 	const pageDescription =
 		'Blog posts and articles by Torrin Leonard, full-stack developer.';
 

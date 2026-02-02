@@ -31,31 +31,6 @@ import JsonLd, {
 	WEBSITE_ID,
 } from '../utils/JsonLd';
 
-const stage = {
-	acts: {
-		landing: Landing,
-		demo: Demo,
-		docs: Docs,
-		playground: Playground,
-		fallback: NotFound,
-	},
-	onOpen: () => {
-		window.scrollTo(0, 0);
-	},
-	template: ({ children }) => children,
-	ssg: true,
-	initial: 'landing',
-	urlRouting: true,
-	fallback: 'fallback',
-	truncateInitial: true,
-	_theme: theme,
-};
-
-const pageUrl = `${BASE_URL}/destamatic-ui`;
-const pageTitle = `destamatic-ui`;
-const pageDescription = 'An all-in-one alternative to the React + MUI + Redux + Next stack.';
-const imageUrl = 'https://torrin.me/profile.dark.png';
-
 const SideBar = StageContext.use(stage => () => {
 	const sidebar = Observer.mutable(false);
 
@@ -171,53 +146,82 @@ const SideBar = StageContext.use(stage => () => {
 	</Popup>;
 });
 
-const App = () => <Theme value={theme}>
-	<Icons value={[IconifyIcons]} >
-		<Head>
-			<Title>{pageTitle}</Title>
+const App = () => {
+	const pageUrl = `${BASE_URL}/destamatic-ui`;
+	const pageTitle = `destamatic-ui`;
+	const pageDescription = 'An all-in-one alternative to the React + MUI + Redux + Next stack.';
+	const imageUrl = 'https://torrin.me/profile.dark.png';
 
-			<Meta name="description" content={pageDescription} />
-			<Meta name="author" content={AUTHOR_NAME} />
-			<Meta name="robots" content="index,follow" />
+	const stage = {
+		acts: {
+			landing: Landing,
+			demo: Demo,
+			docs: Docs,
+			playground: Playground,
+			fallback: NotFound,
+		},
+		onOpen: () => {
+			window.scrollTo(0, 0);
+		},
+		template: ({ children }) => children,
+		ssg: true,
+		initial: 'landing',
+		urlRouting: true,
+		fallback: 'fallback',
+		truncateInitial: true,
+		_theme: theme,
+	};
 
-			<Link rel="canonical" href={pageUrl} />
+	return <>
+		<Theme value={theme}>
+			<Icons value={[IconifyIcons]} >
+				<StageContext value={stage}>
+					<Head>
+						<Title>destamatic-ui | A batteries-included UI framework.</Title>
 
-			<Meta property="og:type" content="website" />
-			<Meta property="og:title" content={pageTitle} />
-			<Meta property="og:description" content={pageDescription} />
-			<Meta property="og:url" content={pageUrl} />
-			<Meta property="og:site_name" content={SITE_NAME} />
-			<Meta property="og:image" content={imageUrl} />
+						<Meta name="description" content={pageDescription} />
+						<Meta name="author" content={AUTHOR_NAME} />
+						<Meta name="robots" content="index,follow" />
 
-			<Meta name="twitter:card" content="summary_large_image" />
-			<Meta name="twitter:title" content={pageTitle} />
-			<Meta name="twitter:description" content={pageDescription} />
-			<Meta name="twitter:image" content={imageUrl} />
+						<Link rel="canonical" href={pageUrl} />
 
-			<JsonLd
-				extraNodes={[{
-					'@type': ['WebPage', 'Product', 'SoftwareApplication'],
-					'@id': `${pageUrl}#webpage`,
-					name: 'destamatic-ui',
-					url: pageUrl,
-					description: pageDescription,
-					inLanguage: 'en-CA',
-					isPartOf: {
-						'@id': WEBSITE_ID,
-					},
-					about: {
-						'@id': AUTHOR_ID,
-					},
-					applicationCategory: 'WebApplication',
-					operatingSystem: 'Any',
-				}]}
-			/>
-			<StageContext value={stage}>
-				<SideBar />
-				<Stage />
-			</StageContext>
-		</Head>
-	</Icons>
-</Theme>;
+						<Meta property="og:type" content="website" />
+						<Meta property="og:title" content='destamatic-ui | A batteries-included UI framework.' />
+						<Meta property="og:description" content={pageDescription} />
+						<Meta property="og:url" content={pageUrl} />
+						<Meta property="og:site_name" content={SITE_NAME} />
+						<Meta property="og:image" content={imageUrl} />
+
+						<Meta name="twitter:card" content="summary_large_image" />
+						<Meta name="twitter:title" content='destamatic-ui | A batteries-included UI framework.' />
+						<Meta name="twitter:description" content={pageDescription} />
+						<Meta name="twitter:image" content={imageUrl} />
+
+						<JsonLd
+							extraNodes={[{
+								'@type': ['WebPage', 'Product', 'SoftwareApplication'],
+								'@id': `${pageUrl}#webpage`,
+								name: 'destamatic-ui',
+								url: pageUrl,
+								description: pageDescription,
+								inLanguage: 'en-CA',
+								isPartOf: {
+									'@id': WEBSITE_ID,
+								},
+								about: {
+									'@id': AUTHOR_ID,
+								},
+								applicationCategory: 'WebApplication',
+								operatingSystem: 'Any',
+							}]}
+						/>
+						<SideBar />
+						<Stage />
+					</Head>
+				</StageContext>
+			</Icons>
+		</Theme>
+	</>;
+};
 
 export default App;
