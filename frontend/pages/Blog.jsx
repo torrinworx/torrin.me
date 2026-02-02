@@ -10,6 +10,7 @@ import {
 	Title,
 	Meta,
 	Link,
+	Shown,
 } from 'destamatic-ui';
 import Markdown from '../utils/Markdown';
 import JsonLd, {
@@ -20,129 +21,157 @@ import JsonLd, {
 	WEBSITE_ID,
 } from '../utils/JsonLd';
 
-const BlogPage = StageContext.use(s => suspend(LoadingDots, async () => {
-	const slug = s.current;
-	const meta = s.blogs?.[`${slug}.md`] || s.blogs?.[slug];
+const BlogPage = StageContext.use(s =>
+	suspend(LoadingDots, async () => {
+		const slug = s.current;
+		const meta = s.blogs?.[`${slug}.md`] || s.blogs?.[slug];
 
-	const response = await fetch(`/blog/${meta.name}`);
-	let content = await response.text();
+		const response = await fetch(`/blog/${meta.name}`);
+		let content = await response.text();
 
-	const cleanupMd = (md) => {
-		md = md.replace(/#\s*header\s*\n([^#]*)\n+/i, '');
-		md = md.replace(/#\s*description\s*\n((?:[^\n]+\n?)*)/i, '');
-		return md.trim();
-	};
+		const getSectionLine = (md, name) => {
+			const m = md.match(new RegExp(`#\\s*${name}\\s*\\n([^\\n]+)`, 'i'));
+			return m ? m[1].trim() : '';
+		};
 
-	content = cleanupMd(content);
+		const cleanupMd = (md) => {
+			md = md.replace(/#\s*header\s*\n([^#]*)\n+/i, '');
+			md = md.replace(/#\s*description\s*\n((?:[^\n]+\n?)*)/i, '');
+			md = md.replace(/#\s*created\s*\n([^\n]+)\n+/i, '');
+			md = md.replace(/#\s*modified\s*\n([^\n]+)\n+/i, '');
+			return md.trim();
+		};
 
-	const formatDate = (dateString) => {
-		const date = new Date(dateString);
-		return new Intl.DateTimeFormat('en-US', {
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric',
-			hour: 'numeric',
-			minute: 'numeric',
-			hour12: false,
-		}).format(date);
-	};
+		// Pull dates from markdown content
+		const createdRaw = getSectionLine(content, 'created');
+		const modifiedRaw = getSectionLine(content, 'modified');
 
-	const postUrl = `${BASE_URL}/blog/${slug}`;
-	const title = meta.header || slug;
-	const description = meta.description || 'Blog post by Torrin Leonard, full-stack developer.';
+		// Then remove the meta blocks from the markdown body
+		content = cleanupMd(content);
 
-	const createdIso = meta.created
-		? new Date(meta.created).toISOString()
-		: undefined;
-	const modifiedIso = meta.modified
-		? new Date(meta.modified).toISOString()
-		: createdIso;
+		const formatDate = (dateString) => {
+			const t = Date.parse(dateString);
+			if (!Number.isFinite(t)) return ''; // don't show garbage
+			const date = new Date(t);
+			return new Intl.DateTimeFormat('en-US', {
+				year: 'numeric',
+				month: 'long',
+				day: 'numeric',
+				hour: 'numeric',
+				minute: 'numeric',
+				hour12: false,
+			}).format(date);
+		};
 
-	const imageUrl = meta.image
-		? (meta.image.startsWith('http')
-			? meta.image
-			: `${BASE_URL}${meta.image}`)
-		: 'https://torrin.me/profile.dark.png';
+		const postUrl = `${BASE_URL}/blog/${slug}`;
+		const title = meta.header || slug;
+		const description =
+			meta.description || 'Blog post by Torrin Leonard, full-stack developer.';
 
-	return <>
-		<Title>{`${title} | ${SITE_NAME}`}</Title>
+		// Prefer markdown dates, fallback to index.json meta
+		const createdIso = (createdRaw || meta.created)
+			? new Date(createdRaw || meta.created).toISOString()
+			: undefined;
 
-		<Meta name="description" content={description} />
-		<Meta name="author" content={AUTHOR_NAME} />
-		<Meta name="robots" content="index,follow" />
+		const modifiedIso = (modifiedRaw || meta.modified)
+			? new Date(modifiedRaw || meta.modified).toISOString()
+			: createdIso;
 
-		<Link rel="canonical" href={postUrl} />
+		const imageUrl = meta.image
+			? (meta.image.startsWith('http') ? meta.image : `${BASE_URL}${meta.image}`)
+			: 'https://torrin.me/profile.dark.png';
 
-		<Meta property="og:type" content="article" />
-		<Meta property="og:title" content={title} />
-		<Meta property="og:description" content={description} />
-		<Meta property="og:url" content={postUrl} />
-		<Meta property="og:site_name" content={SITE_NAME} />
-		{imageUrl && (
-			<Meta property="og:image" content={imageUrl} />
-		)}
+		const createdLabel = formatDate(createdRaw || meta.created);
+		const modifiedLabel = formatDate(modifiedRaw || meta.modified);
 
-		<Meta name="twitter:card" content="summary_large_image" />
-		<Meta name="twitter:title" content={title} />
-		<Meta name="twitter:description" content={description} />
-		{imageUrl && (
-			<Meta name="twitter:image" content={imageUrl} />
-		)}
+		return <>
+			<Title>{`${title} | ${SITE_NAME}`}</Title>
 
-		{createdIso && (
-			<Meta
-				property="article:published_time"
-				content={createdIso}
-			/>
-		)}
-		{modifiedIso && (
-			<Meta
-				property="article:modified_time"
-				content={modifiedIso}
-			/>
-		)}
+			<Meta name="description" content={description} />
+			<Meta name="author" content={AUTHOR_NAME} />
+			<Meta name="robots" content="index,follow" />
 
-		<JsonLd
-			extraNodes={{
-				"@type": "BlogPosting",
-				"@id": `${postUrl}#blogposting`,
-				"mainEntityOfPage": {
-					"@type": "WebPage",
-					"@id": `${postUrl}#webpage`,
-				},
-				"headline": title,
-				"description": description,
-				"articleBody": content,
-				"url": postUrl,
-				"inLanguage": "en-CA",
-				...(createdIso && { "datePublished": createdIso }),
-				...(modifiedIso && { "dateModified": modifiedIso }),
-				"author": {
-					"@id": AUTHOR_ID,
-				},
-				"publisher": {
-					"@id": AUTHOR_ID,
-				},
-				...(imageUrl && {
-					"image": {
-						"@type": "ImageObject",
-						"url": imageUrl,
+			<Link rel="canonical" href={postUrl} />
+
+			<Meta property="og:type" content="article" />
+			<Meta property="og:title" content={title} />
+			<Meta property="og:description" content={description} />
+			<Meta property="og:url" content={postUrl} />
+			<Meta property="og:site_name" content={SITE_NAME} />
+			{imageUrl && <Meta property="og:image" content={imageUrl} />}
+
+			<Meta name="twitter:card" content="summary_large_image" />
+			<Meta name="twitter:title" content={title} />
+			<Meta name="twitter:description" content={description} />
+			{imageUrl && <Meta name="twitter:image" content={imageUrl} />}
+
+			{createdIso && (
+				<Meta property="article:published_time" content={createdIso} />
+			)}
+			{modifiedIso && (
+				<Meta property="article:modified_time" content={modifiedIso} />
+			)}
+
+			<JsonLd
+				extraNodes={{
+					"@type": "BlogPosting",
+					"@id": `${postUrl}#blogposting`,
+					"mainEntityOfPage": {
+						"@type": "WebPage",
+						"@id": `${postUrl}#webpage`,
 					},
-				}),
-				"isPartOf": {
-					"@id": WEBSITE_ID,
-				},
-			}}
-		/>
+					"headline": title,
+					"description": description,
+					"articleBody": content,
+					"url": postUrl,
+					"inLanguage": "en-CA",
+					...(createdIso && { "datePublished": createdIso }),
+					...(modifiedIso && { "dateModified": modifiedIso }),
+					"author": { "@id": AUTHOR_ID },
+					"publisher": { "@id": AUTHOR_ID },
+					...(imageUrl && {
+						"image": { "@type": "ImageObject", "url": imageUrl },
+					}),
+					"isPartOf": { "@id": WEBSITE_ID },
+				}}
+			/>
 
-		<div theme="content_col " style={{ gap: 40, width: '100%', minWidth: 0 }}>
-			<Markdown value={content} />
-		</div>
-	</>;
-}));
+			<div theme="content_col">
+				<Typography type="h1" label={title} />
+
+				<div theme="divider" />
+				<Typography type="p1_bold" label="Torrin Leonard" />
+				<Shown value={createdLabel || modifiedLabel}>
+					<div theme="content_col" style={{ gap: 6 }}>
+						<Shown value={createdLabel}>
+							<Typography type="p2" label={`Published: ${createdLabel}`} />
+						</Shown>
+						<Shown value={modifiedLabel && modifiedLabel !== createdLabel}>
+							<Typography type="p2" label={`Published: ${createdLabel}`} />
+						</Shown>
+					</div>
+				</Shown>
+			</div>
+
+			<div theme="content_col" style={{ gap: 40, width: '100%', minWidth: 0 }}>
+				<Markdown value={content} />
+			</div>
+		</>;
+	})
+);
 
 const BlogLanding = StageContext.use(stage => () => {
-	const blogs = Object.values(stage.blogs); // could sort by date, however dates are currently based on file date values, which are sanatized by github for some reason.
+	const blogs = Object.values(stage.blogs);
+
+	// todo: move this to server side/buildDocs.js so that we don't have to compute this client side.
+	const toTime = (meta) => {
+		const raw = meta.modified || meta.created;
+		if (!raw) return 0;
+		const t = Date.parse(raw);
+		return Number.isFinite(t) ? t : 0;
+	};
+
+	blogs.sort((a, b) => toTime(b) - toTime(a));
 
 	const pageUrl = `${BASE_URL}/blog`;
 	const pageTitle = 'Blog | Torrin.me';

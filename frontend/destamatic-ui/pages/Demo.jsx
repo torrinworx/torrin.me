@@ -1,7 +1,6 @@
 import {
     StageContext,
     Typography,
-    Button,
     Icon,
     ThemeContext,
 
@@ -29,7 +28,6 @@ const Demo = ThemeContext.use(h => StageContext.use(s => () => {
             <ExampleComp globalTheme={s.props._theme} />
         </DropDown>;
     };
-
 
     return <>
         <div

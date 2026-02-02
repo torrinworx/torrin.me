@@ -15,7 +15,7 @@ import Editor from '../editor/Editor';
 
 const destamaticUiExamples = import.meta.glob(
 	'../../../destamatic-ui/components/**/**/*.example.jsx',
-	{ as: 'raw', eager: true }
+	{ query: '?raw', import: 'default', eager: true }
 );
 
 const fetchDestamDomExamples = async ({ // TODO filter out index.jsx file from being included

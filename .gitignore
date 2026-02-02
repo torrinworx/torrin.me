@@ -229,3 +229,4 @@ cython_debug/
 
 build.zip
 frontend/public/blog/index.json
+frontend/public/destamatic-ui
