@@ -6,6 +6,7 @@ import assertRemove from 'destam-dom/transform/assertRemove';
 import compileHTMLLiteral from 'destam-dom/transform/htmlLiteral';
 
 import buildBlog from './buildBlog.js';
+import buildDocs from './buildDocs.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -60,6 +61,26 @@ plugins.push({
 			if (!file.endsWith('.md')) return;
 			if (!file.startsWith(srcDir)) return;
 			await buildBlog({ srcDir, outFile });
+		};
+
+		server.watcher.on('add', onChange);
+		server.watcher.on('change', onChange);
+		server.watcher.on('unlink', onChange);
+	}
+});
+
+plugins.push({
+	name: 'docs-index-generator',
+	apply: 'serve',
+	async configureServer(server) {
+		const srcDir = path.resolve(__dirname, 'destamatic-ui');
+
+		await buildDocs({ __dirname });
+
+		const onChange = async (file) => {
+			if (!file.endsWith('.md')) return;
+			if (!file.startsWith(srcDir)) return;
+			await buildDocs({ __dirname });
 		};
 
 		server.watcher.on('add', onChange);

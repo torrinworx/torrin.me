@@ -5,6 +5,12 @@ Kimai time tracker setup guide.
 # description
 A quick, copy-paste Docker Compose setup for running Kimai with a MySQL backend. It walks you through creating a `.env`, launching the stack, and getting Kimai reachable on port `8001`.
 
+# created
+2026-01-28T23:17:00-05:00
+
+# modified
+2026-01-28T23:17:00-05:00
+
 > Read the full story of how Kimai saved my parent's company $28,800 dollars: [/blog/harvest-tisk-tisk](/blog/harvest-tisk-tisk)  
 > Official docs: https://www.kimai.org/documentation/docker-compose.html
 

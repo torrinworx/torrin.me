@@ -210,8 +210,9 @@ const Footer = StageContext.use(s => () => <div theme='content_col' >
 			icon={<Icon name='feather:external-link' />}
 			label='destamatic-ui'
 			onClick={() => s.open({ name: 'destamatic-ui' })}
-			href='https://github.com/torrinworx/destamatic-ui'
-		/>		</div>
+			href='/destamatic-ui'
+		/>
+	</div>
 </div>);
 
 const onClick = (event) => {

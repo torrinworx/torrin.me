@@ -57,7 +57,7 @@ const pageDescription = 'An all-in-one alternative to the React + MUI + Redux + 
 const imageUrl = 'https://torrin.me/profile.dark.png';
 
 const SideBar = StageContext.use(stage => () => {
-	const sidebar = Observer.mutable(true);
+	const sidebar = Observer.mutable(false);
 
 	const transformStyle = sidebar.map(open => open ? 'translateX(0)' : 'translateX(-100%)');
 	return <Popup>
@@ -86,7 +86,6 @@ const SideBar = StageContext.use(stage => () => {
 			}}
 		>
 			<div>
-
 				<div theme='row_spread' style={{ gap: 20 }}>
 					<Typography type='h2' label='destamatic-ui' style={{ color: '$color' }} />
 					<Button
@@ -100,7 +99,6 @@ const SideBar = StageContext.use(stage => () => {
 
 				<div theme='column' style={{ gap: 4 }}>
 					<Button
-						// type="text_row_spread"
 						type={stage.observer.path('current').map(c => c === 'landing' ? 'contained_row_spread' : 'text_row_spread')}
 						label="Home"
 						href="/destamatic-ui/"
@@ -111,25 +109,27 @@ const SideBar = StageContext.use(stage => () => {
 					/>
 					<Button
 						type={stage.observer.path('current').map(c => c === 'playground' ? 'contained_row_spread' : 'text_row_spread')}
-						label="Playground"
+						label="Playground (coming soon)"
 						href="/destamatic-ui/playground"
 						onClick={() => stage.open({ name: 'playground' })}
 						icon={<Icon name="feather:terminal" />}
 						iconPosition="right"
 						style={{ padding: '4px 10px' }}
+						disabled
 					/>
 					<Button
 						type={stage.observer.path('current').map(c => c === 'docs' ? 'contained_row_spread' : 'text_row_spread')}
-						label="Docs"
+						label="Docs (coming soon)"
 						href="/destamatic-ui/docs"
 						onClick={() => stage.open({ name: 'docs' })}
 						icon={<Icon name="feather:book-open" />}
 						iconPosition="right"
 						style={{ padding: '4px 10px' }}
+						disabled
 					/>
 					<Button
 						type={stage.observer.path('current').map(c => c === 'demo' ? 'contained_row_spread' : 'text_row_spread')}
-						label="Component Demos"
+						label="Demos"
 						href="/destamatic-ui/demo"
 						onClick={() => stage.open({ name: 'demo' })}
 						icon={<Icon name="feather:grid" />}
@@ -140,12 +140,10 @@ const SideBar = StageContext.use(stage => () => {
 			</div>
 
 			<div style={{ flex: 1, overflowY: 'auto' }}>
-				<Typography type='h2' label='On This Page' style={{ color: '$color' }} />
+				<Typography type='h2' label={stage.observer.path('current').map(c => c.charAt(0).toUpperCase() + c.slice(1))} style={{ color: '$color' }} />
 				<div theme='divider' />
 
 			</div>
-
-
 
 			{/* {children} */}
 			{/* Footer, above content scrolls if it's longer but this always stays */}
