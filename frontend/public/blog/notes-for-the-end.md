@@ -27,3 +27,5 @@ I find myself wondering what ends I will experience in my lifetime.
 How meaningful the journey to those ends are, or will be.
 
 Nourishment for the soul. I hope I experience enough of that before my end.
+
+![A tree standing above white headstones of a gravyard on a cold winters day in Waterloo, Ontario, Canada. The ground is covered in a foot of snow. Warm sunlight reflects off of the headstones. The tree is baren of leaves, buds are just barely visible, waiting for springtime.](/P1128597.webp)
