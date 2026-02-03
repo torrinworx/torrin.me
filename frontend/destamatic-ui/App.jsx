@@ -170,6 +170,7 @@ const App = () => {
 		fallback: 'fallback',
 		truncateInitial: true,
 		_theme: theme,
+		currentDelay: 0,
 	};
 
 	return <>
