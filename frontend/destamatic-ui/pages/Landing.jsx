@@ -167,7 +167,7 @@ const Counter = () => {
 		return <Button inline type='link' label={`${release.tag_name}`} href='https://github.com/torrinworx/destamatic-ui/releases/latest' />
 	})
 
-	return <div theme='content_col' style={{ gap: 200 }}>
+	return <div theme='column_fill_center' style={{ gap: 200 }}>
 		<div theme='row_center' style={{ gap: 10 }}>
 			<OnlinePulse />
 			<Typography type="p1" label='Live now' />
@@ -192,7 +192,7 @@ const Counter = () => {
 			/>
 		</div>
 
-		<div theme='column_fill' style={{ gap: 20 }}>
+		<div theme='content_col'>
 			<Typography
 				type="h2_bold"
 				label="An all-in-one alternative to the React + MUI + Redux + Next stack."
@@ -231,7 +231,7 @@ const Counter = () => {
 			</div>
 		</div>
 
-		<div theme='column_fill' style={{ gap: 20 }}>
+		<div theme='content_col'>
 			<Typography type="h2_bold" label="Simple model. Serious speed." style={{ color: '$color', textAlign: 'center' }} />
 			<div theme="divider" />
 
@@ -287,7 +287,7 @@ const Counter = () => {
 			</div>
 		</div>
 
-		<div theme='column_fill' style={{ gap: 20 }}>
+		<div theme='content_col'>
 			<div theme="row_wrap_center_fill" style={{ gap: 20 }}>
 				<Typography type="h2_bold" label="Familiar JSX syntax." style={{ color: '$color' }} />
 
@@ -318,10 +318,10 @@ const Counter = () => {
 				label="Build with destamatic-ui using familiar JSX syntax and conventions."
 				style={{ textAlign: 'center' }}
 			/>
-			<JsxBlock code={type.map(t => t === 'destam' ? codeDestam : codeReact)} />
+			<JsxBlock theme='fill' code={type.map(t => t === 'destam' ? codeDestam : codeReact)} />
 		</div>
 
-		<div theme='column_fill' style={{ gap: 20 }}>
+		<div theme='content_col'>
 			<Typography type="h2_bold" label="Batteries included" style={{ color: '$color', textAlign: 'center' }} />
 			<div theme="divider" />
 			<Typography
@@ -380,7 +380,7 @@ const Counter = () => {
 			</div>
 		</div>
 
-		<div theme='column_fill' style={{ gap: 20 }}>
+		<div theme='content_col'>
 			<Typography type="h2_bold" label="What you'll replace" style={{ color: '$color', textAlign: 'center' }} />
 			<div theme="divider" />
 			<Typography type="p1" label="Nothing to lose, everything to gain." style={{ textAlign: 'center' }} />
@@ -410,7 +410,7 @@ const Counter = () => {
 			</div>
 		</div>
 
-		<div theme='column_fill_center' style={{ gap: 20, marginBottom: 200 }}>
+		<div theme='content_col' style={{ marginBottom: 200 }}>
 			<Typography type="h2_bold" label="Ship the app, not the plumbing." style={{ color: '$color', textAlign: 'center' }} />
 			<div theme="divider" />
 			<Typography
@@ -420,7 +420,7 @@ const Counter = () => {
 			/>
 			<Cta />
 		</div>
-	</div>;
+	</div >;
 };
 
 export default Landing;
