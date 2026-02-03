@@ -34,12 +34,12 @@ Theme.define({
 	},
 
 	markdown_img: {
+		extends: 'radius',
 		display: 'block',
 		maxWidth: '100%',
 		height: 'auto',
-		marginTop: 10,
-		marginBottom: 10,
-		borderRadius: 8,
+		marginTop: 20,
+		marginBottom: 20,
 	},
 
 	markdown_ul: {
