@@ -33,7 +33,7 @@ Theme.define({
 		background: 'rgba(0, 0, 0, 0.10)',
 	},
 
-	markdown_img: {
+	markdownimg: {
 		extends: 'radius',
 		display: 'block',
 		maxWidth: '100%',
@@ -160,7 +160,7 @@ const defaultModifiers = [
 			if (!p) return match;
 
 			return <img
-				theme='markdown_img'
+				theme='markdownimg'
 				src={p.src}
 				alt={p.alt}
 				title={p.title || p.alt}
