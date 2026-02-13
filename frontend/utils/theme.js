@@ -84,7 +84,12 @@ const theme = OObject({
 
 	content_col: {
 		extends: 'column_fill_center'
-	}
+	},
+
+	icon: {
+		width: 'clamp(1.2rem, 1.05rem + 0.6vw, 1.5rem)',
+		height: 'clamp(1.2rem, 1.05rem + 0.6vw, 1.5rem)',
+	},
 });
 
 export default theme
