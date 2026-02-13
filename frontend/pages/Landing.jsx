@@ -213,7 +213,7 @@ const skills = [
     },
     {
         bold: 'Backend & APIs:',
-        text: ' Node.js, Express, FastAPI, REST, WebSockets'
+        text: ' Node.js, Express, FastAPI, Django, REST, WebSockets'
     },
     {
         bold: 'Databases:',
