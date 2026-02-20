@@ -47,7 +47,7 @@ Theme.define({
 		display: 'block',
 		maxWidth: '100%',
 		height: 'auto',
-		maxHeight: 'clamp(220px, 35vw, 420px)',
+		maxHeight: 'clamp(600px, 35vw, 800px)',
 		marginTop: 20,
 		marginBottom: 20,
 	},
@@ -56,7 +56,7 @@ Theme.define({
 		extends: 'radius',
 		display: 'block',
 		maxWidth: '100%',
-		height: 'clamp(220px, 35vw, 420px)',
+		height: 'clamp(600px, 35vw, 800px)',
 		marginTop: 20,
 		marginBottom: 20,
 		overflow: 'hidden',
@@ -212,7 +212,7 @@ const defaultModifiers = [
 						frameBorder={0}
 						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
 						allowFullScreen
-					style={{ width: '100%', height: '100%', display: 'block', border: 0 }}
+						style={{ width: '100%', height: '100%', display: 'block', border: 0 }}
 					/>
 				</div>;
 			}
