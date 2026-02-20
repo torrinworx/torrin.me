@@ -1,4 +1,4 @@
-import { Button, Icon, StageContext, Shown } from 'destamatic-ui';
+import { Button, Icon, StageContext, Shown } from '@destamatic/ui';
 import Hamburger from './Hamburger.jsx';
 import Email from './Email.jsx';
 import Resume from './Resume.jsx';

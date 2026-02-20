@@ -1,4 +1,4 @@
-import { Theme, OArray, Observer } from 'destamatic-ui';
+import { Theme, OArray, Observer } from '@destamatic/ui';
 
 Theme.define({
 	shine: {

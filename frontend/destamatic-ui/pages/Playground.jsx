@@ -10,7 +10,7 @@ import {
 	Stage,
 	Select,
 	Default,
-} from 'destamatic-ui';
+} from '@destamatic/ui';
 import Editor from '../editor/Editor';
 
 const destamaticUiExamples = import.meta.glob(
@@ -83,7 +83,7 @@ const makeExampleActs = (lib, examplesByKey) => {
 			const hSelector =
 				lib === 'destam' ? null :
 					lib === 'destam-dom' ? 'destam-dom' :
-						lib === 'destamatic-ui' ? 'destamatic-ui' :
+						lib === '@destamatic/ui' ? '@destamatic/ui' :
 							undefined;
 
 			return [v.name, () => (
@@ -128,8 +128,8 @@ const ExampleStage = ({ exampleActs }) => {
 };
 
 const DestamaticUiLib = () => {
-	const examples = normalize('destamatic-ui', destamaticUiExamples);
-	const exampleActs = makeExampleActs('destamatic-ui', examples);
+	const examples = normalize('@destamatic/ui', destamaticUiExamples);
+	const exampleActs = makeExampleActs('@destamatic/ui', examples);
 	return <ExampleStage exampleActs={exampleActs} />;
 };
 
@@ -144,16 +144,16 @@ const DestamLib = () => <Paper>
 </Paper>;
 
 const Playground = StageContext.use(s => () => {
-	const libs = ['destamatic-ui', 'destam-dom', 'destam'];
+	const libs = ['@destamatic/ui', 'destam-dom', 'destam'];
 
 	// KEY FIX: acts are defined immediately (not later in an async loader)
 	const libraryConfig = {
 		acts: {
-			'destamatic-ui': DestamaticUiLib,
+			'@destamatic/ui': DestamaticUiLib,
 			'destam-dom': DestamDomLib,
 			'destam': DestamLib,
 		},
-		initial: 'destamatic-ui',
+		initial: '@destamatic/ui',
 		template: Default,
 		ssg: true,
 	};

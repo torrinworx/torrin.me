@@ -15,8 +15,8 @@ import {
 	Script,
 	InputContext,
 	PopupContext,
-} from 'destamatic-ui';
-import IconifyIcons from "destamatic-ui/components/icons/IconifyIcons/IconifyIcons";
+} from '@destamatic/ui';
+import IconifyIcons from "@destamatic/ui/components/icons/IconifyIcons/IconifyIcons";
 
 import fonts from './utils/fonts.js';
 import theme from './utils/theme.js';

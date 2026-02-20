@@ -1,4 +1,4 @@
-import { Typography, Button, Icon, Observer, Shown, StageContext } from 'destamatic-ui';
+import { Typography, Button, Icon, Observer, Shown, StageContext } from '@destamatic/ui';
 
 import Email from '../utils/Email.jsx';
 import useShine from '../utils/Shine.jsx'

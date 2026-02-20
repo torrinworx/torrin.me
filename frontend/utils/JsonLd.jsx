@@ -1,4 +1,4 @@
-import { Script } from 'destamatic-ui';
+import { Script } from '@destamatic/ui';
 
 export const SITE_NAME = 'Torrin Leonard | Full-Stack Engineer';
 export const BASE_URL = 'https://torrin.me';

@@ -1,4 +1,4 @@
-import { Detached, Button, Icon, Observer, useAbort } from 'destamatic-ui';
+import { Detached, Button, Icon, Observer, useAbort } from '@destamatic/ui';
 import Paper from './Paper.jsx';
 
 const Hamburger = ({

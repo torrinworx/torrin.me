@@ -2,7 +2,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import App from './App';
-import { render } from 'destamatic-ui';
+import { render } from '@destamatic/ui';
 
 import buildBlog from '../buildBlog.js';
 

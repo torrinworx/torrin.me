@@ -32,7 +32,7 @@
 		"@iconify-json/tabler": "^1.2.22",
 		"destam": "^0.8.0",
 		"destam-dom": "^0.14.0",
-		"destamatic-ui": "file:destamatic-ui",
+		"@destamatic/ui": "file:destamatic-ui",
 		"esbuild": "^0.25.5",
 		"feather-icons": "^4.29.2",
 		"vite": "^7.2.7",

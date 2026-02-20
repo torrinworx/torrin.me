@@ -1,4 +1,4 @@
-import { Theme } from 'destamatic-ui';
+import { Theme } from '@destamatic/ui';
 
 Theme.define({
 	pulseDot: {

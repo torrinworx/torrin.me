@@ -1,4 +1,4 @@
-import { Typography, Icon, Theme, Button, Observer, LoadingDots, suspend, StageContext } from 'destamatic-ui';
+import { Typography, Icon, Theme, Button, Observer, LoadingDots, suspend, StageContext } from '@destamatic/ui';
 
 import useShine from '../../utils/Shine.jsx';
 import JsxBlock from '../utils/JsxBlock.jsx';
@@ -105,7 +105,7 @@ const Cta = StageContext.use(stage => (_, cleanup, mounted) => {
 });
 
 const Landing = () => {
-	const codeDestam = `import { Observer, Button } from 'destamatic-ui';
+	const codeDestam = `import { Observer, Button } from '@destamatic/ui';
 
 const Counter = () => {
   const count = Observer.mutable(0);

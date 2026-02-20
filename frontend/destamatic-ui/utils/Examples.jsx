@@ -31,7 +31,7 @@ import {
 	OObject,
 	OArray,
 	Icons,
-} from 'destamatic-ui';
+} from '@destamatic/ui';
 
 
 const examples = [
