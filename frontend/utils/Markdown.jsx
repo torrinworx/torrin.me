@@ -47,9 +47,19 @@ Theme.define({
 		display: 'block',
 		maxWidth: '100%',
 		height: 'auto',
-		maxHeight: 'clamp(400px, 35vw, 800px)',
+		maxHeight: 'clamp(220px, 35vw, 420px)',
 		marginTop: 20,
 		marginBottom: 20,
+	},
+
+	markdown_embed: {
+		extends: 'radius',
+		display: 'block',
+		maxWidth: '100%',
+		height: 'clamp(220px, 35vw, 420px)',
+		marginTop: 20,
+		marginBottom: 20,
+		overflow: 'hidden',
 	},
 
 	markdown_ul: {
@@ -154,6 +164,13 @@ const getVideoMimeType = (src) => {
 	return videoMimeTypes[ext] || null;
 };
 
+const getYoutubeEmbedUrl = (src) => {
+	if (!src) return null;
+	const match = src.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?(?:.*?&)?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
+	if (!match) return null;
+	return `https://www.youtube.com/embed/${match[1]}?rel=0`;
+};
+
 const inlineCodeDoubleRe = /``([\s\S]+?)``/g;
 const inlineCodeSingleRe = /`([^`\n]+?)`/g;
 
@@ -185,6 +202,20 @@ const defaultModifiers = [
 			if (!p) return match;
 
 			const label = p.title || p.alt || undefined;
+			const embedUrl = getYoutubeEmbedUrl(p.src);
+			if (embedUrl) {
+				return <div theme='markdown_embed'>
+					<iframe
+						title={label}
+						aria-label={label}
+						src={embedUrl}
+						frameBorder={0}
+						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+						allowFullScreen
+					style={{ width: '100%', height: '100%', display: 'block', border: 0 }}
+					/>
+				</div>;
+			}
 			const videoMime = getVideoMimeType(p.src);
 			if (videoMime) {
 				return <video
