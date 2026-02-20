@@ -33,9 +33,6 @@ That “sync” isn’t some huge stack of custom event plumbing. It’s just a 
 
 Destam’s approach (delta-based state + observers) makes UI updates feel direct and predictable. You mutate state, and the parts of the UI watching it update. No re-render trees, no “why did this component re-run,” no trying to coax a framework into doing the obvious thing.
 
-Here's the code:
-
-
 ## Where destamatic-ui fits in
 
 I’ve been building [destamatic-ui](/destamatic-ui) as the opinionated UI layer on top of destam/destam-dom.
