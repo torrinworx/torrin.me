@@ -134,7 +134,8 @@ const DestamaticUiLib = () => {
 };
 
 const DestamDomLib = suspend(LoadingDots, async () => {
-	const examples = await destamDomExamplesPromise;
+	// const examples = await destamDomExamplesPromise;
+	const examples = []
 	const exampleActs = makeExampleActs('destam-dom', examples);
 	return <ExampleStage exampleActs={exampleActs} />;
 });
