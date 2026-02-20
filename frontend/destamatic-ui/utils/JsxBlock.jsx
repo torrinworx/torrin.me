@@ -1,5 +1,4 @@
-import { Observer } from 'destamatic-ui';
-import { Theme, ThemeContext, Typography, TextModifiers } from 'destamatic-ui';
+import { Theme, ThemeContext, Typography, TextModifiers, Observer } from '@destamatic/ui';
 
 import { modifiers, codeColours } from './JsxModifiers.jsx';
 

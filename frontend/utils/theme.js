@@ -1,4 +1,4 @@
-import { OObject } from 'destamatic-ui'
+import { OObject } from '@destamatic/ui'
 
 /*
 Notes on theme and styles:

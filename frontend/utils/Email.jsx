@@ -1,4 +1,4 @@
-import { Button, Icon, Observer } from 'destamatic-ui'
+import { Button, Icon, Observer } from '@destamatic/ui'
 
 const Email = ({ type = 'outlined'}) => {
     const emailCheck = Observer.mutable(false);

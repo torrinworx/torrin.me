@@ -1,4 +1,4 @@
-import { Typography, Icon, Button, LoadingDots, suspend } from 'destamatic-ui';
+import { Typography, Icon, Button, LoadingDots, suspend } from '@destamatic/ui';
 
 import useShine from '../../utils/Shine.jsx';
 import JsxBlock from '../utils/JsxBlock.jsx';

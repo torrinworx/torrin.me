@@ -3,7 +3,7 @@ import { Observer } from 'destam';
 import * as destamDom from 'destam-dom';
 import { mount as domMount } from 'destam-dom';
 
-import { h as hRaw } from 'destamatic-ui';
+import { h as hRaw } from '@destamatic/ui';
 import { h as domH } from 'destam-dom';
 
 import compileHTMLLiteral from './htmlLiteral';
@@ -18,10 +18,10 @@ import {
 	Theme,
 	is_node,
 	Icon,
-} from 'destamatic-ui';
+} from '@destamatic/ui';
 
-import * as destamaticUI from 'destamatic-ui';
-import IconifyIcons from 'destamatic-ui/components/icons/IconifyIcons/IconifyIcons';
+import * as destamaticUI from '@destamatic/ui';
+import IconifyIcons from '@destamatic/ui/components/icons/IconifyIcons/IconifyIcons';
 
 import { modifiers, codeColours } from '../utils/JsxModifiers.jsx';
 
@@ -160,8 +160,8 @@ export const Editor = ThemeContext.use(h => ({ code, h: hSelector = 'destam-dom'
 
 			// modules map for import-mimicking
 			const modules = {
-				'destamatic-ui': { ...destamaticUI, h: hRaw },
-				'destamatic-ui/components/icons/IconifyIcons/IconifyIcons': IconifyIcons,
+				'@destamatic/ui': { ...destamaticUI, h: hRaw },
+				'@destamatic/ui/components/icons/IconifyIcons/IconifyIcons': IconifyIcons,
 
 				'destam-dom': { ...destamDom, mount: runtimeMount, h: domH },
 
@@ -179,7 +179,7 @@ export const Editor = ThemeContext.use(h => ({ code, h: hSelector = 'destam-dom'
 
 			const runtimeH =
 				hSelector === 'destam-dom' ? domH
-					: hSelector === 'destamatic-ui' ? hRaw
+					: hSelector === '@destamatic/ui' ? hRaw
 						: null;
 
 			const propKeys = Object.keys(props);

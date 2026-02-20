@@ -11,7 +11,7 @@ import {
 	Meta,
 	Link,
 	Shown,
-} from 'destamatic-ui';
+} from '@destamatic/ui';
 import Markdown from '../utils/Markdown';
 import JsonLd, {
 	SITE_NAME,

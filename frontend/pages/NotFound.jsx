@@ -1,4 +1,4 @@
-import { Button, Typography, StageContext, Icon } from 'destamatic-ui';
+import { Button, Typography, StageContext, Icon } from '@destamatic/ui';
 
 const NotFound = StageContext.use(s => () => <div theme='content_col' style={{ height: '60vh' }}>
 	<Typography type='h1' style={{ textAlign: 'center' }}>404 Page Not Found</Typography>

@@ -5,7 +5,7 @@ import {
     ThemeContext,
 
     DropDown,
-} from 'destamatic-ui';
+} from '@destamatic/ui';
 
 const Demo = ThemeContext.use(h => StageContext.use(s => () => {
     const examples = Object.values(

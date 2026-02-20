@@ -12,8 +12,8 @@ import {
 	Icon,
 	Popup,
 	Typography,
-} from 'destamatic-ui';
-import IconifyIcons from "destamatic-ui/components/icons/IconifyIcons/IconifyIcons";
+} from '@destamatic/ui';
+import IconifyIcons from "@destamatic/ui/components/icons/IconifyIcons/IconifyIcons";
 
 import Demo from './pages/Demo.jsx';
 import Docs from './pages/Docs.jsx';

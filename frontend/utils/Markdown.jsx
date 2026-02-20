@@ -1,4 +1,4 @@
-import { Observer, TextModifiers, Typography, Button, Checkbox, Theme, Icon } from 'destamatic-ui';
+import { Observer, TextModifiers, Typography, Button, Checkbox, Theme, Icon } from '@destamatic/ui';
 
 Theme.define({
 	markdown: {

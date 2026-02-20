@@ -10,7 +10,7 @@ import {
 	TextField,
 	TextArea,
 	Icon,
-} from 'destamatic-ui';
+} from '@destamatic/ui';
 
 const Contact = StageContext.use(s => ThemeContext.use(h => ({ focused }) => {
 	if (!(focused instanceof Observer)) focused = Observer.mutable(focused);

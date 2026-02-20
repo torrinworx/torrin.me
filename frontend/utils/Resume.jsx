@@ -1,4 +1,4 @@
-import { Button, Icon, Observer } from 'destamatic-ui';
+import { Button, Icon, Observer } from '@destamatic/ui';
 import useShine from './Shine.jsx';
 
 const Resume = ({ ...props }, cleanup, mounted) => {

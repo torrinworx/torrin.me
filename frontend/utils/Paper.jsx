@@ -1,4 +1,4 @@
-import { Paper as PaperDUI, ThemeContext } from 'destamatic-ui';
+import { Paper as PaperDUI, ThemeContext } from '@destamatic/ui';
 
 const Paper = ({ children, style, ...props }) => {
     return <PaperDUI style={style} {...props}>
