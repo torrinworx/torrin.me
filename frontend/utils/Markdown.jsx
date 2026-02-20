@@ -42,6 +42,16 @@ Theme.define({
 		marginBottom: 20,
 	},
 
+	markdown_video: {
+		extends: 'radius',
+		display: 'block',
+		maxWidth: '100%',
+		height: 'auto',
+		maxHeight: 'clamp(400px, 35vw, 800px)',
+		marginTop: 20,
+		marginBottom: 20,
+	},
+
 	markdown_ul: {
 		marginTop: 6,
 		marginBottom: 6,
@@ -129,6 +139,21 @@ const parseImageToken = (token) => {
 	return { alt, src, title };
 };
 
+const videoMimeTypes = {
+	mp4: 'video/mp4',
+	webm: 'video/webm',
+	ogg: 'video/ogg',
+};
+
+const getVideoMimeType = (src) => {
+	if (!src) return null;
+	const cleaned = src.split('?')[0].split('#')[0];
+	const match = cleaned.match(/\.([a-z0-9]+)$/i);
+	if (!match) return null;
+	const ext = match[1].toLowerCase();
+	return videoMimeTypes[ext] || null;
+};
+
 const inlineCodeDoubleRe = /``([\s\S]+?)``/g;
 const inlineCodeSingleRe = /`([^`\n]+?)`/g;
 
@@ -158,6 +183,20 @@ const defaultModifiers = [
 		return: match => {
 			const p = parseImageToken(match);
 			if (!p) return match;
+
+			const label = p.title || p.alt || undefined;
+			const videoMime = getVideoMimeType(p.src);
+			if (videoMime) {
+				return <video
+					theme='markdown_video'
+					controls
+					preload='metadata'
+					title={label}
+					aria-label={label}
+				>
+					<source src={p.src} type={videoMime} />
+				</video>;
+			}
 
 			return <img
 				theme='markdownimg'
