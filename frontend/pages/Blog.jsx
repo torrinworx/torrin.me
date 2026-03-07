@@ -195,7 +195,7 @@ const BlogPage = StageContext.use(s =>
 			/>
 
 			<div theme="content_col">
-				<Typography type="h1" label={title} />
+				<Typography type="h1" style={{ textAlign: 'center' }} label={title} />
 
 				<div theme="divider" />
 				<Typography type="p1_bold" label="Torrin Leonard" />

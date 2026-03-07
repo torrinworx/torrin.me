@@ -102,6 +102,26 @@ Theme.define({
 		marginBottom: 10,
 		opacity: 0.95,
 	},
+
+	markdown_sup: {
+		fontSize: '0.75em',
+		lineHeight: 1,
+		display: 'inline',
+	},
+
+	markdown_cite: {
+		fontStyle: 'normal',
+	},
+
+	markdown_footnotes: {
+		marginTop: 8,
+	},
+
+	markdown_footnote_label: {
+		display: 'inline-block',
+		minWidth: 28,
+		opacity: 0.7,
+	},
 });
 
 const escapeRe = /\\([\\`*_{}\[\]()#+\-.!|<>])/g;
@@ -174,6 +194,12 @@ const getYoutubeEmbedUrl = (src) => {
 const inlineCodeDoubleRe = /``([\s\S]+?)``/g;
 const inlineCodeSingleRe = /`([^`\n]+?)`/g;
 
+const superscriptRe = /\^([^\n^]+?)\^/g;
+const citationRefRe = /\[([^\]\n]+?)\]\[([^\]\n]+?)\]/g;
+const citationBareRe = /\[(\^?[^\]\n]+?)\](?!\()/g;
+const citationRefSingleRe = /^\[([^\]\n]+?)\]\[([^\]\n]+?)\]$/;
+const citationBareSingleRe = /^\[(\^?[^\]\n]+?)\]$/;
+
 const boldItalicARe = /(?<!\*)\*\*\*([^\n]+?)\*\*\*(?!\*)/g;
 const boldItalicBRe = /(?<!_)___([^\n]+?)___(?!_)/g;
 const boldItalicCRe = /__\*([^\n]+?)\*__/g;
@@ -185,12 +211,105 @@ const boldBRe = /(?<!_)__([^\n]+?)__(?!_)/g;
 const italicARe = /(?<!\*)\*([^*\n]+?)\*(?!\*)/g;
 const italicBRe = /(?<!_)_([^_\n]+?)_(?!_)/g;
 
-const defaultModifiers = [
+const normalizeFootnoteId = (id) => (id || '').trim().replace(/^\^/, '');
+
+const renderCitationButton = ({ href, title, label }) => (
+	<span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle" }}>
+			<Button
+				type="link"
+				track={false}
+				href={href}
+				title={title || href}
+				label={label}
+				iconPosition="right"
+				icon={<Icon name="feather:external-link" style={{ display: "inline-block", width: "0.8em", height: "0.8em" }} />}
+			/>
+	</span>
+);
+
+const makeDefaultModifiers = (footnotes) => {
+	const hasFootnotes = footnotes instanceof Map && footnotes.size > 0;
+
+	const citationModifiers = hasFootnotes
+		? [
+			{
+				check: citationRefRe,
+				atomic: true,
+				return: match => {
+					const m = match.match(citationRefSingleRe);
+					if (!m) return match;
+
+					const rawLabel = m[1];
+					const rawId = m[2];
+					const id = normalizeFootnoteId(rawId);
+					const footnote = footnotes.get(id);
+					if (!footnote || !footnote.href) return match;
+
+					return (
+						<cite theme='markdown_cite'>
+							{renderCitationButton({
+								href: footnote.href,
+								title: footnote.title,
+								label: rawLabel,
+							})}
+						</cite>
+					);
+				},
+			},
+			{
+				check: citationBareRe,
+				atomic: true,
+				return: match => {
+					const m = match.match(citationBareSingleRe);
+					if (!m) return match;
+
+					const rawId = m[1];
+					const id = normalizeFootnoteId(rawId);
+					const footnote = footnotes.get(id);
+					if (!footnote || !footnote.href) return match;
+
+					return (
+						<cite theme='markdown_cite'>
+							{renderCitationButton({
+								href: footnote.href,
+								title: footnote.title,
+								label: `[${rawId}]`,
+							})}
+						</cite>
+					);
+				},
+			},
+		]
+		: [];
+
+	return [
 	// escapes like \* \_ \[ etc
 	{
 		check: escapeRe,
 		atomic: true,
 		return: match => match.slice(1),
+	},
+
+	// citations (must come before links)
+	...citationModifiers,
+
+	// superscript
+	{
+		check: superscriptRe,
+		atomic: false,
+		return: (match, ctx) => {
+			const inner = match.slice(1, -1);
+			const inlineModifiers = ctx?.modifiers;
+			const content = inlineModifiers?.length
+				? <TextModifiers value={inlineModifiers}>{inner}</TextModifiers>
+				: inner;
+
+			return (
+				<sup theme='markdown_sup' style={{ display: 'inline' }}>
+					{content}
+				</sup>
+			);
+		},
 	},
 
 	// images
@@ -354,6 +473,7 @@ const defaultModifiers = [
 			</span>,
 	},
 ];
+};
 
 const normalize = s => (s || '').replace(/\r\n/g, '\n').replace(/\t/g, '    ');
 
@@ -364,9 +484,31 @@ const isHr = line =>
 
 const isFenceStart = line => /^```/.test(line);
 
+const footnoteDefRe = /^\s*\[(\^?[^\]]+)\]:\s+(.+)\s*$/;
+
+const parseFootnoteDefinition = (line) => {
+	const m = line.match(footnoteDefRe);
+	if (!m) return null;
+
+	const rawId = m[1].trim();
+	const rest = (m[2] || '').trim();
+	if (!rest) return null;
+
+	const parsed = rest.match(/^(.*?)(?:\s+"([^"]*)")?\s*$/);
+	if (!parsed) return null;
+
+	const href = (parsed[1] || '').trim();
+	const title = parsed[2] ?? null;
+	const id = normalizeFootnoteId(rawId);
+
+	return { id, rawId, href, title };
+};
+
 const parseBlocks = (md) => {
 	const lines = normalize(md).split('\n');
 	const blocks = [];
+	const footnotes = new Map();
+	const footnoteOrder = [];
 	let i = 0;
 
 	const peek = () => lines[i];
@@ -382,6 +524,22 @@ const parseBlocks = (md) => {
 		if (!line.trim()) {
 			i++;
 			continue;
+		}
+
+		// footnote definitions
+		{
+			const def = parseFootnoteDefinition(line);
+			if (def) {
+				if (!footnotes.has(def.id)) footnoteOrder.push(def.id);
+				footnotes.set(def.id, {
+					id: def.id,
+					rawId: def.rawId,
+					href: def.href,
+					title: def.title,
+				});
+				i++;
+				continue;
+			}
 		}
 
 		// fenced code block
@@ -524,7 +682,7 @@ const parseBlocks = (md) => {
 		}
 	}
 
-	return blocks;
+	return { blocks, footnotes, footnoteOrder };
 };
 
 const buildListTree = (flatItems) => {
@@ -626,8 +784,8 @@ const renderList = (node) => {
 	</ListTag>;
 };
 
-const renderBlocks = (blocks) => {
-	return blocks.map(block => {
+const renderBlocks = (blocks, footnotes, footnoteOrder) => {
+	const rendered = blocks.map(block => {
 		if (block.type === 'hr') {
 			return <div theme='divider' />;
 		}
@@ -665,21 +823,65 @@ const renderBlocks = (blocks) => {
 			<Typography type='p1' label={Observer.immutable(block.text)} />
 		</div>;
 	});
+
+	if (footnoteOrder?.length) {
+		rendered.push(<div theme='divider' />);
+		rendered.push(
+			<div theme='markdown_block'>
+				<div theme='markdown_footnotes'>
+					<ol theme='markdown_ol'>
+						{footnoteOrder.map(id => {
+							const footnote = footnotes.get(id);
+							if (!footnote) return null;
+
+							const label = footnote.title || footnote.href || footnote.rawId || id;
+							return (
+								<li theme='markdown_li'>
+									<span theme='markdown_footnote_label'>[{footnote.rawId || id}]</span>
+									{footnote.href
+										? renderCitationButton({
+											href: footnote.href,
+											title: footnote.title,
+											label,
+										})
+										: <span>{label}</span>
+									}
+								</li>
+							);
+						})}
+					</ol>
+				</div>
+			</div>
+		);
+	}
+
+	return rendered;
 };
 
 const Markdown = ({
 	value,
-	modifiers = defaultModifiers,
+	modifiers = makeDefaultModifiers,
 	theme,
 	...props
 }) => {
 	if (!(value instanceof Observer)) value = Observer.immutable(value || '');
 
-	return <TextModifiers value={modifiers}>
-		<div theme={['markdown', theme]} {...props}>
-			{value.map(md => renderBlocks(parseBlocks(md)))}
-		</div>
-	</TextModifiers>;
+	return <div theme={['markdown', theme]} {...props}>
+		{value.map((md, index) => {
+			const parsed = parseBlocks(md);
+			const appliedModifiers = typeof modifiers === 'function'
+				? modifiers(parsed.footnotes)
+				: modifiers;
+
+			return (
+				<TextModifiers value={appliedModifiers} key={index}>
+					<div>
+						{renderBlocks(parsed.blocks, parsed.footnotes, parsed.footnoteOrder)}
+					</div>
+				</TextModifiers>
+			);
+		})}
+	</div>;
 };
 
 export default Markdown;
