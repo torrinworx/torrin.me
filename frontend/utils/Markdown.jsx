@@ -104,13 +104,19 @@ Theme.define({
 	},
 
 	markdown_sup: {
-		fontSize: '0.75em',
-		lineHeight: 1,
-		display: 'inline',
+		extends: 'typography_p1',
+		display: 'inline-flex',
+		alignItems: 'baseline',
+		gap: 4,
 	},
 
 	markdown_cite: {
-		fontStyle: 'normal',
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: 4,
+		margin: 0,
+		lineHeight: 1,
+		whiteSpace: 'nowrap',
 	},
 
 	markdown_footnotes: {
@@ -213,19 +219,36 @@ const italicBRe = /(?<!_)_([^_\n]+?)_(?!_)/g;
 
 const normalizeFootnoteId = (id) => (id || '').trim().replace(/^\^/, '');
 
-const renderCitationButton = ({ href, title, label }) => (
-	<span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle" }}>
+const renderCitationButton = ({ href, title, label, compact = false }) => {
+	const inlineLabel = compact
+		? <Typography
+			type='inline'
+			label={Observer.immutable(label)}
+			theme='typography_inline'
+		/>
+		: label;
+
+	const iconSize = compact ? '0.65em' : '0.8em';
+	const buttonStyle = compact
+		? { fontSize: '0.7em', padding: 0, minHeight: 'auto', lineHeight: 1 }
+		: { lineHeight: 1 };
+
+	return (
+		<span style={{ display: 'inline-flex', alignItems: 'center', verticalAlign: 'middle' }}>
 			<Button
 				type="link"
+				inline
 				track={false}
 				href={href}
 				title={title || href}
-				label={label}
+				label={inlineLabel}
 				iconPosition="right"
-				icon={<Icon name="feather:external-link" style={{ display: "inline-block", width: "0.8em", height: "0.8em" }} />}
+				style={buttonStyle}
+				icon={<Icon name="feather:external-link" style={{ display: 'inline-block', width: iconSize, height: iconSize }} />}
 			/>
-	</span>
-);
+		</span>
+	);
+};
 
 const makeDefaultModifiers = (footnotes) => {
 	const hasFootnotes = footnotes instanceof Map && footnotes.size > 0;
@@ -235,7 +258,7 @@ const makeDefaultModifiers = (footnotes) => {
 			{
 				check: citationRefRe,
 				atomic: true,
-				return: match => {
+				return: (match, ctx) => {
 					const m = match.match(citationRefSingleRe);
 					if (!m) return match;
 
@@ -245,12 +268,15 @@ const makeDefaultModifiers = (footnotes) => {
 					const footnote = footnotes.get(id);
 					if (!footnote || !footnote.href) return match;
 
+					const compact = ctx?.parentModifier === 'superscript';
+
 					return (
 						<cite theme='markdown_cite'>
 							{renderCitationButton({
 								href: footnote.href,
 								title: footnote.title,
 								label: rawLabel,
+								compact,
 							})}
 						</cite>
 					);
@@ -259,7 +285,7 @@ const makeDefaultModifiers = (footnotes) => {
 			{
 				check: citationBareRe,
 				atomic: true,
-				return: match => {
+				return: (match, ctx) => {
 					const m = match.match(citationBareSingleRe);
 					if (!m) return match;
 
@@ -268,12 +294,15 @@ const makeDefaultModifiers = (footnotes) => {
 					const footnote = footnotes.get(id);
 					if (!footnote || !footnote.href) return match;
 
+					const compact = ctx?.parentModifier === 'superscript';
+
 					return (
 						<cite theme='markdown_cite'>
 							{renderCitationButton({
 								href: footnote.href,
 								title: footnote.title,
 								label: `[${rawId}]`,
+								compact,
 							})}
 						</cite>
 					);
@@ -283,196 +312,206 @@ const makeDefaultModifiers = (footnotes) => {
 		: [];
 
 	return [
-	// escapes like \* \_ \[ etc
-	{
-		check: escapeRe,
-		atomic: true,
-		return: match => match.slice(1),
-	},
-
-	// citations (must come before links)
-	...citationModifiers,
-
-	// superscript
-	{
-		check: superscriptRe,
-		atomic: false,
-		return: (match, ctx) => {
-			const inner = match.slice(1, -1);
-			const inlineModifiers = ctx?.modifiers;
-			const content = inlineModifiers?.length
-				? <TextModifiers value={inlineModifiers}>{inner}</TextModifiers>
-				: inner;
-
-			return (
-				<sup theme='markdown_sup' style={{ display: 'inline' }}>
-					{content}
-				</sup>
-			);
+		// escapes like \* \_ \[ etc
+		{
+			check: escapeRe,
+			atomic: true,
+			return: match => match.slice(1),
 		},
-	},
 
-	// images
-	{
-		check: imgRe,
-		atomic: true,
-		return: match => {
-			const p = parseImageToken(match);
-			if (!p) return match;
+		// citations (must come before links)
+		...citationModifiers,
 
-			const label = p.title || p.alt || undefined;
-			const embedUrl = getYoutubeEmbedUrl(p.src);
-			if (embedUrl) {
-				return <div theme='markdown_embed'>
-					<iframe
+		// superscript
+		{
+			check: superscriptRe,
+			atomic: false,
+			return: (match, ctx) => {
+				const inner = match.slice(1, -1);
+				const render = typeof ctx?.renderWithModifiers === 'function'
+					? ctx.renderWithModifiers(inner, { parentModifier: 'superscript' })
+					: inner;
+
+				return (
+					<sup theme='markdown_sup'>
+						{render}
+					</sup>
+				);
+			},
+		},
+
+		// images
+		{
+			check: imgRe,
+			atomic: true,
+			return: match => {
+				const p = parseImageToken(match);
+				if (!p) return match;
+
+				const label = p.title || p.alt || undefined;
+				const embedUrl = getYoutubeEmbedUrl(p.src);
+				if (embedUrl) {
+					return <div theme='markdown_embed'>
+						<iframe
+							title={label}
+							aria-label={label}
+							src={embedUrl}
+							frameBorder={0}
+							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+							allowFullScreen
+							style={{ width: '100%', height: '100%', display: 'block', border: 0 }}
+						/>
+					</div>;
+				}
+				const videoMime = getVideoMimeType(p.src);
+				if (videoMime) {
+					return <video
+						theme='markdown_video'
+						controls
+						preload='metadata'
 						title={label}
 						aria-label={label}
-						src={embedUrl}
-						frameBorder={0}
-						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-						allowFullScreen
-						style={{ width: '100%', height: '100%', display: 'block', border: 0 }}
+					>
+						<source src={p.src} type={videoMime} />
+					</video>;
+				}
+
+				return <img
+					theme='markdownimg'
+					src={p.src}
+					alt={p.alt}
+					title={p.title || p.alt}
+				/>;
+			},
+		},
+
+		// links -> link Buttons
+		{
+			check: linkRe,
+			atomic: true,
+			return: (match, ctx) => {
+				const p = parseLinkToken(match);
+				if (!p) return match;
+
+				const compact = ctx?.parentModifier === 'superscript';
+				const iconSize = compact ? '0.65em' : undefined;
+				const buttonStyle = compact
+					? { fontSize: '0.75em', padding: 0, minHeight: 'auto', lineHeight: 1 }
+					: { lineHeight: 1 };
+				const labelNode = compact
+					? <span style={{ fontSize: '0.75em', lineHeight: 1 }}>{p.text}</span>
+					: p.text;
+
+				return <span style={{ display: 'inline-flex', alignItems: 'center', verticalAlign: 'middle' }}>
+					<Button
+						type="link"
+						inline
+						track={false}
+						href={p.href}
+						title={p.title || p.href}
+						label={labelNode}
+						style={buttonStyle}
+						iconPosition="right"
+						icon={<Icon name="feather:external-link" style={{ display: 'inline-block', width: iconSize, height: iconSize }} />}
 					/>
-				</div>;
-			}
-			const videoMime = getVideoMimeType(p.src);
-			if (videoMime) {
-				return <video
-					theme='markdown_video'
-					controls
-					preload='metadata'
-					title={label}
-					aria-label={label}
-				>
-					<source src={p.src} type={videoMime} />
-				</video>;
-			}
-
-			return <img
-				theme='markdownimg'
-				src={p.src}
-				alt={p.alt}
-				title={p.title || p.alt}
-			/>;
+				</span>;
+			},
 		},
-	},
 
-	// links -> link Buttons
-	{
-		check: linkRe,
-		atomic: true,
-		return: match => {
-			const p = parseLinkToken(match);
-			if (!p) return match;
-
-			return <span style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle" }}>
-				<Button
-					type="link"
-					track={false}
-					href={p.href}
-					title={p.title || p.href}
-					label={p.text}
-					iconPosition="right"
-					icon={<Icon name="feather:external-link" style={{ display: "inline-block" }} />}
-				/>
-			</span>;
+		// inline code (prefer double-backtick)
+		{
+			check: inlineCodeDoubleRe,
+			atomic: true,
+			return: match => {
+				const inner = match.slice(2, -2);
+				return <code theme='markdown_inlinecode'>{inner}</code>;
+			},
 		},
-	},
 
-	// inline code (prefer double-backtick)
-	{
-		check: inlineCodeDoubleRe,
-		atomic: true,
-		return: match => {
-			const inner = match.slice(2, -2);
-			return <code theme='markdown_inlinecode'>{inner}</code>;
+		{
+			check: inlineCodeSingleRe,
+			atomic: true,
+			return: match => {
+				const inner = match.slice(1, -1);
+				return <code theme='markdown_inlinecode'>{inner}</code>;
+			},
 		},
-	},
 
-	{
-		check: inlineCodeSingleRe,
-		atomic: true,
-		return: match => {
-			const inner = match.slice(1, -1);
-			return <code theme='markdown_inlinecode'>{inner}</code>;
+		// bold+italic combos
+		{
+			check: boldItalicARe,
+			atomic: false,
+			return: match =>
+				<span theme={['typography', 'bold', 'italic']}>
+					{match.slice(3, -3)}
+				</span>,
 		},
-	},
 
-	// bold+italic combos
-	{
-		check: boldItalicARe,
-		atomic: false,
-		return: match =>
-			<span theme={['typography', 'bold', 'italic']}>
-				{match.slice(3, -3)}
-			</span>,
-	},
+		{
+			check: boldItalicBRe,
+			atomic: false,
+			return: match =>
+				<span theme={['typography', 'bold', 'italic']}>
+					{match.slice(3, -3)}
+				</span>,
+		},
 
-	{
-		check: boldItalicBRe,
-		atomic: false,
-		return: match =>
-			<span theme={['typography', 'bold', 'italic']}>
-				{match.slice(3, -3)}
-			</span>,
-	},
+		{
+			check: boldItalicCRe,
+			atomic: false,
+			return: match =>
+				<span theme={['typography', 'bold', 'italic']}>
+					{match.slice(3, -3)}
+				</span>,
+		},
 
-	{
-		check: boldItalicCRe,
-		atomic: false,
-		return: match =>
-			<span theme={['typography', 'bold', 'italic']}>
-				{match.slice(3, -3)}
-			</span>,
-	},
+		{
+			check: boldItalicDRe,
+			atomic: false,
+			return: match =>
+				<span theme={['typography', 'bold', 'italic']}>
+					{match.slice(3, -3)}
+				</span>,
+		},
 
-	{
-		check: boldItalicDRe,
-		atomic: false,
-		return: match =>
-			<span theme={['typography', 'bold', 'italic']}>
-				{match.slice(3, -3)}
-			</span>,
-	},
+		// bold
+		{
+			check: boldARe,
+			atomic: false,
+			return: match =>
+				<span theme={['typography', 'bold']}>
+					{match.slice(2, -2)}
+				</span>,
+		},
 
-	// bold
-	{
-		check: boldARe,
-		atomic: false,
-		return: match =>
-			<span theme={['typography', 'bold']}>
-				{match.slice(2, -2)}
-			</span>,
-	},
+		{
+			check: boldBRe,
+			atomic: false,
+			return: match =>
+				<span theme={['typography', 'bold']}>
+					{match.slice(2, -2)}
+				</span>,
+		},
 
-	{
-		check: boldBRe,
-		atomic: false,
-		return: match =>
-			<span theme={['typography', 'bold']}>
-				{match.slice(2, -2)}
-			</span>,
-	},
+		// italic
+		{
+			check: italicARe,
+			atomic: false,
+			return: match =>
+				<span theme={['typography', 'italic']}>
+					{match.slice(1, -1)}
+				</span>,
+		},
 
-	// italic
-	{
-		check: italicARe,
-		atomic: false,
-		return: match =>
-			<span theme={['typography', 'italic']}>
-				{match.slice(1, -1)}
-			</span>,
-	},
-
-	{
-		check: italicBRe,
-		atomic: false,
-		return: match =>
-			<span theme={['typography', 'italic']}>
-				{match.slice(1, -1)}
-			</span>,
-	},
-];
+		{
+			check: italicBRe,
+			atomic: false,
+			return: match =>
+				<span theme={['typography', 'italic']}>
+					{match.slice(1, -1)}
+				</span>,
+		},
+	];
 };
 
 const normalize = s => (s || '').replace(/\r\n/g, '\n').replace(/\t/g, '    ');
