@@ -7,7 +7,6 @@ from reportlab.platypus import (
     SimpleDocTemplate,
     Spacer,
     ListFlowable,
-    ListItem,
 )
 from reportlab.lib.units import inch
 
@@ -17,7 +16,7 @@ NAME = "Torrin Leonard"
 TITLE = "Full-Stack Software Engineer"
 
 LOCATION = "Waterloo, Ontario, Canada"
-YEARS_EXP = "9 years professional experience"
+YEARS_EXP = "9+ years professional experience"
 EMAIL = "torrin@torrin.me"
 WEBSITE = "https://torrin.me"
 GITHUB = "https://github.com/torrinworx"
@@ -26,50 +25,61 @@ LINKEDIN = "https://www.linkedin.com/in/torrin-leonard-8343a1154/"
 # --- CONTENT (kept close to your Landing.jsx) --- #
 
 SUMMARY = """
-Full-stack software engineer with 9 years of professional experience across startups,
-contract work, and open-source projects. I build AI-powered web apps, custom UI frameworks,
-and the infrastructure they run on, with a focus on accessibility, performance, and clean UX.
+Full-stack software engineer focused on AI-powered web apps, vector search pipelines, and
+accessible UI systems (WCAG). Comfortable owning 0->1 product features end-to-end, collaborating
+with cross-functional teams, and shipping to production in fast-paced environments.
 """
 
 POSITIONS = [
     {
         "role": "Full Stack Software Developer",
-        "company": "Equator",
+        "company": "Equator Studios",
         "location": "Hybrid / Waterloo, ON",
         "dates": "Mar 2023 – Present",
+        "tech": "Node.js/Express, React + destamatic-ui, TypeScript, MongoDB, Python/FastAPI, OpenAI (embeddings + fine-tuning), Qdrant, ChromaDB, GeoPandas, Docker, GitLab CI/CD, GitHub Actions, DigitalOcean, AWS, Proxmox, Linux",
         "bullets": [
-            "Built and shipped an AI-driven proposal tool (backend + frontend).",
-            "Created an accessible UI component library used across GIS and AI products.",
+            "Owned 0->1 AI proposal product end-to-end and shipped to production as sole engineer.",
+            "Built vector ingestion + retrieval pipeline with OpenAI embeddings, Qdrant, and ChromaDB; integrated into our main application.",
+            "Implemented client fine-tuning pipeline with OpenAI fine-tuning API and productionized services.",
+            "Integrated server-hosted GIS segmentation models for satellite imagery selection in the main app.",
+            "Expanded Stripe integrations and supported site-based pricing rollout with product.",
+            "Onboarded and mentored 2 developers; participated in interviews and code reviews.",
         ],
     },
     {
-        "role": "Co-Founder, CEO, Lead Software Developer",
+        "role": "Co-Founder, CEO, Lead Developer",
         "company": "This Cozy Studio Inc.",
         "location": "Waterloo, ON",
         "dates": "Oct 2021 – Jan 2025",
+        "tech": "React, Node.js, Django, Python, Blender API, HTML/CSS/JavaScript, AWS",
         "bullets": [
-            "Created Blend_My_NFTs, a Blender add-on with ~1k GitHub stars.",
-            "Designed and maintained tools for 3D project pipelines.",
+            "Led client-facing delivery for 3D/NFT pipeline projects; scoped contracts, managed timelines, and shipped quickly.",
+            "Built and maintained Blend_My_NFTs (Python/Blender API), reaching ~1k GitHub stars.",
+            "Developed web tooling for asset pipelines and automated rendering/export workflows.",
+            "Coordinated 3D asset pipeline standards with studio collaborators to improve consistency and delivery quality.",
         ],
     },
     {
-        "role": "Automation and Accessibility QA",
+        "role": "Automation & Accessibility Engineer (Contract / Part-time)",
         "company": "League",
         "location": "Remote",
         "dates": "Mar 2021 – May 2022",
+        "tech": "JavaScript/TypeScript, TestCafe, Node/npm, Git, Jira, WCAG",
         "bullets": [
-            "Wrote TestCafe automation for regression testing.",
-            "Performed accessibility audits against WCAG guidelines.",
+            "Built TestCafe regression suites in TypeScript/JavaScript, reducing manual cycles and improving release confidence.",
+            "Performed WCAG accessibility audits and partnered with engineers/PMs to ship compliant releases.",
+            "Maintained automation and triaged defects within CI workflows.",
         ],
     },
     {
-        "role": "Automation and Accessibility QA",
+        "role": "Automation & Accessibility Engineer (Contract / Part-time)",
         "company": "worX4you Inc.",
         "location": "Contract / Various Clients",
-        "dates": "Jun 2013 – Jun 2025",
+        "dates": "Jun 2013 – Mar 2021",
+        "tech": "JavaScript/TypeScript, TestCafe, Node/npm, Git, Jira, WCAG",
         "bullets": [
-            "Provided QA and automation for multiple startup clients.",
-            "Focused on cross-browser testing and accessibility issues.",
+            "Delivered automation and accessibility testing for startup clients; strengthened regression coverage.",
+            "Created reusable test tooling and cross-browser checklists to support WCAG-aligned releases.",
         ],
     },
 ]
@@ -78,11 +88,10 @@ PROJECTS = [
     {
         "name": "destamatic-ui",
         "url": "https://torrin.me/destamatic-ui",
-        "desc": "A batteries-included frontend framework built on fine-grained Observers.",
+        "desc": "Lightweight UI framework using fine-grained observers with routing, SSG/SEO, theming, icons, and rich text.",
         "bullets": [
-            "No React, no VDOM. Components, routing, SSG/SEO, theming, icons, and rich text in one stack.",
-            "Used for Equator Studios mapping/AI platform, torrin.me, and OpenGig.org.",
-            "Replaces heavier React + MUI stacks with a smaller, fast, and predictable component system.",
+            "Used for Equator mapping/AI platform, torrin.me, and OpenGig.org.",
+            "Improves performance and predictability vs heavier component stacks.",
         ],
     },
     {
@@ -95,6 +104,15 @@ PROJECTS = [
         ],
     },
     {
+        "name": "Blend_My_NFTs",
+        "url": "https://github.com/torrinworx/Blend_My_NFTs",
+        "desc": "Blender add-on for generating 3D NFT collections.",
+        "bullets": [
+            "Reached ~1k GitHub stars, 200K+ YouTube views, and is used by multiple studios and NFT projects.",
+            "Automates 3D asset generation and export pipelines from Blender.",
+        ],
+    },
+    {
         "name": "MangoSync",
         "url": "https://github.com/torrinworx/MangoSync",
         "desc": "Local music player with AI-assisted lyrics and metadata.",
@@ -104,38 +122,20 @@ PROJECTS = [
             "Enhances albums with additional metadata like artwork and descriptions.",
         ],
     },
-    {
-        "name": "Blend_My_NFTs",
-        "url": "https://github.com/torrinworx/Blend_My_NFTs",
-        "desc": "Blender add-on for generating 3D NFT collections.",
-        "bullets": [
-            "Reached ~1k GitHub stars, 200K+ YouTube views, and is used by multiple studios and NFT projects.",
-            "Automates 3D asset generation and export pipelines from Blender.",
-        ],
-    },
 ]
 
 SKILLS = [
-    ("Programming Languages", "JavaScript, TypeScript, Python"),
-    (
-        "Frontend & UI",
-        "React, destamatic-ui, Three.js/WebGL, responsive and accessible (WCAG)",
-    ),
-    ("Backend & APIs", "Node.js, Express, FastAPI, REST, WebSockets"),
-    ("Databases", "MongoDB, MariaDB, Redis"),
+    ("Languages", "JavaScript, TypeScript, Python"),
+    ("Frontend", "React, destamatic-ui, HTML/CSS"),
+    ("Backend", "Node.js, Express, FastAPI, Django"),
+    ("Databases", "MongoDB, Qdrant, ChromaDB"),
     (
         "Cloud & DevOps",
-        "Linux (Ubuntu/Arch), Docker, NGINX, DigitalOcean, AWS, GitHub Actions, GitLab CI/CD",
+        "Docker, GitLab CI/CD, GitHub Actions, DigitalOcean, AWS, Proxmox, Linux (Ubuntu/Arch)",
     ),
-    (
-        "Testing & Quality",
-        "TestCafe, automated regression testing, accessibility audits",
-    ),
-    ("AI & ML", "OpenAI API, Whisper, Hugging Face, Qdrant, LangChain, vector search"),
-    (
-        "Certifications",
-        "Harvard CS50 (Intro to Computer Science), W3C Web Accessibility (WAI0.1x)",
-    ),
+    ("AI & Data", "OpenAI API (embeddings + fine-tuning), GeoPandas, pandas"),
+    ("Accessibility", "WCAG audits, W3C Web Accessibility (WAI0.1x)"),
+    ("Testing", "TestCafe, automation testing"),
 ]
 
 
@@ -146,23 +146,23 @@ def draw_header_with_buttons(c):
     width, height = LETTER
 
     # Name
-    c.setFont("Helvetica-Bold", 18)
-    c.drawString(72, height - 72, NAME)
+    c.setFont("Helvetica-Bold", 17)
+    c.drawString(72, height - 62, NAME)
 
     # Title
-    c.setFont("Helvetica", 11)
-    c.drawString(72, height - 92, TITLE)
+    c.setFont("Helvetica", 10)
+    c.drawString(72, height - 80, TITLE)
 
     # Location + years
-    c.setFont("Helvetica", 9)
-    c.drawString(72, height - 126, f"{LOCATION} · {YEARS_EXP}")
+    c.setFont("Helvetica", 8.5)
+    c.drawString(72, height - 108, f"{LOCATION} · {YEARS_EXP}")
 
     # Email
-    c.drawString(72, height - 140, f"Email: {EMAIL}")
+    c.drawString(72, height - 122, f"Email: {EMAIL}")
 
     # Buttons
-    button_y = height - 170
-    button_height = 18
+    button_y = height - 146
+    button_height = 16
     padding_x = 8
     gap = 8
 
@@ -174,8 +174,8 @@ def draw_header_with_buttons(c):
 
     x = 72
     for label, url in links:
-        c.setFont("Helvetica-Bold", 9)
-        text_width = c.stringWidth(label, "Helvetica-Bold", 9)
+        c.setFont("Helvetica-Bold", 8.5)
+        text_width = c.stringWidth(label, "Helvetica-Bold", 8.5)
         button_width = text_width + padding_x * 2
 
         # Button background
@@ -204,26 +204,26 @@ def build_story():
         "Heading1",
         parent=styles["Heading1"],
         fontName="Helvetica-Bold",
-        fontSize=12,
-        spaceBefore=12,
-        spaceAfter=6,
+        fontSize=11,
+        spaceBefore=8,
+        spaceAfter=4,
     )
 
     h2 = ParagraphStyle(
         "Heading2",
         parent=styles["Heading2"],
         fontName="Helvetica-Bold",
-        fontSize=11,
-        spaceBefore=8,
-        spaceAfter=4,
+        fontSize=10,
+        spaceBefore=6,
+        spaceAfter=3,
     )
 
     body = ParagraphStyle(
         "Body",
         parent=styles["BodyText"],
         fontName="Helvetica",
-        fontSize=9,
-        leading=12,
+        fontSize=8.5,
+        leading=11,
     )
 
     italic = ParagraphStyle(
@@ -235,7 +235,7 @@ def build_story():
     story = []
 
     # Space under header
-    story.append(Spacer(1, 90))
+    story.append(Spacer(1, 100))
 
     # Summary
     story.append(Paragraph("Summary", h1))
@@ -243,15 +243,17 @@ def build_story():
 
     # Positions
     story.append(Spacer(1, 6))
-    story.append(Paragraph("Positions", h1))
+    story.append(Paragraph("Experience", h1))
 
     for job in POSITIONS:
         title_line = f"<b>{job['role']} — {job['company']}</b>"
         story.append(Paragraph(title_line, body))
         story.append(Paragraph(f"{job['dates']} | {job['location']}", italic))
+        if job.get("tech"):
+            story.append(Paragraph(f"<b>Tech: {job['tech']}</b>", body))
 
-        bullets = [ListItem(Paragraph(b, body), leftIndent=4) for b in job["bullets"]]
-        story.append(ListFlowable(bullets, bulletType="bullet", bulletFontSize=6))
+        bullets = [Paragraph(b, body) for b in job["bullets"]]
+        story.append(ListFlowable(bullets, bulletType="bullet", bulletFontSize=5.5, leftIndent=10))
         story.append(Spacer(1, 4))
 
     # Projects
@@ -263,8 +265,8 @@ def build_story():
         story.append(Paragraph(name_line, body))
         story.append(Paragraph(proj["desc"], italic))
 
-        bullets = [ListItem(Paragraph(b, body), leftIndent=4) for b in proj["bullets"]]
-        story.append(ListFlowable(bullets, bulletType="bullet", bulletFontSize=6))
+        bullets = [Paragraph(b, body) for b in proj["bullets"]]
+        story.append(ListFlowable(bullets, bulletType="bullet", bulletFontSize=5.5, leftIndent=10))
         story.append(Spacer(1, 4))
 
     # Skills
@@ -285,10 +287,10 @@ def create_pdf(filename):
     doc = SimpleDocTemplate(
         filename,
         pagesize=LETTER,
-        leftMargin=72,
-        rightMargin=72,
-        topMargin=72,
-        bottomMargin=72,
+        leftMargin=54,
+        rightMargin=54,
+        topMargin=54,
+        bottomMargin=54,
     )
 
     story = build_story()
