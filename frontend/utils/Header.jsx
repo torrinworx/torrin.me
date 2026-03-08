@@ -42,15 +42,6 @@ const Header = StageContext.use(s => () => {
                     />
                     <Button
                         type='text'
-                        title='Freelance services'
-                        label='Freelance'
-                        icon={<Icon name='feather:briefcase' />}
-                        iconPosition='right'
-                        onClick={() => rootStage.open({ name: 'freelance' })}
-                        href='/freelance'
-                    />
-                    <Button
-                        type='text'
                         title='Read blog posts'
                         label='Blog'
                         icon={<Icon name='feather:book-open' />}

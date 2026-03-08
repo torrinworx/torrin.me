@@ -12,20 +12,27 @@ const work = [
         url: 'https://equatorstudios.com/',
         imgName: 'Equator',
         header: 'Full Stack Software Developer',
+        description: 'Tech: Node.js/Express, React + destamatic-ui, TypeScript, MongoDB, Python/FastAPI, OpenAI (embeddings + fine-tuning), Qdrant, ChromaDB, GeoPandas, Docker, GitLab CI/CD, GitHub Actions, DigitalOcean, AWS, Proxmox, Linux',
         bullets: [
-            'Built and shipped an AI-driven proposal tool (backend + frontend).',
-            'Created accessible UI component library used across GIS and AI products.',
+            'Owned 0->1 AI proposal product end-to-end and shipped to production as sole engineer.',
+            'Built vector ingestion + retrieval pipeline with OpenAI embeddings, Qdrant, and ChromaDB; integrated into our main application.',
+            'Implemented client fine-tuning pipeline with OpenAI fine-tuning API and productionized services.',
+            'Integrated server-hosted GIS segmentation models for satellite imagery selection in the main app.',
+            'Expanded Stripe integrations and supported site-based pricing rollout with product.',
+            'Onboarded and mentored 2 developers; participated in interviews and code reviews.',
         ],
     },
     {
         start: '2021-10-01',
-        end: '2025-01-01',
+        end: '2023-03-01',
         image: '/ThisCozyStudioLogo.svg',
         imgName: 'This Cozy Studio',
         header: 'Co-Founder, CEO, Lead Software Developer',
+        description: 'Tech: React, Node.js, Django, Python, Blender API, HTML/CSS/JavaScript, AWS',
         bullets: [
-            'Created Blend_My_NFTs, a Blender add-on with ~1k GitHub stars.',
-            'Designed and maintained tools for 3D project pipelines.',
+            'Led client-facing delivery for 3D/NFT pipeline projects; scoped contracts, managed timelines, and shipped quickly.',
+            'Built and maintained Blend_My_NFTs (Python/Blender API), reaching ~1k GitHub stars.',
+            'Developed web tooling for asset pipelines and automated rendering/export workflows.',
         ],
     },
     {
@@ -35,23 +42,26 @@ const work = [
         url: 'https://www.league.com/',
         style: { borderRadius: '50%' },
         imgName: 'League',
-        header: 'Automation and Accessibility QA',
+        header: 'Automation & Accessibility Engineer (Contract / Part-time)',
+        description: 'Tech: JavaScript/TypeScript, TestCafe, Node/npm, Git, Jira, WCAG',
         bullets: [
-            'Wrote TestCafe automation for regression testing.',
-            'Performed accessibility audits against WCAG guidelines.',
+            'Built TestCafe regression suites in TypeScript/JavaScript, reducing manual cycles and improving release confidence.',
+            'Performed WCAG accessibility audits and partnered with engineers/PMs to ship compliant releases.',
+            'Maintained automation and triaged defects within CI workflows.',
         ],
     },
     {
         start: '2013-06-01',
-        end: '2025-06-01',
+        end: '2021-03-01',
         image: '/worX4youLogo.jpg',
         url: 'https://worx4you.com/',
         style: { borderRadius: '50%' },
         imgName: 'worX4you',
-        header: 'Automation and Accessibility QA',
+        header: 'Automation & Accessibility Engineer (Contract / Part-time)',
+        description: 'Tech: JavaScript/TypeScript, TestCafe, Node/npm, Git, Jira, WCAG',
         bullets: [
-            'Provided QA and automation for multiple startup clients.',
-            'Focused on cross-browser testing and accessibility issues.',
+            'Delivered automation and accessibility testing for startup clients; strengthened regression coverage.',
+            'Created reusable test tooling and cross-browser checklists to support WCAG-aligned releases.',
         ],
     },
 ];
@@ -63,11 +73,10 @@ const projects = [
             func: (s) => s.open({ name: 'destamatic-ui' }),
             href: '/destamatic-ui'
         },
-        description: 'A batteries-included frontend framework built on fine-grained Observers.',
+        description: 'Lightweight UI framework using fine-grained observers with routing, SSG/SEO, theming, icons, and rich text.',
         bullets: [
-            'No React, no VDOM. Components, routing, SSG/SEO, theming, icons, and rich text in one stack.',
-            'Used for Equator Studios Mapping/AI platform, torrin.me, and my project OpenGig.org.',
-            'Replaces heavier React + MUI stacks with a smaller, fast, and predictable component system.',
+            'Used for Equator mapping/AI platform, torrin.me, and OpenGig.org.',
+            'Improves performance and predictability vs heavier component stacks.',
         ],
     },
     {
@@ -80,6 +89,15 @@ const projects = [
         ],
     },
     {
+        header: 'Blend_My_NFTs',
+        headerUrl: 'https://github.com/torrinworx/Blend_My_NFTs',
+        description: 'Blender add-on for generating 3D NFT collections.',
+        bullets: [
+            'Reached ~1k GitHub stars, 200K+ views on YouTube, used by multiple studios and NFT projects.',
+            'Automates 3D asset generation and export pipelines from Blender.',
+        ],
+    },
+    {
         header: 'MangoSync',
         headerUrl: 'https://github.com/torrinworx/MangoSync',
         description: 'Local music player with AI-assisted lyrics and metadata.',
@@ -87,15 +105,6 @@ const projects = [
             'Uses Whisper to auto-generate and align lyrics for time-synced playback.',
             'Displays time-synced lyrics in an Apple-style karaoke mode lyric scroller.',
             'Enhances albums with additional metadata like artwork and descriptions.',
-        ],
-    },
-    {
-        header: 'Blend_My_NFTs',
-        headerUrl: 'https://github.com/torrinworx/Blend_My_NFTs',
-        description: 'Blender add-on for generating 3D NFT collections.',
-        bullets: [
-            'Reached ~1k GitHub stars, 200K+ views on YouTube, used by multiple studios and NFT projects.',
-            'Automates 3D asset generation and export pipelines from Blender.',
         ],
     },
 ];
@@ -204,36 +213,36 @@ const Card = StageContext.use(s => ({ each }) => <div theme='column_fill'>
 
 const skills = [
     {
-        bold: 'Programming Languages:',
+        bold: 'Languages:',
         text: ' JavaScript, TypeScript, Python'
     },
     {
-        bold: 'Frontend & UI:',
-        text: ' React, destamatic-ui, Three.js/WebGL, responsive and accessible (WCAG)'
+        bold: 'Frontend:',
+        text: ' React, destamatic-ui, HTML/CSS'
     },
     {
-        bold: 'Backend & APIs:',
-        text: ' Node.js, Express, FastAPI, Django, REST, WebSockets'
+        bold: 'Backend:',
+        text: ' Node.js, Express, FastAPI, Django'
     },
     {
         bold: 'Databases:',
-        text: ' MongoDB, MariaDB, Redis'
+        text: ' MongoDB, Qdrant, ChromaDB'
     },
     {
         bold: 'Cloud & DevOps:',
-        text: ' Linux (Ubuntu/Arch), Docker, NGINX, DigitalOcean, AWS, GitHub Actions, GitLab CI/CD'
+        text: ' Docker, GitLab CI/CD, GitHub Actions, DigitalOcean, AWS, Proxmox, Linux (Ubuntu/Arch)'
     },
     {
-        bold: 'Testing & Quality:',
-        text: ' TestCafe, automated regression testing, accessibility audits'
+        bold: 'AI & Data:',
+        text: ' OpenAI API (embeddings + fine-tuning), GeoPandas, pandas'
     },
     {
-        bold: 'AI & ML:',
-        text: ' OpenAI API, Whisper, Hugging Face, Qdrant, LangChain, vector search'
+        bold: 'Accessibility:',
+        text: ' WCAG audits, W3C Web Accessibility (WAI0.1x)'
     },
     {
-        bold: 'Certifications:',
-        text: ' Harvard CS50 (Intro to Computer Science), W3C Web Accessibility (WAI0.1x)'
+        bold: 'Testing:',
+        text: ' TestCafe, automation testing'
     }
 ];
 
@@ -317,7 +326,7 @@ const Landing = StageContext.use(s => ({ }, cleanup, mounted) => {
             <Typography
                 theme="row_fill_start"
                 type="p1"
-                label="I build AI-powered web apps, custom UI frameworks, and the infrastructure they run on."
+                label="I build AI-powered web apps, vector search pipelines, and accessible UI systems (WCAG)."
             />
             <Typography
                 theme="row_fill_start"
@@ -349,15 +358,6 @@ const Landing = StageContext.use(s => ({ }, cleanup, mounted) => {
                 >
                     {shines}
                 </Button>
-                <Button
-                    title={`Torrin's freelance services for hire.`}
-                    label="Freelance"
-                    type="outlined"
-                    icon={<Icon name="feather:briefcase" />}
-                    onClick={() => s.open({ name: 'freelance' })}
-                    href="/freelance"
-                    iconPosition="right"
-                />
                 <Email />
                 <Button
                     title={`Torrin Leonard's Github.`}
@@ -372,7 +372,7 @@ const Landing = StageContext.use(s => ({ }, cleanup, mounted) => {
         </div>
 
         <div theme='content_col'>
-            <Typography theme='row_fill_start' type='h2' label='Positions' />
+            <Typography theme='row_fill_start' type='h2' label='Experience' />
             <div theme='column_fill' style={{ gap: 20 }}>
                 <Card each={work} />
             </div>

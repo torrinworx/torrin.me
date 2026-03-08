@@ -27,7 +27,6 @@ import Contact from './utils/Contact.jsx';
 import Blog from './pages/Blog';
 import Landing from './pages/Landing.jsx';
 import NotFound from './pages/NotFound.jsx';
-import Freelance from './pages/Freelance.jsx';
 
 import DestamaticUI from './destamatic-ui/App.jsx';
 
@@ -177,8 +176,6 @@ const SocialButton = ({ each }) => <Button
 const stage = {
 	acts: {
 		landing: Landing,
-		freelance: Freelance,
-		services: Freelance,
 		blog: Blog,
 		contact: () => <Contact />,
 		'destamatic-ui': DestamaticUI,
