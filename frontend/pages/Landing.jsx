@@ -287,8 +287,7 @@ const Landing = StageContext.use(s => ({ }, cleanup, mounted) => {
                     <Typography
                         theme="row_fill_start"
                         type="p1"
-                        label={`Full-stack software engineer, ${new Date().getFullYear() - 2017
-                            } years professional experience.`}
+                        label='Full-stack software engineer.'
                     />
                     <Typography
                         theme="row_fill_start"

@@ -16,7 +16,6 @@ NAME = "Torrin Leonard"
 TITLE = "Full-Stack Software Engineer"
 
 LOCATION = "Waterloo, Ontario, Canada"
-YEARS_EXP = "9+ years professional experience"
 EMAIL = "torrin@torrin.me"
 WEBSITE = "https://torrin.me"
 GITHUB = "https://github.com/torrinworx"
@@ -152,10 +151,6 @@ def draw_header_with_buttons(c):
     # Title
     c.setFont("Helvetica", 10)
     c.drawString(72, height - 80, TITLE)
-
-    # Location + years
-    c.setFont("Helvetica", 8.5)
-    c.drawString(72, height - 108, f"{LOCATION} · {YEARS_EXP}")
 
     # Email
     c.drawString(72, height - 122, f"Email: {EMAIL}")
