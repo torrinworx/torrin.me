@@ -52,6 +52,8 @@ Explicitly excluded for v1.
 
 Which phases cover which requirements. Updated during roadmap creation.
 
+Phase names: Phase 1 = Sync contract and content hygiene; Phase 2 = PDF regeneration and validation; Phase 3 = Site polish and update documentation.
+
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | PORT-01 | Phase 3 | Pending |
