@@ -40,8 +40,9 @@ POSITIONS = [
             "Owned 0->1 AI proposal product end-to-end and shipped to production as sole engineer.",
             "Built vector ingestion + retrieval pipeline with OpenAI embeddings, Qdrant, and ChromaDB; integrated into our main application.",
             "Implemented client fine-tuning pipeline with OpenAI fine-tuning API and productionized services.",
+            "Designed and built safeguards for model failures, fine-tuning evals, hallucinations, prompt injection, and continuous context retrieval/management.",
             "Integrated server-hosted GIS segmentation models for satellite imagery selection in the main app.",
-            "Expanded Stripe integrations and supported site-based pricing rollout with product.",
+            "Added Stripe payment systems and supported site-based pricing rollout with product.",
             "Onboarded and mentored 2 developers; participated in interviews and code reviews.",
         ],
     },
@@ -87,10 +88,10 @@ PROJECTS = [
     {
         "name": "destamatic-ui",
         "url": "https://torrin.me/destamatic-ui",
-        "desc": "Lightweight UI framework using fine-grained observers with routing, SSG/SEO, theming, icons, and rich text.",
+        "desc": "Lightweight UI layer built on top of existing company DOM/state tooling to package in-house primitives into a polished, reusable interface.",
         "bullets": [
             "Used for Equator mapping/AI platform, torrin.me, and OpenGig.org.",
-            "Improves performance and predictability vs heavier component stacks.",
+            "Built a sleek UI library on top of established internal tooling, improving developer ergonomics without disrupting existing React-based conventions.",
         ],
     },
     {
