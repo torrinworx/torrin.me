@@ -200,15 +200,7 @@ const Footer = StageContext.use(s => () => <div theme='content_col' >
 		</div>
 	</div>
 	<div theme='row_center_fill_wrap_tight'>
-		<Typography style={{ textAlign: 'center' }} type='p1' label={`© Torrin Leonard ${new Date().getFullYear()} 🇨🇦 | Built with `} />
-		<Button
-			type='link'
-			iconPosition='right'
-			icon={<Icon name='feather:external-link' />}
-			label='destamatic-ui'
-			onClick={() => s.open({ name: 'destamatic-ui' })}
-			href='/destamatic-ui'
-		/>
+		<Typography style={{ textAlign: 'center' }} type='p1' label={`© Torrin Leonard ${new Date().getFullYear()} 🇨🇦 `} />
 	</div>
 </div>);
 
