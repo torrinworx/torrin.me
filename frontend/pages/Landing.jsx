@@ -70,10 +70,11 @@ const work = [
 const projects = [
     {
         header: 'destamatic-ui',
-        headerUrl: {
-            func: (s) => s.open({ name: 'destamatic-ui' }),
-            href: '/destamatic-ui'
-        },
+        // headerUrl: {
+        //     func: (s) => s.open({ name: 'destamatic-ui' }),
+        //     href: 'https://github.com/torrinworx/destamatic-ui'
+        // },
+        headerUrl: 'https://github.com/torrinworx/destamatic-ui',
         description: 'Lightweight UI layer built on top of existing company DOM/state tooling to package in-house primitives into a polished, reusable interface.',
         bullets: [
             'Used for Equator mapping/AI platform, torrin.me, and OpenGig.org.',

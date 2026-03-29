@@ -28,7 +28,7 @@ import Blog from './pages/Blog';
 import Landing from './pages/Landing.jsx';
 import NotFound from './pages/NotFound.jsx';
 
-import DestamaticUI from './destamatic-ui/App.jsx';
+// import DestamaticUI from './destamatic-ui/App.jsx';
 
 let track;
 
@@ -178,7 +178,7 @@ const stage = {
 		landing: Landing,
 		blog: Blog,
 		contact: () => <Contact />,
-		'destamatic-ui': DestamaticUI,
+		// 'destamatic-ui': DestamaticUI,
 		fallback: NotFound,
 	},
 	onOpen: () => {
