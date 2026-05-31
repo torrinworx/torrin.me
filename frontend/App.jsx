@@ -24,7 +24,6 @@ import JsonLd from './utils/JsonLd.jsx';
 import Header from './utils/Header.jsx';
 import Contact from './utils/Contact.jsx';
 
-import Blog from './pages/Blog';
 import Landing from './pages/Landing.jsx';
 import NotFound from './pages/NotFound.jsx';
 
@@ -176,7 +175,6 @@ const SocialButton = ({ each }) => <Button
 const stage = {
 	acts: {
 		landing: Landing,
-		blog: Blog,
 		contact: () => <Contact />,
 		// 'destamatic-ui': DestamaticUI,
 		fallback: NotFound,

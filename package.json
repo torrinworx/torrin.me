@@ -6,7 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"start": "node ./backend/index.js",
-		"dev": "nodemon --watch ./frontend --watch ./destamatic-ui --ignore ./frontend/public/blog/index.json --ignore ./frontend/public/destamatic-ui/* --exec node ./server.js",
+		"dev": "nodemon --watch ./frontend --watch ./destamatic-ui --ignore ./frontend/public/destamatic-ui/* --exec node ./server.js",
 		"build": "bash build.sh",
 		"test": "node --test"
 	},
@@ -30,8 +30,8 @@
 		"@iconify-json/simple-icons": "^1.2.1",
 		"@iconify-json/svg-spinners": "^1.2.4",
 		"@iconify-json/tabler": "^1.2.22",
-		"destam": "^0.8.0",
-		"destam-dom": "^0.14.0",
+		"destam": "^0.9.0",
+		"destam-dom": "^0.15.0",
 		"@destamatic/ui": "file:destamatic-ui",
 		"esbuild": "^0.25.5",
 		"feather-icons": "^4.29.2",
