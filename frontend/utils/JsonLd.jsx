@@ -114,7 +114,7 @@ const baseJsonLd = {
 			url: 'https://equatorstudios.com/',
 		},
 		{
-			'@type': ['WebSite', 'Blog'],
+			'@type': 'WebSite',
 			'@id': WEBSITE_ID,
 			url: BASE_URL,
 			name: SITE_NAME,
