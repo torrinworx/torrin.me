@@ -29,7 +29,7 @@
       "location": "Hybrid / Waterloo, ON",
       "start": "2023-03-01",
       "end": null,
-      "tech": "Node.js/Express, React + destamatic-ui, Next.js, TypeScript, MongoDB, Python/FastAPI, OpenAI (embeddings + fine-tuning), Qdrant, ChromaDB, GeoPandas, Docker, GitLab CI/CD, GitHub Actions, DigitalOcean, AWS, Proxmox, Linux",
+      "tech": "Node.js/Express, React, Next.js, TypeScript, MongoDB, Python/FastAPI, OpenAI, Qdrant, ChromaDB, GeoPandas, Docker, GitLab CI/CD, AWS, Linux",
       "bullets": [
         "Built a 0->1 AI proposal product as its sole engineer through the initial build, then led it as the team grew to seven, authoring the majority of commits and 64% of the code.",
         "Rebuilt the marketing site on Next.js and built its CI/CD deploy pipeline, growing organic search from under 1,000 clicks and under 1M impressions to 52.1K clicks and 6.17M impressions over six months.",
@@ -54,8 +54,7 @@
       "bullets": [
         "Founded and ran a federally incorporated 3D modeling and rendering contract pipeline studio across 7 client engagements with no outside funding; owned product, clients, contracts, and delivery end-to-end.",
         "Built per-client combinatorial rule engines and unattended batch rendering on rented GPU capacity, delivering over 50,000 rendered files to one client in under a week.",
-        "Built and maintained Blend_My_NFTs, a Python/Blender API add-on for procedural 3D asset generation and export, to 1,015 stars and 324 forks; authored 423 of 496 commits across 7 releases.",
-        "Grew a companion tutorial channel to 282,388 views and 3.29K subscribers across 25 videos, driving adoption of the studio's open-source tooling."
+        "Open-sourced the studio's Blender tooling (see Projects) and grew a companion tutorial channel to 282,388 views and 3.29K subscribers across 25 videos, driving adoption."
       ]
     },
     {
@@ -99,9 +98,19 @@
       ]
     },
     {
+      "name": "mcp.torrin.me",
+      "url": "https://mcp.torrin.me",
+      "description": "Sandboxed execution platform for agent-authored modules, running live.",
+      "bullets": [
+        "Agent-authored modules stored as Postgres rows, each run in a per-invocation child process under its own unix uid to block V8 inspector escapes between peers.",
+        "Egress proxy with a local CA terminates TLS only for hosts with a managed secret, so module code never holds plaintext credentials; nftables enforces the boundary."
+      ]
+    },
+    {
       "name": "OpenGig.org",
       "url": "https://opengig.org",
       "description": "Open-source platform for gig workers and customers.",
+      "pdf": false,
       "bullets": [
         "Built solo across 581 commits: full-stack JavaScript with a custom UI framework, database state-sync, and a WebSocket layer, deployed on DigitalOcean behind NGINX with GitHub Actions CI."
       ]
