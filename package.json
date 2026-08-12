@@ -8,6 +8,7 @@
 		"start": "node ./backend/index.js",
 		"dev": "nodemon --watch ./frontend --watch ./destamatic-ui --ignore ./frontend/public/destamatic-ui/* --exec node ./server.js",
 		"build": "bash build.sh",
+		"resume:pdf": "python3 resume_pdf_generator.py",
 		"test": "node --test"
 	},
 	"repository": {

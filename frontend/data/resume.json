@@ -1,0 +1,189 @@
+{
+  "_readme": "Single source of truth for the resume. Consumed by frontend/pages/Landing.jsx (the web page) and by resume_pdf_generator.py (the PDF, generated at build time by build.sh). Edit this file only. Never edit the page or the generator to change content, or the two will drift the way they did before this file existed. Formatting differences between the page and the PDF are intentional and live in each renderer: dates are stored ISO here and formatted per target. The private master record this file is a filtered view of lives in ~/Documents/Notes/experience/.",
+
+  "_pdfFlag": "Any work or project entry may set \"pdf\": false to appear on the website but not in the PDF. The web page has unlimited room; the PDF has to stay at two pages. Default when the key is absent is true.",
+
+  "profile": {
+    "name": "Torrin Leonard",
+    "title": "Full-Stack Software Engineer",
+    "tagline": "Full-stack software engineer.",
+    "availability": "Open to remote roles and contracts.",
+    "intro": "I build AI-powered web apps, vector search pipelines, and accessible UI systems (WCAG).",
+    "location": "Waterloo, Ontario, Canada",
+    "locationDisplay": "Based in Waterloo, Ontario 🇨🇦",
+    "remote": "Canadian citizen. Remote only, anywhere in Canada. Not seeking on-site or hybrid.",
+    "email": "torrin@torrin.me",
+    "phone": "519-591-3736",
+    "website": "https://torrin.me",
+    "github": "https://github.com/torrinworx",
+    "linkedin": "https://www.linkedin.com/in/torrin-leonard-8343a1154/",
+    "summary": "Full-stack software engineer building AI-powered web apps, retrieval-augmented generation (RAG) and vector search pipelines, and accessible UI systems (WCAG). Owns 0->1 product features end-to-end and runs production releases across development, testing, and leadership."
+  },
+
+  "work": [
+    {
+      "role": "Full Stack Software Developer",
+      "company": "Equator Studios",
+      "companyUrl": "https://equatorstudios.com/",
+      "logo": "/EquatorLogoDark.svg",
+      "location": "Hybrid / Waterloo, ON",
+      "start": "2023-03-01",
+      "end": null,
+      "tech": "Node.js/Express, React + destamatic-ui, Next.js, TypeScript, MongoDB, Python/FastAPI, OpenAI (embeddings + fine-tuning), Qdrant, ChromaDB, GeoPandas, Docker, GitLab CI/CD, GitHub Actions, DigitalOcean, AWS, Proxmox, Linux",
+      "bullets": [
+        "Built a 0->1 AI proposal product as its sole engineer through the initial build, then led it as the team grew to seven, authoring the majority of commits and 64% of the code.",
+        "Rebuilt the marketing site on Next.js and built its CI/CD deploy pipeline, growing organic search from under 1,000 clicks and under 1M impressions to 52.1K clicks and 6.17M impressions over six months.",
+        "Authored and merged 70 production releases, coordinating development, testing, and leadership through feature rollout.",
+        "Built the RAG ingestion and retrieval pipeline (OpenAI embeddings, Qdrant, ChromaDB): text-embedding-3-large at 3,072 dimensions across 4 shards, a 16-worker upsert queue, and query-expansion retrieval.",
+        "Implemented a client fine-tuning pipeline on the OpenAI fine-tuning API across four model slots, with per-user token cost metering on every model call.",
+        "Built an admin prompt orchestration layer for nine production AI workflows, with live sync, code-defined fallbacks, and injection and hallucination guards.",
+        "Integrated server-hosted GIS segmentation models (SamGeo, LangSAM) for satellite imagery selection in the main app.",
+        "Added Stripe payment systems and supported site-based pricing rollout with product.",
+        "Onboarded and mentored 2 developers; participated in interviews and code reviews."
+      ]
+    },
+    {
+      "role": "Co-Founder & CEO, Lead Software Developer",
+      "company": "This Cozy Studio",
+      "companyUrl": null,
+      "logo": "/ThisCozyStudioLogo.svg",
+      "location": "Waterloo, ON",
+      "start": "2021-10-01",
+      "end": "2023-03-01",
+      "tech": "React, Node.js, Django, Python, Blender API, HTML/CSS/JavaScript, AWS",
+      "bullets": [
+        "Founded and ran a federally incorporated 3D modeling and rendering contract pipeline studio across 7 client engagements with no outside funding; owned product, clients, contracts, and delivery end-to-end.",
+        "Built per-client combinatorial rule engines and unattended batch rendering on rented GPU capacity, delivering over 50,000 rendered files to one client in under a week.",
+        "Built and maintained Blend_My_NFTs, a Python/Blender API add-on for procedural 3D asset generation and export, to 1,015 stars and 324 forks; authored 423 of 496 commits across 7 releases.",
+        "Grew a companion tutorial channel to 282,388 views and 3.29K subscribers across 25 videos, driving adoption of the studio's open-source tooling."
+      ]
+    },
+    {
+      "role": "Automation & Accessibility Engineer (Contract / Part-time)",
+      "company": "League",
+      "companyUrl": "https://www.league.com/",
+      "logo": "/LeagueLogo.jpg",
+      "logoStyle": { "borderRadius": "50%" },
+      "location": "Remote",
+      "start": "2021-03-01",
+      "end": "2022-05-01",
+      "tech": "JavaScript/TypeScript, TestCafe, Node/npm, Git, Jira, WCAG",
+      "bullets": [
+        "Built TestCafe regression suites in TypeScript/JavaScript, reducing manual cycles and improving release confidence.",
+        "Performed WCAG accessibility audits and partnered with engineers/PMs to ship compliant releases; triaged defects within CI workflows."
+      ]
+    },
+    {
+      "role": "Automation & Accessibility Engineer (Contract / Part-time)",
+      "company": "worX4you",
+      "companyUrl": "https://worx4you.com/",
+      "logo": "/worX4youLogo.jpg",
+      "logoStyle": { "borderRadius": "50%" },
+      "location": "Contract / Various Clients",
+      "start": "2013-06-01",
+      "end": "2021-03-01",
+      "tech": null,
+      "bullets": [
+        "Delivered automation and accessibility testing for startup clients, building reusable test tooling and cross-browser checklists for WCAG-aligned releases."
+      ]
+    }
+  ],
+
+  "projects": [
+    {
+      "name": "destamatic-ui",
+      "url": "https://github.com/torrinworx/destamatic-ui",
+      "description": "Reactive UI component library, published to npm.",
+      "bullets": [
+        "Lead developer of a 70-component library published to npm under MIT (619 of 1,105 commits); powers Equator's mapping/AI platform, torrin.me, and OpenGig.org."
+      ]
+    },
+    {
+      "name": "OpenGig.org",
+      "url": "https://opengig.org",
+      "description": "Open-source platform for gig workers and customers.",
+      "bullets": [
+        "Built solo across 581 commits: full-stack JavaScript with a custom UI framework, database state-sync, and a WebSocket layer, deployed on DigitalOcean behind NGINX with GitHub Actions CI."
+      ]
+    },
+    {
+      "name": "Blend_My_NFTs",
+      "url": "https://github.com/torrinworx/Blend_My_NFTs",
+      "description": "Blender add-on automating procedural 3D asset generation and export, written against the Python/Blender API.",
+      "bullets": [
+        "1,015 stars and 324 forks; used by multiple studios. Authored 423 of 496 commits across 7 releases."
+      ]
+    },
+    {
+      "name": "Cozy-Auto-Texture",
+      "url": "https://github.com/torrinworx/Cozy-Auto-Texture",
+      "description": "Blender add-on bringing Stable Diffusion texture generation into Blender.",
+      "bullets": [
+        "116 stars, one of five open-source Blender tools totalling 1,168. Shipped Sept 2022, two weeks after Stable Diffusion's public release and three months before ChatGPT, with the studio hosting the weights."
+      ]
+    },
+    {
+      "name": "MangoSync",
+      "url": "https://github.com/torrinworx/MangoSync",
+      "description": "Local music player with AI-assisted lyrics and metadata.",
+      "pdf": false,
+      "bullets": [
+        "Uses Whisper to auto-generate and align lyrics for time-synced playback.",
+        "Displays time-synced lyrics in an Apple-style karaoke mode lyric scroller.",
+        "Enhances albums with additional metadata like artwork and descriptions."
+      ]
+    },
+    {
+      "name": "docracy",
+      "url": "https://github.com/torrinworx/docracy",
+      "description": "Document tooling written in Rust.",
+      "pdf": false,
+      "bullets": [
+        "Built solo across 454 commits."
+      ]
+    }
+  ],
+
+  "skills": [
+    { "label": "Languages", "text": "JavaScript, TypeScript, Python, Rust" },
+    { "label": "Frontend", "text": "React, Next.js, destamatic-ui, HTML/CSS" },
+    { "label": "Backend", "text": "Node.js, Express, FastAPI, Django, REST APIs, WebSockets" },
+    { "label": "Databases", "text": "MongoDB, Qdrant, ChromaDB" },
+    { "label": "AI & Data", "text": "OpenAI API (embeddings + fine-tuning), RAG (Retrieval-Augmented Generation), vector search, evals, prompt injection defense, Whisper, pandas" },
+    { "label": "Cloud & DevOps", "text": "Docker, GitLab CI/CD (Continuous Integration/Continuous Deployment), GitHub Actions, DigitalOcean, AWS (Amazon Web Services), Proxmox, NGINX, Linux (Ubuntu/Arch)" },
+    { "label": "Practices", "text": "Release management, code review, mentoring, technical interviewing, WCAG accessibility audits" },
+    { "label": "Testing", "text": "TestCafe, automation and regression testing" }
+  ],
+
+  "education": {
+    "summary": "Self-taught software engineer.",
+    "credentials": [
+      {
+        "name": "CS50x, Introduction to Computer Science",
+        "issuer": "Harvard University",
+        "year": "2025",
+        "url": "https://certificates.cs50.io/c5b07d80-d475-44cb-a616-16e4209db48a.pdf"
+      },
+      {
+        "name": "Introduction to Web Accessibility, WCAG",
+        "issuer": "W3Cx",
+        "year": "2021",
+        "url": "https://courses.edx.org/certificates/05d8dc2dc24e42238e616f83329ee2f0"
+      },
+      {
+        "name": "Greatest Unsolved Mysteries of the Universe (ANU-ASTRO1x)",
+        "issuer": "Australian National University",
+        "year": "2020",
+        "url": "https://courses.edx.org/certificates/24e0a4eb8d2c4bee94503c85ba31a7d5",
+        "pdf": false
+      },
+      {
+        "name": "Introduction to Aerospace Engineering (16.00x)",
+        "issuer": "MIT",
+        "year": "2021",
+        "url": "https://courses.edx.org/certificates/4671ce0c456844ff81684660be3095e2",
+        "pdf": false
+      }
+    ]
+  }
+}

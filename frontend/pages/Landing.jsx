@@ -4,112 +4,34 @@ import Email from '../utils/Email.jsx';
 import useShine from '../utils/Shine.jsx'
 import Contact from '../utils/Contact.jsx';
 import Resume from '../utils/Resume.jsx';
+import resume from '../data/resume.json';
 
-const work = [
-    {
-        start: '2023-03-01',
-        image: '/EquatorLogoDark.svg',
-        url: 'https://equatorstudios.com/',
-        imgName: 'Equator',
-        header: 'Full Stack Software Developer',
-        description: 'Tech: Node.js/Express, React + destamatic-ui, TypeScript, MongoDB, Python/FastAPI, OpenAI (embeddings + fine-tuning), Qdrant, ChromaDB, GeoPandas, Docker, GitLab CI/CD, GitHub Actions, DigitalOcean, AWS, Proxmox, Linux',
-        bullets: [
-            'Owned 0->1 AI proposal product end-to-end and shipped to production as sole engineer.',
-            'Built vector ingestion + retrieval pipeline with OpenAI embeddings, Qdrant, and ChromaDB; integrated into our main application.',
-            'Implemented client fine-tuning pipeline with OpenAI fine-tuning API and productionized services.',
-            'Designed and built safeguards for model failures, fine-tuning evals, hallucinations, prompt injection, and continuous context retrieval/management.',
-            'Integrated server-hosted GIS segmentation models for satellite imagery selection in the main app.',
-            'Added Stripe payment systems and supported site-based pricing rollout with product.',
-            'Onboarded and mentored 2 developers; participated in interviews and code reviews.',
-        ],
-    },
-    {
-        start: '2021-10-01',
-        end: '2023-03-01',
-        image: '/ThisCozyStudioLogo.svg',
-        imgName: 'This Cozy Studio',
-        header: 'Co-Founder, CEO, Lead Software Developer',
-        description: 'Tech: React, Node.js, Django, Python, Blender API, HTML/CSS/JavaScript, AWS',
-        bullets: [
-            'Led client-facing delivery for 3D/NFT pipeline projects; scoped contracts, managed timelines, and shipped quickly.',
-            'Built and maintained Blend_My_NFTs (Python/Blender API), reaching ~1k GitHub stars.',
-            'Developed web tooling for asset pipelines and automated rendering/export workflows.',
-        ],
-    },
-    {
-        start: '2021-03-01',
-        end: '2022-05-01',
-        image: '/LeagueLogo.jpg',
-        url: 'https://www.league.com/',
-        style: { borderRadius: '50%' },
-        imgName: 'League',
-        header: 'Automation & Accessibility Engineer (Contract / Part-time)',
-        description: 'Tech: JavaScript/TypeScript, TestCafe, Node/npm, Git, Jira, WCAG',
-        bullets: [
-            'Built TestCafe regression suites in TypeScript/JavaScript, reducing manual cycles and improving release confidence.',
-            'Performed WCAG accessibility audits and partnered with engineers/PMs to ship compliant releases.',
-            'Maintained automation and triaged defects within CI workflows.',
-        ],
-    },
-    {
-        start: '2013-06-01',
-        end: '2021-03-01',
-        image: '/worX4youLogo.jpg',
-        url: 'https://worx4you.com/',
-        style: { borderRadius: '50%' },
-        imgName: 'worX4you',
-        header: 'Automation & Accessibility Engineer (Contract / Part-time)',
-        description: 'Tech: JavaScript/TypeScript, TestCafe, Node/npm, Git, Jira, WCAG',
-        bullets: [
-            'Delivered automation and accessibility testing for startup clients; strengthened regression coverage.',
-            'Created reusable test tooling and cross-browser checklists to support WCAG-aligned releases.',
-        ],
-    },
-];
+// Content lives in frontend/data/resume.json and nowhere else. resume_pdf_generator.py
+// reads the same file at build time, so the page and the downloadable PDF cannot drift.
+// The adapters below only reshape that data into what <Card> already expects; add
+// resume content by editing the JSON, not here.
+const { profile } = resume;
 
-const projects = [
-    {
-        header: 'destamatic-ui',
-        // headerUrl: {
-        //     func: (s) => s.open({ name: 'destamatic-ui' }),
-        //     href: 'https://github.com/torrinworx/destamatic-ui'
-        // },
-        headerUrl: 'https://github.com/torrinworx/destamatic-ui',
-        description: 'Lightweight UI layer built on top of existing company DOM/state tooling to package in-house primitives into a polished, reusable interface.',
-        bullets: [
-            'Used for Equator mapping/AI platform, torrin.me, and OpenGig.org.',
-            'Built a sleek UI library on top of established internal tooling, improving developer ergonomics without disrupting existing React-based conventions.',
-        ],
-    },
-    {
-        header: 'OpenGig.org',
-        headerUrl: 'https://opengig.org',
-        description: 'Open-source platform for gig workers and customers.',
-        bullets: [
-            'Built a full-stack app in JavaScript with a custom UI framework, database state-sync, and websocket layer.',
-            'Deployed to a DigitalOcean droplet behind NGINX, with GitHub Actions for CI.',
-        ],
-    },
-    {
-        header: 'Blend_My_NFTs',
-        headerUrl: 'https://github.com/torrinworx/Blend_My_NFTs',
-        description: 'Blender add-on for generating 3D NFT collections.',
-        bullets: [
-            'Reached ~1k GitHub stars, 200K+ views on YouTube, used by multiple studios and NFT projects.',
-            'Automates 3D asset generation and export pipelines from Blender.',
-        ],
-    },
-    {
-        header: 'MangoSync',
-        headerUrl: 'https://github.com/torrinworx/MangoSync',
-        description: 'Local music player with AI-assisted lyrics and metadata.',
-        bullets: [
-            'Uses Whisper to auto-generate and align lyrics for time-synced playback.',
-            'Displays time-synced lyrics in an Apple-style karaoke mode lyric scroller.',
-            'Enhances albums with additional metadata like artwork and descriptions.',
-        ],
-    },
-];
+const work = resume.work.map(job => ({
+    start: job.start,
+    end: job.end,
+    image: job.logo,
+    url: job.companyUrl,
+    imgName: job.company,
+    style: job.logoStyle,
+    header: job.role,
+    // Entries may omit tech (worX4you's stack is identical to League's, so repeating it
+    // just costs a line). Undefined hides the row via <Shown>.
+    description: job.tech ? `Tech: ${job.tech}` : undefined,
+    bullets: job.bullets,
+}));
+
+const projects = resume.projects.map(project => ({
+    header: project.name,
+    headerUrl: project.url,
+    description: project.description,
+    bullets: project.bullets,
+}));
 
 const getOrdinal = (n) => {
     const v = n % 100;
@@ -213,40 +135,24 @@ const Card = StageContext.use(s => ({ each }) => <div theme='column_fill'>
     </Shown>
 </div>);
 
-const skills = [
-    {
-        bold: 'Languages:',
-        text: ' JavaScript, TypeScript, Python'
-    },
-    {
-        bold: 'Frontend:',
-        text: ' React, destamatic-ui, HTML/CSS'
-    },
-    {
-        bold: 'Backend:',
-        text: ' Node.js, Express, FastAPI, Django'
-    },
-    {
-        bold: 'Databases:',
-        text: ' MongoDB, Qdrant, ChromaDB'
-    },
-    {
-        bold: 'Cloud & DevOps:',
-        text: ' Docker, GitLab CI/CD, GitHub Actions, DigitalOcean, AWS, Proxmox, Linux (Ubuntu/Arch)'
-    },
-    {
-        bold: 'AI & Data:',
-        text: ' OpenAI API (embeddings + fine-tuning), GeoPandas, pandas'
-    },
-    {
-        bold: 'Accessibility:',
-        text: ' WCAG audits, W3C Web Accessibility (WAI0.1x)'
-    },
-    {
-        bold: 'Testing:',
-        text: ' TestCafe, automation testing'
-    }
-];
+const skills = resume.skills.map(skill => ({
+    bold: `${skill.label}:`,
+    text: ` ${skill.text}`,
+}));
+
+// The site lists every credential; the PDF filters to the on-domain ones via "pdf": false.
+const education = resume.education;
+
+const Credential = ({ each }) => <li key={each.url}>
+    <Button
+        type='link'
+        iconPosition='right'
+        icon={<Icon style={{ marginLeft: 3 }} name='feather:external-link' />}
+        label={<Typography type='body' label={`${each.name} (${each.issuer}, ${each.year})`} />}
+        onClick={() => window.open(each.url, '_blank')}
+        href={each.url}
+    />
+</li>;
 
 const Skill = ({ each }) => {
 
@@ -284,17 +190,17 @@ const Landing = StageContext.use(s => ({ }, cleanup, mounted) => {
                     <Typography
                         theme="row_fill_start"
                         type="h1"
-                        label="Torrin Leonard"
+                        label={profile.name}
                     />
                     <Typography
                         theme="row_fill_start"
                         type="p1"
-                        label='Full-stack software engineer.'
+                        label={profile.tagline}
                     />
                     <Typography
                         theme="row_fill_start"
                         type="p1_bold"
-                        label="Open to roles and contracts."
+                        label={profile.availability}
                     />
                 </div>
 
@@ -327,12 +233,17 @@ const Landing = StageContext.use(s => ({ }, cleanup, mounted) => {
             <Typography
                 theme="row_fill_start"
                 type="p1"
-                label="I build AI-powered web apps, vector search pipelines, and accessible UI systems (WCAG)."
+                label={profile.intro}
             />
             <Typography
                 theme="row_fill_start"
                 type="p1_bold"
-                label="Based in Waterloo, Ontario 🇨🇦"
+                label={profile.locationDisplay}
+            />
+            <Typography
+                theme="row_fill_start"
+                type="p1"
+                label={profile.remote}
             />
 
             <div
@@ -365,8 +276,8 @@ const Landing = StageContext.use(s => ({ }, cleanup, mounted) => {
                     label="Github"
                     type="outlined"
                     icon={<Icon name="feather:github" />}
-                    onClick={() => window.open('https://github.com/torrinworx', '_blank')}
-                    href="https://github.com/torrinworx"
+                    onClick={() => window.open(profile.github, '_blank')}
+                    href={profile.github}
                     iconPosition="right"
                 />
             </div>
@@ -390,6 +301,14 @@ const Landing = StageContext.use(s => ({ }, cleanup, mounted) => {
             <Typography theme='row_fill_start' type='h2' label='Skills' />
             <ul style={{ paddingLeft: 25 }}>
                 <Skill each={skills} />
+            </ul>
+        </div>
+
+        <div theme='content_col'>
+            <Typography theme='row_fill_start' type='h2' label='Education' />
+            <Typography theme='row_fill_start' type='p1' label={education.summary} />
+            <ul style={{ paddingLeft: 25 }}>
+                <Credential each={education.credentials} />
             </ul>
         </div>
 
