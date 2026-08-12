@@ -8,6 +8,17 @@ ZIP_FILE="./build.zip"
 rm -rf "$BUILD_DIR"
 rm -f "$ZIP_FILE"
 
+# Resume PDF. Generated from frontend/data/resume.json, the same file the site imports,
+# so the downloadable PDF can never drift from the web page. Must run before `vite build`,
+# which copies frontend/public into the bundle. A failure here aborts the build on
+# purpose: silently shipping a stale resume is the bug this step exists to prevent.
+if [ -x ./.venv/bin/python ]; then
+	PYTHON=./.venv/bin/python
+else
+	PYTHON=python3
+fi
+"$PYTHON" resume_pdf_generator.py
+
 # Frontend builds
 vite build
 vite build --config vite.config.ssg.js

@@ -25,6 +25,16 @@ jobs:
             - name: Install dependencies
               run: npm i
 
+            # build.sh regenerates the resume PDF from frontend/data/resume.json before
+            # vite runs, so the build needs Python and reportlab available.
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.12"
+
+            - name: Install resume generator dependencies
+              run: pip install reportlab
+
             - name: Execute build script
               run: npm run build
 

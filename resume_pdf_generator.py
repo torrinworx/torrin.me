@@ -1,5 +1,18 @@
+"""Render the resume PDF from the single source of truth.
+
+Content is NOT defined in this file. It lives in frontend/data/resume.json, which the
+website (frontend/pages/Landing.jsx) also imports. This script only decides how that
+data is laid out on paper. Editing content here would recreate the drift this file was
+refactored to remove, so change the JSON instead.
+
+Run via `npm run resume:pdf`, or automatically as the first step of build.sh.
+"""
+
+import json
+from datetime import date
+from pathlib import Path
+
 from reportlab.lib.pagesizes import LETTER
-from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import (
@@ -8,135 +21,61 @@ from reportlab.platypus import (
     Spacer,
     ListFlowable,
 )
-from reportlab.lib.units import inch
 
-OUTPUT_FILE = "Torrin_Leonard_Resume.pdf"
+REPO_ROOT = Path(__file__).resolve().parent
+DATA_FILE = REPO_ROOT / "frontend" / "data" / "resume.json"
 
-NAME = "Torrin Leonard"
-TITLE = "Full-Stack Software Engineer"
+# Write straight into the served asset directory. The site's download button fetches
+# /Torrin_Leonard_Resume.pdf from frontend/public, so generating anywhere else leaves
+# the live download stale.
+OUTPUT_FILE = REPO_ROOT / "frontend" / "public" / "Torrin_Leonard_Resume.pdf"
 
-LOCATION = "Waterloo, Ontario, Canada"
-EMAIL = "torrin@torrin.me"
-WEBSITE = "https://torrin.me"
-GITHUB = "https://github.com/torrinworx"
-LINKEDIN = "https://www.linkedin.com/in/torrin-leonard-8343a1154/"
+RESUME = json.loads(DATA_FILE.read_text(encoding="utf-8"))
+PROFILE = RESUME["profile"]
 
-# --- CONTENT (kept close to your Landing.jsx) --- #
+NAME = PROFILE["name"]
+TITLE = PROFILE["title"]
+EMAIL = PROFILE["email"]
+WEBSITE = PROFILE["website"]
+GITHUB = PROFILE["github"]
+LINKEDIN = PROFILE["linkedin"]
 
-SUMMARY = """
-Full-stack software engineer focused on AI-powered web apps, vector search pipelines, and
-accessible UI systems (WCAG). Comfortable owning 0->1 product features end-to-end, collaborating
-with cross-functional teams, and shipping to production in fast-paced environments.
-"""
+# Applicant tracking systems read the PDF text layer, not the clickable link
+# annotations. The header buttons below are drawn on the canvas, so their text layer
+# contains only the words "Website", "GitHub" and "LinkedIn"; the URLs themselves are
+# invisible to a parser. This line puts the real contact details into the flowed text
+# so they are extractable and so regex-based LinkedIn/phone fields populate.
+CONTACT_LINE = " | ".join(
+    [
+        PROFILE["location"],
+        EMAIL,
+        PROFILE["phone"],
+        WEBSITE.replace("https://", ""),
+        LINKEDIN.replace("https://www.", "").rstrip("/"),
+        GITHUB.replace("https://", ""),
+    ]
+)
 
-POSITIONS = [
-    {
-        "role": "Full Stack Software Developer",
-        "company": "Equator Studios",
-        "location": "Hybrid / Waterloo, ON",
-        "dates": "Mar 2023 – Present",
-        "tech": "Node.js/Express, React + destamatic-ui, TypeScript, MongoDB, Python/FastAPI, OpenAI (embeddings + fine-tuning), Qdrant, ChromaDB, GeoPandas, Docker, GitLab CI/CD, GitHub Actions, DigitalOcean, AWS, Proxmox, Linux",
-        "bullets": [
-            "Owned 0->1 AI proposal product end-to-end and shipped to production as sole engineer.",
-            "Built vector ingestion + retrieval pipeline with OpenAI embeddings, Qdrant, and ChromaDB; integrated into our main application.",
-            "Implemented client fine-tuning pipeline with OpenAI fine-tuning API and productionized services.",
-            "Designed and built safeguards for model failures, fine-tuning evals, hallucinations, prompt injection, and continuous context retrieval/management.",
-            "Integrated server-hosted GIS segmentation models for satellite imagery selection in the main app.",
-            "Added Stripe payment systems and supported site-based pricing rollout with product.",
-            "Onboarded and mentored 2 developers; participated in interviews and code reviews.",
-        ],
-    },
-    {
-        "role": "Co-Founder, CEO, Lead Developer",
-        "company": "This Cozy Studio Inc.",
-        "location": "Waterloo, ON",
-        "dates": "Oct 2021 – Jan 2025",
-        "tech": "React, Node.js, Django, Python, Blender API, HTML/CSS/JavaScript, AWS",
-        "bullets": [
-            "Led client-facing delivery for 3D/NFT pipeline projects; scoped contracts, managed timelines, and shipped quickly.",
-            "Built and maintained Blend_My_NFTs (Python/Blender API), reaching ~1k GitHub stars.",
-            "Developed web tooling for asset pipelines and automated rendering/export workflows.",
-            "Coordinated 3D asset pipeline standards with studio collaborators to improve consistency and delivery quality.",
-        ],
-    },
-    {
-        "role": "Automation & Accessibility Engineer (Contract / Part-time)",
-        "company": "League",
-        "location": "Remote",
-        "dates": "Mar 2021 – May 2022",
-        "tech": "JavaScript/TypeScript, TestCafe, Node/npm, Git, Jira, WCAG",
-        "bullets": [
-            "Built TestCafe regression suites in TypeScript/JavaScript, reducing manual cycles and improving release confidence.",
-            "Performed WCAG accessibility audits and partnered with engineers/PMs to ship compliant releases.",
-            "Maintained automation and triaged defects within CI workflows.",
-        ],
-    },
-    {
-        "role": "Automation & Accessibility Engineer (Contract / Part-time)",
-        "company": "worX4you Inc.",
-        "location": "Contract / Various Clients",
-        "dates": "Jun 2013 – Mar 2021",
-        "tech": "JavaScript/TypeScript, TestCafe, Node/npm, Git, Jira, WCAG",
-        "bullets": [
-            "Delivered automation and accessibility testing for startup clients; strengthened regression coverage.",
-            "Created reusable test tooling and cross-browser checklists to support WCAG-aligned releases.",
-        ],
-    },
-]
+# Location is one of the most common hard knockout filters. Stating the remote
+# constraint in extractable text lets a screener resolve it without guessing.
+REMOTE_LINE = PROFILE["remote"]
 
-PROJECTS = [
-    {
-        "name": "destamatic-ui",
-        "url": "https://torrin.me/destamatic-ui",
-        "desc": "Lightweight UI layer built on top of existing company DOM/state tooling to package in-house primitives into a polished, reusable interface.",
-        "bullets": [
-            "Used for Equator mapping/AI platform, torrin.me, and OpenGig.org.",
-            "Built a sleek UI library on top of established internal tooling, improving developer ergonomics without disrupting existing React-based conventions.",
-        ],
-    },
-    {
-        "name": "OpenGig.org",
-        "url": "https://opengig.org",
-        "desc": "Open-source platform for gig workers and customers.",
-        "bullets": [
-            "Built a full-stack app in JavaScript with a custom UI framework, database state-sync, and WebSocket layer.",
-            "Deployed to a DigitalOcean droplet behind NGINX, with GitHub Actions for CI.",
-        ],
-    },
-    {
-        "name": "Blend_My_NFTs",
-        "url": "https://github.com/torrinworx/Blend_My_NFTs",
-        "desc": "Blender add-on for generating 3D NFT collections.",
-        "bullets": [
-            "Reached ~1k GitHub stars, 200K+ YouTube views, and is used by multiple studios and NFT projects.",
-            "Automates 3D asset generation and export pipelines from Blender.",
-        ],
-    },
-    {
-        "name": "MangoSync",
-        "url": "https://github.com/torrinworx/MangoSync",
-        "desc": "Local music player with AI-assisted lyrics and metadata.",
-        "bullets": [
-            "Uses Whisper to auto-generate and align lyrics for time-synced playback.",
-            "Displays time-synced lyrics in an Apple-style karaoke mode lyric scroller.",
-            "Enhances albums with additional metadata like artwork and descriptions.",
-        ],
-    },
-]
 
-SKILLS = [
-    ("Languages", "JavaScript, TypeScript, Python"),
-    ("Frontend", "React, destamatic-ui, HTML/CSS"),
-    ("Backend", "Node.js, Express, FastAPI, Django"),
-    ("Databases", "MongoDB, Qdrant, ChromaDB"),
-    (
-        "Cloud & DevOps",
-        "Docker, GitLab CI/CD, GitHub Actions, DigitalOcean, AWS, Proxmox, Linux (Ubuntu/Arch)",
-    ),
-    ("AI & Data", "OpenAI API (embeddings + fine-tuning), GeoPandas, pandas"),
-    ("Accessibility", "WCAG audits, W3C Web Accessibility (WAI0.1x)"),
-    ("Testing", "TestCafe, automation testing"),
-]
+def format_month(iso_date):
+    """2023-03-01 -> 'Mar 2023'."""
+    parsed = date.fromisoformat(iso_date)
+    return parsed.strftime("%b %Y")
+
+
+def format_range(start, end):
+    """A plain hyphen, not an en dash: ATS text extraction handles it more predictably."""
+    return f"{format_month(start)} - {format_month(end) if end else 'Present'}"
+
+
+def for_pdf(entries):
+    """The website has unlimited room, the PDF has to hold at two pages. Entries opting
+    out with "pdf": false stay on the site and are dropped here. See _pdfFlag in the JSON."""
+    return [entry for entry in entries if entry.get("pdf", True)]
 
 
 # ---------- HEADER WITH BUTTONS ---------- #
@@ -196,30 +135,26 @@ def draw_header_with_buttons(c):
 def build_story():
     styles = getSampleStyleSheet()
 
+    # Section spacing is deliberately tight. The content is sized to land on exactly two
+    # pages; loosening these pushes the tail of Skills onto a third, mostly empty page.
     h1 = ParagraphStyle(
         "Heading1",
         parent=styles["Heading1"],
         fontName="Helvetica-Bold",
         fontSize=11,
-        spaceBefore=8,
-        spaceAfter=4,
-    )
-
-    h2 = ParagraphStyle(
-        "Heading2",
-        parent=styles["Heading2"],
-        fontName="Helvetica-Bold",
-        fontSize=10,
         spaceBefore=6,
         spaceAfter=3,
     )
 
+    # 8.5/10.5 is a 1.24 line-height ratio, comfortable for print and tighter than the
+    # previous 8.5/11. The half point back per line is what buys the Education section
+    # without cutting content, and leaves headroom for a few future additions.
     body = ParagraphStyle(
         "Body",
         parent=styles["BodyText"],
         fontName="Helvetica",
         fontSize=8.5,
-        leading=11,
+        leading=10.5,
     )
 
     italic = ParagraphStyle(
@@ -228,49 +163,78 @@ def build_story():
         fontName="Helvetica-Oblique",
     )
 
+    contact = ParagraphStyle(
+        "Contact",
+        parent=body,
+        fontSize=8,
+        leading=10,
+        spaceAfter=2,
+    )
+
     story = []
 
     # Space under header
     story.append(Spacer(1, 100))
 
+    # Parser-readable contact details. See CONTACT_LINE above for why this is flowed
+    # text rather than part of the drawn header.
+    story.append(Paragraph(CONTACT_LINE, contact))
+    story.append(Paragraph(f"<b>{REMOTE_LINE}</b>", contact))
+
     # Summary
     story.append(Paragraph("Summary", h1))
-    story.append(Paragraph(SUMMARY.strip().replace("\n", " "), body))
+    story.append(Paragraph(PROFILE["summary"], body))
 
     # Positions
-    story.append(Spacer(1, 6))
+    story.append(Spacer(1, 3))
     story.append(Paragraph("Experience", h1))
 
-    for job in POSITIONS:
-        title_line = f"<b>{job['role']} — {job['company']}</b>"
+    for job in for_pdf(RESUME["work"]):
+        title_line = f"<b>{job['role']}, {job['company']}</b>"
         story.append(Paragraph(title_line, body))
-        story.append(Paragraph(f"{job['dates']} | {job['location']}", italic))
+        dates = format_range(job["start"], job.get("end"))
+        story.append(Paragraph(f"{dates} | {job['location']}", italic))
         if job.get("tech"):
             story.append(Paragraph(f"<b>Tech: {job['tech']}</b>", body))
 
         bullets = [Paragraph(b, body) for b in job["bullets"]]
         story.append(ListFlowable(bullets, bulletType="bullet", bulletFontSize=5.5, leftIndent=10))
-        story.append(Spacer(1, 4))
+        story.append(Spacer(1, 3))
 
     # Projects
-    story.append(Spacer(1, 4))
+    story.append(Spacer(1, 2))
     story.append(Paragraph("Projects", h1))
 
-    for proj in PROJECTS:
-        name_line = f"<b>{proj['name']}</b> — <font color='blue'>{proj['url']}</font>"
+    for proj in for_pdf(RESUME["projects"]):
+        name_line = f"<b>{proj['name']}</b> | <font color='blue'>{proj['url']}</font>"
         story.append(Paragraph(name_line, body))
-        story.append(Paragraph(proj["desc"], italic))
+        story.append(Paragraph(proj["description"], italic))
 
         bullets = [Paragraph(b, body) for b in proj["bullets"]]
         story.append(ListFlowable(bullets, bulletType="bullet", bulletFontSize=5.5, leftIndent=10))
-        story.append(Spacer(1, 4))
+        story.append(Spacer(1, 3))
 
     # Skills
-    story.append(Spacer(1, 4))
+    story.append(Spacer(1, 2))
     story.append(Paragraph("Skills", h1))
 
-    for label, text in SKILLS:
-        line = f"<b>{label}:</b> {text}"
+    for skill in RESUME["skills"]:
+        story.append(Paragraph(f"<b>{skill['label']}:</b> {skill['text']}", body))
+
+    # Education. Kept to one line: a self-taught candidate needs the heading present so
+    # form parsers find an education field, and needs the on-domain credentials in
+    # extractable text, but a list of MOOCs reads as padding.
+    education = RESUME.get("education")
+    if education:
+        story.append(Spacer(1, 2))
+        story.append(Paragraph("Education", h1))
+        credentials = ", ".join(
+            f"{c['name']} ({c['issuer']}, {c['year']})"
+            for c in for_pdf(education.get("credentials", []))
+        )
+        line = education["summary"]
+        if credentials:
+            line = f"{line} {credentials}."
         story.append(Paragraph(line, body))
 
     return story
@@ -281,7 +245,7 @@ def build_story():
 
 def create_pdf(filename):
     doc = SimpleDocTemplate(
-        filename,
+        str(filename),
         pagesize=LETTER,
         leftMargin=54,
         rightMargin=54,
@@ -297,7 +261,7 @@ def create_pdf(filename):
     def on_later_pages(canv, doc_obj):
         # simple header on later pages
         canv.setFont("Helvetica-Bold", 9)
-        canv.drawString(72, LETTER[1] - 50, f"{NAME} – {TITLE}")
+        canv.drawString(72, LETTER[1] - 50, f"{NAME}, {TITLE}")
         canv.setFont("Helvetica", 8)
         canv.drawRightString(LETTER[0] - 72, LETTER[1] - 50, WEBSITE)
 
@@ -305,5 +269,6 @@ def create_pdf(filename):
 
 
 if __name__ == "__main__":
+    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     create_pdf(OUTPUT_FILE)
-    print(f"Created {OUTPUT_FILE}")
+    print(f"Created {OUTPUT_FILE.relative_to(REPO_ROOT)} from {DATA_FILE.relative_to(REPO_ROOT)}")
