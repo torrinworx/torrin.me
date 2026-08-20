@@ -57,7 +57,7 @@ const formatDate = (isoDate) => {
 const formatDateRange = (start, end) => {
     const startStr = formatDate(start);
     const endStr = end ? formatDate(end) : 'Present';
-    return `${startStr} --> ${endStr}`;
+    return `${startStr} to ${endStr}`;
 };
 
 const Card = StageContext.use(s => ({ each }) => <div theme='column_fill'>
@@ -146,12 +146,14 @@ const education = resume.education;
 const Credential = ({ each }) => <li key={each.url}>
     <Button
         type='link'
+        inline
         iconPosition='right'
         icon={<Icon style={{ marginLeft: 3 }} name='feather:external-link' />}
-        label={<Typography type='body' label={`${each.name} (${each.issuer}, ${each.year})`} />}
+        label={<Typography type='body' label={each.name} />}
         onClick={() => window.open(each.url, '_blank')}
         href={each.url}
     />
+    <Typography type='body' label={` (${each.issuer}, ${each.year})`} />
 </li>;
 
 const Skill = ({ each }) => {
@@ -199,8 +201,8 @@ const Landing = StageContext.use(s => ({ }, cleanup, mounted) => {
                     />
                     <Typography
                         theme="row_fill_start"
-                        type="p1_bold"
-                        label={profile.availability}
+                        type="p1"
+                        label={profile.intro}
                     />
                 </div>
 
@@ -232,18 +234,13 @@ const Landing = StageContext.use(s => ({ }, cleanup, mounted) => {
 
             <Typography
                 theme="row_fill_start"
-                type="p1"
-                label={profile.intro}
-            />
-            <Typography
-                theme="row_fill_start"
                 type="p1_bold"
                 label={profile.locationDisplay}
             />
             <Typography
                 theme="row_fill_start"
                 type="p1"
-                label={profile.remote}
+                label={`${profile.availability} ${profile.remote}`}
             />
 
             <div
