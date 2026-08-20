@@ -1,5 +1,5 @@
 {
-  "_readme": "Single source of truth for the resume. Consumed by frontend/pages/Landing.jsx (the web page) and by resume_pdf_generator.py (the PDF, generated at build time by build.sh). Edit this file only. Never edit the page or the generator to change content, or the two will drift the way they did before this file existed. Formatting differences between the page and the PDF are intentional and live in each renderer: dates are stored ISO here and formatted per target. The private master record this file is a filtered view of lives in ~/Documents/Notes/experience/.",
+  "_readme": "Single source of truth for the resume. Consumed by frontend/pages/Landing.jsx (the web page) and by resume_pdf_generator.py (the PDF, generated at build time by build.sh). Edit this file only. Never edit the page or the generator to change content, or the two will drift the way they did before this file existed. Formatting differences between the page and the PDF are intentional and live in each renderer: dates are stored ISO here and formatted per target. The private master record this file is a filtered view of lives in ~/Documents/Notes/job-search/experience/.",
 
   "_pdfFlag": "Any work or project entry may set \"pdf\": false to appear on the website but not in the PDF. The web page has unlimited room; the PDF has to stay at two pages. Default when the key is absent is true.",
 
@@ -17,7 +17,7 @@
     "website": "https://torrin.me",
     "github": "https://github.com/torrinworx",
     "linkedin": "https://www.linkedin.com/in/torrin-leonard-8343a1154/",
-    "summary": "Full-stack software engineer building AI-powered web apps, retrieval-augmented generation (RAG) and vector search pipelines, and accessible UI systems (WCAG). Owns 0->1 product features end-to-end and runs production releases across development, testing, and leadership."
+    "summary": "Full-stack software engineer building AI-powered web apps, retrieval-augmented generation (RAG) and vector search pipelines, and accessible UI systems (WCAG). Owns 0 to 1 product features end to end and runs production releases across development, testing, and leadership."
   },
 
   "work": [
@@ -31,7 +31,7 @@
       "end": null,
       "tech": "Node.js/Express, React, Next.js, TypeScript, MongoDB, Python/FastAPI, OpenAI, Qdrant, ChromaDB, GeoPandas, Docker, GitLab CI/CD, AWS, Linux",
       "bullets": [
-        "Built a 0->1 AI proposal product as its sole engineer through the initial build, then led it as the team grew to seven, authoring the majority of commits and 64% of the code.",
+        "Built a 0 to 1 AI proposal product as its sole engineer through the initial build, then led it as the team grew to seven, authoring the majority of commits and 64% of the code.",
         "Rebuilt the marketing site on Next.js and built its CI/CD deploy pipeline, growing organic search from under 1,000 clicks and under 1M impressions to 52.1K clicks and 6.17M impressions over six months.",
         "Authored and merged 70 production releases, coordinating development, testing, and leadership through feature rollout.",
         "Built the RAG ingestion and retrieval pipeline (OpenAI embeddings, Qdrant, ChromaDB): text-embedding-3-large at 3,072 dimensions across 4 shards, a 16-worker upsert queue, and query-expansion retrieval.",
@@ -52,7 +52,7 @@
       "end": "2023-03-01",
       "tech": "React, Node.js, Django, Python, Blender API, HTML/CSS/JavaScript, AWS",
       "bullets": [
-        "Founded and ran a federally incorporated 3D modeling and rendering contract pipeline studio across 7 client engagements with no outside funding; owned product, clients, contracts, and delivery end-to-end.",
+        "Founded and ran a federally incorporated 3D modeling and rendering contract pipeline studio across 7 client engagements with no outside funding; owned product, clients, contracts, and delivery end to end.",
         "Built per-client combinatorial rule engines and unattended batch rendering on rented GPU capacity, delivering over 50,000 rendered files to one client in under a week.",
         "Open-sourced the studio's Blender tooling (see Projects) and grew a companion tutorial channel to 282,388 views and 3.29K subscribers across 25 videos, driving adoption."
       ]
@@ -143,12 +143,14 @@
       ]
     },
     {
-      "name": "docracy",
-      "url": "https://github.com/torrinworx/docracy",
-      "description": "Document tooling written in Rust.",
+      "name": "KWBuilds.ca",
+      "url": "https://kwbuilds.ca",
+      "description": "Public directory of Waterloo-region tech startups, with news, events, jobs, and a public MCP server.",
       "pdf": false,
       "bullets": [
-        "Built solo across 454 commits."
+        "Built solo across 338 commits: a live directory of 663 published startups scraped and enriched from Communitech, Velocity, and other regional hubs, with news, events, and jobs subsystems running on the same pipeline machinery.",
+        "Chose browserless scraping (got, cheerio) after a measured bake-off across 493 sites recovered content for 98.8%, retiring the headless browser and Docker from the stack.",
+        "Serves a public MCP server with a hand-rolled OAuth 2.1 authorization server (Dynamic Client Registration, PKCE) so claude.ai and ChatGPT connectors can attach while anonymous clients still work."
       ]
     }
   ],
@@ -180,14 +182,14 @@
         "url": "https://courses.edx.org/certificates/05d8dc2dc24e42238e616f83329ee2f0"
       },
       {
-        "name": "Greatest Unsolved Mysteries of the Universe (ANU-ASTRO1x)",
+        "name": "ANU-ASTRO1x, Greatest Unsolved Mysteries of the Universe",
         "issuer": "Australian National University",
         "year": "2020",
         "url": "https://courses.edx.org/certificates/24e0a4eb8d2c4bee94503c85ba31a7d5",
         "pdf": false
       },
       {
-        "name": "Introduction to Aerospace Engineering (16.00x)",
+        "name": "16.00x, Introduction to Aerospace Engineering",
         "issuer": "MIT",
         "year": "2021",
         "url": "https://courses.edx.org/certificates/4671ce0c456844ff81684660be3095e2",
