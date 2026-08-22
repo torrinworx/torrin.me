@@ -81,7 +81,7 @@ const Contact = StageContext.use(s => ThemeContext.use(h => ({ focused }) => {
 			type='p1'
 			theme='row_fill_start'
 		>
-			Fill out the form bellow, email me directly, or dm me on LinkedIn. Either way I'll get back to you quickly!
+			Fill out the form below, email me directly, or dm me on LinkedIn. Either way I'll get back to you quickly!
 		</Typography>
 
 		<Shown value={submitted}>
