@@ -28,13 +28,6 @@ const baseJsonLd = {
 				'@type': 'Organization',
 				'@id': 'https://equatorstudios.com/#organization',
 			},
-			alumniOf: [
-				{
-					'@type': 'CollegeOrUniversity',
-					name: 'University of Waterloo',
-					sameAs: 'https://uwaterloo.ca/',
-				},
-			],
 			address: {
 				'@type': 'PostalAddress',
 				addressLocality: 'Waterloo',
