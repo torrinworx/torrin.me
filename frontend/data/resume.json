@@ -8,7 +8,7 @@
     "title": "Full-Stack Software Engineer",
     "tagline": "Full-stack software engineer.",
     "availability": "Open to remote roles and contracts.",
-    "intro": "I build AI-powered web apps, vector search pipelines, and accessible UI systems (WCAG).",
+    "intro": "I build and lead production software end to end: React and TypeScript, Node, Python, applied AI and retrieval, and the CI/CD it ships on. At Equator I took an AI product from 0 to 1, run production releases, and mentor developers.",
     "location": "Waterloo, Ontario, Canada",
     "locationDisplay": "Based in Waterloo, Ontario 🇨🇦",
     "remote": "Canadian citizen. Remote only, anywhere in Canada. Not seeking on-site or hybrid.",
@@ -32,14 +32,16 @@
       "tech": "Node.js/Express, React, Next.js, TypeScript, MongoDB, Python/FastAPI, OpenAI, Qdrant, ChromaDB, GeoPandas, Docker, GitLab CI/CD, AWS, Linux",
       "bullets": [
         "Built a 0 to 1 AI proposal product as its sole engineer through the initial build, then led it as the team grew to seven, authoring the majority of commits and 64% of the code.",
-        "Rebuilt the marketing site on Next.js and built its CI/CD deploy pipeline, growing organic search from under 1,000 clicks and under 1M impressions to 52.1K clicks and 6.17M impressions over six months.",
-        "Authored and merged 70 production releases, coordinating development, testing, and leadership through feature rollout.",
-        "Built the RAG ingestion and retrieval pipeline (OpenAI embeddings, Qdrant, ChromaDB): text-embedding-3-large at 3,072 dimensions across 4 shards, a 16-worker upsert queue, and query-expansion retrieval.",
-        "Implemented a client fine-tuning pipeline on the OpenAI fine-tuning API across four model slots, with per-user token cost metering on every model call.",
-        "Built an admin prompt orchestration layer for nine production AI workflows, with live sync, code-defined fallbacks, and injection and hallucination guards.",
+        "Rebuilt the marketing site on Next.js and own it end to end through CI/CD and release, growing organic search from under 1,000 clicks and under 1M impressions to 52.1K clicks and 6.17M impressions in six months.",
+        "Authored and merged 70 production releases on the AI product, and served as release manager for a main-product release, coordinating the rollout through pre- and post-push testing.",
+        "Built the RAG ingestion and retrieval pipeline on OpenAI embeddings and Qdrant, migrated off ChromaDB, using query-expansion retrieval rather than single-vector search.",
+        "Implemented a client model fine-tuning pipeline on the OpenAI fine-tuning API, and a proxy metering token cost per user on every model call.",
+        "Built an admin prompt orchestration layer so non-engineers tune production AI behaviour live, with versioned code-defined fallbacks and prompt-injection and hallucination guards.",
         "Integrated server-hosted GIS segmentation models (SamGeo, LangSAM) for satellite imagery selection in the main app.",
         "Added Stripe payment systems and supported site-based pricing rollout with product.",
-        "Onboarded and mentored 2 developers; participated in interviews and code reviews."
+        "Onboarded and mentored 2 full-time developers, reviewed 55 merge requests, and set written acceptance criteria on work handed off to them.",
+        "Created and decomposed 2 company epics, sit on interview panels, and hold the architecture decision on the AI product and the frontend.",
+        "Wrote and maintain the team developer handbook, commit and merge-request policy, and engineering principles with a self-review checklist."
       ]
     },
     {
@@ -127,6 +129,7 @@
       "name": "Cozy-Auto-Texture",
       "url": "https://github.com/torrinworx/Cozy-Auto-Texture",
       "description": "Blender add-on bringing Stable Diffusion texture generation into Blender.",
+      "pdf": false,
       "bullets": [
         "116 stars, one of five open-source Blender tools totalling 1,168. Shipped Sept 2022, two weeks after Stable Diffusion's public release and three months before ChatGPT, with the studio hosting the weights."
       ]
