@@ -5,13 +5,24 @@ taken over in the browser, served by one Node process that also answers the cont
 
 ## Getting it running
 
-The stack is not published yet, so it is cloned beside this project rather than installed:
+The stack is the `aweft` submodule, pinned to a commit of `github.com/torrinworx/aweft`:
 
 ```
-git clone <aweft> aweft     # into this directory; it is gitignored
+git clone --recurse-submodules <this repo>
 npm install                 # links aweft/packages/* as workspaces
 npm run dev                 # vite, on port 3000
 ```
+
+A checkout that predates the submodule takes it with `git submodule update --init`. Moving the pin
+to the top of aweft's main branch is `git submodule update --remote`, and the new pin is a change to
+commit here like any other.
+
+What the submodule holds is TypeScript source, while the stack's packages point their exports at the
+compiled `dist/` a published package carries. So everything here asks for the source by name: the
+`node-options` line in `.npmrc` for what npm runs, `customConditions` in `tsconfig.json` for the
+typecheck, `resolve.conditions` in `vite.config.ts` for the bundle, and `--configLoader native` on
+vite so that config is loaded by Node instead of being pre-resolved by the bundler, which has no way
+to know about the condition.
 
 `npm start` runs the real server against `dist/`, reading `.env` if there is one.
 
@@ -22,9 +33,10 @@ npm run dev                 # vite, on port 3000
 PUBLIC_IP=<droplet> ./deploy.sh   # ships the zip and runs setup.sh on the far end
 ```
 
-There is no CI. GitHub Actions cannot build this site while aweft has no remote to check out, so
-the build happens here and the zip goes up. When aweft is pushed, aweft becomes a submodule and the
-workflow comes back.
+There is no CI: the build happens here and the zip goes up. The reason it could not was that aweft
+had no remote for a workflow to check out. It has one now, and the submodule is what a workflow
+would take with `submodules: recursive`, so the workflow is a thing to write rather than a thing
+that is blocked.
 
 `build.sh` regenerates `frontend/public/Torrin_Leonard_Resume.pdf` from `frontend/data/resume.json`
 before anything else, so the page and the downloadable PDF cannot drift. `npm run resume:pdf` does

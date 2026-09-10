@@ -1,0 +1,4 @@
+[submodule "aweft"]
+	path = aweft
+	url = git@github.com:torrinworx/aweft.git
+	branch = main
