@@ -1,0 +1,25 @@
+{
+	"compilerOptions": {
+		"target": "es2023",
+		"lib": ["es2023", "dom"],
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"noImplicitOverride": true,
+		"exactOptionalPropertyTypes": true,
+
+		"erasableSyntaxOnly": true,
+		"verbatimModuleSyntax": true,
+		"isolatedModules": true,
+		"jsx": "preserve",
+		"allowImportingTsExtensions": true,
+
+		"noEmit": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true
+	},
+	"include": ["frontend", "modules", "tests", "main.ts", "vite.config.ts"],
+	"exclude": ["aweft", "archive", "node_modules", "build"]
+}
