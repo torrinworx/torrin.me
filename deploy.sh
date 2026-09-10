@@ -8,7 +8,7 @@
 # Usage: PUBLIC_IP=<droplet> ./deploy.sh
 set -euo pipefail
 
-: "${PUBLIC_IP:?set PUBLIC_IP to the droplet's address}"
+: "${PUBLIC_IP:?set PUBLIC_IP to the droplet address}"
 BUILD_ID="$(git rev-parse --short HEAD)-$(date -u +%Y%m%d%H%M%S)"
 
 ./build.sh
