@@ -14,7 +14,7 @@ rm -f "$ZIP_FILE"
 npm run resume:pdf
 
 # The page bundle and the shell, then every page written out as a file beside them.
-NODE_ENV=production vite build
+NODE_ENV=production npx --no-install vite build
 npm run pages
 
 # What ships is a trimmed copy of this repo, laid out exactly as it is here, so every relative
