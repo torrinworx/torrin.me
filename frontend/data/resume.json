@@ -5,8 +5,8 @@
 
   "profile": {
     "name": "Torrin Leonard",
-    "title": "Full-Stack Software Engineer",
-    "tagline": "Full-stack software engineer.",
+    "title": "Full-Stack & AI Product Engineer",
+    "tagline": "Full-stack and AI product engineer.",
     "availability": "Open to remote roles and contracts.",
     "intro": "I build and lead production software end to end. At Equator I took an AI product from 0 to 1, run production releases, and mentor developers.",
     "location": "Waterloo, Ontario, Canada",
@@ -17,7 +17,7 @@
     "website": "https://torrin.me",
     "github": "https://github.com/torrinworx",
     "linkedin": "https://www.linkedin.com/in/torrin-leonard-8343a1154/",
-    "summary": "Full-stack software engineer building AI-powered web apps, retrieval-augmented generation (RAG) and vector search pipelines, and accessible UI systems (WCAG). Owns 0 to 1 product features end to end and runs production releases across development, testing, and leadership."
+    "summary": "Full-stack and AI product engineer. I build and own production products end to end with React, TypeScript, Node and Python, and I take AI features from 0 to 1: retrieval-augmented generation (RAG) and vector search, fine-tuning, and guards against prompt injection and hallucination. I run production releases and mentor developers."
   },
 
   "work": [
@@ -96,7 +96,7 @@
       "url": "https://github.com/torrinworx/destamatic-ui",
       "description": "Reactive UI component library, published to npm.",
       "bullets": [
-        "Lead developer of a 70-component library published to npm under MIT (619 of 1,105 commits); powers Equator's mapping/AI platform, torrin.me, and OpenGig.org."
+        "Lead developer of a 70 component library published to npm under MIT, 619 of 1,105 commits. It powers Equator's mapping and AI platform, torrin.me, and OpenGig.org."
       ]
     },
     {
@@ -104,8 +104,8 @@
       "url": "https://mcp.torrin.me",
       "description": "Sandboxed execution platform for agent-authored modules, running live.",
       "bullets": [
-        "Agent-authored modules stored as Postgres rows, each run in a per-invocation child process under its own unix uid to block V8 inspector escapes between peers.",
-        "Egress proxy with a local CA terminates TLS only for hosts with a managed secret, so module code never holds plaintext credentials; nftables enforces the boundary."
+        "Agent-authored modules stored as Postgres rows, each run in an isolated child process that cannot reach the filesystem or its peers.",
+        "An egress proxy injects credentials outside module code, so agent-written modules never hold a plaintext secret."
       ]
     },
     {
@@ -122,7 +122,7 @@
       "url": "https://github.com/torrinworx/Blend_My_NFTs",
       "description": "Blender add-on automating procedural 3D asset generation and export, written against the Python/Blender API.",
       "bullets": [
-        "1,015 stars and 324 forks; used by multiple studios. Authored 423 of 496 commits across 7 releases."
+        "1,015 stars and 324 forks, used by multiple studios. Authored 423 of 496 commits across 7 releases."
       ]
     },
     {
