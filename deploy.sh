@@ -1,9 +1,9 @@
 #!/bin/bash
 # Build here, ship the zip, let setup.sh do the rest.
 #
-# This replaces the GitHub Actions deploy. Actions cannot build this site: the aweft stack has no
-# git remote yet, so a runner has nothing to check out. When aweft is pushed, the workflow comes
-# back and this file goes.
+# This replaces the GitHub Actions deploy, which could not build this site while the aweft stack had
+# no git remote for a runner to check out. It has one now and the stack is a submodule, so a
+# workflow that checks out submodules is a thing to write, and this file goes when it is written.
 #
 # Usage: PUBLIC_IP=<droplet> ./deploy.sh
 set -euo pipefail

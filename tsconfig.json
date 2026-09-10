@@ -4,6 +4,8 @@
 		"lib": ["es2023", "dom"],
 		"module": "nodenext",
 		"moduleResolution": "nodenext",
+		// The stack is a submodule of TypeScript source, not an installed package with a dist/.
+		"customConditions": ["aweft-source"],
 
 		"strict": true,
 		"noUncheckedIndexedAccess": true,

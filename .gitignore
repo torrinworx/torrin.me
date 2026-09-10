@@ -8,11 +8,6 @@ build.zip
 # Screenshots the proof program takes.
 /proof-shots
 
-# The aweft stack, cloned beside this project rather than committed or vendored. Until it has a
-# git remote there is nothing to point a submodule at, so a fresh checkout clones it by hand.
-# See README.md.
-/aweft
-
 .env
 *.log
 .DS_Store

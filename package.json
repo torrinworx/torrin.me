@@ -7,7 +7,7 @@
 		"aweft/packages/*"
 	],
 	"scripts": {
-		"dev": "vite",
+		"dev": "vite --configLoader native",
 		"build": "bash build.sh",
 		"pages": "AWEFT_DEFAULT_H=@aweftjs/ui node --import @aweftjs/build/loader frontend/pages.ts",
 		"start": "node --env-file-if-exists=.env --import @aweftjs/build/loader main.ts",

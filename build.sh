@@ -1,6 +1,13 @@
 #!/bin/bash
 set -euo pipefail
 
+# The stack is a submodule of TypeScript source, and its packages point their exports at a compiled
+# dist/ that a submodule checkout does not carry, so everything below has to ask for the source by
+# name (aweft design 256). `.npmrc` does that for what npm runs; this line does it for the times
+# this script is run straight from a shell, deploy.sh included, and for the bundler, which resolves
+# its own config file before any setting inside that file can apply.
+export NODE_OPTIONS="${NODE_OPTIONS:-} --conditions=aweft-source"
+
 BUILD_DIR="./build"
 ZIP_FILE="./build.zip"
 
@@ -14,7 +21,10 @@ rm -f "$ZIP_FILE"
 npm run resume:pdf
 
 # The page bundle and the shell, then every page written out as a file beside them.
-NODE_ENV=production npx --no-install vite build
+# `--configLoader native` has Node import this config rather than the bundler pre-bundling it with
+# a resolver of its own, which is the only way the condition above reaches the plugin the config
+# imports. Everything inside the config is then resolved with `resolve.conditions`, which it sets.
+NODE_ENV=production npx --no-install vite build --configLoader native
 npm run pages
 
 # What ships is a trimmed copy of this repo, laid out exactly as it is here, so every relative
@@ -26,7 +36,9 @@ cp -r ./dist "$BUILD_DIR/dist"
 cp ./main.ts "$BUILD_DIR/main.ts"
 cp -r ./modules "$BUILD_DIR/modules"
 
-# The stack: source and manifests only. No tests, no recipes, no git history.
+# The stack: source and manifests only. No tests, no recipes, no git history. What ships is that
+# source, so the server has to ask for it by name the way every script here does. run.sh passes the
+# condition on the command line, because .npmrc reaches what npm runs and not a bare `node`.
 mkdir -p "$BUILD_DIR/aweft/packages"
 cp ./aweft/package.json "$BUILD_DIR/aweft/package.json"
 for pkg in ./aweft/packages/*/; do
@@ -56,7 +68,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 nvm use 25
 cd "$SCRIPT_DIR"
 npm i --omit=dev
-node --import @aweftjs/build/loader main.ts
+node --conditions=aweft-source --import @aweftjs/build/loader main.ts
 EOF
 
 cp ./setup.sh "$BUILD_DIR/setup.sh"
