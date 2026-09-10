@@ -33,10 +33,23 @@ const own: Source = fromBundle({
 		config: {
 			dir,
 			unknown: '404',
-			// The hashed bundle output is safe to keep forever. Everything else must revalidate:
-			// with no Cache-Control at all a browser applies its own heuristic freshness, which is
-			// how a visitor ends up running yesterday's page against today's bundle.
-			headers: { '': 'no-cache', 'assets/': 'public, max-age=31536000, immutable' },
+			// Pages must revalidate: with no Cache-Control at all a browser applies its own
+			// heuristic freshness, which is how a visitor ends up running yesterday's page
+			// against today's bundle.
+			//
+			// The hashed bundle and the font files are the exceptions, and both are kept
+			// forever. A font under `no-cache` costs a conditional request before any text can
+			// be painted in it, on every single load, so the page paints in the fallback face
+			// and swaps to the real one when the answer lands. That swap is visible: 111ms of
+			// fallback text on a warm cache and 314ms on a cold one, measured against the
+			// droplet. Neither directory is ever edited in place, so replacing a face means
+			// bumping its directory the way JetBrainsMono-2.304 already does.
+			headers: {
+				'': 'no-cache',
+				'assets/': 'public, max-age=31536000, immutable',
+				'JetBrainsMono-2.304/': 'public, max-age=31536000, immutable',
+				'ibm-plex-sans/': 'public, max-age=31536000, immutable',
+			},
 		},
 	},
 });
