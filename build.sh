@@ -11,6 +11,10 @@ export NODE_OPTIONS="${NODE_OPTIONS:-} --conditions=aweft-source"
 BUILD_DIR="./build"
 ZIP_FILE="./build.zip"
 
+# What this build is called: the commit it was built from and when. deploy.sh sets it so the zip
+# it ships and the answer /api/health gives are one name; a bare ./build.sh makes its own.
+BUILD_ID="${BUILD_ID:-$(git rev-parse --short HEAD)-$(date -u +%Y%m%d%H%M%S)}"
+
 rm -rf "$BUILD_DIR"
 rm -f "$ZIP_FILE"
 
@@ -35,6 +39,10 @@ mkdir -p "$BUILD_DIR"
 cp -r ./dist "$BUILD_DIR/dist"
 cp ./main.ts "$BUILD_DIR/main.ts"
 cp -r ./modules "$BUILD_DIR/modules"
+
+# The stamp main.ts reads beside itself and answers from /api/health, so a poll can tell this build
+# from the one it replaced. A checkout has no such file and answers null.
+printf '{ "build": "%s" }\n' "$BUILD_ID" > "$BUILD_DIR/build.json"
 
 # The stack: source and manifests only. No tests, no recipes, no git history. What ships is that
 # source, so the server has to ask for it by name the way every script here does. run.sh passes the
@@ -80,3 +88,4 @@ popd >/dev/null
 
 du -sh "$BUILD_DIR"
 du -sh "$ZIP_FILE"
+echo "build $BUILD_ID"
