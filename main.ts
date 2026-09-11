@@ -1,6 +1,6 @@
-// The whole server for torrin.me: the built site out of `dist`, and the one route that takes a
-// message from the contact form. No store and no users, so the gate is the site's own ten-line
-// one and nothing here opens a document.
+// The whole server for torrin.me: the built site out of `dist`, the one route that takes a
+// message from the contact form, and the health route a deploy polls. No store and no users, so
+// the gate is the site's own ten-line one and nothing here opens a document.
 //
 // The site's own modules are named as static imports rather than found by scanning a directory.
 // A scan needs the files to still be files at run time; a static import survives being bundled
@@ -9,8 +9,10 @@
 //
 // Run: node --import @aweftjs/build/loader main.ts
 
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
+import { health } from '@aweftjs/health';
 import { fromBundle } from '@aweftjs/modules';
 import type { Source } from '@aweftjs/modules';
 import { createServer } from '@aweftjs/server';
@@ -23,9 +25,23 @@ const port = Number(process.env['PORT'] ?? 3001);
 // every layout this runs in, and the unit is started from wherever systemd feels like.
 const dir = fileURLToPath(new URL('./dist', import.meta.url));
 
+// The id build.sh stamps on what it ships, beside this file too, so `/api/health` can prove the
+// build answering is the one deploy.sh sent. A checkout has no such file and answers null.
+const build = ((): string | null => {
+	try {
+		const stamped = JSON.parse(readFileSync(new URL('./build.json', import.meta.url), 'utf8')) as { build?: unknown };
+		return typeof stamped.build === 'string' ? stamped.build : null;
+	} catch {
+		return null;
+	}
+})();
+
 const own: Source = fromBundle({
 	'./gate.ts': () => import('./modules/gate.ts'),
 	'./Contact.ts': () => import('./modules/Contact.ts'),
+	// Configuration for `@aweftjs/health`'s module: the build id is the whole of what this site
+	// adds to the answer, and there is no store for it to ask.
+	'./health/Check.ts': { config: { info: { build } } },
 	// Configuration for a module this site did not write, so `@aweftjs/static` is still the
 	// implementation. It lives here rather than in a file of its own because `dir` is read off
 	// the entry the operator runs, which is this file wherever the rest of the code ends up.
@@ -56,7 +72,7 @@ const own: Source = fromBundle({
 
 const server = createServer({
 	// This site's own modules come first, so the configuration above wins the merge.
-	sources: [own, files],
+	sources: [own, health, files],
 	store: undefined,
 	gate: 'gate',
 	listener: node({ port }),
