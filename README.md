@@ -33,6 +33,12 @@ to know about the condition.
 PUBLIC_IP=<droplet> ./deploy.sh   # ships the zip and runs setup.sh on the far end
 ```
 
+`build.sh` stamps what it ships with a build id (the commit and the time) in `build/build.json`, and
+the server answers it from `GET /api/health` through `@aweftjs/health`, beside `ok` and when the
+process started. `deploy.sh` polls that route after the restart until the build answering is the
+one it shipped, and exits nonzero if it never is; it does not roll back. A checkout with no stamp
+answers `null` for the build.
+
 There is no CI: the build happens here and the zip goes up. The reason it could not was that aweft
 had no remote for a workflow to check out. It has one now, and the submodule is what a workflow
 would take with `submodules: recursive`, so the workflow is a thing to write rather than a thing
@@ -50,5 +56,5 @@ it on its own.
 | `frontend/entry.tsx` | what the browser runs |
 | `frontend/pages.ts` | writes every page, `404.html`, `shell.html` and `sitemap.xml` |
 | `frontend/data/resume.json` | the content, shared with the resume generator |
-| `main.ts` | the server |
+| `main.ts` | the server: the site's modules, the health and static batteries, the build stamp |
 | `modules/` | the site's own server modules: the gate, and the contact form |
