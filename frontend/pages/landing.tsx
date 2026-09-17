@@ -49,27 +49,15 @@ const projects: readonly Item[] = resume.projects.map((project) => ({
 	bullets: project.bullets,
 }));
 
-const ordinal = (day: number): string => {
-	const teens = day % 100;
-	if (teens >= 11 && teens <= 13) return 'th';
-	switch (day % 10) {
-		case 1: return 'st';
-		case 2: return 'nd';
-		case 3: return 'rd';
-		default: return 'th';
-	}
-};
-
-const dayOf = (iso: string | null | undefined): string => {
+const monthOf = (iso: string | null | undefined): string => {
 	if (!iso) return '';
-	const [year, month, day] = iso.split('-').map(Number);
-	const date = new Date(year ?? 0, (month ?? 1) - 1, day ?? 1);
-	return `${date.toLocaleString('en-US', { month: 'short' })} ${String(date.getDate())}`
-		+ `${ordinal(date.getDate())}, ${String(date.getFullYear())}`;
+	const [year, month] = iso.split('-').map(Number);
+	const date = new Date(year ?? 0, (month ?? 1) - 1, 1);
+	return `${date.toLocaleString('en-US', { month: 'short' })} ${String(date.getFullYear())}`;
 };
 
 const span = (start: string | undefined, end: string | null | undefined): string =>
-	`${dayOf(start)} to ${end ? dayOf(end) : 'Present'}`;
+	`${monthOf(start)} to ${end ? monthOf(end) : 'Present'}`;
 
 const Away = (): unknown => <Icon name="feather:external-link" style={{ marginLeft: 3 }} />;
 
