@@ -23,10 +23,9 @@ const PAGES = ['index.html', 'contact/index.html'];
 const META_NAMES = ['description', 'author', 'robots', 'geo.placename', 'geo.region', 'theme-color', 'viewport'];
 const OG = ['og:title', 'og:description', 'og:type', 'og:url', 'og:image', 'og:site_name', 'og:locale'];
 const TWITTER = ['twitter:card', 'twitter:title', 'twitter:description', 'twitter:image'];
-// Read out of the live build (build.zip, 2026-08-20), not out of the work order: the order said
-// seven and the page has eight. CollegeOrUniversity is the education entry.
-const SCHEMA = ['Person', 'Organization', 'WebSite', 'ImageObject', 'Place', 'PostalAddress',
-	'Language', 'CollegeOrUniversity'];
+// Read out of head.tsx. Organization (the employer, via worksFor) and CollegeOrUniversity (alumniOf)
+// left on 2026-09-16 when the Equator role ended and the education entry was corrected.
+const SCHEMA = ['Person', 'WebSite', 'ImageObject', 'Place', 'PostalAddress', 'Language'];
 
 describe('the head a crawler reads', () => {
 	for (const page of PAGES) {
