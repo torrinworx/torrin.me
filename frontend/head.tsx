@@ -9,9 +9,9 @@ import { Link, Meta, Script, Style, Title, h } from '@aweftjs/ui';
 import { BRAND } from './theme.ts';
 
 const SITE_URL = 'https://torrin.me';
-const PAGE_TITLE = 'Torrin Leonard | Full-Stack Engineer';
-const DESCRIPTION = 'Full-stack software engineer building AI-powered web apps, custom UI '
-	+ 'frameworks, and the infrastructure they run on.';
+const PAGE_TITLE = 'Torrin Leonard | Product Engineer';
+const DESCRIPTION = 'Product engineer, full stack and applied AI. Took an AI product from 0 to 1 as '
+	+ 'its sole engineer, ran production releases, and mentored developers.';
 const IMAGE_URL = `${SITE_URL}/site-card.png`;
 
 const AUTHOR_NAME = 'Torrin Leonard';
@@ -31,15 +31,10 @@ const jsonLd = {
 			url: SITE_URL,
 			image: `${SITE_URL}/profile.dark.png`,
 			jobTitle: [
-				'Full-stack software engineer',
-				'AI & UI tools engineer',
+				'Product engineer',
+				'Full-stack and AI engineer',
 			],
-			description:
-				'Full-stack software engineer building AI-powered web apps, custom UI frameworks, and the infrastructure they run on.',
-			worksFor: {
-				'@type': 'Organization',
-				'@id': 'https://equatorstudios.com/#organization',
-			},
+			description: DESCRIPTION,
 			address: {
 				'@type': 'PostalAddress',
 				addressLocality: 'Waterloo',
@@ -84,19 +79,13 @@ const jsonLd = {
 				'Hugging Face',
 				'Vector search',
 				'Qdrant',
-				'LangChain',
+				'Retrieval-augmented generation',
+				'Claude Code',
 			],
 			knowsLanguage: [
 				{
 					'@type': 'Language',
 					name: 'English',
-				},
-			],
-			alumniOf: [
-				{
-					'@type': 'CollegeOrUniversity',
-					name: 'University of Waterloo',
-					sameAs: 'https://uwaterloo.ca/',
 				},
 			],
 			email: 'mailto:torrin@torrin.me',
@@ -120,18 +109,12 @@ const jsonLd = {
 			},
 		},
 		{
-			'@type': 'Organization',
-			'@id': 'https://equatorstudios.com/#organization',
-			name: 'Equator Studios',
-			url: 'https://equatorstudios.com/',
-		},
-		{
 			'@type': 'WebSite',
 			'@id': WEBSITE_ID,
 			url: SITE_URL,
 			name: PAGE_TITLE,
 			description:
-				'Portfolio of Torrin Leonard, a full-stack software engineer building AI-powered web apps, custom UI frameworks, and the infrastructure they run on.',
+				'Portfolio of Torrin Leonard, a product engineer working across the full stack and applied AI.',
 			inLanguage: 'en-CA',
 			publisher: {
 				'@id': AUTHOR_ID,
