@@ -5,10 +5,10 @@
 
   "profile": {
     "name": "Torrin Leonard",
-    "title": "Full-Stack & AI Product Engineer",
-    "tagline": "Full-stack and AI product engineer.",
-    "availability": "Open to remote roles and contracts.",
-    "intro": "I build and lead production software end to end. At Equator I took an AI product from 0 to 1, run production releases, and mentor developers.",
+    "title": "Product Engineer, Full-Stack & AI",
+    "tagline": "Product engineer, full stack and applied AI.",
+    "availability": "Available now. Open to remote roles and contracts.",
+    "intro": "I build and lead production software end to end. At Equator I took an AI product from 0 to 1, ran production releases, and mentored developers.",
     "location": "Waterloo, Ontario, Canada",
     "locationDisplay": "Based in Waterloo, Ontario 🇨🇦",
     "remote": "Canadian citizen. Remote only, anywhere in Canada. Not seeking on-site or hybrid.",
@@ -17,7 +17,7 @@
     "website": "https://torrin.me",
     "github": "https://github.com/torrinworx",
     "linkedin": "https://www.linkedin.com/in/torrin-leonard-8343a1154/",
-    "summary": "Full-stack and AI product engineer. I build and own production products end to end with React, TypeScript, Node and Python, and I take AI features from 0 to 1: retrieval-augmented generation (RAG) and vector search, fine-tuning, and guards against prompt injection and hallucination. I run production releases and mentor developers."
+    "summary": "Product engineer, full stack and applied AI. I build and own production products end to end with React, TypeScript, Node and Python, and I take AI features from 0 to 1: retrieval-augmented generation (RAG) and vector search, fine-tuning, and guards against prompt injection and hallucination. I ran production releases and mentored developers at Equator, and ran my own studio before that. I work through coding agents (Claude Code) daily, plan first, and review every diff before it ships."
   },
 
   "work": [
@@ -28,11 +28,11 @@
       "logo": "/EquatorLogoDark.svg",
       "location": "Hybrid / Waterloo, ON",
       "start": "2023-03-01",
-      "end": null,
+      "end": "2026-09-01",
       "tech": "Node.js/Express, React, Next.js, TypeScript, MongoDB, Python/FastAPI, OpenAI, Qdrant, ChromaDB, GeoPandas, Docker, GitLab CI/CD, AWS, Linux",
       "bullets": [
         "Built a 0 to 1 AI proposal product as its sole engineer through the initial build, then led it as the team grew to seven, authoring the majority of commits and 64% of the code.",
-        "Rebuilt the marketing site on Next.js and own it end to end through CI/CD and release, growing organic search from under 1,000 clicks and under 1M impressions to 52.1K clicks and 6.17M impressions in six months.",
+        "Rebuilt the marketing site on Next.js and owned it end to end through CI/CD and release, growing organic search from under 1,000 clicks and under 1M impressions to 52.1K clicks and 6.17M impressions in six months.",
         "Authored and merged 70 production releases on the AI product, and served as release manager for a main-product release, coordinating the rollout through pre- and post-push testing.",
         "Built the RAG ingestion and retrieval pipeline on OpenAI embeddings and Qdrant, migrated off ChromaDB, using query-expansion retrieval rather than single-vector search.",
         "Implemented a client model fine-tuning pipeline on the OpenAI fine-tuning API, and a proxy metering token cost per user on every model call.",
@@ -40,8 +40,8 @@
         "Integrated server-hosted GIS segmentation models (SamGeo, LangSAM) for satellite imagery selection in the main app.",
         "Added Stripe payment systems and supported site-based pricing rollout with product.",
         "Onboarded and mentored 2 full-time developers, reviewed 55 merge requests, and set written acceptance criteria on work handed off to them.",
-        "Created and decomposed 2 company epics, sit on interview panels, and hold the architecture decision on the AI product and the frontend.",
-        "Wrote and maintain the team developer handbook, commit and merge-request policy, and engineering principles with a self-review checklist."
+        "Created and decomposed 2 company epics, sat on interview panels, and held the architecture decision on the AI product and the frontend.",
+        "Wrote and maintained the team developer handbook, commit and merge-request policy, and engineering principles with a self-review checklist."
       ]
     },
     {
@@ -164,6 +164,7 @@
     { "label": "Backend", "text": "Node.js, Express, FastAPI, Django, REST APIs, WebSockets" },
     { "label": "Databases", "text": "MongoDB, Qdrant, ChromaDB" },
     { "label": "AI & Data", "text": "OpenAI API (embeddings + fine-tuning), RAG (Retrieval-Augmented Generation), vector search, evals, prompt injection defense, Whisper, pandas" },
+    { "label": "AI-assisted development", "text": "Claude Code, Codex and Cursor daily, plan first, every diff reviewed and tested before it ships" },
     { "label": "Cloud & DevOps", "text": "Docker, GitLab CI/CD (Continuous Integration/Continuous Deployment), GitHub Actions, DigitalOcean, AWS (Amazon Web Services), Proxmox, NGINX, Linux (Ubuntu/Arch)" },
     { "label": "Practices", "text": "Release management, code review, mentoring, technical interviewing, WCAG accessibility audits" },
     { "label": "Testing", "text": "TestCafe, automation and regression testing" }
