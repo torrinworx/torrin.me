@@ -28,7 +28,7 @@
       "logo": "/EquatorLogoDark.svg",
       "location": "Hybrid / Waterloo, ON",
       "start": "2023-03-01",
-      "end": "2026-09-01",
+      "end": "2026-09-14",
       "tech": "Node.js/Express, React, Next.js, TypeScript, MongoDB, Python/FastAPI, OpenAI, Qdrant, ChromaDB, GeoPandas, Docker, GitLab CI/CD, AWS, Linux",
       "bullets": [
         "Built a 0 to 1 AI proposal product as its sole engineer through the initial build, then led it as the team grew to seven, authoring the majority of commits and 64% of the code.",
