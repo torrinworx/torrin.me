@@ -164,7 +164,7 @@
     { "label": "Backend", "text": "Node.js, Express, FastAPI, Django, REST APIs, WebSockets" },
     { "label": "Databases", "text": "MongoDB, Qdrant, ChromaDB" },
     { "label": "AI & Data", "text": "OpenAI API (embeddings + fine-tuning), RAG (Retrieval-Augmented Generation), vector search, evals, prompt injection defense, Whisper, pandas" },
-    { "label": "AI-assisted development", "text": "Claude Code, Codex and Cursor daily, plan first, every diff reviewed and tested before it ships" },
+    { "label": "AI-assisted development", "text": "Claude Code and OpenCode daily, plan first, every diff reviewed and tested before it ships" },
     { "label": "Cloud & DevOps", "text": "Docker, GitLab CI/CD (Continuous Integration/Continuous Deployment), GitHub Actions, DigitalOcean, AWS (Amazon Web Services), Proxmox, NGINX, Linux (Ubuntu/Arch)" },
     { "label": "Practices", "text": "Release management, code review, mentoring, technical interviewing, WCAG accessibility audits" },
     { "label": "Testing", "text": "TestCafe, automation and regression testing" }
