@@ -8,6 +8,9 @@ export default defineConfig({
 	root: join(import.meta.dirname, 'frontend'),
 	plugins: [aweft({ release: process.env['NODE_ENV'] === 'production' })],
 	base: '/',
+	// What the page tells the logs battery it is, so a visit says which build it hit. build.sh
+	// exports BUILD_ID for this and writes the same id into build.json for the server.
+	define: { __BUILD__: JSON.stringify(process.env['BUILD_ID'] ?? null) },
 	// The bundler has its own resolver, so the condition in `.npmrc` does not reach it: name it
 	// here too, or every `@aweftjs/*` import lands on a `dist/` the submodule does not carry.
 	resolve: { conditions: ['aweft-source', 'module', 'browser', 'development|production'] },

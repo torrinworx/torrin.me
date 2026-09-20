@@ -14,6 +14,7 @@ ZIP_FILE="./build.zip"
 # What this build is called: the commit it was built from and when. deploy.sh sets it so the zip
 # it ships and the answer /api/health gives are one name; a bare ./build.sh makes its own.
 BUILD_ID="${BUILD_ID:-$(git rev-parse --short HEAD)-$(date -u +%Y%m%d%H%M%S)}"
+export BUILD_ID   # vite.config.ts stamps the page with it, so a visit names the build it hit
 
 rm -rf "$BUILD_DIR"
 rm -f "$ZIP_FILE"

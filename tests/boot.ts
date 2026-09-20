@@ -5,15 +5,18 @@ import { createServer as createHttp } from 'node:http';
 import type { AddressInfo } from 'node:net';
 
 import { health } from '@aweftjs/health';
+import { logs, paths as logPaths } from '@aweftjs/logs';
 import { fromBundle } from '@aweftjs/modules';
 import type { Source } from '@aweftjs/modules';
 import { createServer } from '@aweftjs/server';
 import { node } from '@aweftjs/server/node';
 import { files } from '@aweftjs/static';
+import { createStore, memoryDriver } from '@aweftjs/store';
+import type { Store } from '@aweftjs/store';
 
 // The same list main.ts ships, so a test loads the modules the deploy loads. A module added
 // there has to be added here too; there are two, and neither is found by scanning a directory
-// any more. The two batteries are listed below, where main.ts lists them.
+// any more. The three batteries are listed below, where main.ts lists them.
 const own = (): Source => fromBundle({
 	'./gate.ts': () => import('../modules/gate.ts'),
 	'./Contact.ts': () => import('../modules/Contact.ts'),
@@ -66,11 +69,13 @@ export const mailbox = async (): Promise<Mailbox> => {
 
 export interface Site {
 	readonly url: string;
+	/** The store the visits land in: memory here, Postgres in production. */
+	readonly store: Store;
 	stop(): Promise<void>;
 }
 
 /**
- * The real server, its own modules and the two batteries, on a free port.
+ * The real server, its own modules and the three batteries, on a free port.
  *
  * Params:
  *   over: configuration per module name, merged over what the module file says, because this
@@ -86,15 +91,18 @@ export const boot = async (
 	const bundle = Object.fromEntries(
 		Object.entries(over).map(([name, config]) => [`./${name}.ts`, { config }]),
 	);
+	const store = createStore({ driver: memoryDriver(), declare: { ...logPaths } });
 	const server = createServer({
-		sources: [fromBundle(bundle), own(), health, files],
-		store: undefined,
+		sources: [fromBundle(bundle), own(), health, logs, files],
+		store,
 		gate: 'gate',
 		listener,
+		origins: ['https://torrin.me', 'https://www.torrin.me'],
 	});
 	await server.start();
 	return {
 		url: `http://127.0.0.1:${String(listener.port ?? 0)}`,
-		stop: () => server.stop(),
+		store,
+		stop: async () => { await server.stop(); await store.stop(); },
 	};
 };

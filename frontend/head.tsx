@@ -192,23 +192,4 @@ export const SiteHead = (): unknown => <>
 	<Style>{DOCUMENT_CSS}</Style>
 
 	<Script key="jsonld" type="application/ld+json">{JSON.stringify(jsonLd)}</Script>
-
-	<Script
-		key="plausible-js"
-		async
-		defer
-		src="https://stats.torrin.me/js/pa-y1DeMbOTUm55YjS0JWtyU.js"
-	/>
-
-	<Script key="plausible-inline" type="text/javascript">
-		{`
-                window.plausible = window.plausible || function() {
-                  (plausible.q = plausible.q || []).push(arguments)
-                };
-                plausible.init = plausible.init || function (opts) {
-                  plausible.o = opts || {};
-                };
-                plausible.init();
-            `}
-	</Script>
 </>;

@@ -29,22 +29,26 @@
 	"homepage": "https://github.com/torrinworx/torrinleonard.com#readme",
 	"dependencies": {
 		"@aweftjs/build": "*",
+		"@aweftjs/client": "*",
 		"@aweftjs/codec": "*",
 		"@aweftjs/core": "*",
 		"@aweftjs/dom": "*",
 		"@aweftjs/health": "*",
 		"@aweftjs/icons": "*",
+		"@aweftjs/logs": "*",
 		"@aweftjs/modules": "*",
 		"@aweftjs/server": "*",
 		"@aweftjs/ssg": "*",
 		"@aweftjs/static": "*",
+		"@aweftjs/store": "*",
 		"@aweftjs/ui": "*",
-		"@plausible-analytics/tracker": "^0.4.4"
+		"pg": "^8.15.6"
 	},
 	"devDependencies": {
 		"@iconify-json/feather": "^1.2.1",
 		"@iconify-json/simple-icons": "^1.2.1",
 		"@types/pdfkit": "^0.17.6",
+		"@types/pg": "^8.23.1",
 		"nodemon": "^3.1.7",
 		"pdfkit": "^0.20.2",
 		"playwright": "1.62.1",

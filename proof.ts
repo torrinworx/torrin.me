@@ -10,6 +10,7 @@ import assert from 'node:assert/strict';
 import { mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
+import { visit, visits } from '@aweftjs/logs';
 import { chromium } from 'playwright';
 
 import { boot, mailbox } from './tests/boot.ts';
@@ -42,6 +43,11 @@ try {
 		view.on('console', (message) => {
 			if (message.type() === 'error') problems.push(`${name} console: ${message.text()}`);
 		});
+		// Everything the page loads or posts is its own origin: the fonts, the bundle, the log
+		// batches. A request anywhere else is a third-party tag that came back.
+		view.on('request', (request) => {
+			if (!request.url().startsWith(site.url)) problems.push(`${name} left the origin: ${request.url()}`);
+		});
 
 		// A deep link, cold. This is how a reader arrives from a search result, and it is the path
 		// that breaks first when the written page and the client tree disagree.
@@ -59,6 +65,12 @@ try {
 		await view.screenshot({ path: `${shots}${name}-desktop.png`, fullPage: true });
 		await view.setViewportSize({ width: 390, height: 844 });
 		await view.screenshot({ path: `${shots}${name}-phone.png`, fullPage: true });
+
+		// The page posts its own record while it is open: the first batch, with the browser's
+		// facts, goes on the recorder's timer, and this waits for the server to have answered it
+		// before the page goes, the way a real tab's keepalive request outlives a close.
+		const logged = await view.waitForResponse((answer) => answer.url() === `${site.url}/api/logs`, { timeout: 15_000 }).catch(() => undefined);
+		assert.ok(logged !== undefined && logged.status() === 200, `${name} posted its log batch and was answered 200`);
 		await view.close();
 	}
 
@@ -100,7 +112,24 @@ try {
 	});
 	assert.deepEqual(trapped, sent, 'the honeypot answers exactly what a real send answers');
 	assert.equal(post.sent.length, before + 1, 'and sent nothing');
+	const formLogged = await view.waitForResponse((answer) => answer.url() === `${site.url}/api/logs`, { timeout: 15_000 }).catch(() => undefined);
+	assert.ok(formLogged !== undefined && formLogged.status() === 200, 'the form page posted its log batch and was answered 200');
 	await view.close();
+
+	// The pages recorded themselves: closing a page sends its last batch, so by now the store
+	// holds a visit per page opened above, each with the browser's facts and the URL it showed.
+	const recorded = await (async () => {
+		for (let attempt = 0; attempt < 50; attempt++) {
+			const found = await visits(site.store, {});
+			if (found.length >= 3) return found;
+			await new Promise((done) => setTimeout(done, 200));
+		}
+		return visits(site.store, {});
+	})();
+	assert.ok(recorded.length >= 3, `three pages were opened and ${String(recorded.length)} visits were recorded`);
+	const opened = await Promise.all(recorded.map((summary) => visit(site.store, summary.id)));
+	assert.ok(opened.every((seen) => seen !== undefined && seen.browser !== null && seen.user === null), 'each visit carries browser facts and no user');
+	assert.ok(opened.some((seen) => seen?.entries.some((entry) => entry.kind === 'url')), 'a visit recorded the URL it showed');
 
 	assert.deepEqual(problems, [], 'no page threw and no console error was logged');
 	console.log(`proof: ok. screenshots in ${shots}`);

@@ -31,7 +31,7 @@ import { NotFound } from './pages/not-found.tsx';
 // `alert-triangle`, so one pack of one icon answers it and no set is bundled.
 const icons = { icons: { 'triangle-alert': alertTriangle } };
 
-/** What a click reports. The browser half hands in Plausible's `track`; a render hands in none. */
+/** What a click reports. The browser half hands in the log's writer; a render hands in none. */
 export type Track = (event: string, options: { props: Record<string, string> }) => void;
 
 const Footer = (): unknown => (
