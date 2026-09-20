@@ -119,7 +119,8 @@ export const Contact = StageContext.use((stage) => (
 							</Validate>
 
 							{/* The trap. Off the screen, out of the reading order and out of the tab
-							    order, so only something filling every field reaches it. */}
+							    order, so only something filling every field reaches it. The label is
+							    for the build's rule; aria-hidden keeps it out of a reader's order. */}
 							<input
 								theme="trap"
 								name="company"
@@ -127,6 +128,7 @@ export const Contact = StageContext.use((stage) => (
 								tabindex="-1"
 								autocomplete="off"
 								aria-hidden="true"
+								aria-label="Company"
 								onInput={(event: unknown) => {
 									company.set(String((event as { target: { value: string } }).target.value));
 								}}

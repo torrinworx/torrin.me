@@ -195,9 +195,11 @@ describe('the origin check', () => {
 	after(async () => { await site.stop(); await post_box.stop(); });
 
 	test('a post from another site is 403 and sends nothing', async () => {
+		// The server's own Origin rule answers first, with its reason; the route's list beneath it
+		// would answer the same status if the rule were ever widened.
 		const answer = await post(site, MESSAGE, { origin: 'https://evil.example' });
 		assert.equal(answer.status, 403);
-		assert.deepEqual(await answer.json(), { ok: false, error: 'Forbidden origin' });
+		assert.equal((await answer.json() as { reasons: { code: string }[] }).reasons[0]?.code, 'origin');
 		assert.equal(post_box.sent.length, 0);
 	});
 
