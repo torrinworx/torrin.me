@@ -283,4 +283,118 @@ export const siteTheme: Definitions = {
 		height: '1px',
 		opacity: 0,
 	},
+
+	// --- the blog --------------------------------------------------------------------------
+
+	// The index: one entry per post, the title a link in the heading face with no underline until
+	// the pointer reaches it, separated by the hairline the landing's entries use.
+	blog_list: { listStyle: 'none', margin: 0, padding: 0, width: '100%', display: 'flex', flexDirection: 'column', gap: '30px' },
+	blog_entry: { gap: '6px', paddingBottom: '30px', borderBottom: '1px solid $border' },
+	blog_title: { color: '$foreground', textDecoration: 'none', _cssProp_hover: { color: '$accent' } },
+
+	// The post's own lines above the markdown: the eyebrow with the date, and the lede in the
+	// second ink.
+	post_meta: { display: 'block' },
+	post_lede: { color: '$ink2' },
+
+	// The body. The `markdown` box carries the paragraph's face and size so its `$measure` is the
+	// paragraph's `$measure`, and every block inside it, a figure or a code box included, stops
+	// where a line of text stops.
+	markdown: { width: '100%', maxWidth: '$measure', fontSize: '$sizeBody', gap: '20px' },
+	markdown_heading: { marginTop: '20px' },
+	// A code block: the paper-a box with the hairline, in the mono face at the label size. The
+	// library's own is the surface with the control radius, which is a card on this page.
+	markdown_code: {
+		fontFamily: '$fontMono',
+		fontSize: '$sizeLabel',
+		lineHeight: '$lhBody',
+		padding: '16px 20px',
+		background: '$surface',
+		border: '1px solid $border',
+		borderRadius: '$radiusLg',
+		maxWidth: '100%',
+		boxSizing: 'border-box',
+	},
+	markdown_inline: { fontFamily: '$fontMono', fontSize: '0.9em', background: '$surface', border: '1px solid $border', padding: '0 4px', borderRadius: '$radius' },
+	// A figure fills the measure and no more; its caption is the second ink, in the paragraph
+	// face at the label size, so it reads as a caption and not as the next paragraph.
+	markdown_figure: { margin: 0, width: '100%' },
+	markdown_image: { width: '100%', border: '1px solid $border' },
+	markdown_video: { width: '100%' },
+	markdown_caption: { fontFamily: '$font', fontSize: '$sizeLabel', lineHeight: '$lhBody', color: '$ink2', marginTop: '8px' },
+	// A quote takes the moss bar; a callout (a quote whose first word is `Note:`) is a paper-a box
+	// with the bar, and the modifier's label is its eyebrow.
+	markdown_quote: {
+		borderLeft: '3px solid $accent',
+		paddingLeft: '16px',
+		color: '$ink2',
+		overflowWrap: 'anywhere',
+		'_cssProp_has([data-callout])': { background: '$surface', border: '1px solid $border', borderLeft: '3px solid $accent', padding: '14px 20px', color: '$foreground' },
+	},
+	callout_label: {
+		display: 'block',
+		fontFamily: '$fontMono',
+		fontSize: '$sizeLabel',
+		fontWeight: 500,
+		textTransform: 'uppercase',
+		letterSpacing: '$tracking',
+		color: '$accent',
+		marginBottom: '4px',
+	},
+	sup: { fontSize: '0.75em', lineHeight: 0, verticalAlign: 'super' },
+
+	// The kinds of token the build's highlighter names (content/highlight.ts), each a colour of
+	// the brand: comments in the muted ink, strings in pine, keywords and tags in moss. The base
+	// entry says the face again, because `*` puts the paragraph face on every themed element and
+	// a token is a themed span inside the block.
+	code: { fontFamily: '$fontMono' },
+	code_comment: { color: '$mutedForeground', fontStyle: 'italic' },
+	code_string: { color: '$ink2' },
+	code_keyword: { color: '$accent', fontWeight: 600 },
+	code_number: { color: '$ink2', fontWeight: 600 },
+	code_function: { color: '$foreground', fontWeight: 600 },
+	code_tag: { color: '$accent' },
+	code_variable: { color: '$foreground' },
+
+	// The contents list: a paper-a box before the body, a numbered list of the second-level
+	// headings in the paragraph face.
+	toc: { boxSizing: 'border-box', width: '100%', maxWidth: '$measure', fontSize: '$sizeBody', padding: '16px 20px', background: '$surface', border: '1px solid $border' },
+	toc_title: { display: 'block', marginBottom: '6px' },
+	toc_list: { margin: 0, paddingLeft: '22px', display: 'flex', flexDirection: 'column', gap: '4px' },
+	toc_item: { margin: 0 },
+	toc_link: { color: '$link', textDecoration: 'underline', fontFamily: '$font', fontSize: '$sizeBody', lineHeight: '$lhBody' },
+
+	// A video before the click: the poster in a 16:9 box with the control edge, the word "Play"
+	// on a moss box at its centre. After the click, the frame in the same box. The poster YouTube
+	// serves is 4:3 with bars, so it is cropped to the box.
+	video: {
+		display: 'block',
+		position: 'relative',
+		width: '100%',
+		aspectRatio: '16 / 9',
+		padding: 0,
+		margin: 0,
+		border: '2px solid $accent',
+		borderRadius: '$radiusLg',
+		background: FOREST,
+		cursor: 'pointer',
+		overflow: 'hidden',
+		'_cssProp_focus-visible': { outline: '2px solid $ring', outlineOffset: '2px' },
+	},
+	video_poster: { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' },
+	video_play: {
+		position: 'absolute',
+		top: '50%',
+		left: '50%',
+		transform: 'translate(-50%, -50%)',
+		padding: '10px 18px',
+		background: '$accent',
+		color: '$accentForeground',
+		fontFamily: '$fontMono',
+		fontSize: '$sizeLabel',
+		fontWeight: 500,
+		textTransform: 'uppercase',
+		letterSpacing: '$tracking',
+	},
+	video_frame: { display: 'block', width: '100%', aspectRatio: '16 / 9', border: '2px solid $accent', borderRadius: '$radiusLg', background: FOREST },
 };

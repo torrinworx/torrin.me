@@ -8,15 +8,15 @@ import { Link, Meta, Script, Style, Title, h } from '@aweftjs/ui';
 
 import { FOREST, LIME, PAPER } from './theme.ts';
 
-const SITE_URL = 'https://torrin.me';
+export const SITE_URL = 'https://torrin.me';
 const PAGE_TITLE = 'Torrin Leonard | Product Engineer';
 const DESCRIPTION = 'Product engineer, full stack and applied AI. Took an AI product from 0 to 1 as '
 	+ 'its sole engineer, ran production releases, and mentored developers.';
 const IMAGE_URL = `${SITE_URL}/site-card.png`;
 
-const AUTHOR_NAME = 'Torrin Leonard';
-const AUTHOR_ID = `${SITE_URL}/#person`;
-const WEBSITE_ID = `${SITE_URL}/#website`;
+export const AUTHOR_NAME = 'Torrin Leonard';
+export const AUTHOR_ID = `${SITE_URL}/#person`;
+export const WEBSITE_ID = `${SITE_URL}/#website`;
 
 const jsonLd = {
 	'@context': 'https://schema.org',
@@ -163,7 +163,11 @@ body { margin: 0; background: ${PAPER}; text-rendering: optimizeLegibility; -web
 ::-moz-selection { background: ${LIME}; color: ${FOREST}; }
 `;
 
-/** Every head tag the site has. Written once in the template, so both pages carry it. */
+/**
+ * Every head tag the site has. Written once in the template, so every page carries it; a blog
+ * page opens a deeper `Head` and its own title, description, canonical and Open Graph tags win
+ * their groups over these.
+ */
 export const SiteHead = (): unknown => <>
 	<Title>{PAGE_TITLE}</Title>
 
@@ -190,6 +194,7 @@ export const SiteHead = (): unknown => <>
 
 	<Link rel="canonical" href={SITE_URL} />
 	<Link rel="icon" href="/favicon.png" sizes="any" type="image/png" />
+	<Link rel="alternate" type="application/atom+xml" href={`${SITE_URL}/feed.xml`} title="Torrin Leonard's blog" />
 
 	<Style>{DOCUMENT_CSS}</Style>
 

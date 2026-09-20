@@ -1,5 +1,5 @@
-// The whole site: the theme, the one icon a component asks for by name, the acts, and the frame
-// every act sits in.
+// The whole site: the theme, the one icon a component asks for by name, the acts (the landing,
+// the contact page, the blog and its posts), and the frame every act sits in.
 //
 // Both halves of the build import this file. `entry.tsx` mounts it in a browser and `pages.ts`
 // renders it to files, so the markup a crawler reads is the markup the page comes alive as.
@@ -21,9 +21,12 @@ import type { Router } from '@aweftjs/dom/router';
 import alertTriangle from '@aweftjs/icons/feather/alert-triangle';
 
 import { SiteHead } from './head.tsx';
+import { ContentContext } from './posts.ts';
+import type { Content } from './posts.ts';
 import { siteTheme } from './theme.ts';
 import { Contact } from './utils/contact.tsx';
 import { Header } from './utils/header.tsx';
+import { blogActs } from './pages/blog.tsx';
 import { Landing } from './pages/landing.tsx';
 import { NotFound } from './pages/not-found.tsx';
 
@@ -97,10 +100,18 @@ const Frame = (props: { children?: unknown[] }): unknown => (
 export const acts: Record<string, Act> = {
 	'': Landing,
 	contact: () => <Contact />,
+	...blogActs,
 	missing: NotFound,
 };
 
-export const Site = (props: { router: Router; track?: Track }): unknown => {
+export interface SiteProps {
+	readonly router: Router;
+	/** Where a post's body comes from: memory for a render, the twins for the browser. Absent, no post renders. */
+	readonly content?: Content;
+	readonly track?: Track;
+}
+
+export const Site = (props: SiteProps): unknown => {
 	const track = props.track;
 	// Where every click in the page goes. `meta` tags them all as this page's.
 	const inputs = {
@@ -114,16 +125,18 @@ export const Site = (props: { router: Router; track?: Track }): unknown => {
 		<Theme value={siteTheme}>
 			<InputContext value={inputs}>
 				<Icons value={icons}>
-					<PopupContext>
-						<StageContext
-							router={props.router}
-							acts={acts}
-							template={Frame}
-							fallback="missing"
-						>
-							<Stage />
-						</StageContext>
-					</PopupContext>
+					<ContentContext value={props.content ?? null}>
+						<PopupContext>
+							<StageContext
+								router={props.router}
+								acts={acts}
+								template={Frame}
+								fallback="missing"
+							>
+								<Stage />
+							</StageContext>
+						</PopupContext>
+					</ContentContext>
 				</Icons>
 			</InputContext>
 		</Theme>
