@@ -1,13 +1,14 @@
 // The site doing its real job, in a real browser, against the real server.
 //
 // Tests pin pieces; this proves the whole thing: the server serves what the build wrote, the page
-// comes alive without replacing anything the server sent, both routes work as deep links, the
-// contact form actually posts, and the pages look right at desktop and phone width.
+// comes alive without replacing anything the server sent, every route works as a deep link (the
+// blog index and the newest post among them, with the title as the h1 and every image loaded),
+// the contact form actually posts, and the pages look right at desktop and phone width.
 //
 // Run: npm run proof   (after npm run build, or at least vite build && npm run pages)
 
 import assert from 'node:assert/strict';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import { visit, visits } from '@aweftjs/logs';
@@ -36,8 +37,18 @@ const browser = await chromium.launch();
 
 const problems: string[] = [];
 
+// The newest published post, from the index the build wrote: the page a reader lands on from the
+// feed, and the one the blog's markup is proven on.
+const newest = (JSON.parse(readFileSync(new URL('./frontend/data/posts.json', import.meta.url), 'utf8')) as { slug: string; title: string }[])[0]!;
+const PAGES: readonly (readonly [name: string, path: string, h1: string | null])[] = [
+	['landing', '/', null],
+	['contact', '/contact', null],
+	['blog', '/blog', 'Blog'],
+	['post', `/blog/${newest.slug}`, newest.title],
+];
+
 try {
-	for (const [name, path] of [['landing', '/'], ['contact', '/contact']] as const) {
+	for (const [name, path, h1] of PAGES) {
 		const view = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 		view.on('pageerror', (error) => problems.push(`${name}: ${String(error)}`));
 		view.on('console', (message) => {
@@ -61,6 +72,13 @@ try {
 
 		const text = await view.textContent('body');
 		assert.ok((text ?? '').trim().length > 0, `${path} has visible text`);
+
+		// A blog page's first heading is the title the index carries, and every image on it
+		// loaded from this origin: a poster the build did not fetch, or a media path the build
+		// rewrote wrong, is a broken image here and not on the live site.
+		if (h1 !== null) assert.equal(await view.textContent('h1'), h1, `${path} shows its title as the h1`);
+		const images = await view.$$eval('img', (found) => found.map((image) => [image.getAttribute('src') ?? '', (image as HTMLImageElement).naturalWidth] as const));
+		for (const [src, width] of images) assert.ok(width > 0, `${path}: the image ${src} loaded`);
 
 		await view.screenshot({ path: `${shots}${name}-desktop.png`, fullPage: true });
 		await view.setViewportSize({ width: 390, height: 844 });
@@ -118,15 +136,16 @@ try {
 
 	// The pages recorded themselves: closing a page sends its last batch, so by now the store
 	// holds a visit per page opened above, each with the browser's facts and the URL it showed.
+	const expected = PAGES.length + 1;
 	const recorded = await (async () => {
 		for (let attempt = 0; attempt < 50; attempt++) {
 			const found = await visits(site.store, {});
-			if (found.length >= 3) return found;
+			if (found.length >= expected) return found;
 			await new Promise((done) => setTimeout(done, 200));
 		}
 		return visits(site.store, {});
 	})();
-	assert.ok(recorded.length >= 3, `three pages were opened and ${String(recorded.length)} visits were recorded`);
+	assert.ok(recorded.length >= expected, `${String(expected)} pages were opened and ${String(recorded.length)} visits were recorded`);
 	const opened = await Promise.all(recorded.map((summary) => visit(site.store, summary.id)));
 	assert.ok(opened.every((seen) => seen !== undefined && seen.browser !== null && seen.user === null), 'each visit carries browser facts and no user');
 	assert.ok(opened.some((seen) => seen?.entries.some((entry) => entry.kind === 'url')), 'a visit recorded the URL it showed');

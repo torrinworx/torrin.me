@@ -17,8 +17,11 @@ const read = (file: string): string => {
 	return readFileSync(path, 'utf8');
 };
 
-/** Every page a reader can land on. Both must carry the whole head, not just the landing page. */
-const PAGES = ['index.html', 'contact/index.html'];
+// The newest published post, from the index the build step wrote.
+const newest = (JSON.parse(readFileSync(`${fileURLToPath(new URL('../frontend/data/posts.json', import.meta.url))}`, 'utf8')) as { slug: string }[])[0]!.slug;
+
+/** Every page a reader can land on. Each must carry the whole head, not just the landing page. */
+const PAGES = ['index.html', 'contact/index.html', 'blog/index.html', `blog/${newest}/index.html`];
 
 const META_NAMES = ['description', 'author', 'robots', 'geo.placename', 'geo.region', 'theme-color', 'viewport'];
 const OG = ['og:title', 'og:description', 'og:type', 'og:url', 'og:image', 'og:site_name', 'og:locale'];
@@ -26,6 +29,11 @@ const TWITTER = ['twitter:card', 'twitter:title', 'twitter:description', 'twitte
 // Read out of head.tsx. Organization (the employer, via worksFor) and CollegeOrUniversity (alumniOf)
 // left on 2026-09-16 when the Equator role ended and the education entry was corrected.
 const SCHEMA = ['Person', 'WebSite', 'ImageObject', 'Place', 'PostalAddress', 'Language'];
+// What a blog page adds beside the site's own graph (frontend/pages/blog.tsx).
+const BLOG_SCHEMA: Readonly<Record<string, readonly string[]>> = {
+	'blog/index.html': ['CollectionPage', 'Blog', 'BlogPosting'],
+	[`blog/${newest}/index.html`]: ['BlogPosting'],
+};
 
 describe('the head a crawler reads', () => {
 	for (const page of PAGES) {
@@ -64,14 +72,39 @@ describe('the head a crawler reads', () => {
 				for (const item of Object.values(record)) collect(item);
 			};
 			for (const block of found) collect(JSON.parse(block[1]!.trim()));
-			for (const type of SCHEMA) assert.ok(types.has(type), `${page} declares @type ${type}`);
+			for (const type of [...SCHEMA, ...(BLOG_SCHEMA[page] ?? [])]) assert.ok(types.has(type), `${page} declares @type ${type}`);
+		});
+
+		it(`${page} points at the Atom feed`, () => {
+			assert.match(read(page), /<link[^>]*rel="alternate"[^>]*type="application\/atom\+xml"[^>]*href="https:\/\/torrin\.me\/feed\.xml"/, `${page} links the feed`);
 		});
 	}
+
+	it('a post page is an article with its own title, canonical, image and dates', () => {
+		const html = read(`blog/${newest}/index.html`);
+		assert.ok(html.includes('property="og:type" content="article"'), 'og:type article');
+		assert.ok(html.includes(`property="og:url" content="https://torrin.me/blog/${newest}"`), 'its own og:url');
+		assert.match(html, new RegExp(`<link[^>]*rel="canonical"[^>]*href="https://torrin\\.me/blog/${newest}"`), 'its own canonical');
+		assert.match(html, /property="og:image" content="https:\/\/torrin\.me\/media\/[^"]+\/og\.[0-9a-f]{8}\.png"/, 'its own card');
+		assert.ok(html.includes('property="article:published_time"'), 'a published time');
+		assert.equal((html.match(/<title[^>]*>/g) ?? []).length, 1, 'one title');
+		assert.equal((html.match(/rel="canonical"/g) ?? []).length, 1, 'one canonical');
+		assert.equal((html.match(/property="og:type"/g) ?? []).length, 1, 'one og:type');
+	});
+
+	it('the index page is a website page with its own title and canonical', () => {
+		const html = read('blog/index.html');
+		assert.ok(html.includes('property="og:type" content="website"'));
+		assert.match(html, /<title[^>]*>Blog \| Torrin Leonard/);
+		assert.match(html, /<link[^>]*rel="canonical"[^>]*href="https:\/\/torrin\.me\/blog"/);
+	});
 
 	it('the sitemap lists every page and robots.txt points at it', () => {
 		const sitemap = read('sitemap.xml');
 		assert.ok(sitemap.includes('<loc>https://torrin.me/</loc>'), 'the landing page is in the sitemap');
 		assert.ok(sitemap.includes('<loc>https://torrin.me/contact</loc>'), 'the contact page is in the sitemap');
+		assert.ok(sitemap.includes('<loc>https://torrin.me/blog</loc>'), 'the blog index is in the sitemap');
+		assert.ok(sitemap.includes(`<loc>https://torrin.me/blog/${newest}</loc>`), 'the newest post is in the sitemap');
 		assert.ok(read('robots.txt').includes('Sitemap: https://torrin.me/sitemap.xml'), 'robots.txt points at it');
 	});
 

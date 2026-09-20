@@ -1,7 +1,8 @@
 My personal website and portfolio, check it out at [torrin.me](https://torrin.me)!
 
-Built on [aweft](https://github.com/torrinworx). Two pages, written out as files at build time and
-taken over in the browser, served by one Node process that also answers the contact form.
+Built on [aweft](https://github.com/torrinworx). The landing page, the contact page and a blog,
+written out as files at build time and taken over in the browser, served by one Node process that
+also answers the contact form.
 
 ## Getting it running
 
@@ -10,8 +11,13 @@ The stack is the `aweft` submodule, pinned to a commit of `github.com/torrinworx
 ```
 git clone --recurse-submodules <this repo>
 npm install                 # links aweft/packages/* as workspaces
-npm run dev                 # vite, on port 3000
+npm run dev                 # the blog's build step, then vite on port 3000
 ```
+
+The blog's build step renders the card a link to a post unfurls to from the studio kit's template
+(`kit/templates/og.html` in [studio](https://github.com/torrinworx/studio), beside the brand's
+fonts), so it wants that repository checked out beside this one, or `STUDIO_DIR` pointing at it.
+Playwright's Chromium renders the cards; `npx playwright install chromium` once if it is missing.
 
 A checkout that predates the submodule takes it with `git submodule update --init`. Moving the pin
 to the top of aweft's main branch is `git submodule update --remote`, and the new pin is a change to
@@ -46,15 +52,57 @@ that is blocked.
 
 `build.sh` regenerates `frontend/public/Torrin_Leonard_Resume.pdf` from `frontend/data/resume.json`
 before anything else, so the page and the downloadable PDF cannot drift. `npm run resume:pdf` does
-it on its own.
+it on its own. Then `npm run content` builds the blog (below), before vite copies what it wrote.
+
+## Writing a post
+
+A post is `content/blog/<slug>.md`, its media in `content/blog/<slug>/`, and the slug is the URL:
+`/blog/<slug>`, which never changes once a post is out. The file starts with YAML front matter:
+
+```yaml
+---
+title: Why Compilers Exist
+description: One sentence for the index and the meta description.
+date: 2026-02-20T01:21:00-05:00     # ISO, with or without a time
+updated: 2026-03-01                  # optional
+draft: true                          # optional; a draft is checked but has no page
+discuss: https://news.ycombinator.com/item?id=...   # optional, the "Discuss on Hacker News" line
+image: A shorter headline for the card                # optional
+---
+```
+
+The body is markdown as `@aweftjs/ui`'s `Markdown` reads it: headings, paragraphs, fences, lists
+three deep, tables, quotes, rules, and an image alone on its line as a figure with its alt text as
+the caption. On top of that the site adds `^superscript^`, a callout (a quote whose first word is
+`Note:`), and a YouTube video: write it as an image whose source is the video's URL,
+`![What it shows](https://youtu.be/<id>)`, and the page shows the poster with a Play button; the
+player loads from `youtube-nocookie.com` only after the click.
+
+`npm run content` (`content/blog.ts`) reads every post and refuses one with no title or date, a
+published one with no description, or two files that would share a URL. It rewrites `[text][n]`
+references to inline links, copies each image into `frontend/public/media/<slug>/` under a name
+carrying its content hash, fetches a video's poster once into the post's folder (commit it), runs
+shiki over the fences, renders the cards, and writes the index the bundle imports
+(`frontend/data/posts.json`), a markdown twin and the fence tokens per post (`frontend/public/blog/`).
+A published post with a missing image fails the build; a draft's is a warning. Everything it
+writes is generated and ignored by git; the sources under `content/` are what is committed.
+
+The pages step then writes `/blog`, a page per published post, and three feeds beside the
+sitemap: `feed.xml` (Atom, full text), `feed.json` (JSON Feed 1.1) and `feed-summary.xml` (the
+first two paragraphs and a link, for dev.to's import).
 
 ## Layout
 
 | path | what it is |
 |---|---|
-| `frontend/site.tsx` | the acts: the landing page, the contact page, and the fallback |
-| `frontend/entry.tsx` | what the browser runs |
-| `frontend/pages.ts` | writes every page, `404.html`, `shell.html` and `sitemap.xml` |
+| `frontend/site.tsx` | the acts: the landing page, the contact page, the blog, and the fallback |
+| `frontend/pages/blog.tsx` | the blog index and the post page: head tags, structured data, the contents list, the modifiers |
+| `frontend/posts.ts` | the post index the bundle carries, and where a post's body comes from on each side |
+| `frontend/feeds.ts` | the three feeds |
+| `frontend/entry.tsx` | what the browser runs; a post page fetches its twin before it takes over |
+| `frontend/pages.ts` | writes every page, `404.html`, `shell.html`, `sitemap.xml` and the feeds |
 | `frontend/data/resume.json` | the content, shared with the resume generator |
+| `content/blog/` | the posts and their media |
+| `content/blog.ts` | the blog's build step; `content/highlight.ts` and `content/cards.ts` are its fences and its cards |
 | `main.ts` | the server: the site's modules, the health and static batteries, the build stamp |
 | `modules/` | the site's own server modules: the gate, and the contact form |
