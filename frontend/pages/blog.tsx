@@ -63,7 +63,9 @@ export const codeOf = (fences: readonly Fence[]) => {
 // line with a YouTube source into (content/blog.ts).
 const VIDEO = /^\[([^\]\n]*)\]\(https:\/\/www\.youtube\.com\/watch\?v=([\w-]{11})\)$/g;
 const SUPERSCRIPT = /\^([^\s^][^^\n]*?)\^/g;
-const NOTE = /^Note:(?=\s)/g;
+// What the build step puts where a quote's first word was `Note:` (content/blog.ts). A modifier
+// sees text alone, so the word itself would make a callout of any paragraph starting with it.
+const NOTE = /^\[!NOTE\](?=\s)/g;
 const LINK = /\[([^\]\n]+)\]\(([^)\s]+)\)/g;
 
 /** A run of text with its links as anchors, for the inside of a superscript. */
@@ -231,7 +233,7 @@ const IndexHead = (): unknown => (
 
 // --- the pages ----------------------------------------------------------------------------
 
-/** The contents list, from the post's second-level headings, when there are three or more. */
+/** The contents list, from the post's second-level headings as the build read them off a render, when there are three or more. */
 const Contents = (props: { post: Listed }): unknown => {
 	const shown = props.post.headings.filter((heading) => heading.level === 2);
 	if (shown.length < 3) return null;
@@ -297,10 +299,14 @@ const Missing = (): unknown => (
 	</div>
 );
 
+/** The page the server wrote, as it stands. A component, so it takes the region `Article` wrote. */
+const Written = (props: { page: Node }): unknown => props.page;
+
 /**
  * One post. Its body is read where it stands when it is already held, which the server always
  * has and the browser has for the post it arrived on, so the hydration renders what the server
- * wrote; a post reached by a click is fetched and shows the loader meanwhile.
+ * wrote; when the browser could not read that body, the server's page is kept as it stands; a
+ * post reached by a click is fetched and shows the loader meanwhile.
  */
 const PostPage = ContentContext.use((content: Content) => (props: { stage?: { params: { get(): Readonly<Record<string, string>> } } }): unknown => {
 	const slug = props.stage?.params.get()['slug'] ?? '';
@@ -308,6 +314,8 @@ const PostPage = ContentContext.use((content: Content) => (props: { stage?: { pa
 	if (post === undefined) return <Missing />;
 	const held = content.peek(slug);
 	if (held !== undefined) return <Article post={post} body={held} />;
+	const written = content.written?.(slug);
+	if (written !== undefined) return <Written page={written} />;
 	const Later = suspend(Loading, async () => <Article post={post} body={await content.read(slug)} />, Failed);
 	return <Later />;
 });

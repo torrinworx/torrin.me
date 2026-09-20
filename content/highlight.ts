@@ -43,8 +43,8 @@ const theme: ThemeRegistration = {
 };
 const kindOf = new Map<string, Kind>(KINDS.map(([kind, colour]) => [colour, kind]));
 
-/** Whether shiki has a grammar under this fence name. */
-export const known = (language: string | null): language is BundledLanguage => language !== null && language in bundledLanguages;
+/** Whether shiki has a grammar under this fence name. Own keys only: `in` would say yes to `constructor`. */
+export const known = (language: string | null): language is BundledLanguage => language !== null && Object.hasOwn(bundledLanguages, language);
 
 /**
  * Tokenize every fenced block of a site.

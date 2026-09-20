@@ -1,11 +1,11 @@
 // The three feeds, written beside the sitemap: feed.xml (Atom 1.0, full text), feed.json (JSON
-// Feed 1.1, full text) and feed-summary.xml (Atom, the first two paragraphs and a link, for
-// dev.to's import). The text is each post's twin rendered through `Markdown`, the way the page
-// renders it, with the feed's own modifiers so a video is a link with its poster.
+// Feed 1.1, full text) and feed-summary.xml (Atom, the description, the first paragraph and a
+// link, for dev.to's import). The text is each post's twin rendered through `Markdown`, the way
+// the page renders it, with the feed's own modifiers so a video is a link with its poster.
 
 import { Markdown, Theme, context, h, render } from '@aweftjs/ui';
 
-import { runs } from '../content/blog.ts';
+import { runs, stripInline } from '../content/blog.ts';
 import { AUTHOR_NAME, SITE_URL } from './head.tsx';
 import { modifiersOf, codeOf, urlOf } from './pages/blog.tsx';
 import type { Body, Listed } from './posts.ts';
@@ -23,26 +23,35 @@ const stamp = (iso: string): string => new Date(iso).toISOString();
 /** Every root-relative `src` and `href` made absolute: a feed reader has no origin to resolve against. */
 const absolute = (html: string): string => html.replace(/(src|href)="\/(?!\/)/g, `$1="${SITE_URL}/`);
 
+/** The markers a render leaves between nodes for the hydration, which a feed has none of. */
+const unmarked = (html: string): string => html.replace(/<!--[\s\S]*?-->/g, '');
+
 /** One post's markdown as HTML, the way the page renders it. */
 export const renderBody = async (post: Listed, markdown: string, fences: Body['fences']): Promise<string> => {
 	const html = await render(
 		h(Theme, { value: siteTheme }, h(Markdown, { source: markdown, code: codeOf(fences), modifiers: modifiersOf(post, true) })),
 		{ context: context() },
 	);
-	return absolute(html);
+	return absolute(unmarked(html));
 };
 
-/** The first two prose paragraphs of a body: what the summary feed carries. No heading, quote, list, figure, table or fence. */
-export const summaryOf = (markdown: string): string => {
-	const held: string[] = [];
+// Under this many characters, a paragraph is a label over what follows it (a file name, a
+// heading written bold), not a paragraph a summary can open with.
+const LABEL = 40;
+
+/**
+ * What the summary feed carries for a post: its description, then the first prose paragraph
+ * that is more than a label. No heading, quote, list, figure, table or fence.
+ */
+export const summaryOf = (description: string, markdown: string): string => {
 	const prose = runs(markdown).filter((run) => run.kind === 'prose').map((run) => run.text).join('\n');
 	for (const chunk of prose.split(/\n\s*\n/)) {
 		const text = chunk.trim();
 		if (text === '' || /^(#|>|[-*+]\s|\d+[.)]\s|!\[|\||\[[^\]]*\]\()/.test(text)) continue;
-		held.push(text);
-		if (held.length === 2) break;
+		if (stripInline(text).length < LABEL) continue;
+		return `${description}\n\n${text}`;
 	}
-	return held.join('\n\n');
+	return description;
 };
 
 export interface Feeds {
@@ -67,7 +76,7 @@ export const feeds = async (posts: readonly Listed[], bodies: ReadonlyMap<string
 		full.push({
 			post,
 			html: await renderBody(post, body.markdown, body.fences),
-			summary: await renderBody(post, summaryOf(body.markdown), []),
+			summary: await renderBody(post, summaryOf(post.description, body.markdown), []),
 		});
 	}
 
@@ -83,14 +92,15 @@ export const feeds = async (posts: readonly Listed[], bodies: ReadonlyMap<string
 		'\t</entry>',
 	].join('\n');
 
-	const atom = (self: string, entries: string): string => [
+	// Each feed is its own document to a reader, so each carries its own id.
+	const atom = (self: string, id: string, entries: string): string => [
 		'<?xml version="1.0" encoding="utf-8"?>',
 		'<feed xmlns="http://www.w3.org/2005/Atom">',
 		`\t<title>${escape(FEED_TITLE)}</title>`,
 		`\t<subtitle>${escape(FEED_DESCRIPTION)}</subtitle>`,
 		`\t<link rel="self" type="application/atom+xml" href="${SITE_URL}/${self}"/>`,
 		`\t<link rel="alternate" type="text/html" href="${SITE_URL}/blog"/>`,
-		`\t<id>${SITE_URL}/blog</id>`,
+		`\t<id>${id}</id>`,
 		`\t<updated>${updated}</updated>`,
 		`\t<author><name>${escape(AUTHOR_NAME)}</name><uri>${SITE_URL}</uri></author>`,
 		entries,
@@ -101,8 +111,8 @@ export const feeds = async (posts: readonly Listed[], bodies: ReadonlyMap<string
 	const read = (post: Listed): string => `<p><a href="${urlOf(post)}">Read the whole post on torrin.me.</a></p>`;
 
 	return {
-		atom: atom('feed.xml', full.map(({ post, html }) => entry(post, html)).join('\n')),
-		summary: atom('feed-summary.xml', full.map(({ post, summary }) => entry(post, `${summary}\n${read(post)}`)).join('\n')),
+		atom: atom('feed.xml', `${SITE_URL}/blog`, full.map(({ post, html }) => entry(post, html)).join('\n')),
+		summary: atom('feed-summary.xml', `${SITE_URL}/blog/summary`, full.map(({ post, summary }) => entry(post, `${summary}\n${read(post)}`)).join('\n')),
 		json: `${JSON.stringify({
 			version: 'https://jsonfeed.org/version/1.1',
 			title: FEED_TITLE,

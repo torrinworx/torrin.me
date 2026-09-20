@@ -4,7 +4,7 @@ description: A quick, copy-paste Docker Compose setup for running Kimai with a M
 date: 2026-01-28T23:17:00-05:00
 ---
 
-> Read the full story of how Kimai saved my parent's company $28,800 dollars: [/blog/harvest-tisk-tisk](/blog/harvest-tisk-tisk)  
+> Read the full story of how Kimai saved my parent's company $28,800 (post coming)  
 > Official docs: https://www.kimai.org/documentation/docker-compose.html
 
 ## Quick Kimai (Docker Compose) Setup

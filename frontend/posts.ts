@@ -60,6 +60,12 @@ export interface Content {
 	peek(slug: string): Body | undefined;
 	/** The body, fetched if need be. */
 	read(slug: string): Promise<Body>;
+	/**
+	 * The page the server wrote for a post whose twin could not be read, to show as it stands so
+	 * the reader keeps the post while the page around it comes alive. Answered once: a later
+	 * visit to the post reads the twin again. Only the browser ever holds one.
+	 */
+	written?(slug: string): Node | undefined;
 }
 
 const nothing: Content = { peek: () => undefined, read: () => Promise.reject(new Error('no content')) };
@@ -92,13 +98,21 @@ export const fetchBody = async (post: Listed): Promise<Body> => {
 
 /**
  * Content fetched from each post's twin, with the first post's body handed in so the hydration
- * renders what the server rendered without waiting.
+ * renders what the server rendered without waiting, or, when that twin could not be read, the
+ * post's page as the server wrote it.
  */
-export const fetching = (seed: readonly (readonly [string, Body])[]): Content => {
+export const fetching = (seed: readonly (readonly [string, Body])[], written?: readonly [slug: string, page: Node]): Content => {
 	const held = new Map<string, Body>(seed);
 	const pending = new Map<string, Promise<Body>>();
+	let kept = written;
 	return {
 		peek: (slug) => held.get(slug),
+		written: (slug) => {
+			if (kept === undefined || kept[0] !== slug) return undefined;
+			const page = kept[1];
+			kept = undefined;
+			return page;
+		},
 		read: (slug) => {
 			const known = held.get(slug);
 			if (known !== undefined) return Promise.resolve(known);
