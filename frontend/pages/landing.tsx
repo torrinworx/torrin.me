@@ -122,7 +122,7 @@ const Entry = (props: { item: Item }): unknown => {
 			</div>
 
 			{item.start === undefined && !item.end ? null
-				: <Typography type="p1_italic" label={span(item.start, item.end)} />}
+				: <Typography type="date" label={span(item.start, item.end)} />}
 
 			{item.description === undefined ? null
 				: <Typography type="body_bold" label={item.description} />}
@@ -169,7 +169,6 @@ export const Landing = (
 						theme="ring"
 						alt="Profile image of Torrin Leonard."
 						style={{
-							borderRadius: 20,
 							// A whole-pixel width and a 3:4 box, so the height is an integer. Left to the
 							// file's own ratio it came out 239.656px tall, and that fraction was the
 							// origin of every blurred rule below it: the live site has the same one.

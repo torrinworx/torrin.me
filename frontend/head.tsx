@@ -6,7 +6,7 @@
 
 import { Link, Meta, Script, Style, Title, h } from '@aweftjs/ui';
 
-import { BRAND } from './theme.ts';
+import { FOREST, LIME, PAPER } from './theme.ts';
 
 const SITE_URL = 'https://torrin.me';
 const PAGE_TITLE = 'Torrin Leonard | Product Engineer';
@@ -152,13 +152,15 @@ const jsonLd = {
 	],
 };
 
-// The two rules that reach `html` and `body`. No theme entry can, because a generated class only
-// ever lands on an element the page built.
+// The rules that reach `html`, `body` and a selection. No theme entry can, because a generated
+// class only ever lands on an element the page built. The document itself is painted paper: the
+// page entry paints a div, and a rubber-band scroll past its end shows whatever is behind it,
+// which was the browser's white. A selection is the brand's highlighter: lime under the ink.
 const DOCUMENT_CSS = `
-html { -webkit-text-size-adjust: none; text-size-adjust: none; }
-body { margin: 0; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-::selection { background: ${BRAND}; color: #ffffff; }
-::-moz-selection { background: ${BRAND}; color: #ffffff; }
+html { background: ${PAPER}; -webkit-text-size-adjust: none; text-size-adjust: none; }
+body { margin: 0; background: ${PAPER}; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+::selection { background: ${LIME}; color: ${FOREST}; }
+::-moz-selection { background: ${LIME}; color: ${FOREST}; }
 `;
 
 /** Every head tag the site has. Written once in the template, so both pages carry it. */
@@ -170,7 +172,7 @@ export const SiteHead = (): unknown => <>
 	<Meta name="robots" content="index, follow" />
 	<Meta name="geo.placename" content="Waterloo, Ontario, Canada" />
 	<Meta name="geo.region" content="CA-ON" />
-	<Meta name="theme-color" content="#ffffff" />
+	<Meta name="theme-color" content={PAPER} />
 
 	<Meta property="og:title" content={PAGE_TITLE} />
 	<Meta property="og:description" content={DESCRIPTION} />
