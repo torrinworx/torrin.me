@@ -30,7 +30,9 @@ typecheck, `resolve.conditions` in `vite.config.ts` for the bundle, and `--confi
 vite so that config is loaded by Node instead of being pre-resolved by the bundler, which has no way
 to know about the condition.
 
-`npm start` runs the real server against `dist/`, reading `.env` if there is one.
+`npm start` runs the real server against `dist/`, reading `.env` if there is one. It needs the
+`db` line in that file even to serve the static pages: the logs battery keeps its visits in
+Postgres, and `main.ts` refuses to start without a reachable database.
 
 ## Building and deploying
 
@@ -63,33 +65,43 @@ A post is `content/blog/<slug>.md`, its media in `content/blog/<slug>/`, and the
 ---
 title: Why Compilers Exist
 description: One sentence for the index and the meta description.
-date: 2026-02-20T01:21:00-05:00     # ISO, with or without a time
-updated: 2026-03-01                  # optional
+date: 2026-02-20T01:21:00-05:00     # YYYY-MM-DD, with or without THH:MM(:SS) and Z or ±HH:MM
+updated: 2026-03-01                  # optional, the same shape
 draft: true                          # optional; a draft is checked but has no page
+future: true                         # optional; a published post dated after today is refused without it
 discuss: https://news.ycombinator.com/item?id=...   # optional, the "Discuss on Hacker News" line
 image: A shorter headline for the card                # optional
 ---
 ```
 
+`draft` and `future` take the YAML booleans `true` and `false` and nothing else: `yes` or
+`"true"` is refused rather than read as one or the other. `discuss` has to be a thread on
+`news.ycombinator.com`, since it goes into the page as a link.
+
 The body is markdown as `@aweftjs/ui`'s `Markdown` reads it: headings, paragraphs, fences, lists
 three deep, tables, quotes, rules, and an image alone on its line as a figure with its alt text as
-the caption. On top of that the site adds `^superscript^`, a callout (a quote whose first word is
-`Note:`), and a YouTube video: write it as an image whose source is the video's URL,
-`![What it shows](https://youtu.be/<id>)`, and the page shows the poster with a Play button; the
-player loads from `youtube-nocookie.com` only after the click.
+the caption. An image is referenced by its bare file name, `![The caption](pic.png)`, and lives
+beside the markdown in `content/blog/<slug>/`. On top of that the site adds `^superscript^`, a
+callout (a quote whose first word is `Note:`), and a YouTube video: write it as an image whose
+source is the video's URL, `![What it shows](https://youtu.be/<id>)`, and the page shows the
+poster with a Play button; the player loads from `youtube-nocookie.com` only after the click.
 
 `npm run content` (`content/blog.ts`) reads every post and refuses one with no title or date, a
-published one with no description, or two files that would share a URL. It rewrites `[text][n]`
-references to inline links, copies each image into `frontend/public/media/<slug>/` under a name
-carrying its content hash, fetches a video's poster once into the post's folder (commit it), runs
-shiki over the fences, renders the cards, and writes the index the bundle imports
-(`frontend/data/posts.json`), a markdown twin and the fence tokens per post (`frontend/public/blog/`).
-A published post with a missing image fails the build; a draft's is a warning. Everything it
-writes is generated and ignored by git; the sources under `content/` are what is committed.
+published one with no description, a published one dated after today without `future: true`, or
+two files that would share a URL. It rewrites `[text][n]` references to inline links, copies each
+image into `frontend/public/media/<slug>/` under a name carrying its content hash, fetches a
+video's poster once into the post's folder (commit it), runs shiki over the fences, renders the
+cards, and writes the index the bundle imports (`frontend/data/posts.json`), a markdown twin and
+the fence tokens per post (`frontend/public/blog/`). A published post fails the build when an
+image is missing, when an image line would show as text (a space in the source, a size that is
+not `=WxH`), or when it links `/blog/<slug>` to a draft or to no post; for a draft the first two
+are warnings and the links go unchecked. An image whose path climbs out of the post's folder
+fails the build either way. Everything it writes is generated and ignored by git; the sources
+under `content/` are what is committed.
 
 The pages step then writes `/blog`, a page per published post, and three feeds beside the
 sitemap: `feed.xml` (Atom, full text), `feed.json` (JSON Feed 1.1) and `feed-summary.xml` (the
-first two paragraphs and a link, for dev.to's import).
+description, the first paragraph and a link, for dev.to's import).
 
 ## Layout
 
