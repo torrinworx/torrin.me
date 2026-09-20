@@ -138,6 +138,11 @@ server {
     listen 443 ssl;
     server_name ${DOMAIN};
 
+    # One JSON line per request for stats.torrin.me's loader, beside the default access log.
+    # The stats_json format is installed by the stats repo (droplet/install.sh); without it
+    # nginx -t fails here, which is the right failure.
+    access_log /var/log/nginx/torrin.me.stats.log stats_json;
+
     ssl_certificate     ${FULLCHAIN};
     ssl_certificate_key ${PRIVKEY};
     include /etc/letsencrypt/options-ssl-nginx.conf;
