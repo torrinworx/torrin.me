@@ -2,21 +2,24 @@
 //
 // `Detached` places the panel and `Card` paints it. Every row is a `Button` with a real `href`, so
 // the two internal links are in the markup a crawler reads and `router.links` turns a click into a
-// navigation with nothing wired here.
+// navigation with nothing wired here. The row that points at the page already showing is left out.
 
 import { mutable } from '@aweftjs/core';
-import { Button, Card, Detached, Icon, h, mark, useAbort } from '@aweftjs/ui';
+import { Button, Card, Detached, Icon, StageContext, h, mark, useAbort } from '@aweftjs/ui';
 
 import { Email } from './email.tsx';
 import { Resume } from './resume.tsx';
 
 const ROW = ['bare', 'brand'];
 
-export const Header = (
+export const Header = StageContext.use((stage) => (
 	_props: Record<string, unknown>,
 	cleanup: (...fns: (() => void)[]) => void,
 ): unknown => {
 	const open = mutable(false);
+	const current = stage?.current;
+	const unless = (act: string, row: unknown): unknown =>
+		(current === undefined ? row : current.map((showing) => (showing === act ? null : row)));
 
 	// `Detached` closes itself when the page scrolls under the anchor, but not on Escape or on a
 	// click elsewhere: its own popup's dismissal writes the placement, which the placement loop
@@ -73,27 +76,31 @@ export const Header = (
 						style={{ padding: 10, minWidth: 150 }}
 					>
 						<div theme={['column', 'tight']} style={{ gap: 5 }}>
-							<Button
-								theme={ROW}
-								title="Go to home"
-								label="Home"
-								icon={<Icon name="feather:home" />}
-								iconPosition="right"
-								href="/"
-								hrefNewTab={false}
-								onClick={close}
-							/>
+							{unless('', (
+								<Button
+									theme={ROW}
+									title="Go to home"
+									label="Home"
+									icon={<Icon name="feather:home" />}
+									iconPosition="right"
+									href="/"
+									hrefNewTab={false}
+									onClick={close}
+								/>
+							))}
 							<Resume theme={ROW} />
-							<Button
-								theme={ROW}
-								title="Get in touch"
-								label="Contact"
-								icon={<Icon name="feather:mail" />}
-								iconPosition="right"
-								href="/contact"
-								hrefNewTab={false}
-								onClick={close}
-							/>
+							{unless('contact', (
+								<Button
+									theme={ROW}
+									title="Get in touch"
+									label="Contact"
+									icon={<Icon name="feather:mail" />}
+									iconPosition="right"
+									href="/contact"
+									hrefNewTab={false}
+									onClick={close}
+								/>
+							))}
 							<Button
 								theme={ROW}
 								title="Torrin Leonard's Github"
@@ -109,4 +116,4 @@ export const Header = (
 			</Detached>
 		</div>
 	);
-};
+});
