@@ -7,7 +7,8 @@
 		"aweft/packages/*"
 	],
 	"scripts": {
-		"dev": "vite --configLoader native",
+		"content": "node --import @aweftjs/build/loader content/blog.ts",
+		"dev": "npm run content && vite --configLoader native",
 		"build": "bash build.sh",
 		"pages": "AWEFT_DEFAULT_H=@aweftjs/ui node --import @aweftjs/build/loader frontend/pages.ts",
 		"start": "node --env-file-if-exists=.env --import @aweftjs/build/loader main.ts",
@@ -15,7 +16,7 @@
 		"typecheck": "tsc --noEmit",
 		"test": "node --import @aweftjs/build/loader --test tests/*.test.ts",
 		"proof": "node --import @aweftjs/build/loader proof.ts",
-		"gate": "npm run typecheck && npm run build && npm test && npm run proof"
+		"gate": "npm run content && npm run typecheck && npm run build && npm test && npm run proof"
 	},
 	"repository": {
 		"type": "git",
@@ -52,7 +53,9 @@
 		"nodemon": "^3.1.7",
 		"pdfkit": "^0.20.2",
 		"playwright": "1.62.1",
+		"shiki": "^4.4.3",
 		"typescript": "^5.7.0",
-		"vite": "^8.2.2"
+		"vite": "^8.2.2",
+		"yaml": "^2.9.1"
 	}
 }

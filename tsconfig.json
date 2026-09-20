@@ -22,6 +22,6 @@
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true
 	},
-	"include": ["frontend", "modules", "tests", "main.ts", "vite.config.ts"],
+	"include": ["content", "frontend", "modules", "tests", "main.ts", "proof.ts", "vite.config.ts"],
 	"exclude": ["aweft", "archive", "node_modules", "build"]
 }

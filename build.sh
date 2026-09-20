@@ -25,6 +25,11 @@ rm -f "$ZIP_FILE"
 # stale resume is the bug this step exists to prevent.
 npm run resume:pdf
 
+# The blog: every post read and checked, its media hashed into frontend/public, the index the
+# bundle imports and the twins the browser fetches written. Before vite, which copies
+# frontend/public into dist as it is; and before the typecheck in the gate, which imports the index.
+npm run content
+
 # The page bundle and the shell, then every page written out as a file beside them.
 # `--configLoader native` has Node import this config rather than the bundler pre-bundling it with
 # a resolver of its own, which is the only way the condition above reaches the plugin the config

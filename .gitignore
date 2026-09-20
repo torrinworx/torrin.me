@@ -5,6 +5,14 @@ node_modules/
 /build
 build.zip
 
+# What content/blog.ts writes from content/blog/: the index, the twins and the tokens, the media
+# under its hashed names, and the two site images it renders. The sources are in content/.
+/frontend/data/posts.json
+/frontend/public/blog/
+/frontend/public/media/
+/frontend/public/site-card.png
+/frontend/public/profile.dark.png
+
 # Screenshots the proof program takes.
 /proof-shots
 
