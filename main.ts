@@ -89,6 +89,7 @@ const own: Source = fromBundle({
 				'assets/': 'public, max-age=31536000, immutable',
 				'JetBrainsMono-2.304/': 'public, max-age=31536000, immutable',
 				'ibm-plex-sans/': 'public, max-age=31536000, immutable',
+				'source-serif-4.005/': 'public, max-age=31536000, immutable',
 			},
 		},
 	},

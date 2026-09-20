@@ -1,4 +1,4 @@
-// The two self-hosted families, as `@font-face` directives for one theme entry.
+// The three self-hosted families, as `@font-face` directives for one theme entry.
 //
 // The engine emits each of these once per render however many class chains reach the entry that
 // holds them, so they go through the theme rather than through a <Style> tag the page would have
@@ -6,6 +6,11 @@
 
 const JETBRAINS = '/JetBrainsMono-2.304/fonts/webfonts/JetBrainsMono';
 const PLEX = '/ibm-plex-sans/woff2/IBMPlexSans';
+// The 4.005R release of github.com/adobe-fonts/source-serif, OFL 1.1; the licence sits beside
+// the files. The variable cut rather than the static weights: it carries the optical size axis,
+// so a 50px h1 and a 24px h2 each get the serifs drawn for that size, which is what the brand
+// specimen shows and no pair of static files does.
+const SOURCE_SERIF = '/source-serif-4.005/SourceSerif4Variable';
 
 /** One weight of a family: the number, then the upright and italic file stems. */
 type Face = readonly [weight: number, upright: string, italic: string];
@@ -53,8 +58,29 @@ const facesOf = (
 	return out;
 };
 
-/** The 32 faces the site ships, keyed as directives of whichever entry they are spread into. */
+/** A variable family: one file per style, declaring the whole weight axis. */
+const variableOf = (
+	prefix: string,
+	family: string,
+	base: string,
+	range: string,
+): Record<string, Record<string, unknown>> => {
+	const out: Record<string, Record<string, unknown>> = {};
+	for (const [style, stem] of [['normal', 'Roman'], ['italic', 'Italic']] as const) {
+		out[`_fontFace_${prefix}${style}`] = {
+			fontFamily: family,
+			src: `url("${base}-${stem}.otf.woff2") format("woff2")`,
+			fontWeight: range,
+			fontStyle: style,
+			fontDisplay: 'swap',
+		};
+	}
+	return out;
+};
+
+/** The 34 faces the site ships, keyed as directives of whichever entry they are spread into. */
 export const fontFaces: Record<string, Record<string, unknown>> = {
 	...facesOf('jb', '"JetBrains Mono"', JETBRAINS, jetbrains),
 	...facesOf('plex', '"IBM Plex Sans"', PLEX, plex),
+	...variableOf('serif', '"Source Serif 4"', SOURCE_SERIF, '200 900'),
 };
