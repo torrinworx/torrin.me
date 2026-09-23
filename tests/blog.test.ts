@@ -325,9 +325,9 @@ describe('the posts in content/blog', () => {
 	it('every one parses, and every image a published post names is there', async () => {
 		const where = scratch();
 		const built = await buildBlog({ content: `${repo}content/blog`, data: where.data, public: where.public, studio: null });
-		assert.equal(built.posts.length, 3, 'the three published posts');
+		assert.equal(built.posts.length, 4, 'the four published posts');
 		const published = built.posts.filter((post) => !post.draft);
-		assert.deepEqual(published.map((post) => post.slug).sort(), ['kimai-setup', 'nrth-day-one', 'when-to-open-source']);
+		assert.deepEqual(published.map((post) => post.slug).sort(), ['aweft-for-agents', 'kimai-setup', 'nrth-day-one', 'when-to-open-source']);
 		assert.deepEqual(built.warnings, []);
 	});
 });
