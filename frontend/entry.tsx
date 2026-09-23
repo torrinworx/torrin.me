@@ -24,6 +24,30 @@ import type { Track } from './site.tsx';
 // Stamped by vite.config.ts from BUILD_ID; a dev server has none.
 declare const __BUILD__: string | null;
 
+// The client numbers its classes afresh and rewrites the server's sheet with its own, so a kept
+// article's awN classes would point at other rules, and a class compiled later lands on it too (a
+// pressed menu button reflowed the page under the pointer and the click was lost). The article
+// gets names of its own, and the server's rules for them come along.
+const keepStyles = (article: Element): void => {
+	const sheet = document.querySelector<HTMLStyleElement>('head style[data-aweft]:not([data-aweft-grown])')?.sheet;
+	if (sheet === null || sheet === undefined) return;
+	const rename = (text: string) => text.replace(/\baw(\d+)\b/g, 'kept$1');
+	const pick = (rules: CSSRuleList): string[] => Array.from(rules).flatMap((rule) => {
+		if (rule instanceof CSSStyleRule) return /\.aw\d+\b/.test(rule.selectorText) ? [rename(rule.cssText)] : [];
+		if (rule instanceof CSSGroupingRule) {
+			const inner = pick(rule.cssRules);
+			return inner.length === 0 ? [] : [`${rule.cssText.slice(0, rule.cssText.indexOf('{'))}{ ${inner.join(' ')} }`];
+		}
+		return [];
+	});
+	for (const element of [article, ...Array.from(article.querySelectorAll('[class]'))]) {
+		element.setAttribute('class', rename(element.getAttribute('class') ?? ''));
+	}
+	const style = document.createElement('style');
+	style.textContent = pick(sheet.cssRules).join('\n');
+	document.head.append(style);
+};
+
 const opened = /^\/blog\/([a-z0-9-]+)\/?$/.exec(location.pathname);
 const post = opened === null ? undefined : postAt(opened[1]!);
 const seed: [string, Body][] = [];
@@ -37,6 +61,7 @@ if (post !== undefined) {
 		console.error(`${post.slug}: the twin could not be read, so the page keeps what the server wrote:`, error);
 		const article = document.querySelector('main article');
 		if (article !== null) {
+			keepStyles(article);
 			article.remove();
 			written = [post.slug, article];
 		}
