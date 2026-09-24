@@ -82,9 +82,12 @@ systemctl restart "$SERVICE_NAME"
 # The radio #
 #############
 
-# ffmpeg is the encoder. The package is installed once and never again.
+# ffmpeg is the encoder. The package is installed once and never again. The index refresh is
+# allowed to fail: a third-party repository with no release file for this Ubuntu (the certbot
+# PPA, on 2026-09-24) would otherwise end the deploy here, with the site already restarted
+# above and nginx not yet written below.
 if ! command -v ffmpeg >/dev/null; then
-  apt-get update -qq
+  apt-get update -qq || echo "apt-get update failed, installing from the index as it is"
   DEBIAN_FRONTEND=noninteractive apt-get install -y -qq ffmpeg
 fi
 
