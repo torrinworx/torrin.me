@@ -54,7 +54,7 @@ export const config: Config = {
 	/** Bars the drums take to fade in at a track's start, and to fade out at its end. */
 	drumFadeBars: 8,
 	/**
-	 * Chance that a beat starts a melody note; an off-beat sixteenth has a quarter of it. A
+	 * Chance that a beat starts a melody note, and an off-beat sixteenth has a quarter of it. A
 	 * note that is still sounding blocks the next, so the melody lands a little under this.
 	 */
 	melody: 0.14,

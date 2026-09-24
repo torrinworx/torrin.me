@@ -1,6 +1,6 @@
 // The radio: the composer answers the same notes for the same moment, the station turns them
 // into sound and crossfades tracks, and the stream reaches a listener from the moment they ask.
-// The voice here is the tone generator, so no soundfont is read; the encoder is the real ffmpeg.
+// The voice here is the tone generator, so no soundfont is read, and the encoder is the real ffmpeg.
 
 import assert from 'node:assert/strict';
 import { after, before, describe, it, test } from 'node:test';
@@ -147,7 +147,7 @@ describe('the station', () => {
 		voice.told.length = 0;
 		at.next();
 		assert.equal(at.playing().slot, 11);
-		// Slot 10 is on channels 0 to 3, slot 11 on 4 to 7; the new bank starts at nothing.
+		// Slot 10 is on channels 0 to 3, slot 11 on 4 to 7, and the new bank starts at nothing.
 		const programs = voice.told.filter((said) => said.what === 'program').map((said) => said.channel);
 		assert.deepEqual(programs, [4, 5, 6, 7]);
 		const first = voice.told.find((said) => said.what === 'volume' && said.channel === 4);
@@ -276,7 +276,7 @@ describe('the stream', () => {
 	test('a listener gets MP3 frames at once and keeps getting them', async () => {
 		const heard = await listen(`http://127.0.0.1:${String(radio.port)}/stream`, 2000);
 		assert.ok(heard.firstAfterMs >= 0 && heard.firstAfterMs < 1000, `first bytes inside a second: ${String(heard.firstAfterMs)} ms`);
-		// Two seconds at 128 kbps is 32 KB; the backlog adds a second and a half on top.
+		// Two seconds at 128 kbps is 32 KB, and the backlog adds a second and a half on top.
 		assert.ok(heard.bytes.length > 24 * 1024, `${String(heard.bytes.length)} bytes in two seconds`);
 		let frames = 0;
 		for (let i = 0; i < heard.bytes.length - 1; i++) if (isFrameStart(heard.bytes, i)) frames++;
@@ -285,7 +285,7 @@ describe('the stream', () => {
 	});
 
 	test('a joining listener is handed the backlog first, so play starts at once', async () => {
-		// A third of a second of live stream is 5 KB; the backlog in front of it is 24 KB.
+		// A third of a second of live stream is 5 KB, and the backlog in front of it is 24 KB.
 		const heard = await listen(`http://127.0.0.1:${String(radio.port)}/stream`, 330);
 		assert.ok(heard.bytes.length > 16 * 1024, `${String(heard.bytes.length)} bytes in the first third of a second`);
 	});

@@ -65,13 +65,13 @@ the wall clock, so every listener hears the same moment and a restart resumes th
 
 ```
 npm run soundfont           # fetches the 32 MB soundfont into radio/assets/, once
-npm run radio               # the station on RADIO_PORT (3010); the dev server proxies /radio/stream to it
+npm run radio               # the station on RADIO_PORT (3010). The dev server proxies /radio/stream to it
 ```
 
 The radio is its own process and imports nothing from the stack: on the droplet it runs as the
 `torrin.me-radio` unit from `/var/www/torrin.me/radio`, and `setup.sh` replaces and restarts it
 only when what shipped under `radio/` changed, so a deploy that touched the site alone never cuts
-the stream. nginx proxies `/radio/stream` to it with buffering off; the site's process never
+the stream. nginx proxies `/radio/stream` to it with buffering off. The site's process never
 carries audio. What it plays is `radio/config.ts`: tempo, modes, instruments, drums, levels and
 the encoder's tone. `GET /health` on its port says what is playing and how many are listening.
 
@@ -135,7 +135,7 @@ description, the first paragraph and a link, for dev.to's import).
 | `frontend/data/resume.json` | the content, shared with the resume generator |
 | `content/blog/` | the posts and their media |
 | `content/blog.ts` | the blog's build step; `content/highlight.ts` and `content/cards.ts` are its fences and its cards |
-| `frontend/pages/radio.tsx` | the radio page; `frontend/radio.ts` is the player, one audio element for the whole site |
+| `frontend/pages/radio.tsx` | the radio page, and `frontend/radio.ts` the player, one audio element for the whole site |
 | `main.ts` | the server: the site's modules, the health and static batteries, the build stamp |
 | `modules/` | the site's own server modules: the gate, and the contact form |
-| `radio/` | the station: `config.ts` is the sound, `compose.ts` the notes, `station.ts` the clock, `pace.ts` keeps it on the wall clock, `voice.ts` the sampler, `stream.ts` the encoder and fan-out, `serve.ts` its port, `main.ts` the process |
+| `radio/` | the station: `config.ts` holds its settings, `compose.ts` picks the notes, `station.ts` times them, `pace.ts` keeps that on the wall clock, `voice.ts` plays them, `stream.ts` encodes and fans out, `serve.ts` answers HTTP, `main.ts` starts it all |

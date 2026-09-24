@@ -1,5 +1,5 @@
 // The radio's own HTTP: the stream, and a health answer with what is playing. nginx puts
-// /radio/stream in front of /stream; nothing else reaches this port.
+// /radio/stream in front of /stream, and nothing else reaches this port.
 
 import { createServer } from 'node:http';
 import type { Server } from 'node:http';

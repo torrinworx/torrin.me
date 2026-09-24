@@ -1,6 +1,6 @@
 // Fetches the soundfont the station plays, once. GeneralUser GS v2.0.3, from the official
 // repository at a pinned commit, checked against its hash, into assets/ beside this file. The
-// file is 32 MB and stays out of git; build.sh runs this when it is missing and ships the copy.
+// file is 32 MB and stays out of git. build.sh runs this when it is missing and ships the copy.
 //
 // Run: npm run soundfont
 

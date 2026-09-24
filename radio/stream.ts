@@ -1,4 +1,4 @@
-// The encoder and the fan-out. One ffmpeg turns the station's samples into MP3; every listener
+// The encoder and the fan-out. One ffmpeg turns the station's samples into MP3, and every listener
 // is handed the same bytes as they come, after the last second or so of them, so playback starts
 // at once. A listener that stops reading is dropped rather than buffered without end.
 
@@ -30,7 +30,7 @@ export interface Broadcast {
 	stop(): Promise<void>;
 }
 
-// 128 kbps is 16 KB a second; a second and a half of it is what a joining listener gets.
+// 128 kbps is 16 KB a second, so a second and a half of it is what a joining listener gets.
 const BACKLOG = 24 * 1024;
 const LAGGING = 1024 * 1024;
 
@@ -48,7 +48,7 @@ export const broadcast = (options: BroadcastOptions = {}): Broadcast => {
 		'-probesize', '32', '-analyzeduration', '0',
 		'-f', 's16le', '-ar', String(SAMPLE_RATE), '-ac', '2', '-i', 'pipe:0',
 		// The low-pass is the tone. The compressor evens the level between tracks and the limiter
-		// is the last stop before the encoder clips; neither looks ahead, so a frame leaves as
+		// is the last stop before the encoder clips. Neither looks ahead, so a frame leaves as
 		// soon as it is made. (dynaudnorm was tried first and held thirty seconds back.)
 		'-af', `lowpass=f=${String(config.lowpassHz)},acompressor=threshold=-22dB:ratio=3:attack=40:release=900:makeup=6dB,alimiter=limit=0.9`,
 		'-c:a', 'libmp3lame', '-b:a', config.bitrate,
@@ -91,7 +91,7 @@ export const broadcast = (options: BroadcastOptions = {}): Broadcast => {
 			for (const response of listening) response.end();
 			listening.clear();
 			if (encoder.exitCode !== null) { done(); return; }
-			// The end of its input is how ffmpeg is told to finish; a kill would leave it writing
+			// The end of its input is how ffmpeg is told to finish. A kill would leave it writing
 			// into a pipe nobody reads, which it reports as a broken pipe.
 			const timer = setTimeout(() => { encoder.kill('SIGKILL'); }, 2000);
 			encoder.once('exit', () => { clearTimeout(timer); done(); });

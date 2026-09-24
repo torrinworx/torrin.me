@@ -1,7 +1,7 @@
 // The station: the clock that turns the composer's steps into sound. It knows what time it is,
 // which track that time is inside, and plays that track's events into the voice as the time
 // comes, one block of samples at a time. A new slot starts its track on the other bank of
-// channels and both banks crossfade; a station that starts mid-track strikes the chord it is
+// channels and both banks crossfade. A station that starts mid-track strikes the chord it is
 // inside so the first block is not silence.
 //
 // Time is seconds since the epoch. The slot is `floor(time / trackSeconds)`, and the track in it
@@ -9,7 +9,7 @@
 // same thing.
 //
 // The station is pulled: `next()` renders the block after the last one. Whoever calls it keeps
-// it in step with the wall clock (`pace.ts`); a test can drive it as fast as it likes with a
+// it in step with the wall clock (`pace.ts`), and a test can drive it as fast as it likes with a
 // clock of its own.
 
 import { STEPS_PER_BAR, events, holding, stepAt, track } from './compose.ts';

@@ -1,7 +1,7 @@
 // The radio process: the soundfont into the voice, the voice into the station, the station's
 // blocks into the encoder in step with the wall clock, and the stream on a local port for nginx.
 //
-// Run: node main.ts   (RADIO_PORT, default 3010; RADIO_SOUNDFONT, default assets/GeneralUser-GS.sf2)
+// Run: node main.ts   (RADIO_PORT, default 3010, and RADIO_SOUNDFONT, default assets/GeneralUser-GS.sf2)
 
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
@@ -24,7 +24,7 @@ if (spawnSync('ffmpeg', ['-version'], { stdio: 'ignore' }).error !== undefined) 
 const voice = await fluid(readFileSync(soundfont));
 // The file's bytes are in the synthesizer's heap now and the buffer they came in is garbage,
 // but 60 MB of garbage that nothing presses on stays resident. run.sh exposes the collector
-// for this one call; without it the call is a no-op and the memory goes when it goes.
+// for this one call. Without it the call is a no-op and the memory goes when it goes.
 (globalThis as { gc?: () => void }).gc?.();
 const playing = station({ voice, blockSeconds: BLOCK_SECONDS });
 
@@ -32,7 +32,7 @@ let stopping = false;
 const encoder = broadcast({
 	onExit: (code) => {
 		if (stopping) return;
-		// Without the encoder there is no stream; the unit restarts the process.
+		// Without the encoder there is no stream, and the unit restarts the process.
 		console.error(`ffmpeg exited with ${String(code)}`);
 		process.exit(1);
 	},

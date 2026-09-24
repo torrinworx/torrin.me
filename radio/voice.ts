@@ -8,7 +8,7 @@ import type * as JSSynthTypes from 'js-synthesizer';
 
 import { config } from './config.ts';
 
-// The package is CommonJS with a UMD entry and documents `require` for Node; a named import
+// The package is CommonJS with a UMD entry and documents `require` for Node. A named import
 // from it depends on what Node's lexer finds in that bundle, and this does not.
 const require = createRequire(import.meta.url);
 const JSSynth = require('js-synthesizer') as typeof JSSynthTypes;
@@ -39,7 +39,7 @@ const CC_VOLUME = 7;
 export const fluid = async (soundfont: Buffer): Promise<Voice> => {
 	JSSynth.Synthesizer.initializeWithFluidSynthModule(libfluidsynth as never);
 	await JSSynth.waitForReady();
-	// The library's file probes are stubs in this build and say so on every load; nothing here
+	// The library's file probes are stubs in this build and say so on every load, and nothing here
 	// reads a file through it.
 	JSSynth.disableLogging();
 	const synth = new JSSynth.Synthesizer();
@@ -54,7 +54,7 @@ export const fluid = async (soundfont: Buffer): Promise<Voice> => {
 		initialGain: config.gain,
 	});
 	// The synthesizer copies the bank into its own heap. A file this size is read into a buffer
-	// of its own, so its bytes are handed over as they are; a slice would be a third copy of
+	// of its own, so its bytes are handed over as they are. A slice would be a third copy of
 	// 32 MB, and the droplet has about 320 MB free.
 	const bytes = soundfont.byteOffset === 0 && soundfont.byteLength === soundfont.buffer.byteLength
 		? soundfont.buffer as ArrayBuffer

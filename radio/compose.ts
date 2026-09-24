@@ -86,7 +86,7 @@ const keyOf = (root: number, scale: readonly number[], degree: number, octave: n
 };
 
 // The degrees a progression walks between, weighted: home, the subdominants and the relative
-// minor carry it; the dominant is rarer, and the third and the diminished seventh never come.
+// minor carry it. The dominant is rarer, and the third and the diminished seventh never come.
 const DEGREES = [0, 0, 0, 3, 3, 5, 5, 1, 4];
 
 const chordOf = (root: number, scale: readonly number[], degree: number): Chord => ({
@@ -149,7 +149,7 @@ const off = (part: Part, key: number): Event => ({ part, key, velocity: 0 });
 
 // The melody is the one part whose notes have a length of their own, so a step has to ask the
 // steps before it whether one of them started a note that ends now, or is still sounding. A
-// candidate is the dice alone; a note is a candidate no earlier candidate still covers. The
+// candidate is the dice alone. A note is a candidate no earlier candidate still covers. The
 // earlier candidate counts whether or not it became a note, so the rule looks back one level
 // and never recurses.
 const MELODY_MAX_STEPS = 12;
@@ -249,7 +249,7 @@ export const holding = (of: Track, step: number, settings: Config = config): Eve
 	const chord = chordAt(of, step, settings);
 	const chordSpan = settings.barsPerChord * STEPS_PER_BAR;
 	const boundary = step - (step % chordSpan) + chordSpan;
-	// The bass may already be on the fifth for the chord's last beat; the next boundary will
+	// The bass may already be on the fifth for the chord's last beat, and the next boundary will
 	// stop whichever it struck, so what is struck here has to be the same one.
 	const bass = step >= boundary - 4 && fifthStruck(of, boundary, chordSpan) ? chord.fifth : chord.bass;
 	return [

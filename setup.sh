@@ -51,8 +51,9 @@ if [[ -z "${PORT:-}" ]]; then
   exit 1
 fi
 
-# The radio's port, the same way, except that no line means 3010 (as main.ts has it) and not a
-# failed deploy: grep's miss would end the script here, with the site stopped above.
+# The radio's port, read the same way. A missing line means 3010, the default main.ts has, and
+# not a failed deploy: under set -e a grep with no match would stop this script here, after the
+# site was stopped above.
 RADIO_PORT=$( (grep -E '^RADIO_PORT=' "$ENV_FILE" || true) | tail -n1 | cut -d'=' -f2-)
 RADIO_PORT="${RADIO_PORT:-3010}"
 
@@ -81,7 +82,7 @@ systemctl restart "$SERVICE_NAME"
 # The radio #
 #############
 
-# ffmpeg is the encoder; the package is installed once and never again.
+# ffmpeg is the encoder. The package is installed once and never again.
 if ! command -v ffmpeg >/dev/null; then
   apt-get update -qq
   DEBIAN_FRONTEND=noninteractive apt-get install -y -qq ffmpeg
@@ -204,7 +205,7 @@ server {
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
     # The radio's live stream, straight from its own process. Buffering off, or nginx holds
-    # the audio back in chunks; a long read timeout, because a listener stays for hours.
+    # the audio back in chunks. A long read timeout, because a listener stays for hours.
     location = /radio/stream {
         proxy_pass http://127.0.0.1:${RADIO_PORT}/stream;
         proxy_http_version 1.1;

@@ -19,13 +19,13 @@ What was decided while building, why, and what would reverse it.
   sha256, kept out of git, shipped in the zip. Its license asks for a local copy rather than a
   link to its download, which the zip is.
 - **Two channel banks crossfade tracks.** A new track starts on the other four channels at zero
-  volume and both ramp on CC7 over the crossfade; drums stay on channel 10 and belong to the newer
+  volume and both ramp on CC7 over the crossfade. Drums stay on channel 10 and belong to the newer
   track, fading by velocity over a track's first and last bars.
 - **Every step is computable on its own.** The track is seeded by its slot (wall clock over track
   length) and a step's chance events by a hash of slot and step, so a restart resumes mid-track
   with the same notes and no state is kept anywhere.
 - **The sampler is a `Voice` the station is handed.** Tests use a plain tone generator, so the
-  suite needs neither the soundfont nor a network; the proof uses the real one.
+  suite needs neither the soundfont nor a network. The proof uses the real one.
 - **nginx talks to the radio directly** at `/radio/stream`, buffering off, and the vite dev server
   proxies the same path, so the page uses one relative URL everywhere. The site's process never
   carries audio.
@@ -84,7 +84,7 @@ time, a second station, an installable app.
 ## Definition of done
 
 The repo's gate is green (content, typecheck, build, test, proof). Tests: the composer is
-deterministic for a seed; the stream route sends MP3 frames continuously and a listener joining
+deterministic for a seed. The stream route sends MP3 frames continuously and a listener joining
 mid-stream gets audio within a second. The proof records ten seconds from the running process and
 checks it is not silent.
 
