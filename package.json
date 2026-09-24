@@ -4,7 +4,8 @@
 	"description": "My personal portfolio website.",
 	"type": "module",
 	"workspaces": [
-		"aweft/packages/*"
+		"aweft/packages/*",
+		"radio"
 	],
 	"scripts": {
 		"content": "node --import @aweftjs/build/loader content/blog.ts",
@@ -13,6 +14,8 @@
 		"pages": "AWEFT_DEFAULT_H=@aweftjs/ui node --import @aweftjs/build/loader frontend/pages.ts",
 		"start": "node --env-file-if-exists=.env --import @aweftjs/build/loader main.ts",
 		"resume:pdf": "node --import @aweftjs/build/loader resume.ts",
+		"radio": "node radio/main.ts",
+		"soundfont": "node radio/soundfont.ts",
 		"typecheck": "tsc --noEmit",
 		"test": "node --import @aweftjs/build/loader --test tests/*.test.ts",
 		"proof": "node --import @aweftjs/build/loader proof.ts",

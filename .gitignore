@@ -13,6 +13,9 @@ build.zip
 /frontend/public/site-card.png
 /frontend/public/profile.dark.png
 
+# The soundfont npm run soundfont fetches; 32 MB, shipped in the zip, never committed.
+/radio/assets/
+
 # Screenshots the proof program takes.
 /proof-shots
 

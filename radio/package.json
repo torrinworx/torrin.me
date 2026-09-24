@@ -1,0 +1,10 @@
+{
+	"name": "torrin.me-radio",
+	"private": true,
+	"version": "1.0.0",
+	"description": "The radio: composes, plays and streams one live station.",
+	"type": "module",
+	"dependencies": {
+		"js-synthesizer": "^1.13.0"
+	}
+}
