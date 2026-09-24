@@ -3,11 +3,13 @@
 // Tests pin pieces; this proves the whole thing: the server serves what the build wrote, the page
 // comes alive without replacing anything the server sent, every route works as a deep link (the
 // blog index and the newest post among them, with the title as the h1 and every image loaded),
-// the contact form actually posts, and the pages look right at desktop and phone width.
+// the contact form actually posts, the pages look right at desktop and phone width, and the radio
+// process, run as the droplet runs it, streams audio that is not silence to a listener joining now.
 //
 // Run: npm run proof   (after npm run build, or at least vite build && npm run pages)
 
 import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
 import { mkdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -26,6 +28,55 @@ process.env['EMAIL_FROM'] = 'proof@torrin.me';
 process.env['EMAIL_TO'] = 'torrin@torrin.me';
 process.env['EMAIL_SUBJECT'] = 'torrin.me proof run';
 
+interface Heard { readonly frames: number; readonly rms: number; readonly health: { ok: boolean; listeners: number } }
+
+const tuneIn = async (seconds: number): Promise<Heard> => {
+	const port = 4174;
+	const radio = spawn(process.execPath, [fileURLToPath(new URL('./radio/main.ts', import.meta.url))], {
+		env: { ...process.env, RADIO_PORT: String(port) },
+		stdio: ['ignore', 'pipe', 'inherit'],
+	});
+	try {
+		await new Promise<void>((ready, failed) => {
+			radio.stdout.on('data', (line: Buffer) => { if (line.toString().includes('radio on')) ready(); });
+			radio.once('exit', (code) => { failed(new Error(`the radio exited with ${String(code)} before it was ready`)); });
+		});
+		const stopper = new AbortController();
+		setTimeout(() => { stopper.abort(); }, seconds * 1000);
+		const answer = await fetch(`http://127.0.0.1:${String(port)}/stream`, { signal: stopper.signal });
+		assert.equal(answer.headers.get('content-type'), 'audio/mpeg');
+		const health = await (await fetch(`http://127.0.0.1:${String(port)}/health`)).json() as Heard['health'];
+		const chunks: Uint8Array[] = [];
+		try {
+			const reader = answer.body!.getReader();
+			for (;;) {
+				const next = await reader.read();
+				if (next.done) break;
+				chunks.push(next.value);
+			}
+		} catch (error) {
+			if ((error as Error).name !== 'AbortError') throw error;
+		}
+		const mp3 = Buffer.concat(chunks);
+		let frames = 0;
+		for (let i = 0; i < mp3.length - 1; i++) if (mp3[i] === 0xff && ((mp3[i + 1] ?? 0) & 0xe0) === 0xe0) frames++;
+
+		// Decoded by ffmpeg, the same tool the radio encodes with, to 16-bit mono samples.
+		const decoder = spawn('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-i', 'pipe:0', '-f', 's16le', '-ac', '1', '-ar', '48000', 'pipe:1'], { stdio: ['pipe', 'pipe', 'inherit'] });
+		const decoded: Buffer[] = [];
+		decoder.stdout.on('data', (chunk: Buffer) => { decoded.push(chunk); });
+		decoder.stdin.end(mp3);
+		await new Promise<void>((done) => { decoder.once('exit', () => { done(); }); });
+		const pcm = Buffer.concat(decoded);
+		let sum = 0;
+		for (let i = 0; i + 1 < pcm.length; i += 2) { const sample = pcm.readInt16LE(i) / 32768; sum += sample * sample; }
+		const rms = Math.sqrt(sum / Math.max(1, pcm.length / 2));
+		return { frames, rms, health };
+	} finally {
+		radio.kill('SIGTERM');
+	}
+};
+
 const post = await mailbox();
 // A fixed port, because the page's own origin has to be allowed before the server starts.
 const port = 4173;
@@ -43,6 +94,7 @@ const newest = (JSON.parse(readFileSync(new URL('./frontend/data/posts.json', im
 const PAGES: readonly (readonly [name: string, path: string, h1: string | null])[] = [
 	['landing', '/', null],
 	['contact', '/contact', null],
+	['radio', '/radio', 'Radio'],
 	['blog', '/blog', 'Blog'],
 	['post', `/blog/${newest.slug}`, newest.title],
 ];
@@ -149,6 +201,20 @@ try {
 	const opened = await Promise.all(recorded.map((summary) => visit(site.store, summary.id)));
 	assert.ok(opened.every((seen) => seen !== undefined && seen.browser !== null && seen.user === null), 'each visit carries browser facts and no user');
 	assert.ok(opened.some((seen) => seen?.entries.some((entry) => entry.kind === 'url')), 'a visit recorded the URL it showed');
+
+	// The radio page has its button before anything is pressed.
+	const dial = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+	await dial.goto(`${site.url}/radio`, { waitUntil: 'networkidle' });
+	assert.equal(await dial.textContent('#radio-play'), 'Play', 'the radio page offers Play');
+	await dial.close();
+
+	// The radio, the way the droplet runs it: the process on a port, a listener joining now, ten
+	// seconds of the stream decoded back to samples and measured. Silence would pass every other
+	// check here, so this one listens.
+	const heard = await tuneIn(10);
+	assert.ok(heard.frames > 300, `${String(heard.frames)} MP3 frames in ten seconds`);
+	assert.ok(heard.rms > 0.003, `the stream is not silence: rms ${heard.rms.toFixed(4)}`);
+	assert.ok(heard.health.ok && heard.health.listeners === 1, 'health saw the one listener');
 
 	assert.deepEqual(problems, [], 'no page threw and no console error was logged');
 	console.log(`proof: ok. screenshots in ${shots}`);

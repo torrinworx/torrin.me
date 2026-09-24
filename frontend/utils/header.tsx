@@ -1,7 +1,7 @@
-// The hamburger and what it opens: home, resume, contact, the blog, GitHub and the address.
+// The hamburger and what it opens: home, resume, contact, the blog, the radio, GitHub and the address.
 //
 // `Detached` places the panel and `Card` paints it. Every row is a `Button` with a real `href`, so
-// the three internal links are in the markup a crawler reads and `router.links` turns a click into
+// the four internal links are in the markup a crawler reads and `router.links` turns a click into
 // a navigation with nothing wired here. The row that points at the page already showing is left out.
 
 import { mutable } from '@aweftjs/core';
@@ -109,6 +109,18 @@ export const Header = StageContext.use((stage) => (
 									icon={<Icon name="feather:book-open" />}
 									iconPosition="right"
 									href="/blog"
+									hrefNewTab={false}
+									onClick={close}
+								/>
+							))}
+							{unless('radio', (
+								<Button
+									theme={ROW}
+									title="Listen to the radio"
+									label="Radio"
+									icon={<Icon name="feather:radio" />}
+									iconPosition="right"
+									href="/radio"
 									hrefNewTab={false}
 									onClick={close}
 								/>

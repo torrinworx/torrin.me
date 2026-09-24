@@ -1,5 +1,5 @@
 // The whole site: the theme, the one icon a component asks for by name, the acts (the landing,
-// the contact page, the blog and its posts), and the frame every act sits in.
+// the contact page, the radio, the blog and its posts), and the frame every act sits in.
 //
 // Both halves of the build import this file. `entry.tsx` mounts it in a browser and `pages.ts`
 // renders it to files, so the markup a crawler reads is the markup the page comes alive as.
@@ -29,6 +29,7 @@ import { Header } from './utils/header.tsx';
 import { blogActs } from './pages/blog.tsx';
 import { Landing } from './pages/landing.tsx';
 import { NotFound } from './pages/not-found.tsx';
+import { RadioPage } from './pages/radio.tsx';
 
 // `Validate` mounts an icon called `triangle-alert`; Feather publishes that drawing under
 // `alert-triangle`, so one pack of one icon answers it and no set is bundled.
@@ -100,6 +101,7 @@ const Frame = (props: { children?: unknown[] }): unknown => (
 export const acts: Record<string, Act> = {
 	'': Landing,
 	contact: () => <Contact />,
+	radio: RadioPage,
 	...blogActs,
 	missing: NotFound,
 };

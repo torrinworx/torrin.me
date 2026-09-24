@@ -17,6 +17,8 @@ export default defineConfig({
 	server: {
 		host: true,
 		port: Number(process.env['PORT'] ?? 3000),
+		// The radio is its own process (`npm run radio`); in production nginx puts it here.
+		proxy: { '/radio/stream': { target: `http://127.0.0.1:${process.env['RADIO_PORT'] ?? '3010'}`, rewrite: () => '/stream' } },
 	},
 	build: {
 		target: 'esnext',

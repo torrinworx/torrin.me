@@ -21,7 +21,7 @@ const read = (file: string): string => {
 const newest = (JSON.parse(readFileSync(`${fileURLToPath(new URL('../frontend/data/posts.json', import.meta.url))}`, 'utf8')) as { slug: string }[])[0]!.slug;
 
 /** Every page a reader can land on. Each must carry the whole head, not just the landing page. */
-const PAGES = ['index.html', 'contact/index.html', 'blog/index.html', `blog/${newest}/index.html`];
+const PAGES = ['index.html', 'contact/index.html', 'radio/index.html', 'blog/index.html', `blog/${newest}/index.html`];
 
 const META_NAMES = ['description', 'author', 'robots', 'geo.placename', 'geo.region', 'theme-color', 'viewport'];
 const OG = ['og:title', 'og:description', 'og:type', 'og:url', 'og:image', 'og:site_name', 'og:locale'];
@@ -103,6 +103,7 @@ describe('the head a crawler reads', () => {
 		const sitemap = read('sitemap.xml');
 		assert.ok(sitemap.includes('<loc>https://torrin.me/</loc>'), 'the landing page is in the sitemap');
 		assert.ok(sitemap.includes('<loc>https://torrin.me/contact</loc>'), 'the contact page is in the sitemap');
+		assert.ok(sitemap.includes('<loc>https://torrin.me/radio</loc>'), 'the radio page is in the sitemap');
 		assert.ok(sitemap.includes('<loc>https://torrin.me/blog</loc>'), 'the blog index is in the sitemap');
 		assert.ok(sitemap.includes(`<loc>https://torrin.me/blog/${newest}</loc>`), 'the newest post is in the sitemap');
 		assert.ok(read('robots.txt').includes('Sitemap: https://torrin.me/sitemap.xml'), 'robots.txt points at it');
