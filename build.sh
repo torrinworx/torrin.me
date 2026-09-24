@@ -30,6 +30,10 @@ npm run resume:pdf
 # frontend/public into dist as it is; and before the typecheck in the gate, which imports the index.
 npm run content
 
+# The soundfont the radio plays: 32 MB, fetched once and kept out of git. Shipped in the zip, so
+# the droplet never fetches anything.
+[[ -f radio/assets/GeneralUser-GS.sf2 ]] || npm run soundfont
+
 # The page bundle and the shell, then every page written out as a file beside them.
 # `--configLoader native` has Node import this config rather than the bundler pre-bundling it with
 # a resolver of its own, which is the only way the condition above reaches the plugin the config
@@ -85,8 +89,25 @@ npm i --omit=dev
 node --conditions=aweft-source --import @aweftjs/build/loader main.ts
 EOF
 
+# The radio: its source, its manifest and the soundfont, laid out as they are here. setup.sh
+# copies this directory to a home of its own and restarts the radio only when it changed, so a
+# deploy that touched nothing here leaves the stream playing.
+mkdir -p "$BUILD_DIR/radio"
+cp ./radio/*.ts ./radio/package.json "$BUILD_DIR/radio/"
+cp -r ./radio/assets "$BUILD_DIR/radio/assets"
+
+cat << 'EOF' > "$BUILD_DIR/radio/run.sh"
+#!/bin/bash
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+. ~/.nvm/nvm.sh
+nvm use 25
+cd "$SCRIPT_DIR"
+npm i --omit=dev
+node --expose-gc main.ts
+EOF
+
 cp ./setup.sh "$BUILD_DIR/setup.sh"
-chmod +x "$BUILD_DIR/run.sh" "$BUILD_DIR/setup.sh"
+chmod +x "$BUILD_DIR/run.sh" "$BUILD_DIR/radio/run.sh" "$BUILD_DIR/setup.sh"
 
 pushd "$BUILD_DIR" >/dev/null
 zip -rq "../$ZIP_FILE" .

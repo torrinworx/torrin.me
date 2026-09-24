@@ -7,6 +7,8 @@ SERVICE_NAME="torrin.me"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 DEPLOY_DIR="/var/www/torrin.me/deploy"
 ENV_FILE="/var/www/torrin.me/.env"
+RADIO_SERVICE="torrin.me-radio"
+RADIO_DIR="/var/www/torrin.me/radio"
 NGINX_SITE_AVAILABLE="/etc/nginx/sites-available/torrin.me"
 NGINX_SITE_ENABLED="/etc/nginx/sites-enabled/torrin.me"
 
@@ -49,6 +51,11 @@ if [[ -z "${PORT:-}" ]]; then
   exit 1
 fi
 
+# The radio's port, the same way, except that no line means 3010 (as main.ts has it) and not a
+# failed deploy: grep's miss would end the script here, with the site stopped above.
+RADIO_PORT=$( (grep -E '^RADIO_PORT=' "$ENV_FILE" || true) | tail -n1 | cut -d'=' -f2-)
+RADIO_PORT="${RADIO_PORT:-3010}"
+
 # systemd service
 cat << 'EOF' | tee "/etc/systemd/system/torrin.me.service" > /dev/null
 [Unit]
@@ -69,6 +76,54 @@ EOF
 systemctl daemon-reload
 systemctl enable "$SERVICE_NAME"
 systemctl restart "$SERVICE_NAME"
+
+#############
+# The radio #
+#############
+
+# ffmpeg is the encoder; the package is installed once and never again.
+if ! command -v ffmpeg >/dev/null; then
+  apt-get update -qq
+  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq ffmpeg
+fi
+
+# The radio runs from a directory of its own, so this deploy directory can be wiped under it. It
+# is replaced and restarted only when what shipped differs from what runs: a deploy that changed
+# the site alone never cuts the stream.
+shipped=$(cd "$DEPLOY_DIR/radio" && find . -type f -print0 | sort -z | xargs -0 sha256sum | sha256sum | cut -d' ' -f1)
+running=$(cat "$RADIO_DIR/.shipped" 2>/dev/null || true)
+if [[ "$shipped" != "$running" ]] || ! systemctl is-active --quiet "$RADIO_SERVICE"; then
+  systemctl stop "$RADIO_SERVICE" || echo "skipped stop $RADIO_SERVICE"
+  rm -rf "$RADIO_DIR"
+  mkdir -p "$RADIO_DIR"
+  cp -r "$DEPLOY_DIR/radio/." "$RADIO_DIR/"
+  echo "$shipped" > "$RADIO_DIR/.shipped"
+  chmod +x "$RADIO_DIR/run.sh"
+
+  cat << 'EOF' | tee "/etc/systemd/system/${RADIO_SERVICE}.service" > /dev/null
+[Unit]
+Description=torrin.me radio
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/var/www/torrin.me/radio/run.sh
+WorkingDirectory=/var/www/torrin.me/radio
+Restart=always
+RestartSec=2
+EnvironmentFile=/var/www/torrin.me/.env
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  systemctl daemon-reload
+  systemctl enable "$RADIO_SERVICE"
+  systemctl restart "$RADIO_SERVICE"
+  echo "radio replaced and restarted ($shipped)"
+else
+  echo "radio unchanged, left playing"
+fi
 
 ############################
 # Certbot / nginx handling #
@@ -147,6 +202,18 @@ server {
     ssl_certificate_key ${PRIVKEY};
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    # The radio's live stream, straight from its own process. Buffering off, or nginx holds
+    # the audio back in chunks; a long read timeout, because a listener stays for hours.
+    location = /radio/stream {
+        proxy_pass http://127.0.0.1:${RADIO_PORT}/stream;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 1d;
+        proxy_set_header X-Real-IP \$remote_addr;
+    }
 
     location / {
         proxy_pass http://localhost:${PORT};
