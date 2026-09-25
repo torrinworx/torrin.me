@@ -160,7 +160,7 @@ const shape = (beat: number, bar: number): number => {
 
 /**
  * The bars, 0 to 1 each, for one frame. `at` is the page's clock in milliseconds. Idle when
- * nothing plays; the spectrum or the beat when something does.
+ * nothing plays, the spectrum or the beat when something does.
  */
 export const levels = (out: Float32Array, at: number): void => {
 	if (state.get() !== 'playing') { idle(out, at); return; }
