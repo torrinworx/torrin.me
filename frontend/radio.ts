@@ -39,7 +39,7 @@ export const BARS = 24;
 
 export type Source = 'spectrum' | 'tempo';
 
-/** Which source the bars use: the spectrum where the audio engine can be trusted, the tempo on a touch screen. */
+/** Which source the bars use: the spectrum on a desktop, the tempo on a touch screen, where the audio is not routed through the audio engine. */
 export const sourceFor = (env: { readonly coarsePointer: boolean; readonly webAudio: boolean }): Source =>
 	(env.coarsePointer || !env.webAudio ? 'tempo' : 'spectrum');
 
@@ -50,7 +50,7 @@ let presses = 0;
 let analyser: AnalyserNode | null = null;
 let spectrum: Uint8Array<ArrayBuffer> | null = null;
 let listened = false;
-// The server's time the audible stream was at when this press began, less the backlog.
+// The server's time of the audio being heard when this press began: the time at the press, less the backlog.
 let anchor: number | null = null;
 
 export const source = (): Source => sourceFor({
@@ -82,7 +82,7 @@ const title = (heard: Now | null): void => {
 };
 
 const stop = (): void => {
-	// A press of its own, so a /now answer still in flight from the play cannot set the anchor.
+	// Counted as a press, so a /now answer that arrives after this stop, from the play before it, does not set the anchor.
 	presses++;
 	if (audio !== null) {
 		audio.pause();
@@ -181,7 +181,7 @@ export const levels = (out: Float32Array, at: number): void => {
 	const moment = audible();
 	if (heard === null || moment === null) { idle(out, at); return; }
 	if (heard.style === 'sleep') {
-		// No beat to follow: a slow breath, each bar a little behind the last one.
+		// No beat to follow: a slow rise and fall, each bar a little behind the last one.
 		for (let i = 0; i < out.length; i++) out[i] = 0.12 + 0.3 * (0.5 + 0.5 * Math.sin(moment / 3 + i * 0.35));
 		return;
 	}

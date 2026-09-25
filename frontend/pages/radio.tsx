@@ -38,7 +38,7 @@ const line = (heard: Now | null): string =>
 
 const CANVAS = 'radio-bars';
 
-/** The bars: a canvas drawn every frame from `levels`, in the accent on the page's paper. */
+/** The bars: a canvas drawn every frame from `levels`, in the accent colour on the page's background colour. */
 const Bars = (_props: Record<string, unknown>, cleanup: (...fns: (() => void)[]) => void): unknown => {
 	if (typeof requestAnimationFrame === 'function') {
 		const heights = new Float32Array(BARS);

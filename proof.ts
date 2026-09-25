@@ -32,7 +32,7 @@ process.env['EMAIL_SUBJECT'] = 'torrin.me proof run';
 
 interface Heard { readonly frames: number; readonly rms: number; readonly health: { ok: boolean; listeners: number }; readonly now: { style: string; name: string } }
 
-/** The moment thirty seconds into the first track of a style, so a listen lands on its drums, not its intro. */
+/** The moment thirty seconds into the first track of a style, so the recording has the drums in it and not the intro's fade. */
 const startOf = (style: StyleName): number => slotOf(firstSlot(style)).begins + 30;
 
 const tuneIn = async (seconds: number, style: StyleName): Promise<Heard> => {
@@ -83,8 +83,8 @@ const tuneIn = async (seconds: number, style: StyleName): Promise<Heard> => {
 	}
 };
 
-// What the radio's now route would answer, in front of the page's own fetch: the site's server
-// has no such route (nginx puts the radio's there), so the browser is handed one here.
+// The answer the page's fetch of /radio/now gets. The site's server has no such route (in
+// production nginx proxies it to the radio), so the browser is given this one.
 const ON_AIR = {
 	time: Date.now() / 1000, backlogSeconds: 1.5, slot: 7, style: 'synthwave', name: 'Proof Signal', tempo: 100,
 	key: 'A minor', bar: 3, bars: 52, begins: Date.now() / 1000 - 30, seconds: 210, blockEnds: Date.now() / 1000 + 600,
@@ -230,7 +230,8 @@ try {
 
 	// The radio, the way the droplet runs it: the process on a port, started thirty seconds into
 	// a track of each style, a listener joining now, ten seconds of the stream decoded back to
-	// samples and measured. Silence would pass every other check here, so this one listens.
+	// samples and measured. Every other check here would pass on silence, so this one measures
+	// the sound.
 	for (const style of ['sleep', 'synthwave'] as const) {
 		const heard = await tuneIn(10, style);
 		assert.equal(heard.now.style, style, `the station started on a ${style} track`);
