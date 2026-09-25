@@ -58,22 +58,31 @@ it on its own. Then `npm run content` builds the blog (below), before vite copie
 
 ## The radio
 
-`/radio` plays one live station: `radio/` composes slow music in code, plays it through a soundfont
+`/radio` plays one live station: `radio/` composes music in code, plays it through a soundfont
 (FluidSynth compiled to WebAssembly, over GeneralUser GS) and encodes one MP3 stream with ffmpeg,
 which every listener is handed from the moment they press play. The composition is a function of
 the wall clock, so every listener hears the same moment and a restart resumes the same track.
 
+Two styles take turns, three tracks each: sleep (low pads and a drone, nothing struck, a low-pass
+near 600 Hz) and synthwave (a kick on every beat, a bass that ducks under it, pads, a saw lead, a
+breakdown). Each track has a name made from its seed. `GET /radio/now` says what is on the air,
+and the page draws bars from it: the real spectrum on a desktop, a pulse on the beat on a phone,
+where the audio is never routed through the browser's audio engine so lock-screen play holds.
+
 ```
 npm run soundfont           # fetches the 32 MB soundfont into radio/assets/, once
-npm run radio               # the station on RADIO_PORT (3010). The dev server proxies /radio/stream to it
+npm run radio               # the station on RADIO_PORT (3010). The dev server proxies /radio/stream and /radio/now to it
+npm run radio:render -- synthwave 90 proof-shots/radio-synthwave.mp3   # ninety seconds of one style, to listen to
 ```
 
 The radio is its own process and imports nothing from the stack: on the droplet it runs as the
 `torrin.me-radio` unit from `/var/www/torrin.me/radio`, and `setup.sh` replaces and restarts it
 only when what shipped under `radio/` changed, so a deploy that touched the site alone never cuts
 the stream. nginx proxies `/radio/stream` to it with buffering off. The site's process never
-carries audio. What it plays is `radio/config.ts`: tempo, modes, instruments, drums, levels and
-the encoder's tone. `GET /health` on its port says what is playing and how many are listening.
+carries audio. What it plays is `radio/config.ts`: per style, the tempo, modes, progressions,
+instruments, kit, levels and low-pass, and the block length that alternates them. `GET /health` on
+its port says what is playing and how many are listening. `RADIO_START` starts the process's clock
+at a given moment, which is how the proof lands on a known track. A render pins its own start.
 
 ## Writing a post
 
@@ -138,4 +147,4 @@ description, the first paragraph and a link, for dev.to's import).
 | `frontend/pages/radio.tsx` | the radio page, and `frontend/radio.ts` the player, one audio element for the whole site |
 | `main.ts` | the server: the site's modules, the health and static batteries, the build stamp |
 | `modules/` | the site's own server modules: the gate, and the contact form |
-| `radio/` | the station: `config.ts` holds its settings, `compose.ts` picks the notes, `station.ts` times them, `pace.ts` keeps that on the wall clock, `voice.ts` plays them, `stream.ts` encodes and fans out, `serve.ts` answers HTTP, `main.ts` starts it all |
+| `radio/` | the station: `config.ts` holds its settings, `schedule.ts` lays the tracks out in time, `compose.ts` picks the notes, `station.ts` times them, `tone.ts` is the low-pass, `pace.ts` keeps that on the wall clock, `voice.ts` plays them, `stream.ts` encodes and fans out, `serve.ts` answers HTTP, `main.ts` starts it all, `render.ts` writes one style to a file |

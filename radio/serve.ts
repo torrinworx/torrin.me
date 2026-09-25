@@ -1,5 +1,5 @@
-// The radio's own HTTP: the stream, and a health answer with what is playing. nginx puts
-// /radio/stream in front of /stream, and nothing else reaches this port.
+// The radio's own HTTP: the stream, what is playing, and a health answer. nginx puts
+// /radio/stream and /radio/now in front of /stream and /now, and nothing else reaches this port.
 
 import { createServer } from 'node:http';
 import type { Server } from 'node:http';
@@ -13,9 +13,19 @@ export interface Radio {
 }
 
 export const serve = async (
-	options: { readonly station: Station; readonly broadcast: Broadcast; readonly port?: number; readonly host?: string },
+	options: {
+		readonly station: Station;
+		readonly broadcast: Broadcast;
+		readonly port?: number;
+		readonly host?: string;
+		/** Seconds since the epoch, as the station counts them. The wall clock by default. */
+		readonly clock?: () => number;
+	},
 ): Promise<Radio> => {
 	const { station, broadcast } = options;
+	const clock = options.clock ?? (() => Date.now() / 1000);
+	const json = (body: unknown): [number, Record<string, string>, string] =>
+		[200, { 'content-type': 'application/json', 'cache-control': 'no-store' }, JSON.stringify(body)];
 	const server: Server = createServer((request, response) => {
 		const url = new URL(request.url ?? '/', 'http://radio');
 		if (url.pathname === '/stream' && (request.method === 'GET' || request.method === 'HEAD')) {
@@ -31,9 +41,17 @@ export const serve = async (
 			broadcast.attach(response);
 			return;
 		}
+		if (url.pathname === '/now' && request.method === 'GET') {
+			// The server's clock and the backlog's length go with the track, so a page can place
+			// the beat it hears: the time at the press, less the backlog, plus what it has played.
+			const [status, headers, body] = json({ time: clock(), backlogSeconds: broadcast.backlogSeconds(), ...station.playing() });
+			response.writeHead(status, headers);
+			response.end(body);
+			return;
+		}
 		if (url.pathname === '/health' && request.method === 'GET') {
-			const body = JSON.stringify({ ok: true, listeners: broadcast.listeners(), playing: station.playing(), uptime: process.uptime() });
-			response.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+			const [status, headers, body] = json({ ok: true, listeners: broadcast.listeners(), playing: station.playing(), uptime: process.uptime() });
+			response.writeHead(status, headers);
 			response.end(body);
 			return;
 		}

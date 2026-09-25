@@ -3,52 +3,67 @@
 // same notes and a restart picks up mid-track. Nothing here keeps state between calls.
 //
 // Time is counted in sixteenth-note steps, sixteen to a bar. The station turns steps into seconds
-// with the track's tempo.
+// with the track's tempo. Which style a slot is comes from the schedule, and each style has its
+// own rules below: sleep is pads and a drone with nothing struck, synthwave is a kick on every
+// beat with a bass that ducks under it.
 
 import { config } from './config.ts';
-import type { Config } from './config.ts';
+import type { Config, Style, StyleName } from './config.ts';
+import { slotOf } from './schedule.ts';
 
 export const STEPS_PER_BAR = 16;
 
-/** The parts a track has. Every event names one; the station maps them to MIDI channels. */
-export type Part = 'pad' | 'keys' | 'bass' | 'melody' | 'drums';
+/** The parts a track has. Every event names one. The station maps them to MIDI channels. */
+export type Part = 'pad' | 'keys' | 'bass' | 'lead' | 'drums' | 'duck';
 
 export interface Event {
 	readonly part: Part;
 	readonly key: number;
-	/** 1 to 127 for a note on, 0 for a note off. */
+	/** 1 to 127 for a note on, 0 for a note off. For `duck`, the bass level to set, as a percentage. */
 	readonly velocity: number;
 }
 
 export interface Chord {
 	/** The scale degree the chord is built on, 0 to 6. */
 	readonly degree: number;
-	/** Root, fifth and octave, low: what the pad holds. */
+	/** Root, fifth and octave: what the pad holds. */
 	readonly pad: readonly number[];
-	/** Third, seventh and ninth in the middle: what the keys play. */
+	/** Third, seventh and ninth above: what the keys play, when there are keys. */
 	readonly keys: readonly number[];
 	/** The root, low. */
 	readonly bass: number;
 	readonly fifth: number;
+	/** The chord's tones in the lead's octave, for arpeggios. */
+	readonly tones: readonly number[];
 }
 
 export interface Track {
 	readonly slot: number;
+	readonly style: StyleName;
+	readonly name: string;
 	readonly tempo: number;
 	/** Semitones above C. */
 	readonly root: number;
 	readonly mode: string;
 	readonly chords: readonly Chord[];
-	readonly instruments: Readonly<Record<Exclude<Part, 'drums'>, number>>;
+	/** Programs per part. A part with no program is silent. */
+	readonly instruments: Readonly<Partial<Record<Exclude<Part, 'drums' | 'duck'>, number>>>;
 	/** How far an off-beat sixteenth is pushed late, as a fraction of a step. */
 	readonly swing: number;
-	/** Steps in the track: enough bars to cover the slot at this tempo. */
+	/** Steps in the track: enough bars to cover its length at this tempo. */
 	readonly steps: number;
 }
 
-// A small, fast generator with a full period: mulberry32. Two of them per track, one for the
-// track's shape and, through `chance`, one per step, so a step never has to replay the steps
-// before it to know its own dice.
+export const KEY_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+/** The key as a name, like "A minor" or "D lydian": the two everyday modes by their everyday names. */
+export const keyName = (of: Track): string => {
+	const mode = of.mode === 'aeolian' ? 'minor' : of.mode === 'ionian' ? 'major' : of.mode;
+	return `${KEY_NAMES[of.root]!} ${mode}`;
+};
+
+// A small, fast generator with a full period: mulberry32. One per track for its shape and,
+// through `chance`, one per step, so a step never has to replay the steps before it.
 const generator = (seed: number): (() => number) => {
 	let state = seed >>> 0;
 	return () => {
@@ -85,47 +100,38 @@ const keyOf = (root: number, scale: readonly number[], degree: number, octave: n
 	return 12 * (octave + shift) + root + scale[wrapped]!;
 };
 
-// The degrees a progression walks between, weighted: home, the subdominants and the relative
-// minor carry it. The dominant is rarer, and the third and the diminished seventh never come.
-const DEGREES = [0, 0, 0, 3, 3, 5, 5, 1, 4];
-
-const chordOf = (root: number, scale: readonly number[], degree: number): Chord => ({
+const chordOf = (root: number, scale: readonly number[], degree: number, octaves: Style['octaves']): Chord => ({
 	degree,
-	pad: [keyOf(root, scale, degree, 3), keyOf(root, scale, degree + 4, 3), keyOf(root, scale, degree, 4)],
-	keys: [keyOf(root, scale, degree + 2, 4), keyOf(root, scale, degree + 6, 4), keyOf(root, scale, degree + 8, 4)],
-	bass: keyOf(root, scale, degree, 2),
-	fifth: keyOf(root, scale, degree + 4, 2),
+	pad: [keyOf(root, scale, degree, octaves.pad), keyOf(root, scale, degree + 4, octaves.pad), keyOf(root, scale, degree, octaves.pad + 1)],
+	keys: [keyOf(root, scale, degree + 2, octaves.keys), keyOf(root, scale, degree + 6, octaves.keys), keyOf(root, scale, degree + 8, octaves.keys)],
+	bass: keyOf(root, scale, degree, octaves.bass),
+	fifth: keyOf(root, scale, degree + 4, octaves.bass),
+	tones: [keyOf(root, scale, degree, octaves.lead), keyOf(root, scale, degree + 2, octaves.lead), keyOf(root, scale, degree + 4, octaves.lead), keyOf(root, scale, degree + 7, octaves.lead)],
 });
+
+const styleOf = (of: Track, settings: Config): Style => settings.style[of.style];
 
 /** The track that plays in one slot. The same slot always answers the same track. */
 export const track = (slot: number, settings: Config = config): Track => {
+	const where = slotOf(slot, settings);
+	const style = settings.style[where.style];
 	const random = generator(mix(slot, 0x7261646f));
-	const tempo = between(random, settings.tempo.min, settings.tempo.max);
+	const tempo = between(random, style.tempo.min, style.tempo.max);
 	const root = between(random, 0, 11);
-	const mode = pick(random, Object.keys(settings.modes));
-	const scale = settings.modes[mode]!;
-
-	const count = between(random, settings.chords.min, settings.chords.max);
-	const chords: Chord[] = [];
-	let last = -1;
-	for (let i = 0; i < count; i++) {
-		let degree = i === 0 && random() < 0.6 ? 0 : pick(random, DEGREES);
-		while (degree === last) degree = pick(random, DEGREES);
-		chords.push(chordOf(root, scale, degree));
-		last = degree;
+	const mode = pick(random, Object.keys(style.modes));
+	const scale = style.modes[mode]!;
+	const chords = pick(random, style.progressions).map((degree) => chordOf(root, scale, degree, style.octaves));
+	const instruments: Record<string, number> = {};
+	for (const part of ['pad', 'keys', 'bass', 'lead'] as const) {
+		if (style.instruments[part].length > 0) instruments[part] = pick(random, style.instruments[part]);
 	}
-
-	const instruments = {
-		pad: pick(random, settings.instruments.pad),
-		keys: pick(random, settings.instruments.keys),
-		bass: pick(random, settings.instruments.bass),
-		melody: pick(random, settings.instruments.melody),
-	};
-	const swing = 0.08 + random() * 0.12;
-
+	// Synthwave sits straight on the grid. Sleep has no grid to hear, and a little swing is what
+	// keeps a pad's second voice from landing on the drone.
+	const swing = where.style === 'synthwave' ? 0 : 0.08 + random() * 0.12;
+	const name = `${pick(random, style.names.first)} ${pick(random, style.names.second)}`;
 	const secondsPerBar = (60 / tempo) * 4;
-	const bars = Math.ceil(settings.trackSeconds / secondsPerBar);
-	return { slot, tempo, root, mode, chords, instruments, swing, steps: bars * STEPS_PER_BAR };
+	const bars = Math.ceil(where.seconds / secondsPerBar);
+	return { slot, style: where.style, name, tempo, root, mode, chords, instruments, swing, steps: bars * STEPS_PER_BAR };
 };
 
 /** Seconds one step lasts at the track's tempo. */
@@ -135,111 +141,177 @@ export const stepSeconds = (of: Track): number => 60 / of.tempo / 4;
 export const stepAt = (of: Track, step: number): number =>
 	stepSeconds(of) * (step + (step % 2 === 1 ? of.swing : 0));
 
-const chordAt = (of: Track, step: number, settings: Config): Chord => {
-	const bar = Math.floor(step / STEPS_PER_BAR);
-	return of.chords[Math.floor(bar / settings.barsPerChord) % of.chords.length]!;
-};
+const chordSpanOf = (of: Track, settings: Config): number => styleOf(of, settings).barsPerChord * STEPS_PER_BAR;
 
-/** Whether a chord's bass steps up to the fifth for its last beat. */
-const fifthStruck = (of: Track, boundary: number, chordSpan: number): boolean =>
-	chance(of, boundary - 4, 10) < 0.3 && boundary >= chordSpan;
+const chordAt = (of: Track, step: number, settings: Config): Chord =>
+	of.chords[Math.floor(step / chordSpanOf(of, settings)) % of.chords.length]!;
 
 const on = (part: Part, key: number, velocity: number): Event => ({ part, key, velocity: Math.max(1, Math.min(127, Math.round(velocity))) });
 const off = (part: Part, key: number): Event => ({ part, key, velocity: 0 });
+const duck = (percent: number): Event => ({ part: 'duck', key: 0, velocity: percent });
 
-// The melody is the one part whose notes have a length of their own, so a step has to ask the
-// steps before it whether one of them started a note that ends now, or is still sounding. A
-// candidate is the dice alone. A note is a candidate no earlier candidate still covers. The
-// earlier candidate counts whether or not it became a note, so the rule looks back one level
-// and never recurses.
-const MELODY_MAX_STEPS = 12;
-const MELODY_DEGREES = [0, 1, 2, 4, 5, 7, 8, 9];
+/** How much of the drums a step carries: nothing at the edges of a track, all in the middle. */
+const drumWeight = (of: Track, step: number, style: Style): number => {
+	if (style.kit === null) return 0;
+	const fade = style.drumFadeBars * STEPS_PER_BAR;
+	if (fade === 0) return 1;
+	return Math.max(0, Math.min(1, step / fade, (of.steps - step) / fade));
+};
 
-const melodyCandidate = (of: Track, step: number, settings: Config): { key: number; length: number } | null => {
-	if (step % 4 !== 0 && chance(of, step, 1) > 0.25) return null;
-	if (chance(of, step, 2) >= settings.melody) return null;
-	const scale = settings.modes[of.mode]!;
+// Synthwave's breakdown: the drums leave for eight bars a little past the middle of a track,
+// and the bar before they come back is a fill.
+const BREAKDOWN_BARS = 8;
+const breakdownStart = (of: Track): number => Math.floor((of.steps / STEPS_PER_BAR) * 0.6) * STEPS_PER_BAR;
+const inBreakdown = (of: Track, step: number): boolean =>
+	step >= breakdownStart(of) && step < breakdownStart(of) + BREAKDOWN_BARS * STEPS_PER_BAR;
+
+// The lead's notes have a length of their own, so a step asks the steps before it whether one
+// of them started a note that ends now or is still sounding. A candidate is the dice alone. A
+// note is a candidate no earlier candidate still covers, whether or not that one became a
+// note, so the rule looks back one level and never recurses.
+const LEAD_MAX_STEPS = 8;
+const LEAD_DEGREES = [0, 2, 4, 7, 9, 11, 14];
+
+interface Started { readonly key: number; readonly length: number }
+
+const leadCandidate = (of: Track, step: number, settings: Config): Started | null => {
+	const style = styleOf(of, settings);
+	if (of.instruments.lead === undefined || style.lead.note === 0) return null;
+	if (step % 4 !== 0 && chance(of, step, 1) > 0.3) return null;
+	if (chance(of, step, 2) >= style.lead.note) return null;
+	const scale = style.modes[of.mode]!;
 	const chord = chordAt(of, step, settings);
-	const degree = chord.degree + pick(generator(mix(of.slot, step, 3)), MELODY_DEGREES);
-	const key = keyOf(of.root, scale, degree, 5);
-	const length = 2 + Math.floor(chance(of, step, 4) * (MELODY_MAX_STEPS - 2));
+	const degree = chord.degree + pick(generator(mix(of.slot, step, 3)), LEAD_DEGREES);
+	const key = keyOf(of.root, scale, degree, style.octaves.lead);
+	const length = 2 + Math.floor(chance(of, step, 4) * (LEAD_MAX_STEPS - 2));
 	return { key, length };
 };
 
-const melodyStart = (of: Track, step: number, settings: Config): { key: number; length: number } | null => {
-	const candidate = melodyCandidate(of, step, settings);
+const leadStart = (of: Track, step: number, settings: Config): Started | null => {
+	const candidate = leadCandidate(of, step, settings);
 	if (candidate === null) return null;
-	for (let back = 1; back <= MELODY_MAX_STEPS; back++) {
+	for (let back = 1; back <= LEAD_MAX_STEPS; back++) {
 		const earlier = step - back;
 		if (earlier < 0) break;
-		const sounding = melodyCandidate(of, earlier, settings);
+		const sounding = leadCandidate(of, earlier, settings);
 		if (sounding !== null && earlier + sounding.length > step) return null;
 	}
 	return candidate;
 };
 
-/** How much of the drums a step carries: nothing at the edges of a track, all in the middle. */
-const drumWeight = (of: Track, step: number, settings: Config): number => {
-	const fade = settings.drumFadeBars * STEPS_PER_BAR;
-	const fromStart = step / fade;
-	const fromEnd = (of.steps - step) / fade;
-	return Math.max(0, Math.min(1, fromStart, fromEnd)) * settings.drums;
+/** Whether a bar is an arpeggio bar: the lead runs the chord's tones on eighths instead of singing. */
+const arpeggioBar = (of: Track, step: number, settings: Config): boolean => {
+	const style = styleOf(of, settings);
+	if (of.instruments.lead === undefined || style.lead.arpeggio === 0) return false;
+	// Two bars at a time, so a figure gets to repeat once.
+	const pair = Math.floor(step / (2 * STEPS_PER_BAR)) * 2 * STEPS_PER_BAR;
+	return chance(of, pair, 12) < style.lead.arpeggio;
 };
 
-/** What happens on one step of a track: the notes that start and the notes that stop. */
-export const events = (of: Track, step: number, settings: Config = config): Event[] => {
+const sleepEvents = (of: Track, step: number, settings: Config): Event[] => {
 	const out: Event[] = [];
-	const inBar = step % STEPS_PER_BAR;
-	const chordSpan = settings.barsPerChord * STEPS_PER_BAR;
+	const chordSpan = chordSpanOf(of, settings);
 	const chord = chordAt(of, step, settings);
-
-	// The chord parts change together, on the first step of a chord. The previous chord's notes
-	// stop on that same step, and the instrument's own release carries them under the new ones.
+	// The pad and the drone change together on the first step of a chord. The previous chord's
+	// notes stop on the same step, and the instrument's own release carries them under.
 	if (step % chordSpan === 0) {
 		if (step > 0) {
 			const previous = chordAt(of, step - 1, settings);
 			for (const key of previous.pad) out.push(off('pad', key));
-			for (const key of previous.keys) out.push(off('keys', key));
-			out.push(off('bass', fifthStruck(of, step, chordSpan) ? previous.fifth : previous.bass));
+			out.push(off('bass', previous.bass));
 		}
-		for (const key of chord.pad) out.push(on('pad', key, 72 + chance(of, step, 5) * 16));
-		for (const key of chord.keys) out.push(on('keys', key, 56 + chance(of, step, 6) * 20));
-		out.push(on('bass', chord.bass, 70 + chance(of, step, 7) * 12));
+		for (const key of chord.pad) out.push(on('pad', key, 64 + chance(of, step, 5) * 16));
+		out.push(on('bass', chord.bass, 70 + chance(of, step, 7) * 10));
 	}
-	// A softer second touch of the keys on the last bar of a chord, some of the time.
-	if (step % chordSpan === chordSpan - STEPS_PER_BAR && chance(of, step, 8) < 0.45) {
-		for (const key of chord.keys) out.push(off('keys', key), on('keys', key, 40 + chance(of, step, 9) * 14));
+	// A second voice of the pad, an octave above the fifth, comes and goes on the half-chord.
+	if (step % chordSpan === chordSpan / 2 && chance(of, step, 8) < 0.5) {
+		out.push(on('pad', chord.pad[1]! + 12, 40 + chance(of, step, 9) * 12));
 	}
-	// The bass steps up to the fifth for the last beat of a chord, some of the time.
-	if (step % chordSpan === chordSpan - 4 && fifthStruck(of, step + 4, chordSpan)) {
-		out.push(off('bass', chord.bass), on('bass', chord.fifth, 62));
+	if (step % chordSpan === chordSpan - 2 && chance(of, step - chordSpan / 2 + 2, 8) < 0.5) {
+		out.push(off('pad', chord.pad[1]! + 12));
+	}
+	return out;
+};
+
+const synthwaveEvents = (of: Track, step: number, settings: Config): Event[] => {
+	const out: Event[] = [];
+	const style = styleOf(of, settings);
+	const inBar = step % STEPS_PER_BAR;
+	const chordSpan = chordSpanOf(of, settings);
+	const chord = chordAt(of, step, settings);
+	const quiet = inBreakdown(of, step);
+	const weight = quiet ? 0 : drumWeight(of, step, style);
+
+	if (step % chordSpan === 0) {
+		if (step > 0) for (const key of chordAt(of, step - 1, settings).pad) out.push(off('pad', key));
+		for (const key of chord.pad) out.push(on('pad', key, 70 + chance(of, step, 5) * 14));
 	}
 
-	for (let back = 1; back <= MELODY_MAX_STEPS; back++) {
-		const earlier = step - back;
-		if (earlier < 0) break;
-		const started = melodyStart(of, earlier, settings);
-		if (started !== null && earlier + started.length === step) out.push(off('melody', started.key));
+	// The bass: the root on every sixteenth, an octave up on the off-beats, ducked by the kick.
+	// It rests in the breakdown's first half so the pad and the lead have the room.
+	const rests = quiet && step < breakdownStart(of) + (BREAKDOWN_BARS / 2) * STEPS_PER_BAR;
+	const bassKey = (at: number): number => {
+		const held = chordAt(of, at, settings);
+		return at % 2 === 1 ? held.bass + 12 : held.bass;
+	};
+	if (!rests) {
+		if (step > 0 && !(quiet && step === breakdownStart(of) + (BREAKDOWN_BARS / 2) * STEPS_PER_BAR)) out.push(off('bass', bassKey(step - 1)));
+		out.push(on('bass', bassKey(step), inBar % 4 === 0 ? 100 : 84));
+	} else if (step === breakdownStart(of)) {
+		out.push(off('bass', bassKey(step - 1)));
 	}
-	const melody = melodyStart(of, step, settings);
-	if (melody !== null) out.push(on('melody', melody.key, 48 + chance(of, step, 11) * 22));
 
-	const weight = drumWeight(of, step, settings);
+	// The kick ducks the bass: down on the beat, back up over the three steps after.
+	if (weight > 0) out.push(duck([35, 60, 85, 100][inBar % 4]!));
+	else if (inBar === 0) out.push(duck(100));
+
+	// The lead: an arpeggio over the chord on eighths, or a sung line, two bars at a time. A sung
+	// note still sounding when an arpeggio begins is cut, so the two never hold one key at once.
+	if (of.instruments.lead !== undefined) {
+		const arpeggio = arpeggioBar(of, step, settings);
+		for (let back = 1; back <= LEAD_MAX_STEPS; back++) {
+			const earlier = step - back;
+			if (earlier < 0) break;
+			if (arpeggioBar(of, earlier, settings)) continue;
+			const started = leadStart(of, earlier, settings);
+			if (started === null) continue;
+			const ends = earlier + started.length;
+			if (arpeggio ? inBar === 0 && ends >= step : ends === step) out.push(off('lead', started.key));
+		}
+		if (arpeggio) {
+			if (inBar % 2 === 0) {
+				if (inBar > 0) out.push(off('lead', chord.tones[((inBar / 2) + 3) % 4]!));
+				else if (step > 0 && arpeggioBar(of, step - 1, settings)) out.push(off('lead', chordAt(of, step - 1, settings).tones[3]!));
+				out.push(on('lead', chord.tones[(inBar / 2) % 4]!, 58 + chance(of, step, 11) * 14));
+			}
+			if (inBar === STEPS_PER_BAR - 1 && !arpeggioBar(of, step + 1, settings)) out.push(off('lead', chord.tones[3]!));
+		} else {
+			const lead = leadStart(of, step, settings);
+			if (lead !== null) out.push(on('lead', lead.key, 60 + chance(of, step, 11) * 20));
+		}
+	}
+
 	if (weight > 0) {
 		const hit = (key: number, velocity: number, odds = 1): void => {
 			if (odds < 1 && chance(of, step, 20 + key) >= odds) return;
 			out.push(on('drums', key, velocity * weight));
 		};
-		if (inBar === 0) hit(36, 96);
-		if (inBar === 10) hit(36, 70, 0.5);
-		if (inBar === 8) hit(37, 76);
-		if (inBar % 4 === 2) hit(42, 44);
-		if (inBar % 4 === 0 && inBar !== 0) hit(42, 34, 0.7);
-		if (inBar === 14) hit(46, 30, 0.2);
+		const fill = step >= breakdownStart(of) - STEPS_PER_BAR && step < breakdownStart(of);
+		if (inBar % 4 === 0) hit(36, 118);
+		if (inBar === 4 || inBar === 12) hit(38, 112);
+		if (inBar % 2 === 0) hit(42, inBar % 4 === 0 ? 70 : 52);
+		if (inBar % 4 === 3) hit(42, 44, 0.6);
+		if (inBar === 14) hit(46, 48, 0.25);
+		if (inBar === 7 || inBar === 15) hit(37, 40, 0.3);
+		if (fill && inBar % 2 === 1) hit(38, 70 + inBar * 2);
 	}
 
 	return out;
 };
+
+/** What happens on one step of a track: the notes that start and the notes that stop. */
+export const events = (of: Track, step: number, settings: Config = config): Event[] =>
+	(of.style === 'sleep' ? sleepEvents(of, step, settings) : synthwaveEvents(of, step, settings));
 
 /**
  * The chord-part notes that would be sounding at a step, for a station joining a track in the
@@ -247,14 +319,7 @@ export const events = (of: Track, step: number, settings: Config = config): Even
  */
 export const holding = (of: Track, step: number, settings: Config = config): Event[] => {
 	const chord = chordAt(of, step, settings);
-	const chordSpan = settings.barsPerChord * STEPS_PER_BAR;
-	const boundary = step - (step % chordSpan) + chordSpan;
-	// The bass may already be on the fifth for the chord's last beat, and the next boundary will
-	// stop whichever it struck, so what is struck here has to be the same one.
-	const bass = step >= boundary - 4 && fifthStruck(of, boundary, chordSpan) ? chord.fifth : chord.bass;
-	return [
-		...chord.pad.map((key) => on('pad', key, 76)),
-		...chord.keys.map((key) => on('keys', key, 60)),
-		on('bass', bass, 72),
-	];
+	const out: Event[] = chord.pad.map((key) => on('pad', key, 70));
+	if (of.style === 'sleep') out.push(on('bass', chord.bass, 72));
+	return out;
 };
