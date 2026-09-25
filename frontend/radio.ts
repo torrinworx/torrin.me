@@ -82,7 +82,8 @@ const title = (heard: Now | null): void => {
 };
 
 const stop = (): void => {
-	// Counted as a press, so a /now answer that arrives after this stop, from the play before it, does not set the anchor.
+	// A stop counts as a press. A /now answer from the earlier play that arrives after the stop
+	// then does not set the anchor.
 	presses++;
 	if (audio !== null) {
 		audio.pause();
