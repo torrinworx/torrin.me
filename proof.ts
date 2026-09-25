@@ -16,6 +16,8 @@ import { fileURLToPath } from 'node:url';
 import { visit, visits } from '@aweftjs/logs';
 import { chromium } from 'playwright';
 
+import { firstSlot, slotOf } from './radio/schedule.ts';
+import type { StyleName } from './radio/config.ts';
 import { boot, mailbox } from './tests/boot.ts';
 
 const shots = fileURLToPath(new URL('./proof-shots/', import.meta.url));
@@ -28,12 +30,15 @@ process.env['EMAIL_FROM'] = 'proof@torrin.me';
 process.env['EMAIL_TO'] = 'torrin@torrin.me';
 process.env['EMAIL_SUBJECT'] = 'torrin.me proof run';
 
-interface Heard { readonly frames: number; readonly rms: number; readonly health: { ok: boolean; listeners: number } }
+interface Heard { readonly frames: number; readonly rms: number; readonly health: { ok: boolean; listeners: number }; readonly now: { style: string; name: string } }
 
-const tuneIn = async (seconds: number): Promise<Heard> => {
+/** The moment thirty seconds into the first track of a style, so a listen lands on its drums, not its intro. */
+const startOf = (style: StyleName): number => slotOf(firstSlot(style)).begins + 30;
+
+const tuneIn = async (seconds: number, style: StyleName): Promise<Heard> => {
 	const port = 4174;
 	const radio = spawn(process.execPath, [fileURLToPath(new URL('./radio/main.ts', import.meta.url))], {
-		env: { ...process.env, RADIO_PORT: String(port) },
+		env: { ...process.env, RADIO_PORT: String(port), RADIO_START: String(startOf(style)) },
 		stdio: ['ignore', 'pipe', 'inherit'],
 	});
 	try {
@@ -46,6 +51,7 @@ const tuneIn = async (seconds: number): Promise<Heard> => {
 		const answer = await fetch(`http://127.0.0.1:${String(port)}/stream`, { signal: stopper.signal });
 		assert.equal(answer.headers.get('content-type'), 'audio/mpeg');
 		const health = await (await fetch(`http://127.0.0.1:${String(port)}/health`)).json() as Heard['health'];
+		const now = await (await fetch(`http://127.0.0.1:${String(port)}/now`)).json() as Heard['now'];
 		const chunks: Uint8Array[] = [];
 		try {
 			const reader = answer.body!.getReader();
@@ -71,10 +77,20 @@ const tuneIn = async (seconds: number): Promise<Heard> => {
 		let sum = 0;
 		for (let i = 0; i + 1 < pcm.length; i += 2) { const sample = pcm.readInt16LE(i) / 32768; sum += sample * sample; }
 		const rms = Math.sqrt(sum / Math.max(1, pcm.length / 2));
-		return { frames, rms, health };
+		return { frames, rms, health, now };
 	} finally {
 		radio.kill('SIGTERM');
 	}
+};
+
+// What the radio's now route would answer, in front of the page's own fetch: the site's server
+// has no such route (nginx puts the radio's there), so the browser is handed one here.
+const ON_AIR = {
+	time: Date.now() / 1000, backlogSeconds: 1.5, slot: 7, style: 'synthwave', name: 'Proof Signal', tempo: 100,
+	key: 'A minor', bar: 3, bars: 52, begins: Date.now() / 1000 - 30, seconds: 210, blockEnds: Date.now() / 1000 + 600,
+};
+const onAir = async (view: import('playwright').Page): Promise<void> => {
+	await view.route('**/radio/now', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ON_AIR) }));
 };
 
 const post = await mailbox();
@@ -102,6 +118,7 @@ const PAGES: readonly (readonly [name: string, path: string, h1: string | null])
 try {
 	for (const [name, path, h1] of PAGES) {
 		const view = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+		await onAir(view);
 		view.on('pageerror', (error) => problems.push(`${name}: ${String(error)}`));
 		view.on('console', (message) => {
 			if (message.type() === 'error') problems.push(`${name} console: ${message.text()}`);
@@ -202,19 +219,26 @@ try {
 	assert.ok(opened.every((seen) => seen !== undefined && seen.browser !== null && seen.user === null), 'each visit carries browser facts and no user');
 	assert.ok(opened.some((seen) => seen?.entries.some((entry) => entry.kind === 'url')), 'a visit recorded the URL it showed');
 
-	// The radio page has its button before anything is pressed.
+	// The radio page has its button and its bars before anything is pressed.
 	const dial = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+	await onAir(dial);
 	await dial.goto(`${site.url}/radio`, { waitUntil: 'networkidle' });
 	assert.equal(await dial.textContent('#radio-play'), 'Play', 'the radio page offers Play');
+	assert.ok(await dial.$('#radio-bars') !== null, 'and draws its bars');
+	assert.ok((await dial.textContent('main'))?.includes('Proof Signal · Synthwave · A minor · 100 bpm'), 'and says what is on the air');
 	await dial.close();
 
-	// The radio, the way the droplet runs it: the process on a port, a listener joining now, ten
-	// seconds of the stream decoded back to samples and measured. Silence would pass every other
-	// check here, so this one listens.
-	const heard = await tuneIn(10);
-	assert.ok(heard.frames > 300, `${String(heard.frames)} MP3 frames in ten seconds`);
-	assert.ok(heard.rms > 0.003, `the stream is not silence: rms ${heard.rms.toFixed(4)}`);
-	assert.ok(heard.health.ok && heard.health.listeners === 1, 'health saw the one listener');
+	// The radio, the way the droplet runs it: the process on a port, started thirty seconds into
+	// a track of each style, a listener joining now, ten seconds of the stream decoded back to
+	// samples and measured. Silence would pass every other check here, so this one listens.
+	for (const style of ['sleep', 'synthwave'] as const) {
+		const heard = await tuneIn(10, style);
+		assert.equal(heard.now.style, style, `the station started on a ${style} track`);
+		assert.ok(heard.now.name.includes(' '), `with a name: ${heard.now.name}`);
+		assert.ok(heard.frames > 300, `${style}: ${String(heard.frames)} MP3 frames in ten seconds`);
+		assert.ok(heard.rms > 0.003, `${style} is not silence: rms ${heard.rms.toFixed(4)}`);
+		assert.ok(heard.health.ok && heard.health.listeners === 1, `${style}: health saw the one listener`);
+	}
 
 	assert.deepEqual(problems, [], 'no page threw and no console error was logged');
 	console.log(`proof: ok. screenshots in ${shots}`);

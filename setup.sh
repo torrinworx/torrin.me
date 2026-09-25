@@ -219,6 +219,11 @@ server {
         proxy_set_header X-Real-IP \$remote_addr;
     }
 
+    # What is on the air, for the page's now-playing line and the bars on a phone.
+    location = /radio/now {
+        proxy_pass http://127.0.0.1:${RADIO_PORT}/now;
+    }
+
     location / {
         proxy_pass http://localhost:${PORT};
         proxy_set_header Host \$host;

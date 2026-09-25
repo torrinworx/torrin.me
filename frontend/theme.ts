@@ -32,7 +32,7 @@ export const LIME = '#ECF39E';
 export const PAPER = '#F4F6EC';
 export const PAPER_A = '#FAF8F4';
 const MUTED = '#5C6A56';
-const LINE = 'rgba(19, 42, 19, 0.16)';
+export const LINE = 'rgba(19, 42, 19, 0.16)';
 
 // The paragraph, once: `p1` and `body` were two faces on the old site and are the same face now.
 // Both names stay because both pages reach for both.
