@@ -1,7 +1,8 @@
 // The blog's build step, on posts written for the test and on the real ones, and the pages and
 // feeds the build wrote.
 //
-// The dist half needs `npm run build` (or `npm run content && vite build && npm run pages`) first.
+// The dist half needs `npm run build` (or `npm run content`, then
+// `vite build --configLoader native && npm run pages`) first.
 
 import assert from 'node:assert/strict';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';

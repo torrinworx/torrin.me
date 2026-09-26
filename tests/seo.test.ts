@@ -2,7 +2,7 @@
 // because a crawler does not run the page's JavaScript: a tag that only appears after hydration is
 // a tag Google never gets.
 //
-// Run `npm run build` (or `vite build && npm run pages`) before this suite.
+// Run `npm run build` (or `vite build --configLoader native && npm run pages`) before this suite.
 
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';

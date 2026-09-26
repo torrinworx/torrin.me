@@ -1,9 +1,9 @@
 // Writes every page of the site as a file, plus 404.html, shell.html, sitemap.xml and the feeds.
 //
-// Run: npm run pages, after `npm run content` and `vite build` have written the twins and the
-// shell into dist/. That directory sits beside main.ts, which is where the server looks for it,
-// locally and on the droplet alike. The posts are rendered from the same twins the browser
-// fetches, so the page and its twin are one string.
+// Run: npm run pages, after `npm run content` and `vite build --configLoader native` have
+// written the twins and the shell into dist/. That directory sits beside main.ts, which is where
+// the server looks for it, locally and on the droplet alike. The posts are rendered from the same
+// twins the browser fetches, so the page and its twin are one string.
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 

@@ -6,7 +6,8 @@
 // the contact form actually posts, the pages look right at desktop and phone width, and the radio
 // process, run as the droplet runs it, streams audio that is not silence to a listener joining now.
 //
-// Run: npm run proof   (after npm run build, or at least vite build && npm run pages)
+// Run: npm run proof   (after npm run build, or at least
+//      vite build --configLoader native && npm run pages)
 
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
