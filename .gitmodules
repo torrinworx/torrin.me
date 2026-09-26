@@ -2,3 +2,7 @@
 	path = aweft
 	url = git@github.com:torrinworx/aweft.git
 	branch = main
+[submodule "app-deploy"]
+	path = app-deploy
+	url = git@github.com:torrinworx/app-deploy.git
+	branch = main

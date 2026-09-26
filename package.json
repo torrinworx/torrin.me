@@ -10,7 +10,8 @@
 	"scripts": {
 		"content": "node --import @aweftjs/build/loader content/blog.ts",
 		"dev": "npm run content && vite --configLoader native",
-		"build": "bash build.sh",
+		"build": "bash app-deploy/build.sh",
+		"deploy": "bash app-deploy/deploy.sh",
 		"pages": "AWEFT_DEFAULT_H=@aweftjs/ui node --import @aweftjs/build/loader frontend/pages.ts",
 		"start": "node --env-file-if-exists=.env --import @aweftjs/build/loader main.ts",
 		"resume:pdf": "node --import @aweftjs/build/loader resume.ts",
