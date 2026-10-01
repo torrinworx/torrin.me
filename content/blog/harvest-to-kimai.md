@@ -59,7 +59,7 @@ When pricing is fair, people pay for convenience. When pricing stops making sens
 
 Open source doesn't need to be perfect to win here. It needs to be good enough, cheap enough, stable enough, and easy enough to host. In 2026, hosting is the part that changed most. You don't need a server closet and a networking certification anymore. A Mac mini, a Raspberry Pi, an old PC or a $10 VPS can run a lot of open source tools.
 
-Blender is the example I keep coming back to. It got good, the community grew around it, and now any paid 3D tool has to explain why you should pay when the free one is industry grade. Time tracking isn't 3D modelling, but the same thing can happen. When an acquisition raises a team's prices, the team starts looking at other tools, and some of those teams start using and contributing to the open source one.
+Blender is one example. It's a free, open source 3D tool, and it got good enough that studios use it for real work. Paid 3D tools now have to explain why you should pay for them. Open source time trackers like Kimai can get there too, if enough teams that leave Harvest and tools like it start using them and contributing back.
 
 ## What I took from it
 
