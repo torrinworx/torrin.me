@@ -38,7 +38,7 @@ Postgres, and `main.ts` refuses to start without a reachable database.
 
 ```
 npm run build                        # dist/, then a zip of everything the droplet needs
-PUBLIC_IP=<droplet> npm run deploy   # ships the zip and runs setup.sh on the far end
+npm run deploy                       # ships the zip and runs setup.sh on the far end
 ```
 
 `build.sh` stamps what it ships with a build id (the commit and the time) in `build/build.json`, and
