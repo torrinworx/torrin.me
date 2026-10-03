@@ -92,11 +92,22 @@
 
   "projects": [
     {
-      "name": "destamatic-ui",
-      "url": "https://github.com/torrinworx/destamatic-ui",
-      "description": "Reactive UI component library, published to npm.",
+      "name": "Builderloo.ca",
+      "url": "https://builderloo.ca",
+      "description": "Public directory of Waterloo-region tech startups (formerly KWBuilds), with news, events, jobs, a forum, and a public MCP server.",
       "bullets": [
-        "Lead developer of a 70 component library published to npm under MIT, 619 of 1,105 commits. It powers Equator's mapping and AI platform, torrin.me, and OpenGig.org."
+        "Built solo across 483 commits: a live directory of 824 published startups scraped and enriched from Communitech, Velocity, and other regional hubs, with news, events, and jobs subsystems running on the same pipeline machinery.",
+        "Chose browserless scraping (got, cheerio) after a measured bake-off across 493 sites recovered content for 98.8%, retiring the headless browser and Docker from the stack.",
+        "Serves a public MCP server with a hand-rolled OAuth 2.1 authorization server (Dynamic Client Registration, PKCE) so claude.ai and ChatGPT connectors can attach while anonymous clients still work."
+      ]
+    },
+    {
+      "name": "maccobylab.com",
+      "url": "https://maccobylab.com",
+      "description": "No-code web platform for behavioral research: researchers build an experiment visually, share one link, and get charts and raw CSV back.",
+      "bullets": [
+        "Compiles each experiment to a constrained JSON definition, validates and freezes it server-side against a generated op whitelist, then runs it in participants' browsers on a purpose-built interpreter rather than generated code.",
+        "Runs author-written code in an opaque-origin sandboxed iframe with no network access, and measures reaction times on a monotonic high-resolution clock so wall-clock changes cannot corrupt them."
       ]
     },
     {
@@ -109,12 +120,11 @@
       ]
     },
     {
-      "name": "OpenGig.org",
-      "url": "https://opengig.org",
-      "description": "Open-source platform for gig workers and customers.",
-      "pdf": false,
+      "name": "aweft",
+      "url": "https://aweft.dev",
+      "description": "Full-stack TypeScript toolkit for apps whose state is an observable document, published to npm under MIT as @aweftjs.",
       "bullets": [
-        "Built solo across 581 commits: full-stack JavaScript with a custom UI framework, database state-sync, and a WebSocket layer, deployed on DigitalOcean behind NGINX with GitHub Actions CI."
+        "Built solo across 399 commits: 23 packages covering state, sync, storage, server, UI, sandboxing, jobs, and auth. Builderloo, maccobylab.com, mcp.torrin.me, and torrin.me all run on it."
       ]
     },
     {
@@ -123,6 +133,24 @@
       "description": "Blender add-on automating procedural 3D asset generation and export, written against the Python/Blender API.",
       "bullets": [
         "1,015 stars and 324 forks, used by multiple studios. Authored 423 of 496 commits across 7 releases."
+      ]
+    },
+    {
+      "name": "destamatic-ui",
+      "url": "https://github.com/torrinworx/destamatic-ui",
+      "description": "Reactive UI component library, published to npm.",
+      "pdf": false,
+      "bullets": [
+        "Lead developer of a 70 component library published to npm under MIT, 619 of 1,105 commits. It powers Equator's mapping and AI platform and OpenGig.org."
+      ]
+    },
+    {
+      "name": "OpenGig.org",
+      "url": "https://opengig.org",
+      "description": "Open-source platform for gig workers and customers.",
+      "pdf": false,
+      "bullets": [
+        "Built solo across 581 commits: full-stack JavaScript with a custom UI framework, database state-sync, and a WebSocket layer, deployed on DigitalOcean behind NGINX with GitHub Actions CI."
       ]
     },
     {
@@ -143,17 +171,6 @@
         "Uses Whisper to auto-generate and align lyrics for time-synced playback.",
         "Displays time-synced lyrics in an Apple-style karaoke mode lyric scroller.",
         "Enhances albums with additional metadata like artwork and descriptions."
-      ]
-    },
-    {
-      "name": "KWBuilds.ca",
-      "url": "https://kwbuilds.ca",
-      "description": "Public directory of Waterloo-region tech startups, with news, events, jobs, and a public MCP server.",
-      "pdf": false,
-      "bullets": [
-        "Built solo across 338 commits: a live directory of 663 published startups scraped and enriched from Communitech, Velocity, and other regional hubs, with news, events, and jobs subsystems running on the same pipeline machinery.",
-        "Chose browserless scraping (got, cheerio) after a measured bake-off across 493 sites recovered content for 98.8%, retiring the headless browser and Docker from the stack.",
-        "Serves a public MCP server with a hand-rolled OAuth 2.1 authorization server (Dynamic Client Registration, PKCE) so claude.ai and ChatGPT connectors can attach while anonymous clients still work."
       ]
     }
   ],
