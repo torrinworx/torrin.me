@@ -259,6 +259,10 @@ export const siteTheme: Definitions = {
 		[stacked]: { position: 'relative', inset: 'auto', height: '300px', order: 1 },
 	},
 	hero_canvas: { position: 'absolute', left: 0, top: 0, display: 'block', imageRendering: 'pixelated' },
+	// The bird that lands on the resume button (strip.ts). Above everything in the hero, out of the
+	// pointer's way, and not shown until the browser flies it in. The library eases every transform
+	// over 0.15s, which would trail the bird behind its own flight.
+	hero_bird: { position: 'absolute', left: 0, top: 0, zIndex: 1, display: 'none', pointerEvents: 'none', imageRendering: 'pixelated', transition: 'none' },
 	hero_over: {
 		position: 'absolute',
 		inset: 0,

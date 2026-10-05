@@ -9,7 +9,7 @@ import type { Derived } from '@aweftjs/core';
 import { Button, Icon, Typography, h } from '@aweftjs/ui';
 
 import resume from '../data/resume.json' with { type: 'json' };
-import { heroScale, heroScene, runStrip } from '../strip.ts';
+import { heroScale, heroScene, runPerch, runStrip } from '../strip.ts';
 import { ModeContext, dark } from '../theme.ts';
 import { Contact } from '../utils/contact.tsx';
 import { Email } from '../utils/email.tsx';
@@ -149,6 +149,7 @@ const Section = (props: { title: string; children?: unknown[] }): unknown => (
 );
 
 const STRIP = 'hero-strip';
+const BIRD = 'hero-bird';
 
 /**
  * The top of the landing page: the pixel strip across the window, the name, the role, a sentence and
@@ -157,6 +158,8 @@ const STRIP = 'hero-strip';
  *
  * The strip only exists in a browser. The page the build writes has the words and an empty canvas,
  * and the scene starts on the first frame after the page comes alive, in the mode the page is in.
+ * On that frame a bird sets off for the resume button too. A change of mode repaints both and
+ * sends neither back to the start.
  */
 const Hero = ModeContext.use((mode) => (
 	props: { focused: Derived<boolean> },
@@ -170,11 +173,18 @@ const Hero = ModeContext.use((mode) => (
 			const host = document.getElementById(STRIP);
 			stop = host === null ? () => {} : runStrip(host, (width) => heroScene(night, width), heroScale);
 		};
+		let perch = (): void => {};
 		const first = requestAnimationFrame(() => {
 			if (mode === null) start(false);
 			else off = mode.effect((held) => { start(held === dark); });
+			const hero = document.getElementById(STRIP)?.parentElement;
+			const bird = document.getElementById(BIRD);
+			const resume = hero?.querySelector<HTMLElement>('a[download]');
+			if (hero && bird instanceof HTMLCanvasElement && resume) {
+				perch = runPerch(hero, bird, resume, heroScale, () => mode?.get() === dark);
+			}
 		});
-		cleanup(() => { cancelAnimationFrame(first); off(); stop(); });
+		cleanup(() => { cancelAnimationFrame(first); off(); stop(); perch(); });
 	}
 
 	return (
@@ -213,6 +223,7 @@ const Hero = ModeContext.use((mode) => (
 					<p theme="hero_where">{profile.heroWhere}</p>
 				</div>
 			</div>
+			<canvas id={BIRD} theme="hero_bird" aria-hidden="true" width="8" height="6" />
 		</div>
 	);
 });

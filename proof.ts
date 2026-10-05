@@ -162,16 +162,39 @@ try {
 		await view.close();
 	}
 
-	// The landing's strip and the dark mode switch, as a visitor uses them: the browser draws the
-	// strip with its sky in the page colour, the menu's switch turns the page and the strip dark,
-	// and the choice is still there after a reload (work order 485).
+	// The landing's strip, its bird and the dark mode switch, as a visitor uses them: the browser
+	// draws the strip with its sky in the page colour, the menu's switch turns the page and the strip
+	// dark, and the choice is still there after a reload (work order 485).
 	const landing = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 	landing.on('pageerror', (error) => problems.push(`mode: ${String(error)}`));
 	// Each load of the page is a visit, and every visit must post its first batch, browser facts
 	// and all, before the page reloads or closes, as the pages above do.
 	const posted = (): Promise<unknown> => landing.waitForResponse((answer) => answer.url() === `${site.url}/api/logs`, { timeout: 15_000 });
 	let batch = posted();
-	await landing.goto(`${site.url}/`, { waitUntil: 'networkidle' });
+	await landing.goto(`${site.url}/`, { waitUntil: 'commit' });
+	// A bird lands on the resume button in the first second and a half, and flies off when the
+	// pointer reaches the button.
+	const perched = await landing.waitForFunction(
+		() => (document.getElementById('hero-bird')?.dataset['state'] === 'perch' ? performance.now() : false),
+		undefined,
+		{ polling: 'raf', timeout: 5_000 },
+	).then(async (at) => Number(await at.jsonValue()), () => Infinity);
+	assert.ok(perched <= 1_500, `the bird lands within 1.5s of the page opening, not at ${String(Math.round(perched))}ms`);
+	const resume = landing.locator('#hero-strip ~ * a[download]').first();
+	const onEdge = await landing.evaluate(() => {
+		const hero = document.getElementById('hero-strip')!.parentElement!;
+		return document.getElementById('hero-bird')!.getBoundingClientRect().bottom === hero.querySelector('a[download]')!.getBoundingClientRect().top;
+	});
+	assert.ok(onEdge, 'with its feet on the button');
+	await resume.hover();
+	const flown = await landing.waitForFunction(
+		() => getComputedStyle(document.getElementById('hero-bird')!).display === 'none',
+		undefined,
+		{ timeout: 5_000 },
+	).then(() => true, () => false);
+	assert.ok(flown, 'and is gone once the pointer reaches the button');
+	await landing.mouse.move(640, 300);
+	await landing.waitForLoadState('networkidle');
 	const skyIs = async (rgb: string): Promise<void> => {
 		await landing.waitForFunction((want) => {
 			const canvas = document.querySelector<HTMLCanvasElement>('#hero-strip canvas');

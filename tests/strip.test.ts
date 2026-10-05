@@ -1,10 +1,11 @@
-// The landing's pixel strip (work order 485). Everything here runs the strip in Node, through
-// createStrip, with motion where the test needs it and none where a still frame is the point.
+// The landing's pixel strip and the bird on the resume button (work order 485). Everything here
+// runs in Node, through createStrip and createPerch, with motion where the test needs it and none
+// where a still frame is the point.
 
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { createStrip, heroScene, pack } from '../frontend/strip.ts';
+import { ARRIVE, createPerch, createStrip, heroScene, pack } from '../frontend/strip.ts';
 import { FOREST, PAPER } from '../frontend/theme.ts';
 
 // A wide screen and a phone: CSS width, then the strip's size in its own pixels, then where the
@@ -66,5 +67,59 @@ describe('the hero strip', () => {
 		strip.frame(0, 0);
 		for (let i = 0; i < 300; i++) { strip.move(Math.round(0.74 * 635) + (i % 2), 52); strip.frame(1 / 60, i / 60); }
 		assert.equal(strip.leaves(), 0);
+	});
+});
+
+// The bird on the resume button, run frame by frame at sixty a second. Its button's top edge is at
+// (300, 500); it sets off from above the page, to the right.
+describe('the resume bird', () => {
+	const TO = { x: 300, y: 500 }, FROM = { x: 540, y: -110 }, DT = 1 / 60;
+	const fly = (seconds: number, bird = createPerch(FROM, () => 0.5), to = TO) => {
+		for (let i = 0; i < Math.round(seconds / DT); i++) bird.step(DT, to);
+		return bird;
+	};
+
+	it('lands on the button within a second, feet on its top edge', () => {
+		const bird = createPerch(FROM, () => 0.5);
+		let t = 0;
+		while (bird.state === 'in' && t < 5) { bird.step(DT, TO); t += DT; }
+		assert.equal(bird.state, 'perch');
+		assert.ok(ARRIVE <= 1 && t <= ARRIVE + DT, `landed after ${t.toFixed(2)}s`);
+		assert.deepEqual([bird.x, bird.y], [TO.x, TO.y]);
+	});
+
+	it('pecks the button with its feet still', () => {
+		const bird = fly(ARRIVE);
+		const feet = (pose: typeof bird.pose) => pose.filter(([x, y]) => y === 0 && x >= -2).map(String).sort();
+		const standing = feet(bird.pose);
+		let pecks = 0, was = false;
+		for (let i = 0; i < 120; i++) {
+			bird.step(DT, TO);
+			// A peck puts the beak on the feet row, ahead of the feet.
+			const down = bird.pose.some(([x, y]) => y === 0 && x < -2);
+			if (down && !was) pecks++;
+			was = down;
+			assert.deepEqual(feet(bird.pose), standing, 'the feet do not move');
+		}
+		assert.ok(pecks >= 2, `pecked ${String(pecks)} times in two seconds`);
+	});
+
+	it('stays on the button as the button moves', () => {
+		const bird = fly(ARRIVE + 0.5);
+		bird.step(DT, { x: 120, y: 640 });
+		assert.deepEqual([bird.x, bird.y], [120, 640]);
+	});
+
+	it('flies off up and to the left when scared, from the button or on its way down', () => {
+		for (const after of [ARRIVE + 1, ARRIVE / 2]) {
+			const bird = fly(after);
+			const [x, y] = [bird.x, bird.y];
+			bird.scare();
+			fly(1, bird);
+			assert.equal(bird.state, 'away');
+			assert.ok(bird.y < y - 100 && bird.x < x - 50, `scared after ${String(after)}s, it moved from (${String(x)}, ${String(y)}) to (${String(bird.x)}, ${String(bird.y)})`);
+			fly(3, bird);
+			assert.equal(bird.state, 'away', 'and does not come back');
+		}
 	});
 });

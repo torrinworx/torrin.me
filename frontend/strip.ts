@@ -93,7 +93,9 @@ export const NIGHT: Palette = {
 	bankTop: '#1E3B1C', bank: ['#0F220F', '#0A170A'],
 	water: '#0B180B', sparkle: SAGE, trough: '#050D05',
 	vine: '#1E3B1C', vineLeaf: [PINE, MOSS], tuft: ['#1E3B1C', PINE],
-	firefly: LIME, moon: LIME, bird: '#0A170A',
+	// The night strip has no birds; this is the one on the resume button, which stands against the
+	// forest page and so takes the second ink.
+	firefly: LIME, moon: LIME, bird: SAGE,
 };
 
 /** The landing hero's seed. Its trees are seeded from it in order, so its third tree is `treeSeed(HERO_SEED, 2)`. */
@@ -641,3 +643,191 @@ export const runStrip = (
 	};
 };
 
+// --- the bird on the resume button ------------------------------------------------------------
+//
+// One of the strip's birds, drawn a size closer: it flies down to the resume button as the page
+// opens, pecks at it, and leaves when the pointer reaches the button. Like the strip, `createPerch`
+// is the bird alone and needs no DOM; `runPerch` puts it on a page.
+
+type Pose = readonly (readonly [x: number, y: number])[];
+
+/** A pose from rows of `#`, the last row on the feet row (y 0), the first column at x -4. Faces left. */
+const pose = (rows: readonly string[]): Pose => rows.flatMap((row, j) =>
+	[...row].flatMap((c, i) => (c === '#' ? [[i - 4, j - rows.length + 1] as const] : [])));
+
+// Standing, with an eye. Pecking, the head drops to the button in front of the feet and the tail
+// lifts; the feet stay where they are.
+const STAND = pose(['.##.....', '#.##....', '.####...', '.#####..', '..###.##', '..#.#...']);
+const PECK = pose(['...##...', '..####.#', '.######.', '#.###...', '#.#.#...']);
+// In flight it is the strip's V with a body under it, wings raised then level; in a bound it is the
+// body alone.
+const FLY_UP = pose(['.#.....#', '..#...#.', '...###..', '....#...', '........']);
+const FLY_LEVEL = pose(['.##...##', '...###..', '....#...', '........']);
+const TUCK = pose(['.####...', '..###...', '........']);
+
+/** How long the flight down to the button takes, in seconds. */
+export const ARRIVE = 0.9;
+
+/** What the bird is doing: flying down, on the button, or flying off. */
+export type PerchState = 'in' | 'perch' | 'away';
+
+/** The bird on the resume button. */
+export interface Perch {
+	readonly state: PerchState;
+	/** Where its feet are, in CSS pixels. */
+	readonly x: number;
+	readonly y: number;
+	/** The pixels to paint, in strip pixels from the feet, the bird facing left. */
+	readonly pose: Pose;
+	/** Advance by `dt` seconds. `to` is where it lands: the button's top edge, read each frame. */
+	step(dt: number, to: { readonly x: number; readonly y: number }): void;
+	/** The pointer reached the button. Flying down or standing on it, the bird flies off. */
+	scare(): void;
+}
+
+/**
+ * A bird that sets off from `from` and lands within `ARRIVE` seconds.
+ *
+ * It comes down in a curve that ends level with the button, falls with its wings tucked through
+ * the middle of it, and beats its wings to brake at both ends. On the button it stands a moment,
+ * pecks two to four times, and stands again. Scared, it flies off up and to the left in bounds, as
+ * the strip's birds do, and keeps going; the page decides when it is out of sight.
+ */
+export const createPerch = (from: { readonly x: number; readonly y: number }, random: () => number = Math.random): Perch => {
+	let state: PerchState = 'in';
+	let x = from.x, y = from.y, t = 0;
+	let current: Pose = FLY_UP;
+	// On the button: the time left in this stance, and the pecks left in this round.
+	let wait = 0.25 + random() * 0.3, pecks = 0, down = false;
+	// Flying off.
+	let vx = 0, vy = 0, flap = true, bout = 0;
+
+	const step = (dt: number, to: { readonly x: number; readonly y: number }): void => {
+		t += dt;
+		const beat = Math.floor(t * 14) & 1 ? FLY_LEVEL : FLY_UP;
+		if (state === 'in') {
+			const s = Math.min(1, t / ARRIVE), u = 1 - (1 - s) ** 2;
+			const cx = to.x + 170, cy = to.y - 70;
+			x = (1 - u) ** 2 * from.x + 2 * u * (1 - u) * cx + u * u * to.x;
+			y = (1 - u) ** 2 * from.y + 2 * u * (1 - u) * cy + u * u * to.y;
+			current = s > 0.15 && s < 0.55 ? TUCK : beat;
+			if (s === 1) { state = 'perch'; current = STAND; }
+			return;
+		}
+		if (state === 'perch') {
+			x = to.x; y = to.y;
+			wait -= dt;
+			if (wait <= 0) {
+				if (down) { down = false; pecks--; wait = pecks > 0 ? 0.13 : 0.5 + random(); }
+				else { if (pecks === 0) pecks = 2 + Math.floor(random() * 3); down = true; wait = 0.09; }
+			}
+			current = down ? PECK : STAND;
+			return;
+		}
+		bout -= dt;
+		if (bout <= 0) { flap = !flap; bout = flap ? 0.22 + random() * 0.08 : 0.12 + random() * 0.06; }
+		vx += (-220 - vx) * 2 * dt;
+		vy += (flap ? (-300 - vy) * 6 : 600) * dt;
+		x += vx * dt; y += vy * dt;
+		current = flap ? beat : TUCK;
+	};
+
+	const scare = (): void => {
+		if (state === 'away') return;
+		state = 'away'; vx = -120; vy = -150; flap = true; bout = 0.25;
+	};
+
+	return {
+		get state() { return state; },
+		get x() { return x; },
+		get y() { return y; },
+		get pose() { return current; },
+		step,
+		scare,
+	};
+};
+
+/**
+ * Run the bird on `canvas`, a child of `hero` placed against it, landing on `button`.
+ *
+ * It sets off from above the top of the page, to the right of the button, and is painted in the
+ * strip's bird colour for the mode `night` reports, at the strip's pixel size. The pointer reaching
+ * the button, or the keyboard focusing it, sends it off; once it is past the edge of the page it is
+ * gone for good. Nothing happens for a visitor who asked for reduced motion.
+ *
+ * Returns: a stop function.
+ */
+export const runPerch = (
+	hero: HTMLElement,
+	canvas: HTMLCanvasElement,
+	button: HTMLElement,
+	scale: (width: number) => number,
+	night: () => boolean,
+): (() => void) => {
+	const context = canvas.getContext('2d');
+	if (!context || matchMedia('(prefers-reduced-motion: reduce)').matches) return () => {};
+
+	// The canvas holds every pose: x from -4 to 3, y from -5 to 0, in strip pixels.
+	canvas.width = 8; canvas.height = 6;
+	const spot = (): { x: number; y: number } => {
+		const h = hero.getBoundingClientRect(), b = button.getBoundingClientRect();
+		return { x: b.left - h.left + b.width * 0.72, y: b.top - h.top };
+	};
+	const start = spot(), top = hero.getBoundingClientRect().top + scrollY;
+	const bird = createPerch({ x: start.x + 240, y: -top - 30 });
+
+	let raf = 0, last = performance.now(), size = 0;
+	const paint = (): void => {
+		const next = scale(hero.getBoundingClientRect().width);
+		if (next !== size) {
+			size = next;
+			canvas.style.width = `${String(8 * size)}px`; canvas.style.height = `${String(6 * size)}px`;
+		}
+		// Across, on the strip's pixel grid; down, on the button's edge exactly, so the feet touch it.
+		const left = Math.round(bird.x / size) * size - 4 * size, high = Math.round(bird.y) - 6 * size;
+		canvas.style.transform = `translate(${String(left)}px, ${String(high)}px)`;
+		context.clearRect(0, 0, 8, 6);
+		context.fillStyle = (night() ? NIGHT : LIGHT).bird;
+		for (const [px, py] of bird.pose) context.fillRect(px + 4, py + 5, 1, 1);
+	};
+	const gone = (): boolean => {
+		const h = hero.getBoundingClientRect();
+		return bird.y + h.top + scrollY < -40 || bird.x + h.left < -40 || bird.x + h.left > innerWidth + 40;
+	};
+
+	// Standing on a button that is off screen, nothing needs drawing: the loop rests until the button
+	// is back, or until the bird is scared.
+	let seen = true, running = false, done = false;
+	const tick = (ms: number): void => {
+		bird.step(Math.min(0.05, (ms - last) / 1000), spot());
+		last = ms;
+		if (bird.state === 'perch' && button.matches(':hover')) bird.scare();
+		canvas.dataset['state'] = bird.state;
+		if (bird.state === 'away' && gone()) { canvas.style.display = 'none'; running = false; done = true; return; }
+		paint();
+		if (bird.state === 'perch' && !seen) { running = false; return; }
+		raf = requestAnimationFrame(tick);
+	};
+	const run = (): void => {
+		if (running || done) return;
+		running = true; last = performance.now(); raf = requestAnimationFrame(tick);
+	};
+	const scare = (): void => { bird.scare(); run(); };
+	button.addEventListener('pointerenter', scare);
+	button.addEventListener('focus', scare);
+	const watch = new IntersectionObserver(([entry]) => {
+		seen = entry?.isIntersecting ?? true;
+		if (seen) run();
+	});
+	watch.observe(button);
+	canvas.style.display = 'block';
+	paint();
+	run();
+
+	return () => {
+		cancelAnimationFrame(raf);
+		watch.disconnect();
+		button.removeEventListener('pointerenter', scare);
+		button.removeEventListener('focus', scare);
+	};
+};
