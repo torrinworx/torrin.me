@@ -1,5 +1,6 @@
-// The hamburger and what it opens: home, resume, contact, the blog, the radio, GitHub, the address
-// and the dark mode switch.
+// The top of every page. The name, a link home, heads every page but the landing, whose hero
+// carries it. The hamburger floats at the top right of the window on every page, and opens home,
+// resume, contact, the blog, the radio, GitHub, the address and the dark mode switch.
 //
 // `Detached` places the panel and `Card` paints it. Every row is a `Button` with a real `href`, so
 // the four internal links are in the markup a crawler reads and `router.links` turns a click into
@@ -57,8 +58,13 @@ export const Header = StageContext.use((stage) => ModeContext.use((mode) => (
 
 	const darkOn = mode?.map((held) => held === dark).setter((on) => { mode.set(on ? dark : light); });
 
-	return (
-		<div theme="bar">
+	return [
+		unless('', (
+			<div theme="bar">
+				<a theme="wordmark" href="/" title="Go to home">Torrin Leonard</a>
+			</div>
+		)),
+		<nav theme="float" aria-label="Site">
 			<Detached
 				enabled={open}
 				locations={['below-end', 'above-end', 'below-start', 'above-start']}
@@ -156,6 +162,6 @@ export const Header = StageContext.use((stage) => ModeContext.use((mode) => (
 					</Card>
 				</mark.popup>
 			</Detached>
-		</div>
-	);
+		</nav>,
+	];
 }));

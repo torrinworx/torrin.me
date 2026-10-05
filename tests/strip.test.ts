@@ -1,0 +1,70 @@
+// The landing's pixel strip (work order 485). Everything here runs the strip in Node, through
+// createStrip, with motion where the test needs it and none where a still frame is the point.
+
+import assert from 'node:assert/strict';
+import { describe, it } from 'node:test';
+
+import { createStrip, heroScene, pack } from '../frontend/strip.ts';
+import { FOREST, PAPER } from '../frontend/theme.ts';
+
+// A wide screen and a phone: CSS width, then the strip's size in its own pixels, then where the
+// moon stands across it at night.
+const SIZES = [['wide', 1905, 635, 187, 0.6], ['phone', 390, 195, 150, 0.8]] as const;
+
+const still = (night: boolean, css: number, width: number, height: number) => {
+	const strip = createStrip(heroScene(night, css), width, height, { motion: false });
+	strip.frame(0, 0);
+	return strip;
+};
+const row = (strip: { width: number; pixels: Uint32Array }, y: number): number[] =>
+	Array.from(strip.pixels.subarray(y * strip.width, (y + 1) * strip.width));
+
+describe('the hero strip', () => {
+	for (const [name, css, width, height, moon] of SIZES) {
+		it(`its sky starts at the page colour, light and dark, on a ${name} screen`, () => {
+			assert.ok(row(still(false, css, width, height), 0).every((c) => c === pack(PAPER)), 'the light sky starts at paper');
+			assert.ok(row(still(true, css, width, height), 0).every((c) => c === pack(FOREST)), 'the night sky starts at forest');
+		});
+
+		// The pond is as deep as the sky is tall, so its last row mirrors the top of the sky and
+		// nothing standing on the bank runs off the bottom.
+		it(`its pond ends on the page colour with no reflection cut off, on a ${name} screen`, () => {
+			assert.ok(row(still(false, css, width, height), height - 1).every((c) => c === pack(PAPER)), 'the light pond ends on paper');
+			// The moon stands in the top of the night sky, so its reflection is the one thing allowed in
+			// the last row: within its radius, its glow and the ripple's sway of either side of it.
+			const reach = Math.max(3, Math.round(height * 0.045)) + 3 + 6;
+			const night = row(still(true, css, width, height), height - 1);
+			const stray = night.filter((c, x) => Math.abs(x - Math.round(width * moon)) > reach && c !== pack(FOREST));
+			assert.equal(stray.length, 0, 'the night pond ends on forest, apart from the moon');
+		});
+	}
+
+	it('draws the same scene from the same seed', () => {
+		assert.deepEqual(still(false, 1905, 635, 187).pixels, still(false, 1905, 635, 187).pixels);
+	});
+
+	// "25 a second at an easy pace": an easy pace is two strip pixels a move, sixty moves a second.
+	it('a second of brushing a crown at an easy pace shakes about 25 leaves loose', () => {
+		let seed = 1;
+		const random = (): number => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+		const strip = createStrip(heroScene(false, 1905), 635, 187, { motion: true, random });
+		strip.frame(0, 0);
+		// Inside the crown of the hero's second tree: it stands at 0.74 of the width, and its crown is
+		// centred well above the bank.
+		const x = Math.round(0.74 * 635), y = 52;
+		for (let i = 0; i < 60; i++) {
+			strip.move(x + (i % 2 ? 1 : -1), y);
+			strip.frame(1 / 60, 0.5 + i / 60);
+		}
+		const shaken = strip.leaves();
+		assert.ok(shaken >= 22 && shaken <= 26, `about 25 leaves came loose, not ${String(shaken)}`);
+	});
+
+	// Five seconds, past the moment the first leaf would fall on its own.
+	it('lets nothing fall with motion off, brushed or not', () => {
+		const strip = createStrip(heroScene(false, 1905), 635, 187, { motion: false });
+		strip.frame(0, 0);
+		for (let i = 0; i < 300; i++) { strip.move(Math.round(0.74 * 635) + (i % 2), 52); strip.frame(1 / 60, i / 60); }
+		assert.equal(strip.leaves(), 0);
+	});
+});

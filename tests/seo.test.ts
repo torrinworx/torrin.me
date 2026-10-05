@@ -115,3 +115,51 @@ describe('the head a crawler reads', () => {
 		assert.ok(!read('sitemap.xml').includes('404'), 'and it is not in the sitemap');
 	});
 });
+
+// The landing's hero as the build writes it (work order 485): its words are in the page a crawler
+// reads, taken from resume.json, and the strip is an empty canvas the browser fills.
+describe('the landing page a crawler reads', () => {
+	const profile = (JSON.parse(readFileSync(fileURLToPath(new URL('../frontend/data/resume.json', import.meta.url)), 'utf8')) as {
+		profile: Record<string, string>;
+	}).profile;
+	const escaped = (text: string): string => text.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+	it('carries the hero copy from resume.json', () => {
+		const html = read('index.html');
+		for (const key of ['name', 'heroLabel', 'heroLede', 'heroWhere']) {
+			assert.ok(html.includes(escaped(profile[key]!)), `the hero says profile.${key}`);
+		}
+		assert.match(html, /<h1[^>]*>[^<]*Torrin Leonard/, 'the name is the h1');
+		assert.match(html, /id="hero-strip"[^>]*>\s*<canvas/, 'the strip is a canvas the browser fills');
+	});
+
+	// Read inside the menu's panel, which the build writes at the end of the page: the hero carries
+	// the resume too, so a match anywhere on the page would pass with a menu row gone. A page leaves
+	// out the row that points at itself.
+	it('carries the menu links on every page', () => {
+		for (const page of PAGES) {
+			const html = read(page);
+			const at = html.indexOf('<div data-menu');
+			assert.ok(at > 0, `${page} has the menu's panel`);
+			const menu = html.slice(at);
+			for (const href of ['/blog', '/radio', '/Torrin_Leonard_Resume.pdf']) {
+				if (page === `${href.slice(1)}/index.html`) continue;
+				assert.ok(menu.includes(`href="${href}"`), `${page} links ${href} from the menu`);
+			}
+		}
+	});
+
+	it('shows the name in the header on every page but the landing, whose hero carries it', () => {
+		for (const page of PAGES) {
+			const header = read(page).split('aria-label="Site"')[0]!;
+			assert.equal(/<a[^>]*title="Go to home"[^>]*>Torrin Leonard<\/a>/.test(header), page !== 'index.html', `${page}: the header's name`);
+		}
+	});
+
+	it('puts the square photo in the hero, before the strip ends', () => {
+		const html = read('index.html');
+		const photo = html.indexOf('src="/headshot-square.webp"');
+		assert.ok(photo > 0 && photo < html.indexOf(escaped(profile.heroWhere!)), 'the photo is in the hero, above its actions');
+		assert.ok(existsSync(`${dist}headshot-square.webp`), 'and the file is in the build');
+	});
+});

@@ -42,6 +42,14 @@ export const PAPER_A = '#FAF8F4';
 const MUTED = '#5C6A56';
 export const LINE = 'rgba(19, 42, 19, 0.16)';
 
+/**
+ * The widest screen, in CSS pixels, that stacks the landing's words above its strip. Narrower
+ * than about 860, the first tree's crown reaches under the sentence. The strip lays its trees out
+ * for the same width (strip.ts), so this is the one place it is set.
+ */
+export const STACKED = 860;
+const stacked = `_media_(max-width: ${String(STACKED)}px)`;
+
 /** What the switch moves between: one of the two modes below. */
 export type Mode = Definitions;
 
@@ -166,6 +174,9 @@ export const siteTheme: Definitions = {
 		boxSizing: 'border-box',
 		padding: '20px',
 		gap: '60px',
+		// The landing's strip runs the full width of the window, wider than this padded box; the
+		// part a scrollbar covers is cut off rather than scrolled to.
+		overflowX: 'clip',
 	},
 
 	// One column of content, capped at a readable width and centred in the page.
@@ -181,16 +192,39 @@ export const siteTheme: Definitions = {
 	},
 	content_start: { alignItems: 'flex-start' },
 
-	// The header strip: the same width as the content column, with the menu pushed to its end.
+	// The name's row above every page but the landing: the same width as the content column, and as
+	// tall as the menu button, so the name lines up with it.
 	bar: {
 		display: 'flex',
 		flexDirection: 'row',
 		alignItems: 'center',
-		justifyContent: 'flex-end',
 		boxSizing: 'border-box',
 		width: '100%',
 		maxWidth: '800px',
+		minHeight: '44px',
 		padding: '0 20px',
+	},
+	// The name at the start of the strip, in the heading face, a link home.
+	wordmark: {
+		fontFamily: '$fontSerif',
+		fontWeight: 600,
+		fontSize: '1.15rem',
+		letterSpacing: '-0.01em',
+		color: '$foreground',
+		textDecoration: 'none',
+		'_cssProp_focus-visible': { outline: '2px solid $ring', outlineOffset: '4px' },
+	},
+	// The menu button, pinned to the top right of the window on every page, on a tile of the page
+	// colour with the photo's halo, so it reads over whatever scrolls under it.
+	float: {
+		position: 'fixed',
+		top: '20px',
+		right: '20px',
+		zIndex: 10,
+		display: 'flex',
+		background: '$background',
+		boxShadow: '0 0 0 2px $accent',
+		borderRadius: '$radius',
 	},
 	// The dark mode switch at the foot of the menu, drawn in the panel's ink: the library's switch is
 	// filled with the accent when on, which is the panel's own colour, so it would vanish.
@@ -202,6 +236,115 @@ export const siteTheme: Definitions = {
 		'_cssProp_:checked::before': { background: '$accent' },
 		// The page's ring is the panel's own colour, so focus is drawn in the panel's ink.
 		'_cssProp_focus-visible': { outline: '2px solid $accentForeground', outlineOffset: '3px', boxShadow: 'none' },
+	},
+	// --- the landing's hero: the strip, with the name in its sky and the actions on its water ---
+
+	// The whole width of the window. On a wide screen the words sit over the strip; at STACKED and
+	// narrower the three take turns: the words, a shorter strip, then the actions.
+	// 680px tall so the words and the photo sit above the crowns: the trees keep their size and stand
+	// lower (strip.ts). It starts below the band the menu button floats in, so the name has room
+	// above it.
+	hero: {
+		position: 'relative',
+		width: '100vw',
+		height: '680px',
+		marginTop: '64px',
+		[stacked]: { height: 'auto', display: 'flex', flexDirection: 'column', gap: '24px' },
+	},
+	hero_strip: {
+		position: 'absolute',
+		inset: 0,
+		overflow: 'hidden',
+		touchAction: 'pan-y',
+		[stacked]: { position: 'relative', inset: 'auto', height: '300px', order: 1 },
+	},
+	hero_canvas: { position: 'absolute', left: 0, top: 0, display: 'block', imageRendering: 'pixelated' },
+	hero_over: {
+		position: 'absolute',
+		inset: 0,
+		pointerEvents: 'none',
+		boxSizing: 'border-box',
+		// The column the sections below sit in, with the page's own padding around it, so the words
+		// line up with them at every width; on a phone they flow, with the same two paddings.
+		maxWidth: '840px',
+		margin: '0 auto',
+		// Stacked, its two halves are the hero's own rows, so the strip can stand between them.
+		[stacked]: { display: 'contents' },
+	},
+	// The words at the start of the column and the photo at its end. The row itself lets the pointer
+	// through to the strip; only the words and the photo catch it.
+	hero_sky: {
+		position: 'absolute',
+		top: '16px',
+		left: '40px',
+		right: '40px',
+		display: 'flex',
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'flex-start',
+		gap: '24px',
+		[stacked]: { position: 'static', boxSizing: 'border-box', padding: '16px 40px 0' },
+		'_media_(max-width: 520px)': { flexDirection: 'column-reverse', gap: '20px' },
+	},
+	hero_intro: { display: 'flex', flexDirection: 'column', gap: '14px', maxWidth: '420px', minWidth: 0, pointerEvents: 'auto' },
+	// The square head-and-shoulders crop, with the halo every control has. A whole-pixel square, so
+	// nothing below it lands between device pixel rows. At a half-pixel offset the browser blends the
+	// photo's last row and column with what is behind it, which drew a light seam inside the halo;
+	// the accent behind it makes that blend the halo's colour.
+	hero_photo: {
+		display: 'block',
+		flex: '0 0 auto',
+		width: '120px',
+		height: '120px',
+		objectFit: 'cover',
+		background: '$accent',
+		boxShadow: '0 0 0 2px $accent',
+		pointerEvents: 'auto',
+		'_media_(max-width: 520px)': { width: '96px', height: '96px' },
+	},
+	hero_water: {
+		position: 'absolute',
+		bottom: '56px',
+		left: '40px',
+		// As wide as what it holds and no wider, so the pointer reaches the pond beside the actions.
+		maxWidth: 'calc(100% - 80px)',
+		display: 'flex',
+		flexDirection: 'column',
+		gap: '14px',
+		pointerEvents: 'auto',
+		[stacked]: { position: 'static', maxWidth: 'none', order: 2, padding: '0 40px 56px' },
+	},
+	hero_actions: { display: 'flex', flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: '10px 20px' },
+	// The one-sentence intro: a size up from a paragraph, kept to a short measure.
+	hero_lede: { fontSize: '1.1em', lineHeight: '$lhBody', maxWidth: '46ch', margin: 0 },
+	// Where the work can happen, quiet, in the label face without the capitals.
+	hero_where: { fontFamily: '$fontMono', fontSize: '0.85em', color: '$ink2', margin: 0 },
+	// A text action on the water: the label face, underlined, the accent colour.
+	quietlink: {
+		fontFamily: '$fontMono',
+		fontWeight: 500,
+		fontSize: '$sizeLabel',
+		textTransform: 'uppercase',
+		letterSpacing: '$tracking',
+		color: '$accent',
+		textDecoration: 'underline',
+		textDecorationThickness: '1px',
+		textUnderlineOffset: '5px',
+		background: 'none',
+		border: 'none',
+		padding: 0,
+		cursor: 'pointer',
+		// The library's button gives an icon side its own padding, by rules that outrank a plain
+		// `padding`; the Email link carries an icon, so it zeroes them the same way.
+		'_cssProp_has(> svg:first-child)': { paddingLeft: 0 },
+		'_cssProp_has(> svg:last-child)': { paddingRight: 0 },
+		// The library's halo is the ring at half strength, 2:1 on paper; a link with no box of its
+		// own needs the full ring to be seen.
+		'_cssProp_focus-visible': { outline: '2px solid $ring', outlineOffset: '4px' },
+		// Under the pointer the underline thickens. The Email action is the library's button, which
+		// tints its box on hover; this has no box, so the tint goes.
+		_cssProp_hover: { textDecorationThickness: '2px', backgroundImage: 'none' },
+		_cssProp_active: { backgroundImage: 'none' },
 	},
 	content_radius: { borderRadius: '$radiusLg' },
 

@@ -5,13 +5,15 @@
 // only reshape that data into what <Entry> expects; add resume content by editing the JSON.
 
 import { mutable } from '@aweftjs/core';
+import type { Derived } from '@aweftjs/core';
 import { Button, Icon, Typography, h } from '@aweftjs/ui';
 
 import resume from '../data/resume.json' with { type: 'json' };
+import { heroScale, heroScene, runStrip } from '../strip.ts';
+import { ModeContext, dark } from '../theme.ts';
 import { Contact } from '../utils/contact.tsx';
 import { Email } from '../utils/email.tsx';
 import { Resume } from '../utils/resume.tsx';
-import { useShine } from '../utils/shine.tsx';
 
 const { profile } = resume;
 
@@ -146,83 +148,80 @@ const Section = (props: { title: string; children?: unknown[] }): unknown => (
 	</div>
 );
 
-export const Landing = (
-	_props: Record<string, unknown>,
+const STRIP = 'hero-strip';
+
+/**
+ * The top of the landing page: the pixel strip across the window, the name, the role, a sentence and
+ * the photo in its sky, and on its water the resume, the two ways to get in touch, and where the work
+ * can happen.
+ *
+ * The strip only exists in a browser. The page the build writes has the words and an empty canvas,
+ * and the scene starts on the first frame after the page comes alive, in the mode the page is in.
+ */
+const Hero = ModeContext.use((mode) => (
+	props: { focused: Derived<boolean> },
 	cleanup: (...fns: (() => void)[]) => void,
 ): unknown => {
+	if (typeof requestAnimationFrame === 'function') {
+		let stop = (): void => {};
+		let off = (): void => {};
+		const start = (night: boolean): void => {
+			stop();
+			const host = document.getElementById(STRIP);
+			stop = host === null ? () => {} : runStrip(host, (width) => heroScene(night, width), heroScale);
+		};
+		const first = requestAnimationFrame(() => {
+			if (mode === null) start(false);
+			else off = mode.effect((held) => { start(held === dark); });
+		});
+		cleanup(() => { cancelAnimationFrame(first); off(); stop(); });
+	}
+
+	return (
+		<div theme="hero">
+			<div id={STRIP} theme="hero_strip" aria-hidden="true">
+				<canvas theme="hero_canvas" />
+			</div>
+			<div theme="hero_over">
+				<div theme="hero_sky">
+					<div theme="hero_intro">
+						<Typography type="h1" label={profile.name} />
+						<Typography type="date" label={profile.heroLabel} />
+						<Typography type="p1" theme="hero_lede" label={profile.heroLede} />
+					</div>
+					{/* A square head-and-shoulders crop of headshot.webp (800px from x 200, y 360), at 360px. */}
+					<img theme="hero_photo" src="/headshot-square.webp" width="120" height="120" alt="Profile image of Torrin Leonard." />
+				</div>
+				<div theme="hero_water">
+					<div theme="hero_actions">
+						<Resume />
+						<button
+							type="button"
+							theme="quietlink"
+							title="Get in touch with Torrin Leonard."
+							onClick={() => {
+								const block = document.getElementById('contact');
+								if (block === null) return;
+								props.focused.set(true);
+								block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+							}}
+						>
+							Contact
+						</button>
+						<Email theme="quietlink" />
+					</div>
+					<p theme="hero_where">{profile.heroWhere}</p>
+				</div>
+			</div>
+		</div>
+	);
+});
+
+export const Landing = (): unknown => {
 	const focused = mutable(false);
 
 	return [
-		<div theme={['content', 'start']}>
-			<div
-				theme={['row', 'wide', 'start']}
-				style={{ alignItems: 'center', justifyContent: 'space-between', gap: 10 }}
-			>
-				<div style={{ flex: '1 1 0', minWidth: 0 }}>
-					<Typography theme={['row', 'wide', 'start']} type="h1" label={profile.name} />
-					<Typography theme={['row', 'wide', 'start']} type="p1" label={profile.tagline} />
-					<Typography theme={['row', 'wide', 'start']} type="p1" label={profile.intro} />
-				</div>
-
-				<div style={{ flex: '0 0 auto', display: 'flex', justifyContent: 'flex-end' }}>
-					<img
-						src="/headshot.webp"
-						theme="ring"
-						alt="Profile image of Torrin Leonard."
-						style={{
-							// A whole-pixel width and a 3:4 box, so the height is an integer. Left to the
-							// file's own ratio it came out 239.656px tall, and that fraction was the
-							// origin of every blurred rule below it: the live site has the same one.
-							width: 'round(20vw, 3px)',
-							maxWidth: 180,
-							minWidth: 141,
-							aspectRatio: '3 / 4',
-							height: 'auto',
-							objectFit: 'cover',
-							display: 'block',
-						}}
-					/>
-				</div>
-			</div>
-
-			<div theme="divider" style={{ marginTop: 16 }} />
-
-			<Typography theme={['row', 'wide', 'start']} type="p1_bold" label={profile.locationDisplay} />
-			<Typography
-				theme={['row', 'wide', 'start']}
-				type="p1"
-				label={`${profile.availability} ${profile.remote}`}
-			/>
-
-			<div theme={['row', 'wrap', 'wide', 'start']} style={{ marginTop: 10, gap: 10 }}>
-				<Resume />
-				<Button
-					id="get-in-touch"
-					theme="shiny"
-					title="Get in touch with Torrin Leonard."
-					label="Contact"
-					icon={<Icon name="feather:mail" />}
-					iconPosition="right"
-					onClick={() => {
-						const block = document.getElementById('contact');
-						if (block === null) return;
-						focused.set(true);
-						block.scrollIntoView({ behavior: 'smooth', block: 'start' });
-					}}
-				>
-					{useShine(cleanup)}
-				</Button>
-				<Email type="quiet" />
-				<Button
-					type="quiet"
-					title="Torrin Leonard's Github."
-					label="Github"
-					icon={<Icon name="feather:github" />}
-					iconPosition="right"
-					href={profile.github}
-				/>
-			</div>
-		</div>,
+		<Hero focused={focused} />,
 
 		<Section title="Experience">
 			<div theme="column" style={{ width: '100%', gap: 20 }}>

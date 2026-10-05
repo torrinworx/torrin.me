@@ -17,6 +17,9 @@
     "website": "https://torrin.me",
     "github": "https://github.com/torrinworx",
     "linkedin": "https://www.linkedin.com/in/torrin-leonard-8343a1154/",
+    "heroLabel": "Product Engineer · Available now",
+    "heroLede": "I build and lead production AI software 0 to 1, end to end.",
+    "heroWhere": "Open to remote roles · Located in Waterloo 🇨🇦",
     "summary": "Product engineer, full stack and applied AI. I build and own production products end to end with React, TypeScript, Node and Python, and I take AI features from 0 to 1: retrieval-augmented generation (RAG) and vector search, fine-tuning, and guards against prompt injection and hallucination. I ran production releases and mentored developers at Equator, and ran my own studio before that. I work through coding agents (Claude Code) daily, plan first, and review every diff before it ships."
   },
 

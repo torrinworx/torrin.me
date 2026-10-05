@@ -162,8 +162,9 @@ try {
 		await view.close();
 	}
 
-	// The dark mode switch, as a visitor uses it: the menu's switch turns the page dark, and the
-	// choice is still there after a reload (work order 485).
+	// The landing's strip and the dark mode switch, as a visitor uses them: the browser draws the
+	// strip with its sky in the page colour, the menu's switch turns the page and the strip dark,
+	// and the choice is still there after a reload (work order 485).
 	const landing = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 	landing.on('pageerror', (error) => problems.push(`mode: ${String(error)}`));
 	// Each load of the page is a visit, and every visit must post its first batch, browser facts
@@ -171,19 +172,34 @@ try {
 	const posted = (): Promise<unknown> => landing.waitForResponse((answer) => answer.url() === `${site.url}/api/logs`, { timeout: 15_000 });
 	let batch = posted();
 	await landing.goto(`${site.url}/`, { waitUntil: 'networkidle' });
+	const skyIs = async (rgb: string): Promise<void> => {
+		await landing.waitForFunction((want) => {
+			const canvas = document.querySelector<HTMLCanvasElement>('#hero-strip canvas');
+			if (canvas === null || canvas.width === 0) return false;
+			const [r, g, b] = canvas.getContext('2d')?.getImageData(0, 0, 1, 1).data ?? [];
+			return `${String(r)},${String(g)},${String(b)}` === want;
+		}, rgb, { timeout: 5_000 });
+	};
+	await skyIs('244,246,236');
+	// The menu floats at the top right of the window, so a visitor deep in the page still has it.
+	await landing.evaluate(() => { document.querySelector('h2')!.scrollIntoView(); });
+	const menu = await landing.locator('button[aria-label="Menu"]').boundingBox();
+	assert.ok(menu !== null && menu.y === 20 && menu.x + menu.width === 1260, `the menu stays at the top right as the page scrolls, not at ${JSON.stringify(menu)}`);
 	await landing.click('button[aria-label="Menu"]');
 	await landing.click('text=Dark mode');
+	await landing.evaluate(() => { scrollTo(0, 0); });
+	await skyIs('19,42,19');
 	// The page eases into its new background over a moment, so this waits for it to arrive.
-	const isForest = (): Promise<boolean> => landing.waitForFunction(
+	const forest = await landing.waitForFunction(
 		() => getComputedStyle(document.querySelector('main')!.parentElement!).backgroundColor === 'rgb(19, 42, 19)',
 		undefined,
 		{ timeout: 5_000 },
 	).then(() => true, () => false);
-	assert.ok(await isForest(), 'the switch turns the page forest');
+	assert.ok(forest, 'the switch turns the page forest');
 	await batch;
 	batch = posted();
 	await landing.reload({ waitUntil: 'networkidle' });
-	assert.ok(await isForest(), 'and it is forest again after a reload');
+	await skyIs('19,42,19');
 	assert.equal(await landing.evaluate(() => localStorage.getItem('modeChoice')), 'dark', 'and the choice is kept across a reload');
 	await landing.screenshot({ path: `${shots}landing-dark.png` });
 	await batch;
