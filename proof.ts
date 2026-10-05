@@ -162,6 +162,33 @@ try {
 		await view.close();
 	}
 
+	// The dark mode switch, as a visitor uses it: the menu's switch turns the page dark, and the
+	// choice is still there after a reload (work order 485).
+	const landing = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+	landing.on('pageerror', (error) => problems.push(`mode: ${String(error)}`));
+	// Each load of the page is a visit, and every visit must post its first batch, browser facts
+	// and all, before the page reloads or closes, as the pages above do.
+	const posted = (): Promise<unknown> => landing.waitForResponse((answer) => answer.url() === `${site.url}/api/logs`, { timeout: 15_000 });
+	let batch = posted();
+	await landing.goto(`${site.url}/`, { waitUntil: 'networkidle' });
+	await landing.click('button[aria-label="Menu"]');
+	await landing.click('text=Dark mode');
+	// The page eases into its new background over a moment, so this waits for it to arrive.
+	const isForest = (): Promise<boolean> => landing.waitForFunction(
+		() => getComputedStyle(document.querySelector('main')!.parentElement!).backgroundColor === 'rgb(19, 42, 19)',
+		undefined,
+		{ timeout: 5_000 },
+	).then(() => true, () => false);
+	assert.ok(await isForest(), 'the switch turns the page forest');
+	await batch;
+	batch = posted();
+	await landing.reload({ waitUntil: 'networkidle' });
+	assert.ok(await isForest(), 'and it is forest again after a reload');
+	assert.equal(await landing.evaluate(() => localStorage.getItem('modeChoice')), 'dark', 'and the choice is kept across a reload');
+	await landing.screenshot({ path: `${shots}landing-dark.png` });
+	await batch;
+	await landing.close();
+
 	// The form, end to end: filled in a real browser, posted to the real route, landing in the
 	// endpoint that stands in for Resend.
 	const view = await browser.newPage({ viewport: { width: 1280, height: 900 } });

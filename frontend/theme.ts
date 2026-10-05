@@ -1,14 +1,21 @@
-// The site's look, as one partial theme handed to `<Theme value={...}>`.
+// The site's look: two modes holding the colours, and one partial theme holding everything else.
 //
 // The brand is studio/brand/tokens.json, copied here by value because a theme is data and that
 // file is in another repository. Five greens on paper: forest and pine are the two inks, moss is
-// the one accent, sage and lime are fills only. Everything the theme names `$accent` is moss.
+// the one accent, sage and lime are fills only. Everything the light mode names `$accent` is moss.
+// The dark mode is the brand's dark roles: a forest page, paper ink, sage for the second ink and
+// lime for the accent.
+//
+// The pages are written light. Only a visitor who picks dark with the menu's switch gets dark,
+// once the page is alive; their system setting is never read (work order 485, as builderloo.ca).
 //
 // Four type sizes exist on purpose, which is what keeps the page from growing a font size per
 // component: the display heading, the section heading, the paragraph, and the mono label.
 // Source Serif 4 is the heading face, IBM Plex Sans the paragraph face, and JetBrains Mono the
 // label face: eyebrows, dates and the controls, set uppercase and tracked.
 
+import type { Derived } from '@aweftjs/core';
+import { createContext, dark as baseDark, light as baseLight } from '@aweftjs/ui';
 import type { Definitions } from '@aweftjs/ui';
 
 import { fontFaces } from './fonts.ts';
@@ -28,11 +35,85 @@ export const PINE = '#31572C';
  * WCAG 2 AA as text on either, which is what lets it be the link colour and not only a line.
  */
 export const MOSS = '#4F772D';
+export const SAGE = '#90A955';
 export const LIME = '#ECF39E';
 export const PAPER = '#F4F6EC';
 export const PAPER_A = '#FAF8F4';
 const MUTED = '#5C6A56';
 export const LINE = 'rgba(19, 42, 19, 0.16)';
+
+/** What the switch moves between: one of the two modes below. */
+export type Mode = Definitions;
+
+const lightTokens: Record<string, string> = {
+	$background: PAPER,
+	$foreground: FOREST,
+	// The second ink: dates and eyebrows, quieter than a paragraph and still 7.6:1 on paper.
+	$ink2: PINE,
+	// A raised block: the fields, and the box the brand calls paper-a.
+	$surface: PAPER_A,
+	$surfaceForeground: FOREST,
+	$mutedForeground: MUTED,
+
+	$accent: MOSS,
+	// Paper-a on moss is 4.94:1. White is 5.24:1 and is not one of the page's colours.
+	$accentForeground: PAPER_A,
+	$link: MOSS,
+	// Every focus ring on the page is drawn from this, so tabbing through the site is moss.
+	$ring: MOSS,
+	$input: MOSS,
+	$border: LINE,
+};
+
+// The brand's dark roles. Lime on forest is 13:1 and sage 5.8:1 (tokens.json); the muted ink is
+// 8:1. The raised block is forest lifted one step, since paper-a would be a light box on a dark page.
+const darkTokens: Record<string, string> = {
+	$background: FOREST,
+	$foreground: PAPER_A,
+	$ink2: SAGE,
+	$surface: '#1A331A',
+	$surfaceForeground: PAPER_A,
+	$mutedForeground: '#B4C2A6',
+
+	$accent: LIME,
+	$accentForeground: FOREST,
+	$link: LIME,
+	$ring: LIME,
+	$input: LIME,
+	$border: 'rgba(250, 248, 244, 0.16)',
+};
+
+/** The light mode, which is how every page is written. */
+export const light: Mode = { ...baseLight, '*': { ...baseLight['*'], ...lightTokens } };
+
+/**
+ * The dark mode. A company logo drawn for a light page gets a paper tile under it, or a dark mark
+ * on a transparent ground would vanish into the forest.
+ */
+export const dark: Mode = {
+	...baseDark,
+	'*': { ...baseDark['*'], ...darkTokens },
+	logo: { background: PAPER_A, borderRadius: '$radius' },
+};
+
+/**
+ * What the menu's switch is wrapped in: its label set as a menu row is, in the panel's ink. A field's
+ * label is one fixed entry for every field, so only a provider around this one can restyle it.
+ */
+export const menuSwitch: Definitions = {
+	field_label: {
+		fontFamily: '$fontMono',
+		fontWeight: 500,
+		fontSize: '$sizeLabel',
+		textTransform: 'uppercase',
+		letterSpacing: '$tracking',
+		color: '$accentForeground',
+		cursor: 'pointer',
+	},
+};
+
+/** The mode the page shows, a cell the menu's switch writes. Absent above a component, it is light. */
+export const ModeContext = createContext<Derived<Mode> | null>(null);
 
 // The paragraph, once: `p1` and `body` were two faces on the old site and are the same face now.
 // Both names stay because both pages reach for both.
@@ -48,24 +129,6 @@ export const siteTheme: Definitions = {
 		$font: SANS,
 		$fontMono: MONO,
 		$fontSerif: SERIF,
-
-		$background: PAPER,
-		$foreground: FOREST,
-		// The second ink: dates and eyebrows, quieter than a paragraph and still 7.6:1 on paper.
-		$ink2: PINE,
-		// A raised block: the fields, and the box the brand calls paper-a.
-		$surface: PAPER_A,
-		$surfaceForeground: FOREST,
-		$mutedForeground: MUTED,
-
-		$accent: MOSS,
-		// Paper-a on moss is 4.94:1. White is 5.24:1 and is not one of the page's colours.
-		$accentForeground: PAPER_A,
-		$link: MOSS,
-		// Every focus ring on the page is drawn from this, so tabbing through the site is moss.
-		$ring: MOSS,
-		$input: MOSS,
-		$border: LINE,
 
 		// Editorial edges. A control keeps two pixels so a 2px border does not alias at the
 		// corner; a block is square, as the specimen's cards are.
@@ -128,6 +191,17 @@ export const siteTheme: Definitions = {
 		width: '100%',
 		maxWidth: '800px',
 		padding: '0 20px',
+	},
+	// The dark mode switch at the foot of the menu, drawn in the panel's ink: the library's switch is
+	// filled with the accent when on, which is the panel's own colour, so it would vanish.
+	brandswitch: {
+		border: '2px solid $accentForeground',
+		background: 'transparent',
+		_cssProp_before: { background: '$accentForeground' },
+		_cssProp_checked: { background: '$accentForeground', borderColor: '$accentForeground' },
+		'_cssProp_:checked::before': { background: '$accent' },
+		// The page's ring is the panel's own colour, so focus is drawn in the panel's ink.
+		'_cssProp_focus-visible': { outline: '2px solid $accentForeground', outlineOffset: '3px', boxShadow: 'none' },
 	},
 	content_radius: { borderRadius: '$radiusLg' },
 
@@ -247,9 +321,12 @@ export const siteTheme: Definitions = {
 	ring: { boxShadow: '0 0 0 2px $accent', borderRadius: '$radiusLg' },
 
 	// The same halo, blinking, until the pointer reaches the block. A keyframes body is written
-	// out as it stands, so the colour is the literal here rather than `$accent`.
+	// out as it stands, with no token in it, so the frames only switch an outline on and off and
+	// the outline takes its colour from the mode.
 	blink: {
-		_keyframes_blink: `0%, 50% { box-shadow: 0 0 0 0.2rem ${MOSS}; } 50.01%, 100% { box-shadow: none; }`,
+		_keyframes_blink: '0%, 50% { outline-style: solid; } 50.01%, 100% { outline-style: none; }',
+		outlineWidth: '0.2rem',
+		outlineColor: '$accent',
 		animation: '$blink 1s steps(1, end) infinite',
 	},
 

@@ -1,18 +1,20 @@
-// The hamburger and what it opens: home, resume, contact, the blog, the radio, GitHub and the address.
+// The hamburger and what it opens: home, resume, contact, the blog, the radio, GitHub, the address
+// and the dark mode switch.
 //
 // `Detached` places the panel and `Card` paints it. Every row is a `Button` with a real `href`, so
 // the four internal links are in the markup a crawler reads and `router.links` turns a click into
 // a navigation with nothing wired here. The row that points at the page already showing is left out.
 
 import { mutable } from '@aweftjs/core';
-import { Button, Card, Detached, Icon, StageContext, h, mark, useAbort } from '@aweftjs/ui';
+import { Button, Card, Detached, Icon, StageContext, Theme, Toggle, h, mark, useAbort } from '@aweftjs/ui';
 
+import { ModeContext, dark, light, menuSwitch } from '../theme.ts';
 import { Email } from './email.tsx';
 import { Resume } from './resume.tsx';
 
 const ROW = ['bare', 'brand'];
 
-export const Header = StageContext.use((stage) => (
+export const Header = StageContext.use((stage) => ModeContext.use((mode) => (
 	_props: Record<string, unknown>,
 	cleanup: (...fns: (() => void)[]) => void,
 ): unknown => {
@@ -40,11 +42,20 @@ export const Header = StageContext.use((stage) => (
 		open.effect((on) => {
 			stop?.();
 			stop = on ? listen() : null;
+			// The panel is placed outside the header, so Tab from the button would skip it. Two frames:
+			// the panel is hidden for the one frame before it has been placed.
+			if (on && typeof requestAnimationFrame === 'function') {
+				requestAnimationFrame(() => requestAnimationFrame(() => {
+					document.querySelector<HTMLElement>('[data-menu] a, [data-menu] input')?.focus();
+				}));
+			}
 		}),
 		() => { stop?.(); },
 	);
 
 	const close = (): void => { open.set(false); };
+
+	const darkOn = mode?.map((held) => held === dark).setter((on) => { mode.set(on ? dark : light); });
 
 	return (
 		<div theme="bar">
@@ -134,10 +145,17 @@ export const Header = StageContext.use((stage) => (
 								href="https://github.com/torrinworx"
 							/>
 							<Email theme={ROW} />
+							{darkOn === undefined ? null : (
+								<Theme value={menuSwitch}>
+									<div theme={['row', 'center']} style={{ padding: '8px 10px' }}>
+										<Toggle value={darkOn} label="Dark mode" theme="brandswitch" />
+									</div>
+								</Theme>
+							)}
 						</div>
 					</Card>
 				</mark.popup>
 			</Detached>
 		</div>
 	);
-});
+}));

@@ -11,6 +11,7 @@
 // binding to the server and nothing else; the site has no documents to share.
 
 import { createClient } from '@aweftjs/client';
+import { mutable } from '@aweftjs/core';
 import { createRouter } from '@aweftjs/dom/router';
 import { createLog } from '@aweftjs/logs/client';
 import { attach } from '@aweftjs/ssg/client';
@@ -20,6 +21,8 @@ import { fetchBody, fetching, postAt } from './posts.ts';
 import type { Body } from './posts.ts';
 import { Site } from './site.tsx';
 import type { Track } from './site.tsx';
+import { dark, light } from './theme.ts';
+import type { Mode } from './theme.ts';
 
 // Stamped by vite.config.ts from BUILD_ID; a dev server has none.
 declare const __BUILD__: string | null;
@@ -76,5 +79,21 @@ const log = createLog(createClient({ url: socket }), { build: __BUILD__, router 
 // site gave it, so a report reads "resume" and not "a[href]".
 const track: Track = (event, options) => { log.write({ kind: event, ...options.props }); };
 
-attach(document.body as never, <Site router={router} content={fetching(seed, written)} track={track} />);
+// The pages are written light, and light is the default whatever the system says. Only a visitor
+// who picked dark with the menu's switch gets dark, once the page is alive (work order 485).
+const mode = mutable<Mode>(light);
+attach(document.body as never, <Site router={router} content={fetching(seed, written)} track={track} mode={mode} />);
 router.links(document.body as never);
+
+const stored = ((): string | null => { try { return localStorage.getItem('modeChoice'); } catch { return null; } })();
+if (stored === 'dark') mode.set(dark);
+mode.watch((held) => { try { localStorage.setItem('modeChoice', held === dark ? 'dark' : 'light'); } catch { /* a private window keeps nothing */ } });
+// What no theme entry reaches: the document behind the page, the browser's own controls and
+// scrollbars, and the colour a phone paints its bar in.
+mode.effect((held) => {
+	const background = String(held['*']?.['$background'] ?? '');
+	document.documentElement.style.colorScheme = held === dark ? 'dark' : 'light';
+	document.documentElement.style.backgroundColor = background;
+	document.body.style.backgroundColor = background;
+	document.querySelector('meta[name="theme-color"]')?.setAttribute('content', background);
+});

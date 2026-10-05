@@ -5,7 +5,7 @@ import { Button, Head, Icon, Link, Meta, Shown, Title, Typography, h, mark } fro
 import { SITE_URL } from '../head.tsx';
 import { BARS, levels, now, radio, refresh, state } from '../radio.ts';
 import type { Now, State } from '../radio.ts';
-import { LINE, MOSS } from '../theme.ts';
+import { LIME, LINE, MOSS, ModeContext, dark } from '../theme.ts';
 
 const RADIO_URL = `${SITE_URL}/radio`;
 const TITLE = 'Radio | Torrin Leonard';
@@ -38,8 +38,11 @@ const line = (heard: Now | null): string =>
 
 const CANVAS = 'radio-bars';
 
+// The baseline under the bars in the dark mode: the dark border, paper at low strength.
+const NIGHT_LINE = 'rgba(250, 248, 244, 0.16)';
+
 /** A canvas of vertical rectangles, one per band, drawn every frame from `levels` in the accent colour. */
-const Bars = (_props: Record<string, unknown>, cleanup: (...fns: (() => void)[]) => void): unknown => {
+const Bars = ModeContext.use((mode) => (_props: Record<string, unknown>, cleanup: (...fns: (() => void)[]) => void): unknown => {
 	if (typeof requestAnimationFrame === 'function') {
 		const heights = new Float32Array(BARS);
 		let frame = 0;
@@ -59,19 +62,20 @@ const Bars = (_props: Record<string, unknown>, cleanup: (...fns: (() => void)[])
 			levels(heights, at);
 			const gap = 3;
 			const bar = (width - gap * (BARS - 1)) / BARS;
-			context.fillStyle = MOSS;
+			const night = mode?.get() === dark;
+			context.fillStyle = night ? LIME : MOSS;
 			for (let i = 0; i < BARS; i++) {
 				const tall = Math.max(2, heights[i]! * height);
 				context.fillRect(i * (bar + gap), height - tall, bar, tall);
 			}
-			context.fillStyle = LINE;
+			context.fillStyle = night ? NIGHT_LINE : LINE;
 			context.fillRect(0, height - 1, width, 1);
 		};
 		frame = requestAnimationFrame(draw);
 		cleanup(() => { cancelAnimationFrame(frame); });
 	}
 	return <canvas id={CANVAS} aria-hidden="true" style={{ width: '100%', height: 96, display: 'block' }} />;
-};
+});
 
 export const RadioPage = (
 	_props: Record<string, unknown>,
@@ -98,7 +102,7 @@ export const RadioPage = (
 			<Typography theme={['row', 'wide', 'start']} type="p1" label={DESCRIPTION} />
 			<div
 				theme={['column', 'wide']}
-				style={{ marginTop: 16, padding: 16, gap: 12, boxSizing: 'border-box', border: `1px solid ${LINE}`, borderRadius: 12 }}
+				style={{ marginTop: 16, padding: 16, gap: 12, boxSizing: 'border-box', border: '1px solid $border', borderRadius: 12 }}
 			>
 				<Bars />
 				<Typography type="p1_bold" label={now.map(line)} />

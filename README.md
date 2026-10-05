@@ -142,6 +142,7 @@ description, the first paragraph and a link, for dev.to's import).
 | `frontend/entry.tsx` | what the browser runs; a post page fetches its twin before it takes over |
 | `frontend/pages.ts` | writes every page, `404.html`, `shell.html`, `sitemap.xml` and the feeds |
 | `frontend/data/resume.json` | the content, shared with the resume generator |
+| `frontend/theme.ts` | the look: a light and a dark mode holding the colours, and `siteTheme` holding the rest |
 | `content/blog/` | the posts and their media |
 | `content/blog.ts` | the blog's build step; `content/highlight.ts` and `content/cards.ts` are its fences and its cards |
 | `frontend/pages/radio.tsx` | the radio page, and `frontend/radio.ts` the player, one audio element for the whole site |

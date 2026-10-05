@@ -6,7 +6,12 @@
 
 import { Link, Meta, Script, Style, Title, h } from '@aweftjs/ui';
 
-import { FOREST, LIME, PAPER } from './theme.ts';
+import { FOREST, LIME, ModeContext, PAPER } from './theme.ts';
+import type { Mode } from './theme.ts';
+
+// The colour a phone paints its browser bar: the page's own. The head is written again on every
+// navigation, so this is read from the mode each time rather than set once.
+const colorOf = (mode: Mode): string => String(mode['*']?.['$background'] ?? PAPER);
 
 export const SITE_URL = 'https://torrin.me';
 const PAGE_TITLE = 'Torrin Leonard | Product Engineer';
@@ -168,7 +173,7 @@ body { margin: 0; background: ${PAPER}; text-rendering: optimizeLegibility; -web
  * page opens a deeper `Head` and its own title, description, canonical and Open Graph tags win
  * their groups over these.
  */
-export const SiteHead = (): unknown => <>
+export const SiteHead = ModeContext.use((mode) => (): unknown => <>
 	<Title>{PAGE_TITLE}</Title>
 
 	<Meta name="description" content={DESCRIPTION} />
@@ -176,7 +181,7 @@ export const SiteHead = (): unknown => <>
 	<Meta name="robots" content="index, follow" />
 	<Meta name="geo.placename" content="Waterloo, Ontario, Canada" />
 	<Meta name="geo.region" content="CA-ON" />
-	<Meta name="theme-color" content={PAPER} />
+	<Meta name="theme-color" content={mode?.map(colorOf) ?? PAPER} />
 
 	<Meta property="og:title" content={PAGE_TITLE} />
 	<Meta property="og:description" content={DESCRIPTION} />
@@ -199,4 +204,4 @@ export const SiteHead = (): unknown => <>
 	<Style>{DOCUMENT_CSS}</Style>
 
 	<Script key="jsonld" type="application/ld+json">{JSON.stringify(jsonLd)}</Script>
-</>;
+</>);

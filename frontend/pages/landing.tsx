@@ -86,6 +86,7 @@ const Entry = (props: { item: Item }): unknown => {
 					{item.image === undefined ? null : (
 						<img
 							src={item.image}
+							theme="logo"
 							alt={`Logo of ${item.imageName ?? item.header}`}
 							style={{
 								boxSizing: 'border-box',
