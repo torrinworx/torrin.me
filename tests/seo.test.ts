@@ -51,10 +51,17 @@ describe('the head a crawler reads', () => {
 			for (const name of TWITTER) assert.ok(html.includes(`name="${name}"`), `${page} has ${name}`);
 		});
 
-		it(`${page} carries the canonical link and the favicon`, () => {
+		it(`${page} carries the canonical link and the icons, and the icons are in the build`, () => {
 			const html = read(page);
 			assert.match(html, /<link[^>]*rel="canonical"[^>]*href="https:\/\/torrin\.me/, `${page} is canonical`);
-			assert.match(html, /<link[^>]*rel="icon"/, `${page} has a favicon`);
+			for (const [rel, file] of [['icon', 'favicon-16.png'], ['icon', 'favicon-32.png'], ['apple-touch-icon', 'apple-touch-icon.png']] as const) {
+				const tag = [...html.matchAll(/<link[^>]*>/g)].map((found) => found[0]).find((link) => link.includes(`href="/${file}"`)) ?? '';
+				assert.ok(tag.includes(`rel="${rel}"`), `${page} links ${file} as ${rel}`);
+				assert.ok(existsSync(`${dist}${file}`), `${file} was copied into the build`);
+				// The size the head promises is the size the file is: a PNG's width is at byte 16.
+				const side = readFileSync(`${dist}${file}`).readUInt32BE(16);
+				assert.ok(tag.includes(`sizes="${String(side)}x${String(side)}"`), `${page} says ${file} is ${String(side)}px`);
+			}
 		});
 
 		it(`${page} carries the whole JSON-LD block, parseable`, () => {

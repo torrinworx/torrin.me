@@ -1,10 +1,12 @@
-// The landing's pixel strip and the bird on the resume button (work order 485). Everything here
-// runs in Node, through createStrip and createPerch, with motion where the test needs it and none
-// where a still frame is the point.
+// The landing's pixel strip, the bird on the resume button, and the icons drawn from the strip
+// (work order 485). Everything here runs in Node, through createStrip and createPerch, with motion
+// where the test needs it and none where a still frame is the point.
 
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { describe, it } from 'node:test';
 
+import { icons } from '../favicons.ts';
 import { ARRIVE, createPerch, createStrip, heroScene, pack } from '../frontend/strip.ts';
 import { FOREST, PAPER } from '../frontend/theme.ts';
 
@@ -121,5 +123,19 @@ describe('the resume bird', () => {
 			fly(3, bird);
 			assert.equal(bird.state, 'away', 'and does not come back');
 		}
+	});
+});
+
+describe('the icons', () => {
+	for (const [name, bytes] of Object.entries(icons())) {
+		it(`frontend/public/${name} is what the generator draws`, () => {
+			const committed = readFileSync(new URL(`../frontend/public/${name}`, import.meta.url));
+			assert.ok(committed.equals(bytes), `${name} is stale: run npm run favicons`);
+		});
+	}
+
+	it('are 16, 32 and 180 pixels square', () => {
+		const sizes = Object.fromEntries(Object.entries(icons()).map(([name, bytes]) => [name, bytes.readUInt32BE(16)]));
+		assert.deepEqual(sizes, { 'favicon-16.png': 16, 'favicon-32.png': 32, 'apple-touch-icon.png': 180 });
 	});
 });

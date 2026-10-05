@@ -15,6 +15,7 @@
 		"pages": "AWEFT_DEFAULT_H=@aweftjs/ui node --import @aweftjs/build/loader frontend/pages.ts",
 		"start": "node --env-file-if-exists=.env --import @aweftjs/build/loader main.ts",
 		"resume:pdf": "node --import @aweftjs/build/loader resume.ts",
+		"favicons": "node --import @aweftjs/build/loader favicons.ts",
 		"radio": "node radio/main.ts",
 		"soundfont": "node radio/soundfont.ts",
 		"radio:render": "node radio/render.ts",

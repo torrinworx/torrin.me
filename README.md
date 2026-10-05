@@ -56,6 +56,10 @@ that is blocked.
 before anything else, so the page and the downloadable PDF cannot drift. `npm run resume:pdf` does
 it on its own. Then `npm run content` builds the blog (below), before vite copies what it wrote.
 
+The tab and home screen icons (`frontend/public/favicon-16.png`, `favicon-32.png` and
+`apple-touch-icon.png`) are the landing hero's third tree, drawn by the strip's own generator.
+`npm run favicons` redraws them, and the tests fail when the committed files no longer match it.
+
 ## The radio
 
 `/radio` plays one live station: `radio/` composes music in code, plays it through a soundfont
@@ -144,6 +148,7 @@ description, the first paragraph and a link, for dev.to's import).
 | `frontend/data/resume.json` | the content, shared with the resume generator; the hero's three lines are its `hero*` fields |
 | `frontend/theme.ts` | the look: a light and a dark mode holding the colours, and `siteTheme` holding the rest |
 | `frontend/strip.ts` | the pixel strip at the top of the landing page: a painter that needs no DOM, and the canvas runner; and the bird that lands on the resume button, pecks it, and flies off when the pointer reaches it |
+| `favicons.ts` | draws the icons from the strip's generator |
 | `content/blog/` | the posts and their media |
 | `content/blog.ts` | the blog's build step; `content/highlight.ts` and `content/cards.ts` are its fences and its cards |
 | `frontend/pages/radio.tsx` | the radio page, and `frontend/radio.ts` the player, one audio element for the whole site |

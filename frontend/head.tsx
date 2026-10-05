@@ -198,7 +198,9 @@ export const SiteHead = ModeContext.use((mode) => (): unknown => <>
 	<Meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
 	<Link rel="canonical" href={SITE_URL} />
-	<Link rel="icon" href="/favicon.png" sizes="any" type="image/png" />
+	<Link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+	<Link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png" />
+	<Link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
 	<Link rel="alternate" type="application/atom+xml" href={`${SITE_URL}/feed.xml`} title="Torrin Leonard's blog" />
 
 	<Style>{DOCUMENT_CSS}</Style>
