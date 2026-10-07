@@ -21,6 +21,7 @@ import { fetchBody, fetching, postAt } from './posts.ts';
 import type { Body } from './posts.ts';
 import { Site } from './site.tsx';
 import type { Track } from './site.tsx';
+import { motion } from './strip.ts';
 import { dark, light } from './theme.ts';
 import type { Mode } from './theme.ts';
 
@@ -82,6 +83,11 @@ const track: Track = (event, options) => { log.write({ kind: event, ...options.p
 // The pages are written light, and light is the default whatever the system says. Only a visitor
 // who picked dark with the menu's switch gets dark, once the page is alive (work order 485).
 const mode = mutable<Mode>(light);
+// The forest moves unless the visitor's system asks for reduced motion, or the visitor switched it
+// off from the menu. Set before the page comes alive, so nothing starts moving only to stop.
+const held = ((): string | null => { try { return localStorage.getItem('motionChoice'); } catch { return null; } })();
+motion.set(held === null ? !matchMedia('(prefers-reduced-motion: reduce)').matches : held === 'on');
+motion.watch((moving) => { try { localStorage.setItem('motionChoice', moving ? 'on' : 'off'); } catch { /* a private window keeps nothing */ } });
 attach(document.body as never, <Site router={router} content={fetching(seed, written)} track={track} mode={mode} />);
 router.links(document.body as never);
 

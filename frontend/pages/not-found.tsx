@@ -1,7 +1,12 @@
+// The page for an address that names nothing: a tree on its own across the window, then the words.
+
 import { Button, Icon, Typography, h } from '@aweftjs/ui';
 
-export const NotFound = (): unknown => (
-	<div theme="content" style={{ height: '60vh' }}>
+import { Lost } from '../utils/forest.tsx';
+
+export const NotFound = (): unknown => [
+	<Lost />,
+	<div theme="content" style={{ minHeight: '30vh' }}>
 		<Typography type="h1" style={{ textAlign: 'center' }}>404 Page Not Found</Typography>
 		<Typography type="p1" style={{ textAlign: 'center' }}>
 			The page you are trying to access is either unavailable or restricted.
@@ -13,5 +18,5 @@ export const NotFound = (): unknown => (
 			iconPosition="right"
 			icon={<Icon name="feather:arrow-right" />}
 		/>
-	</div>
-);
+	</div>,
+];

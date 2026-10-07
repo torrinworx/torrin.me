@@ -30,8 +30,7 @@ const SERIF = '"Source Serif 4", Georgia, "Times New Roman", serif';
 export const FOREST = '#132A13';
 export const PINE = '#31572C';
 /**
- * The one accent: links, the rule under a heading, the edge of a control, the halo on the
- * headshot, the focus ring. Measured at 4.8:1 on paper and 4.94:1 on paper-a, so it passes
+ * The one accent: links, the rule under a heading, the edge of a control, the focus ring. Measured at 4.8:1 on paper and 4.94:1 on paper-a, so it passes
  * WCAG 2 AA as text on either, which is what lets it be the link colour and not only a line.
  */
 export const MOSS = '#4F772D';
@@ -177,6 +176,8 @@ export const siteTheme: Definitions = {
 		// The landing's strip runs the full width of the window, wider than this padded box; the
 		// part a scrollbar covers is cut off rather than scrolled to.
 		overflowX: 'clip',
+		// What the canopy over an inner page is placed against, from the top of the window.
+		position: 'relative',
 	},
 
 	// One column of content, capped at a readable width and centred in the page.
@@ -256,9 +257,32 @@ export const siteTheme: Definitions = {
 		inset: 0,
 		overflow: 'hidden',
 		touchAction: 'pan-y',
-		[stacked]: { position: 'relative', inset: 'auto', height: '300px', order: 1 },
+		// Taller when stacked, so the photo floats over the bank with the sky above it.
+		[stacked]: { position: 'relative', inset: 'auto', height: '440px', order: 1 },
 	},
 	hero_canvas: { position: 'absolute', left: 0, top: 0, display: 'block', imageRendering: 'pixelated' },
+	// The photo floating over the strip's bank, kept over the strip's pixel copy of it (landing.tsx).
+	// Placed by transform, so its bobbing is never a layout shift; until the page comes alive it
+	// stands about where it floats: at the end of the words' column, or centred when stacked.
+	hero_photo: {
+		position: 'absolute',
+		left: 0,
+		top: 0,
+		zIndex: 1,
+		display: 'block',
+		width: '174px',
+		height: '234px',
+		objectFit: 'cover',
+		transform: 'translate(calc(100vw - max(0px, (100vw - 840px) / 2) - 217px), 69px)',
+		transition: 'none',
+		cursor: 'pointer',
+		userSelect: 'none',
+		WebkitUserSelect: 'none',
+		touchAction: 'pan-y',
+		[stacked]: { width: '128px', height: '172px', transform: 'translate(calc(50vw - 64px), 48px)' },
+	},
+	// What the strip draws in front of the photo: a leaf, a vine, a bird on its top edge.
+	hero_front: { position: 'absolute', left: 0, top: 0, zIndex: 2, width: 0, height: 0, display: 'block', pointerEvents: 'none', imageRendering: 'pixelated', transition: 'none' },
 	// The bird that lands on the resume button (strip.ts). Above everything in the hero, out of the
 	// pointer's way, and not shown until the browser flies it in. The library eases every transform
 	// over 0.15s, which would trail the bird behind its own flight.
@@ -275,8 +299,8 @@ export const siteTheme: Definitions = {
 		// Stacked, its two halves are the hero's own rows, so the strip can stand between them.
 		[stacked]: { display: 'contents' },
 	},
-	// The words at the start of the column and the photo at its end. The row itself lets the pointer
-	// through to the strip; only the words and the photo catch it.
+	// The words at the start of the column. The row itself lets the pointer through to the strip;
+	// only the words catch it.
 	hero_sky: {
 		position: 'absolute',
 		top: '16px',
@@ -288,24 +312,8 @@ export const siteTheme: Definitions = {
 		alignItems: 'flex-start',
 		gap: '24px',
 		[stacked]: { position: 'static', boxSizing: 'border-box', padding: '16px 40px 0' },
-		'_media_(max-width: 520px)': { flexDirection: 'column-reverse', gap: '20px' },
 	},
 	hero_intro: { display: 'flex', flexDirection: 'column', gap: '14px', maxWidth: '420px', minWidth: 0, pointerEvents: 'auto' },
-	// The square head-and-shoulders crop, with the halo every control has. A whole-pixel square, so
-	// nothing below it lands between device pixel rows. At a half-pixel offset the browser blends the
-	// photo's last row and column with what is behind it, which drew a light seam inside the halo;
-	// the accent behind it makes that blend the halo's colour.
-	hero_photo: {
-		display: 'block',
-		flex: '0 0 auto',
-		width: '120px',
-		height: '120px',
-		objectFit: 'cover',
-		background: '$accent',
-		boxShadow: '0 0 0 2px $accent',
-		pointerEvents: 'auto',
-		'_media_(max-width: 520px)': { width: '96px', height: '96px' },
-	},
 	hero_water: {
 		position: 'absolute',
 		bottom: '56px',
@@ -378,8 +386,8 @@ export const siteTheme: Definitions = {
 	// A control is a label: the mono face, uppercase and tracked, at the label size.
 	button: {
 		textDecoration: 'none',
-		// 2px, the same as the divider, the fields and the halo on the headshot. The library's own
-		// control is 1px, which read as three different weights on one page.
+		// 2px, the same as the divider and the fields. The library's own control is 1px, which read
+		// as three different weights on one page.
 		borderWidth: '2px',
 		fontFamily: '$fontMono',
 		fontWeight: 500,
@@ -464,8 +472,8 @@ export const siteTheme: Definitions = {
 		borderRadius: '$radiusLg',
 	},
 
-	// A solid halo around the headshot, on a square photo.
-	ring: { boxShadow: '0 0 0 2px $accent', borderRadius: '$radiusLg' },
+	// The halo the landing's "Contact" button puts round the contact block, held still while motion is off.
+	ring: { outlineWidth: '0.2rem', outlineStyle: 'solid', outlineColor: '$accent' },
 
 	// The same halo, blinking, until the pointer reaches the block. A keyframes body is written
 	// out as it stands, with no token in it, so the frames only switch an outline on and off and
@@ -499,6 +507,87 @@ export const siteTheme: Definitions = {
 	// A button holding a shine has to clip it, and the shine is placed against the button.
 	shiny: { position: 'relative', overflow: 'clip' },
 
+	// Read by a screen reader and not drawn: the contact form's answer, said as it arrives.
+	unseen: {
+		position: 'absolute',
+		width: '1px',
+		height: '1px',
+		padding: 0,
+		margin: '-1px',
+		overflow: 'hidden',
+		clip: 'rect(0 0 0 0)',
+		whiteSpace: 'nowrap',
+		border: 0,
+	},
+
+	// --- the forest around the site (forest.tsx) -------------------------------------------
+
+	// A canvas a scene paints, at the top left of its box, its pixels kept square.
+	scene_canvas: { position: 'absolute', left: 0, top: 0, display: 'block', imageRendering: 'pixelated' },
+
+	// A section heading on the landing, with its rule: the rule is the bank of a small strip whose
+	// tree stands at its end. Until the page comes alive, a plain line in its place. The title and
+	// the strip share one cell, so the heading is as tall as its tree and the tree never reaches the
+	// section above. Where a long title on a narrow screen meets the tree, the title's own page
+	// colour hides the tree behind it, so the words never sit on leaves (WCAG 1.4.3).
+	heading: { display: 'grid', alignItems: 'end', width: '100%' },
+	heading_title: {
+		gridArea: '1 / 1',
+		justifySelf: 'start',
+		alignSelf: 'end',
+		width: 'auto',
+		// The padding widens the page colour past the glyphs' ascenders and the last letter.
+		padding: '6px 8px 3px 0',
+		marginBottom: '10px',
+		position: 'relative',
+		zIndex: 3,
+		background: '$background',
+	},
+	rule: {
+		gridArea: '1 / 1',
+		position: 'relative',
+		overflow: 'hidden',
+		pointerEvents: 'none',
+		zIndex: 2,
+		background: 'linear-gradient($accent, $accent) bottom / 100% 2px no-repeat',
+	},
+
+	// The canopy over an inner page's margins, from the top of the window, out of the pointer's way.
+	canopy: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 3, pointerEvents: 'none', overflow: 'hidden' },
+
+	// A post's tree beside it on the index, and above its title.
+	tile: { position: 'relative', width: '72px', height: '108px', overflow: 'hidden', marginTop: '22px' },
+	plot: { position: 'relative', width: '100%', height: '220px', overflow: 'hidden' },
+
+	// The footer: a shore across the window, down to its bottom edge, the social row in its sky and
+	// the copyright on its water.
+	// Stacked, the social row wraps to two lines, so the shore is taller and its trees start below them.
+	shore: { position: 'relative', width: '100vw', height: '300px', marginBottom: '-20px', flex: '0 0 auto', [stacked]: { height: '380px' } },
+	shore_strip: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '300px', overflow: 'hidden' },
+	shore_row: {
+		position: 'absolute',
+		top: '26px',
+		left: 0,
+		right: 0,
+		boxSizing: 'border-box',
+		padding: '0 20px',
+		display: 'flex',
+		flexWrap: 'wrap',
+		justifyContent: 'center',
+		gap: '10px',
+	},
+	shore_line: { position: 'absolute', left: 0, right: 0, bottom: '30px', margin: 0, maxWidth: 'none', textAlign: 'center' },
+
+	// The 404 page's tree, across the window above the words.
+	lost: { position: 'relative', width: '100vw', height: '250px', marginTop: '70px', overflow: 'hidden', flex: '0 0 auto' },
+
+	// The radio's reeds, inside its card.
+	reeds: { position: 'relative', width: '100%', height: '120px', overflow: 'hidden' },
+
+	// The contact block holds the bird that lands on its form, and the bird is drawn over it (strip.ts).
+	contact: { position: 'relative' },
+	perch: { position: 'absolute', left: 0, top: 0, zIndex: 7, display: 'none', pointerEvents: 'none', imageRendering: 'pixelated', transition: 'none' },
+
 	// Off the screen and out of the reading order: the spam trap in the contact form.
 	trap: {
 		position: 'absolute',
@@ -512,8 +601,10 @@ export const siteTheme: Definitions = {
 
 	// The index: one entry per post, the title a link in the heading face with no underline until
 	// the pointer reaches it, separated by the hairline the landing's entries use.
+	// Each entry is its words and, beside them, the post's tree.
 	blog_list: { listStyle: 'none', margin: 0, padding: 0, width: '100%', display: 'flex', flexDirection: 'column', gap: '30px' },
-	blog_entry: { gap: '6px', paddingBottom: '30px', borderBottom: '1px solid $border' },
+	blog_entry: { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 72px', gap: '24px', alignItems: 'start', paddingBottom: '30px', borderBottom: '1px solid $border' },
+	blog_text: { gap: '6px', minWidth: 0 },
 	blog_title: { color: '$foreground', textDecoration: 'none', _cssProp_hover: { color: '$accent' } },
 
 	// The post's own lines above the markdown: the eyebrow with the date, and the lede in the

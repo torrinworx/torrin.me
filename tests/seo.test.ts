@@ -163,10 +163,11 @@ describe('the landing page a crawler reads', () => {
 		}
 	});
 
-	it('puts the square photo in the hero, before the strip ends', () => {
+	it('puts the photo in the hero\'s strip, with its words for a reader who cannot see it', () => {
 		const html = read('index.html');
-		const photo = html.indexOf('src="/headshot-square.webp"');
-		assert.ok(photo > 0 && photo < html.indexOf(escaped(profile.heroWhere!)), 'the photo is in the hero, above its actions');
-		assert.ok(existsSync(`${dist}headshot-square.webp`), 'and the file is in the build');
+		const photo = html.indexOf('src="/portrait.webp"');
+		assert.ok(photo > html.indexOf('id="hero-strip"') && photo < html.indexOf(escaped(profile.heroWhere!)), 'the photo is in the strip, above the hero\'s actions');
+		assert.match(html.slice(photo - 200, photo + 300), /alt="Torrin Leonard, head and shoulders, in front of evergreens\."/, 'and says what it shows');
+		assert.ok(existsSync(`${dist}portrait.webp`), 'and the file is in the build');
 	});
 });

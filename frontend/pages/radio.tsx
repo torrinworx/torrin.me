@@ -1,11 +1,12 @@
-// The radio page: a small player. The bars, the track on the air, one button, a status word.
+// The radio page: a small player. The reeds, which stand as tall as each band is loud (forest.tsx),
+// the track on the air, one button, a status word.
 
 import { Button, Head, Icon, Link, Meta, Shown, Title, Typography, h, mark } from '@aweftjs/ui';
 
 import { SITE_URL } from '../head.tsx';
-import { BARS, levels, now, radio, refresh, state } from '../radio.ts';
+import { now, radio, refresh, state } from '../radio.ts';
 import type { Now, State } from '../radio.ts';
-import { LIME, LINE, MOSS, ModeContext, dark } from '../theme.ts';
+import { Canopy, Reeds } from '../utils/forest.tsx';
 
 const RADIO_URL = `${SITE_URL}/radio`;
 const TITLE = 'Radio | Torrin Leonard';
@@ -36,47 +37,6 @@ const STYLE: Readonly<Record<Now['style'], string>> = { sleep: 'Sleep', synthwav
 const line = (heard: Now | null): string =>
 	(heard === null ? 'On the air' : `${heard.name} · ${STYLE[heard.style]} · ${heard.key} · ${String(heard.tempo)} bpm`);
 
-const CANVAS = 'radio-bars';
-
-// The baseline under the bars in the dark mode: the dark border, paper at low strength.
-const NIGHT_LINE = 'rgba(250, 248, 244, 0.16)';
-
-/** A canvas of vertical rectangles, one per band, drawn every frame from `levels` in the accent colour. */
-const Bars = ModeContext.use((mode) => (_props: Record<string, unknown>, cleanup: (...fns: (() => void)[]) => void): unknown => {
-	if (typeof requestAnimationFrame === 'function') {
-		const heights = new Float32Array(BARS);
-		let frame = 0;
-		const draw = (at: number): void => {
-			frame = requestAnimationFrame(draw);
-			const canvas = document.getElementById(CANVAS) as HTMLCanvasElement | null;
-			const context = canvas?.getContext('2d');
-			if (canvas === null || canvas === undefined || !context) return;
-			const width = canvas.clientWidth;
-			const height = canvas.clientHeight;
-			if (canvas.width !== width * devicePixelRatio || canvas.height !== height * devicePixelRatio) {
-				canvas.width = width * devicePixelRatio;
-				canvas.height = height * devicePixelRatio;
-			}
-			context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-			context.clearRect(0, 0, width, height);
-			levels(heights, at);
-			const gap = 3;
-			const bar = (width - gap * (BARS - 1)) / BARS;
-			const night = mode?.get() === dark;
-			context.fillStyle = night ? LIME : MOSS;
-			for (let i = 0; i < BARS; i++) {
-				const tall = Math.max(2, heights[i]! * height);
-				context.fillRect(i * (bar + gap), height - tall, bar, tall);
-			}
-			context.fillStyle = night ? NIGHT_LINE : LINE;
-			context.fillRect(0, height - 1, width, 1);
-		};
-		frame = requestAnimationFrame(draw);
-		cleanup(() => { cancelAnimationFrame(frame); });
-	}
-	return <canvas id={CANVAS} aria-hidden="true" style={{ width: '100%', height: 96, display: 'block' }} />;
-});
-
 export const RadioPage = (
 	_props: Record<string, unknown>,
 	cleanup: (...fns: (() => void)[]) => void,
@@ -96,6 +56,7 @@ export const RadioPage = (
 	}
 	return [
 		<RadioHead />,
+		<Canopy />,
 		<div theme="content">
 			<Typography theme={['row', 'wide', 'start']} type="h1" label="Radio" />
 			<div theme="divider" />
@@ -104,7 +65,7 @@ export const RadioPage = (
 				theme={['column', 'wide']}
 				style={{ marginTop: 16, padding: 16, gap: 12, boxSizing: 'border-box', border: '1px solid $border', borderRadius: 12 }}
 			>
-				<Bars />
+				<Reeds />
 				<Typography type="p1_bold" label={now.map(line)} />
 				<div theme={['row', 'wrap', 'wide', 'start']} style={{ gap: 10, alignItems: 'center' }}>
 					<Shown value={state.map((at) => at === 'playing' || at === 'tuning')}>

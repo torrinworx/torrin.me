@@ -1,14 +1,25 @@
-// The pixel strip at the top of the landing page: trees, a pond that mirrors them, leaves that fall
-// when the cursor brushes a crown, birds, fireflies at night, and ripples where the cursor crosses
-// the water. Approved as https://claude.ai/artifact/WfGHVZb54iFvZTbUHKXwfP (work order 485).
+// The pixel forest: the strip at the top of the landing page (trees, a pond that mirrors them,
+// leaves that fall when the cursor brushes a crown, birds, fireflies at night, ripples where the
+// cursor crosses the water) and the smaller scenes the rest of the site carries. The strip was
+// approved as https://claude.ai/artifact/WfGHVZb54iFvZTbUHKXwfP (work order 485); the photo floating
+// over it and the scenes around the site as https://claude.ai/artifact/8LvHKbwqDGKm2dgPnZHTw5.
 //
-// Two halves. `createStrip` paints into a pixel buffer and needs no DOM, so the favicon script and
-// the tests run it in Node. `runStrip` puts one on a canvas in a page, sizes it, feeds it the
-// pointer and runs it only while it is on screen.
+// Two halves. `createStrip`, `createCanopy` and `createReeds` paint into pixel buffers and need no
+// DOM, so the favicon script and the tests run them in Node. `runScene` puts one on a canvas in a
+// page, sizes it, feeds it the pointer and runs it only while it is on screen and `motion` is on.
 //
 // Colours are packed as ImageData lays them out on a little-endian machine: 0xAABBGGRR.
 
+import { mutable } from '@aweftjs/core';
+
 import { FOREST, LIME, MOSS, PAPER, PAPER_A, PINE, SAGE, STACKED } from './theme.ts';
+
+/**
+ * Whether the forest moves. Off, every scene holds still and no bird flies, which is the pause
+ * WCAG 2.2.2 asks of anything that moves on its own for more than five seconds. The page starts it
+ * off for a visitor whose system asks for reduced motion, and the menu's switch writes it.
+ */
+export const motion = mutable(true);
 
 /** A tree: where it stands across the width, its height against the sky, and its own seed if it has one. */
 export type Tree = readonly [x: number, height: number, seed?: number];
@@ -49,12 +60,43 @@ export interface StripConfig {
 	readonly birds?: number;
 	readonly flock?: boolean;
 	readonly fireflies?: number;
+	/**
+	 * How high the fireflies rise, as a share of the way from the top down to the bank: 0.3 when left
+	 * off. A scene with words in its sky keeps them below the words, and their reflections above any
+	 * words in its pond, so none ever stops behind a letter.
+	 */
+	readonly fireflyTop?: number;
 	/** Where the moon is, as shares of the width and of the sky. */
 	readonly moon?: readonly [number, number];
 	/** How tall the hills are, against the default. */
 	readonly hills?: number;
 	/** Whether crowns grow hanging vines. */
 	readonly vines?: boolean;
+	readonly stone?: Stone;
+	/** For a strip narrower than the window: how many pixels it takes to fade out at each side. */
+	readonly sides?: number;
+}
+
+/**
+ * A picture in the scene, behind the trees: on the bank, or floating over it. Its lift, bob, vines
+ * and island are read every frame, so a page can change them while the strip runs.
+ */
+export interface Stone {
+	/** Its left edge, in strip pixels. */
+	readonly x: number;
+	readonly width: number;
+	readonly height: number;
+	/** Its packed pixels, row by row. */
+	readonly pixels: Uint32Array;
+	/** How far it floats above the bank, and how far it bobs up and down, in strip pixels. */
+	readonly lift?: number;
+	readonly bob?: number;
+	/** How long its longest vine is, in strip pixels. */
+	readonly vines?: number;
+	/** Whether it stands on a clump of earth. */
+	readonly island?: boolean;
+	/** How many birds stand on its top edge. */
+	readonly birds?: number;
 }
 
 export interface Strip {
@@ -70,6 +112,10 @@ export interface Strip {
 	leave(): void;
 	/** How many leaves are falling or lying on the bank. */
 	leaves(): number;
+	/** The pointer pressed at a point in strip pixels. Whether it pressed the stone. */
+	poke(x: number, y: number): boolean;
+	/** Where the stone's top left corner is this frame, or null with no stone. */
+	readonly stoneAt: { readonly x: number; readonly y: number } | null;
 }
 
 /** The light strip. Its sky starts at the page colour, so the top edge is invisible. */
@@ -101,38 +147,179 @@ export const NIGHT: Palette = {
 /** The landing hero's seed. Its trees are seeded from it in order, so its third tree is `treeSeed(HERO_SEED, 2)`. */
 export const HERO_SEED = 5;
 
-// On a wide screen the trees stand to the right of the words; on a narrower one the words sit above
-// the strip, so the trees spread across it.
-// Their heights are against a 680px hero, so the crowns stand below the words and the photo.
-const WIDE_TREES: readonly Tree[] = [[0.64, 0.41], [0.74, 0.57], [0.86, 0.47], [0.96, 0.34]];
-const STACKED_TREES: readonly Tree[] = [[0.12, 0.45], [0.38, 0.72], [0.64, 0.56], [0.9, 0.42]];
 /** A strip's `index`th tree is seeded from the strip's seed and its place in the list. */
 export const treeSeed = (seed: number, index: number): number => seed * 31 + index;
 
-// The ground at half the height: the pond below the bank is as deep as the sky above it, so every
-// reflection fits. The hills are kept low so the words in the sky stand clear of them.
-const hero = (palette: Palette, night: boolean, trees: readonly Tree[]): StripConfig => ({
-	seed: HERO_SEED,
-	ground: 0.5,
-	hills: 0.5,
-	reflection: true,
-	ambient: night ? 1 : 0.9,
-	light: night ? [0.6, -0.8] : [-0.6, -0.8],
-	trees,
-	palette,
-	...(night ? { fireflies: 12, moon: [trees === STACKED_TREES ? 0.8 : 0.6, 0.14] as const } : { birds: 2, flock: true }),
-});
-const HERO = {
-	light: { wide: hero(LIGHT, false, WIDE_TREES), stacked: hero(LIGHT, false, STACKED_TREES) },
-	night: { wide: hero(NIGHT, true, WIDE_TREES), stacked: hero(NIGHT, true, STACKED_TREES) },
-};
-
-/** The hero's scene for a mode and a width in CSS pixels. The same object for the same answer, so a resize within a layout keeps the scene. */
-export const heroScene = (night: boolean, width: number): StripConfig =>
-	HERO[night ? 'night' : 'light'][width <= STACKED ? 'stacked' : 'wide'];
-
 /** The size of one strip pixel on a screen this wide. */
 export const heroScale = (width: number): number => (width >= 440 ? 3 : 2);
+
+/** The light coming from the upper left by day and the upper right by night, where the moon is. */
+const lightOf = (night: boolean): readonly [number, number] => (night ? [0.6, -0.8] : [-0.6, -0.8]);
+
+/**
+ * The photo's box in the hero, in strip pixels and frame included: 180 by 240 CSS pixels on a wide
+ * screen, 132 by 176 when the words stack above the strip.
+ */
+export const photoBox = (width: number): { readonly width: number; readonly height: number } => {
+	const size = heroScale(width);
+	const [w, h] = width <= STACKED ? [132, 176] : [180, 240];
+	return { width: Math.round(w / size), height: Math.round(h / size) };
+};
+
+/**
+ * Where the photo's left edge stands in a hero this wide, in strip pixels. On a wide screen it ends
+ * where the column the words sit in ends; stacked, it is centred.
+ */
+export const photoLeft = (width: number): number => {
+	const size = heroScale(width), box = photoBox(width), across = Math.ceil(width / size);
+	if (width <= STACKED) return Math.round((across - box.width) / 2);
+	const end = width - Math.max(0, (width - 840) / 2) - 40;
+	return Math.round((end - box.width * size) / size);
+};
+
+/**
+ * How the photo floats: high enough over the bank that the hero does not read as standing on the
+ * ground, bobbing a few pixels, with vines down from its foot and a clump of earth under it. In
+ * strip pixels, as Torrin set them on the sketch's sliders.
+ */
+export const FLOAT = { lift: 25, bob: 5, vines: 30 } as const;
+
+const heroCache = new Map<string, StripConfig>();
+
+/**
+ * The hero's scene for a mode and a width in CSS pixels.
+ *
+ * `photo` is the photo's pixels at a size, its inner box without the frame, or null while it has
+ * not loaded; with none the trees stand where they would around it and nothing floats. The same
+ * object comes back for the same answer, so a resize that keeps the layout keeps the scene.
+ *
+ * The bank is a little over halfway down on a wide screen, so the pond is shallower than the sky
+ * and its reflections fade into the page before its bottom edge; stacked, the strip is taller and
+ * the bank lower. The hills are kept low so the words in the sky stand clear of them.
+ */
+export const heroScene = (
+	night: boolean,
+	width: number,
+	photo?: (width: number, height: number) => Uint32Array | null,
+): StripConfig => {
+	const size = heroScale(width), across = Math.ceil(width / size);
+	const box = photoBox(width), left = photoLeft(width), stacked = width <= STACKED;
+	const inner = photo?.(box.width - 2, box.height - 2) ?? null;
+	const key = `${String(night)} ${String(width)} ${String(inner !== null)}`;
+	const held = heroCache.get(key);
+	if (held !== undefined) return held;
+	const at = (x: number): number => x / across;
+	const trees: readonly Tree[] = stacked
+		? [[0.05, 0.42], [at(left - 10), 0.42], [at(left + box.width + 9), 0.36], [0.95, 0.5]]
+		: [[at(left - 46), 0.42], [at(left - 12), 0.46], [at(left + box.width + 10), 0.4], [at(left + box.width + 46), 0.36]];
+	const palette = night ? NIGHT : LIGHT;
+	let stone: Stone | undefined;
+	if (inner !== null) {
+		// The photo with the bank's top colour as a frame, so it reads as part of the scene.
+		const frame = pack(palette.bankTop), iw = box.width - 2, pixels = new Uint32Array(box.width * box.height);
+		for (let y = 0; y < box.height; y++) for (let x = 0; x < box.width; x++) {
+			const edge = x === 0 || y === 0 || x === box.width - 1 || y === box.height - 1;
+			pixels[y * box.width + x] = edge ? frame : inner[(y - 1) * iw + x - 1]!;
+		}
+		// Birds stand on it by day, as the rest of the strip has them; the night has fireflies instead.
+		stone = { x: left, width: box.width, height: box.height, pixels, ...FLOAT, island: true, birds: night ? 0 : 2 };
+	}
+	const scene: StripConfig = {
+		seed: HERO_SEED,
+		ground: stacked ? 0.62 : 0.56,
+		hills: 0.5,
+		reflection: true,
+		ambient: night ? 1 : 0.9,
+		light: lightOf(night),
+		trees,
+		palette,
+		...(stone === undefined ? {} : { stone }),
+		// On a wide screen the words stand in the sky and the buttons in the pond; the fireflies keep
+		// below the words, and their reflections above the buttons.
+		...(night ? { fireflies: 12, moon: stacked ? [0.84, 0.1] as const : [0.53, 0.12] as const, ...(stacked ? {} : { fireflyTop: 0.6 }) } : { birds: 2, flock: true }),
+	};
+	// One width at a time is all a page shows; the cache holds the last few so a mode switch back is free.
+	if (heroCache.size > 8) heroCache.clear();
+	heroCache.set(key, scene);
+	return scene;
+};
+
+// --- the scenes around the site -------------------------------------------------------------
+//
+// Each is a strip whose sky is the page colour all the way down and which has no hills, so once the
+// runner makes that colour see-through, the page is the sky and nothing but the forest is drawn.
+
+const paged = (night: boolean): Palette => {
+	const palette = night ? NIGHT : LIGHT, page = night ? FOREST : PAPER;
+	return { ...palette, sky: [page, page], hills: [] };
+};
+
+/** The heights of the trees under the landing's five section headings, in strip pixels: one tree growing down the page. */
+export const RULE_HEIGHTS = [14, 22, 32, 44, 58] as const;
+
+/**
+ * The rule under the landing's `index`th section heading: a bank one pixel tall in the accent,
+ * which is the rule, and a tree at its end that is taller under each heading than the last. The
+ * fourth and fifth grow vines; a bird stands in the last by day.
+ */
+export const ruleScene = (index: number, night: boolean, height: number): StripConfig => {
+	const line = night ? LIME : MOSS;
+	return {
+		seed: 41 + index,
+		ground: (height - 1) / height,
+		reflection: false,
+		ambient: 3.5,
+		light: lightOf(night),
+		trees: [[0.94, 0.95]],
+		vines: index >= 3,
+		birds: !night && index === RULE_HEIGHTS.length - 1 ? 1 : 0,
+		palette: { ...paged(night), bankTop: line, bank: [line, line] },
+	};
+};
+
+/**
+ * A post's own tree, from a seed its slug gives it, so a post keeps its tree. FNV-1a over the slug,
+ * folded into the range the trees are seeded from.
+ */
+export const seedOf = (slug: string): number => {
+	let h = 2166136261;
+	for (const c of slug) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); }
+	return (h >>> 0) % 100000;
+};
+
+/** The tile beside a post on the blog's index: its tree alone on a bank, mirrored, fading out at the sides. */
+export const tileScene = (seed: number, night: boolean): StripConfig => ({
+	seed, ground: 0.5, reflection: true, ambient: 9, light: lightOf(night), trees: [[0.5, 0.95, seed]], sides: 5,
+	palette: paged(night),
+});
+
+/** The plot above a post's title: the same tree, larger, with a bird by day and fireflies at night. */
+export const plotScene = (seed: number, night: boolean): StripConfig => ({
+	seed, ground: 0.5, reflection: true, ambient: 1.4, light: lightOf(night), trees: [[0.5, 0.92, seed]], sides: 24,
+	palette: paged(night),
+	...(night ? { fireflies: 5 } : { birds: 1 }),
+});
+
+/** Where the footer's trees stand: in two groves at the sides, clear of the social row and the line under it. */
+export const SHORE_TREES: readonly Tree[] = [[0.04, 0.42], [0.11, 0.62], [0.19, 0.38], [0.27, 0.5], [0.73, 0.48], [0.81, 0.36], [0.89, 0.6], [0.97, 0.44]];
+
+/** The footer: a shore across the window, the social row in its sky and the copyright on its water. */
+export const shoreScene = (night: boolean, trees: readonly Tree[] = SHORE_TREES): StripConfig => ({
+	seed: 11, ground: 0.5, hills: 0.8, reflection: true, ambient: 2, light: lightOf(night), trees,
+	palette: night ? NIGHT : LIGHT,
+	// The fireflies keep below the social row, and their reflections above the copyright.
+	...(night ? { fireflies: 8, fireflyTop: 0.5, moon: [0.62, 0.7] as const } : { birds: 1, flock: true }),
+});
+
+/** The 404 page: one tree on its own. */
+export const lostScene = (night: boolean): StripConfig => ({
+	seed: 404, ground: 0.56, hills: 0.7, reflection: true, ambient: 1.6, light: lightOf(night), trees: [[0.5, 0.8]],
+	palette: night ? NIGHT : LIGHT,
+	...(night ? { fireflies: 6, moon: [0.76, 0.24] as const } : { birds: 1 }),
+});
+
+/** How far down the pond, as a share of its depth, its reflection starts to fade out. */
+const FADE = 0.4;
 
 const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
 const bayer = (x: number, y: number): number => BAYER[(y & 3) * 4 + (x & 3)]!;
@@ -335,7 +522,8 @@ export const createStrip = (
 	const sparkles: { x: number; y: number; len: number; phase: number }[] = [];
 	if (config.reflection) for (let i = 0; i < W / 14; i++) sparkles.push({ x: Math.floor(r() * W), y: waterTop + 1 + Math.floor(r() * (H - waterTop) * 0.35), len: 2 + Math.floor(r() * 4), phase: r() * 6 });
 	const flies: Fly[] = [];
-	for (let i = 0; i < (config.fireflies ?? 0); i++) flies.push({ x: r() * W, y: gy * (0.35 + r() * 0.6), vx: 0, vy: 0, phase: r() * 6 });
+	const flyTop = config.fireflyTop ?? 0.3;
+	for (let i = 0; i < (config.fireflies ?? 0); i++) flies.push({ x: r() * W, y: gy * (flyTop + 0.05 + r() * (0.9 - flyTop)), vx: 0, vy: 0, phase: r() * 6 });
 	const perches = canopy.filter((p) => !p.tree.has(p.x, p.y - 1) && p.y > 4);
 	const birds: Bird[] = [];
 	const perch = (face: number, phase: number): Bird => {
@@ -351,6 +539,82 @@ export const createStrip = (
 	const wave = new Float32Array(W * H);
 	const ptr = { x: null as number | null, y: 0 };
 	let stroke = 0, wind = 0, now = 0, nextDrop = 2, nextFlock = 6, budget = 0;
+
+	// The stone springs back from wherever the pointer pushes it: sideways from a brush, down from a
+	// press. Its vines have their own seed, so adding a stone leaves the rest of the scene as it was.
+	const stone = config.stone;
+	const sr = rng(config.seed + 7919);
+	const stoneVines = stone ? Array.from({ length: 7 }, (_, i) => ({ u: (i + 0.5 + (sr() - 0.5) * 0.7) / 7, len: 0.45 + sr() * 0.55, phase: sr() * 6, push: 0, pv: 0, x: 0, y: 0, n: 0 })) : [];
+	const lump = { x: 0, vx: 0, dip: 0, dv: 0, left: 0, top: 0 };
+	// Birds on the stone are the resume button's bird at the strip's size. `createPerch` flies in page
+	// pixels; three of them make one strip pixel. Each bird keeps to its own third of the top edge.
+	const K = 3, SPOTS = [0.2, 0.5, 0.8];
+	const sitters = Array.from({ length: Math.min(3, stone?.birds ?? 0) }, (_, i) => (
+		{ bird: null as Perch | null, spot: i * 2 % 3, face: 1, look: 1, wait: 1.5 + i * 2.5 + sr() * 2 }
+	));
+	const sitAt = (spot: number): { x: number; y: number } => ({ x: (lump.left + Math.round(SPOTS[spot]! * (stone!.width - 1))) * K, y: lump.top * K });
+	const drawSitters = (dt: number): void => {
+		for (const s of sitters) {
+			if (!s.bird) {
+				s.wait -= dt;
+				if (!motion || s.wait > 0) continue;
+				const free = [0, 1, 2].filter((k) => !sitters.some((o) => o !== s && o.spot === k));
+				s.spot = free[Math.floor(random() * free.length)] ?? s.spot;
+				const to = sitAt(s.spot);
+				s.bird = createPerch({ x: to.x + 240, y: -30 }, random);
+				s.face = 1;
+			}
+			const b = s.bird;
+			b.step(dt, sitAt(s.spot));
+			// Standing, it turns to look about now and then; pecking keeps it facing one way.
+			if (b.state === 'perch' && b.pose === STAND && (s.look -= dt) <= 0) { s.face = -s.face; s.look = 0.8 + random() * 1.8; }
+			if (b.state === 'away' && (b.y < -20 * K || b.x < -20 * K)) { s.bird = null; s.wait = 6 + random() * 8; continue; }
+			const face = b.state === 'perch' ? s.face : 1, bx = Math.round(b.x / K), by = Math.round(b.y / K) - 1;
+			for (const [px, py] of b.pose) if (by + py < gy) put(bx + (face > 0 ? px : -px - 1), by + py, pal.bird);
+		}
+	};
+	const scareSitters = (x: number, y: number, reach: number): void => {
+		for (const s of sitters) if (s.bird && s.bird.state !== 'away' && Math.hypot(x - s.bird.x / K, y - s.bird.y / K) < reach) s.bird.scare();
+	};
+	const on = (x: number, y: number): boolean => !!stone && x >= lump.left && x < lump.left + stone.width && y >= lump.top && y < lump.top + stone.height;
+	const drawStone = (dt: number): void => {
+		if (!stone) return;
+		// A brush moves it two pixels at most, on a stiff spring: enough to feel, not enough to pull the eye.
+		lump.vx += (-lump.x * 40 - lump.vx * 9) * dt; lump.x = clamp(lump.x + lump.vx * dt, -2, 2);
+		lump.dv += (-lump.dip * 30 - lump.dv * 5) * dt; lump.dip += lump.dv * dt;
+		const lift = (stone.lift ?? 0) + (stone.bob ?? 0) * Math.sin(now * 1.3) - lump.dip;
+		lump.left = stone.x + Math.round(lump.x);
+		lump.top = Math.min(gy - stone.height, gy - stone.height - Math.round(lift));
+		const bottom = lump.top + stone.height, half = stone.width / 2 + 3, cx = lump.left + stone.width / 2;
+		// The earth under it tapers to a ragged point, darker the deeper it goes.
+		const below = (x: number): number => {
+			const a = (x + 0.5 - cx) / half;
+			return !stone.island || Math.abs(a) > 1 ? -1 : Math.round(12 * (1 - Math.abs(a) ** 1.6) * (0.85 + 0.3 * hash(x - lump.left, 11)));
+		};
+		const sky = (x: number, y: number, c: number): void => { if (y < gy) put(x, y, c); };
+		if (stone.island) for (let x = Math.floor(cx - half); x < cx + half; x++) {
+			const d = below(x);
+			for (let j = 0; j <= d; j++) {
+				const k = j / (d + 1) + (hash(x - lump.left, j) - 0.5) * 0.3;
+				sky(x, bottom + j, j === 0 ? pal.bankTop : k < 0.35 ? pal.bank[0]! : k > 0.7 || bayer(x, bottom + j) < 0.5 ? pal.bank[1]! : pal.bank[0]!);
+			}
+			if (d >= 0 && (x < lump.left || x >= lump.left + stone.width) && hash(x - lump.left, 3) < 0.6) sky(x, bottom - 1, pal.tuft[hash(x - lump.left, 5) < 0.5 ? 0 : 1]!);
+		}
+		for (let y = 0; y < stone.height; y++) for (let x = 0; x < stone.width; x++) sky(lump.left + x, lump.top + y, stone.pixels[y * stone.width + x]!);
+		const longest = stone.vines ?? 0;
+		for (const v of stoneVines) {
+			v.pv += (-v.push * 14 - v.pv * 3 - lump.vx * 2) * dt; v.push += v.pv * dt;
+			v.x = Math.round(stone.island ? cx - half + 2 + v.u * (half * 2 - 4) : lump.left + 1 + v.u * (stone.width - 2));
+			v.y = stone.island ? bottom + Math.max(0, below(v.x)) + 1 : bottom;
+			// A vine that reached the bank would read as a leg holding the stone up.
+			v.n = Math.max(0, Math.min(Math.round(v.len * longest), gy - 3 - v.y));
+			for (let i = 0; i < v.n; i++) {
+				const x = v.x + Math.round((Math.sin(now * 1.2 + v.phase + i * 0.18) * 0.7 + wind * 1.2 + v.push) * i / v.n);
+				sky(x, v.y + i, pal.vine);
+				if (i % 3 === 1) sky(x + (i % 6 === 1 ? 1 : -1), v.y + i, pal.vineLeaf[i % 2]!);
+			}
+		}
+	};
 
 	const sway = (t: Grown, y: number): number => {
 		if (y >= t.swayStart) return 0;
@@ -384,6 +648,8 @@ export const createStrip = (
 		wind *= Math.pow(0.3, dt);
 		while (trail.length && now - trail[0]!.t > 1.2) trail.shift();
 		pixels.set(bg);
+		drawStone(dt);
+		drawSitters(dt);
 
 		for (const tr of trees) for (const p of tr.all) put(p.x + sway(tr, p.y), p.y, p.wood || !trail.length ? p.c : rustle(p));
 		for (const tr of trees) for (const v of tr.vines) {
@@ -398,6 +664,8 @@ export const createStrip = (
 			}
 		}
 		for (const tf of tufts) {
+			// Grass in front of a stone standing on the bank reads as a flaw in its frame.
+			if (stone && lump.top + stone.height >= gy && tf.x >= lump.left && tf.x < lump.left + stone.width) continue;
 			put(tf.x, gy - 1, pal.tuft[tf.c]!);
 			if (tf.h > 1) put(tf.x + Math.round(Math.sin(now * 1.5 + tf.x * 0.3) * 0.6 + wind * 0.5), gy - 2, pal.tuft[1 - tf.c]!);
 		}
@@ -490,7 +758,7 @@ export const createStrip = (
 				if (ptr.x !== null) { const dx = fl.x - ptr.x, dy = fl.y - ptr.y, d = Math.hypot(dx, dy); if (d < 14 && d > 0) { fl.vx += dx / d * 60 * dt; fl.vy += dy / d * 60 * dt; } }
 				const sp = Math.hypot(fl.vx, fl.vy), max = 6; if (sp > max) { fl.vx *= max / sp; fl.vy *= max / sp; }
 				fl.vx *= Math.pow(0.6, dt); fl.vy *= Math.pow(0.6, dt);
-				fl.x = (fl.x + fl.vx * dt + W) % W; fl.y = clamp(fl.y + fl.vy * dt, gy * 0.3, gy - 2);
+				fl.x = (fl.x + fl.vx * dt + W) % W; fl.y = clamp(fl.y + fl.vy * dt, gy * flyTop, gy - 2);
 			}
 			const b = 0.5 + 0.5 * Math.sin(now * 2.2 + fl.phase), x = Math.round(fl.x), y = Math.round(fl.y);
 			if (b < 0.25) continue;
@@ -523,7 +791,11 @@ export const createStrip = (
 				// what stands in front of the sky (hills, trees, leaves, birds) takes the water's tint.
 				const k = y - waterTop, sy = gy - 1 - k, m = 0.42 + 0.2 * k / depth;
 				const xo = Math.round(Math.sin(k * 0.8 + now * 2.1) * (0.6 + k * 0.05));
+				// Below FADE of the pond's depth the reflection dithers back to the page colour, so the
+				// strip's bottom edge never cuts through something it mirrors.
+				const fade = clamp((k / depth - FADE) / (1 - FADE), 0, 1);
 				for (let x = 0; x < W; x++) {
+					if (fade > 0 && bayer(x, y) < fade) { pixels[y * W + x] = sky[0]!; continue; }
 					// A wave bends the reflection under it; its crests catch light and its troughs darken.
 					const h = ripples.length ? wave[y * W + x]! : 0, sy2 = clamp(sy - Math.round(h), 0, gy - 1);
 					if (sy < 0 && !h) { pixels[y * W + x] = sky[0]!; continue; }
@@ -535,6 +807,12 @@ export const createStrip = (
 				}
 			}
 			for (const sp of sparkles) if (Math.sin(now * 1.3 + sp.phase) > 0.55) for (let i = 0; i < sp.len; i++) put(sp.x + i, sp.y, pal.sparkle);
+		}
+		const sides = config.sides ?? 0;
+		if (sides > 0) for (let y = 0; y < H; y++) for (let d = 0; d < sides; d++) {
+			const f = 1 - d / sides;
+			if (bayer(d, y) < f) pixels[y * W + d] = sky[0]!;
+			if (bayer(W - 1 - d, y) < f) pixels[y * W + W - 1 - d] = sky[0]!;
 		}
 	};
 
@@ -557,97 +835,383 @@ export const createStrip = (
 				if (i >= 0) { drop(canopy[i]!, dx * 1.5); budget--; }
 			}
 			for (const tr of trees) for (const v of tr.vines) if (Math.abs(x - v.ax) < 3 && y > v.ay && y < v.ay + v.len) v.pv += dx * 3;
+			for (const v of stoneVines) if (Math.abs(x - v.x) < 3 && y > v.y && y < v.y + v.n) v.pv += dx * 3;
+			if (on(x, y)) lump.vx = clamp(lump.vx + dx * 2, -20, 20);
+			scareSitters(x, y, 12);
 		}
 		ptr.x = x; ptr.y = y;
 	};
 
-	return { width: W, height: H, pixels, frame, move, leave: () => { ptr.x = null; }, leaves: () => leaves.length };
+	// A press on the stone dips it toward the water, and a ripple spreads where its reflection is.
+	const poke = (x: number, y: number): boolean => {
+		if (!stone || !motion || !on(x, y)) return false;
+		lump.dv += 22;
+		scareSitters(x, y, Infinity);
+		if (config.reflection && ripples.length < 40) {
+			ripples.push({ x: lump.left + stone.width / 2, y: Math.min(H - 1, waterTop + 1 + Math.max(0, gy - lump.top - stone.height)), t: now, amp: 2.4 });
+		}
+		return true;
+	};
+
+	return {
+		width: W, height: H, pixels, frame, move, poke, leave: () => { ptr.x = null; }, leaves: () => leaves.length,
+		get stoneAt() { return stone ? { x: lump.left, y: lump.top } : null; },
+	};
+};
+
+// --- the margins and the radio: two painters that are not strips -------------------------------
+
+/** Something a canvas shows: a buffer of packed pixels that moves on with time. A strip is one. */
+export interface Painter {
+	readonly width: number;
+	readonly height: number;
+	/** The frame, one packed colour per pixel, row by row. 0 is see-through. */
+	readonly pixels: Uint32Array;
+	/** A colour the canvas shows as see-through as well, so the page behind it shows. */
+	readonly clear?: number;
+	/** Advance by `dt` seconds to time `t` and paint. */
+	frame(dt: number, t: number): void;
+	move?(x: number, y: number): void;
+	leave?(): void;
+	poke?(x: number, y: number): boolean;
+}
+
+interface Hanging { ax: number; ay: number; len: number; phase: number; push: number; pv: number }
+
+/**
+ * The underside of a canopy over the margins either side of the content column, with vines hanging
+ * from it, `width` by `height` strip pixels. Nothing is drawn over the column, so on a screen with no
+ * margins nothing is drawn at all. The pointer crossing the margins stirs the vines.
+ *
+ * `grow`, read every frame, is how far the reader is through the page, 0 to 1: the vine nearest the
+ * column on the left grows that far down and buds at its end. `moving` false holds every vine still.
+ */
+export const createCanopy = (options: {
+	readonly width: number;
+	readonly height: number;
+	/** The content column's width, in strip pixels. */
+	readonly column: number;
+	readonly seed: number;
+	readonly night: boolean;
+	readonly moving?: boolean;
+	readonly grow?: () => number;
+}): Painter => {
+	const { width: W, height: H } = options, moving = options.moving ?? true;
+	const pixels = new Uint32Array(W * H);
+	const c0 = (W - Math.min(options.column, W)) / 2, c1 = W - c0;
+	const r = rng(options.seed), p1 = r() * 6, p2 = r() * 6;
+	// How far down the canopy reaches at each column: nothing over the content, ragged in the margins,
+	// and deepest at the window's edges.
+	const depth = new Float32Array(W);
+	for (let x = 0; x < W; x++) {
+		const out = x < c0 ? c0 - x : x > c1 ? x - c1 : 0, g = clamp((out - 2) / 16, 0, 1);
+		const edge = clamp(1 - Math.min(x, W - 1 - x) / 50, 0, 1), n = 0.5 + 0.3 * Math.sin(x * 0.13 + p1) + 0.2 * Math.sin(x * 0.37 + p2);
+		depth[x] = g * (1.5 + 3 * n + 6 * edge * edge);
+	}
+	let vines: Hanging[] = [];
+	for (let x = 3; x < W - 3; x += 4 + Math.floor(r() * 8)) {
+		if (depth[x]! < 2) continue;
+		const out = x < c0 ? c0 - x : x - c1;
+		vines.push({ ax: x, ay: Math.floor(depth[x]!), len: Math.round(4 + r() * H * 0.55 * clamp(out / 30, 0.3, 1)), phase: r() * 6, push: 0, pv: 0 });
+	}
+	let grown: Hanging | null = null;
+	if (options.grow !== undefined) {
+		const x = Math.floor(c0 - 7);
+		for (let k = -2; k <= 2; k++) if (x + k >= 0 && x + k < W) depth[x + k] = Math.max(depth[x + k]!, 3 - Math.abs(k) * 0.5);
+		grown = { ax: x, ay: 3, len: 3, phase: 1.3, push: 0, pv: 0 };
+		vines = vines.filter((v) => Math.abs(v.ax - x) > 4);
+	}
+	const P = packed(options.night ? NIGHT : LIGHT), bud = pack(LIME), budHeart = pack(SAGE);
+	let wind = 0, lastX: number | null = null;
+
+	const put = (x: number, y: number, c: number): void => { if (x >= 0 && x < W && y >= 0 && y < H) pixels[y * W + x] = c; };
+	const hang = (v: Hanging, dt: number, t: number): readonly [number, number] | null => {
+		v.pv += (-v.push * 14 - v.pv * 3) * dt; v.push += v.pv * dt;
+		let tip: readonly [number, number] | null = null;
+		for (let i = 0; i < v.len; i++) {
+			const f = i / Math.max(v.len, 1), y = v.ay + i;
+			if (y >= H) break;
+			const x = v.ax + Math.round((Math.sin(t * 1.2 + v.phase + i * 0.18) * 0.7 + wind * 1.2 + v.push) * f);
+			put(x, y, P.vine);
+			if (i % 3 === 1) put(x + (i % 6 === 1 ? 1 : -1), y, P.vineLeaf[i % 2]!);
+			tip = [x, y];
+		}
+		return tip;
+	};
+
+	const frame = (dt: number, t: number): void => {
+		wind *= Math.pow(0.3, dt);
+		pixels.fill(0);
+		for (let x = 0; x < W; x++) {
+			const d = depth[x]!;
+			for (let y = 0; y < d && y < H; y++) put(x, y, P.tones[clamp(Math.floor((0.72 - 0.55 * y / Math.max(d, 1)) * 5 + bayer(x, y) - 0.5), 0, 4)]!);
+			const e = Math.floor(d);
+			if (d > 0.5 && hash(x, e) < 0.35) put(x, e, P.tones[1]!);
+		}
+		for (const v of vines) hang(v, dt, t);
+		if (grown !== null && options.grow !== undefined) {
+			const p = clamp(options.grow(), 0, 1);
+			grown.len = Math.round(3 + p * (H - grown.ay - 8));
+			const tip = hang(grown, dt, t);
+			if (tip !== null && p > 0.97) {
+				const [x, y] = tip;
+				put(x, y + 1, bud); put(x - 1, y + 2, bud); put(x + 1, y + 2, bud); put(x, y + 3, bud); put(x, y + 2, budHeart);
+			}
+		}
+	};
+
+	const move = (x: number, y: number): void => {
+		if (!moving) return;
+		if (lastX !== null) {
+			const dx = x - lastX;
+			wind = clamp(wind + dx * 0.006, -0.5, 0.5);
+			for (const v of grown === null ? vines : [...vines, grown]) if (Math.abs(x - v.ax) < 3 && y > v.ay && y < v.ay + v.len) v.pv += dx * 3;
+		}
+		lastX = x;
+	};
+
+	return { width: W, height: H, pixels, frame, move, leave: () => { lastX = null; } };
 };
 
 /**
- * Run a strip on the canvas inside `host`, filling the host.
+ * Reeds at the water's edge, one clump of three per band of the radio, mirrored in a pond that fades
+ * into the page before its bottom edge, and fading out at the sides.
  *
- * `configFor` and `scale` take the host's width in CSS pixels: the first picks the scene for it (a
- * phone lays its trees out differently), the second the size of one strip pixel. The strip runs only
- * while the host is on screen, and holds still for a visitor who asked for reduced motion.
- *
- * Returns: a stop function that takes every listener and observer back off.
+ * `heard`, called every frame, fills one level per band, 0 to 1, and answers whether anything is
+ * playing; while nothing is, the reeds stand at a third of their height and sway.
  */
-export const runStrip = (
-	host: HTMLElement,
-	configFor: (width: number) => StripConfig,
-	scale: (width: number) => number,
-): (() => void) => {
-	const canvas = host.querySelector('canvas');
-	const context = canvas?.getContext('2d');
-	if (canvas === null || canvas === undefined || !context) return () => {};
-	const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;
-	let strip: Strip | null = null;
-	let image: ImageData | null = null;
-	let config: StripConfig | null = null;
-	let size = 1;
+export const createReeds = (options: {
+	readonly width: number;
+	readonly height: number;
+	readonly night: boolean;
+	readonly bands: number;
+	readonly heard: (out: Float32Array, t: number) => boolean;
+}): Painter => {
+	const { width: W, height: H, bands } = options, gy = Math.round(H * 0.58);
+	const pixels = new Uint32Array(W * H), level = new Float32Array(bands).fill(0.34), loud = new Float32Array(bands);
+	const phase = Array.from({ length: bands }, (_, i) => hash(i, 3) * 6);
+	const r = rng(24);
+	const blades: { band: number; x: number; f: number; head: boolean; phase: number }[] = [];
+	for (let i = 0; i < bands; i++) {
+		const cx = Math.round((i + 0.5) / bands * W);
+		for (const [dx, f] of [[-1, 0.62], [0, 1], [1, 0.78]] as const) blades.push({ band: i, x: cx + dx, f: f * (0.85 + r() * 0.15), head: dx === 0, phase: r() * 6 });
+	}
+	const sparks: { x: number; y: number; len: number; phase: number }[] = [];
+	for (let i = 0; i < W / 16; i++) sparks.push({ x: Math.floor(r() * W), y: gy + 3 + Math.floor(r() * (H - gy - 4) * 0.3), len: 2 + Math.floor(r() * 3), phase: r() * 6 });
+	const P = packed(options.night ? NIGHT : LIGHT);
+	const put = (x: number, y: number, c: number): void => { if (x >= 0 && x < W && y >= 0 && y < gy) pixels[y * W + x] = c; };
 
-	const paint = (dt: number, t: number): void => {
-		if (strip === null || image === null) return;
-		strip.frame(dt, t);
-		new Uint32Array(image.data.buffer).set(strip.pixels);
-		context.putImageData(image, 0, 0);
+	const frame = (dt: number, t: number): void => {
+		const on = options.heard(loud, t);
+		for (let i = 0; i < bands; i++) {
+			const target = on ? 0.22 + 0.72 * loud[i]! : 0.34 + 0.05 * Math.sin(t * 0.9 + i);
+			level[i]! += (target - level[i]!) * Math.min(1, dt * (on ? 10 : 3));
+			// A first frame, or a still one, shows where the reeds are headed.
+			if (dt === 0) level[i] = target;
+		}
+		pixels.fill(0);
+		pixels.fill(P.bankTop, gy * W, (gy + 1) * W);
+		const tallest = gy - 3;
+		for (const b of blades) {
+			const h = Math.max(2, Math.round(level[b.band]! * tallest * b.f));
+			const at = (j: number): number => b.x + Math.round(Math.sin(t * 1.4 + b.phase + j * 0.12) * 0.8 * (j / h) * (j / h));
+			for (let j = 0; j < h; j++) { const x = at(j), y = gy - 1 - j; put(x, y, P.tones[j < h * 0.35 ? 1 : bayer(x, y) < 0.5 ? 2 : 3]!); }
+			if (b.head && h > 6) for (let j = 0; j < 3; j++) {
+				const x = at(h - 2 - j), y = gy - h + 1 + j;
+				put(x, y, P.wood[1]!); put(x + 1, y, P.wood[j === 0 ? 2 : 0]!);
+			}
+		}
+		const top = gy + 1, deep = H - top;
+		for (let y = top; y < H; y++) {
+			const k = y - top, sy = gy - 1 - k, m = 0.42 + 0.2 * k / deep, xo = Math.round(Math.sin(k * 0.8 + t * 2.1) * (0.6 + k * 0.05));
+			// Whole by the last row: this pond is shallow enough that its last row mirrors the tips of loud reeds.
+			const fade = clamp(((k + 1) / deep - FADE) / (1 - FADE), 0, 1);
+			for (let x = 0; x < W; x++) {
+				if (sy < 0 || (fade > 0 && bayer(x, y) < fade)) { pixels[y * W + x] = 0; continue; }
+				const from = pixels[sy * W + clamp(x + xo, 0, W - 1)]!;
+				pixels[y * W + x] = from === 0 ? 0 : mix(from, P.water, m);
+			}
+		}
+		for (const q of sparks) if (Math.sin(t * 1.3 + q.phase) > 0.55) for (let i = 0; i < q.len && q.x + i < W; i++) pixels[q.y * W + q.x + i] = P.sparkle;
+		const sides = 8;
+		for (let y = 0; y < H; y++) for (let d = 0; d < sides; d++) {
+			const f = 1 - d / sides;
+			if (bayer(d, y) < f) pixels[y * W + d] = 0;
+			if (bayer(W - 1 - d, y) < f) pixels[y * W + W - 1 - d] = 0;
+		}
 	};
-	const layout = (): void => {
+
+	return { width: W, height: H, pixels, frame };
+};
+
+// --- on a page ------------------------------------------------------------------------------
+
+/** How long the page and its scenes take to fade from one mode to the other, in seconds. */
+export const SWITCH_SECONDS = 0.6;
+
+/** What `runScene` puts on a canvas. */
+export interface Scene {
+	/**
+	 * A painter for a host this many strip pixels across and down, `css` CSS pixels wide, in a mode,
+	 * moving or still. Asked again when that size changes, when the mode changes and when motion is
+	 * switched.
+	 */
+	readonly paint: (night: boolean, width: number, height: number, css: number, moving: boolean) => Painter;
+	/** The size of one strip pixel on a host this wide. The hero's, when left off. */
+	readonly scale?: (css: number) => number;
+	/** What the pointer is listened on. The host, when left off. */
+	readonly pointer?: HTMLElement;
+	/** Run after each frame with the painter, the pixels as the canvas shows them, and the size of a strip pixel. */
+	readonly drawn?: (painter: Painter, shown: Uint32Array, size: number) => void;
+	/** Paint again on every scroll, even while still: for a scene that follows the reader and not the clock. */
+	readonly scroll?: boolean;
+}
+
+/** A yes or no a page holds and can be watched: night or day. */
+export interface Watched {
+	get(): boolean;
+	watch(fn: (value: boolean) => void): () => void;
+}
+
+/** A scene running on a page. */
+export interface Running {
+	/** Paint it afresh, as for a change of mode, without the fade. */
+	again(): void;
+	/** Take every listener and observer back off. */
+	stop(): void;
+}
+
+// A copy of a canvas's last frame laid over it, fading out while the canvas draws the new mode
+// underneath, so the forest changes mode as the page does: together and in one plain fade.
+const ghost = (canvas: HTMLCanvasElement): void => {
+	const copy = canvas.cloneNode(false) as HTMLCanvasElement;
+	copy.removeAttribute('id');
+	copy.getContext('2d')?.drawImage(canvas, 0, 0);
+	copy.setAttribute('aria-hidden', 'true');
+	copy.style.pointerEvents = 'none';
+	copy.style.transition = `opacity ${String(SWITCH_SECONDS)}s ease`;
+	canvas.after(copy);
+	requestAnimationFrame(() => requestAnimationFrame(() => { copy.style.opacity = '0'; }));
+	setTimeout(() => { copy.remove(); }, SWITCH_SECONDS * 1000 + 100);
+};
+
+/**
+ * Run a scene on the canvas that is the first child of `host`, filling the host.
+ *
+ * Whatever the painter draws in 0 or in its `clear` colour is see-through, so a strip's sky is the
+ * page itself. The scene runs only while the host is on screen and `motion` is on; still, it shows
+ * one frame and holds it. A change of mode fades a scene on screen from its last frame to the new
+ * one, and repaints one off screen when it next comes into view.
+ */
+export const runScene = (host: HTMLElement, scene: Scene, night: Watched): Running => {
+	const canvas = host.firstElementChild;
+	const context = canvas instanceof HTMLCanvasElement ? canvas.getContext('2d') : null;
+	if (!(canvas instanceof HTMLCanvasElement) || context === null) return { again: () => {}, stop: () => {} };
+	const scale = scene.scale ?? heroScale;
+	let painter: Painter | null = null;
+	let image: ImageData | null = null;
+	let size = 1, stale = false, seen = false, on = false, raf = 0, last = 0;
+	// The moment a still scene is held at.
+	let held = performance.now() / 1000;
+
+	const draw = (dt: number): void => {
+		if (painter === null || image === null) return;
+		painter.frame(dt, motion.get() ? performance.now() / 1000 : held);
+		const shown = new Uint32Array(image.data.buffer), from = painter.pixels, clear = painter.clear;
+		for (let i = 0; i < from.length; i++) { const c = from[i]!; shown[i] = c === clear ? 0 : c; }
+		context.putImageData(image, 0, 0);
+		scene.drawn?.(painter, shown, size);
+	};
+	const layout = (again: boolean): void => {
 		const box = host.getBoundingClientRect();
 		if (!box.width || !box.height) return;
-		const next = configFor(box.width);
 		size = scale(box.width);
 		const width = Math.ceil(box.width / size), height = Math.ceil(box.height / size);
-		if (strip !== null && strip.width === width && strip.height === height && next === config) return;
-		config = next;
-		strip = createStrip(config, width, height, { motion });
-		canvas.width = width; canvas.height = height;
+		if (!again && painter !== null && painter.width === width && painter.height === height) return;
+		stale = false;
+		painter = scene.paint(night.get(), width, height, box.width, motion.get());
+		if (image === null || canvas.width !== width || canvas.height !== height) {
+			canvas.width = width; canvas.height = height;
+			image = context.createImageData(width, height);
+		}
 		canvas.style.width = `${String(width * size)}px`; canvas.style.height = `${String(height * size)}px`;
-		image = context.createImageData(width, height);
-		paint(0, performance.now() / 1000);
+		draw(0);
 	};
-
-	const onMove = (event: PointerEvent): void => {
-		const box = canvas.getBoundingClientRect();
-		strip?.move((event.clientX - box.left) / size, (event.clientY - box.top) / size);
+	const refresh = (fade: boolean): void => {
+		if (painter === null) return;
+		if (!seen) { stale = true; return; }
+		if (fade && motion.get()) ghost(canvas);
+		layout(true);
 	};
-	const onLeave = (): void => { strip?.leave(); };
-	host.addEventListener('pointermove', onMove);
-	host.addEventListener('pointerleave', onLeave);
-
-	const resized = new ResizeObserver(layout);
-	resized.observe(host);
-	layout();
-
-	let on = false, raf = 0, last = 0;
 	const tick = (ms: number): void => {
-		paint(Math.min(0.05, (ms - last) / 1000), ms / 1000);
+		draw(Math.min(0.05, (ms - last) / 1000));
 		last = ms;
 		if (on) raf = requestAnimationFrame(tick);
 	};
-	const seen = new IntersectionObserver(([entry]) => {
-		if (!motion) return;
-		if (entry?.isIntersecting && !on) { on = true; last = performance.now(); raf = requestAnimationFrame(tick); }
-		else if (!entry?.isIntersecting) { on = false; cancelAnimationFrame(raf); }
-	});
-	seen.observe(host);
+	const loop = (): void => {
+		const want = seen && motion.get();
+		if (want && !on) { on = true; last = performance.now(); raf = requestAnimationFrame(tick); }
+		else if (!want && on) { on = false; cancelAnimationFrame(raf); }
+	};
 
-	return () => {
-		on = false;
-		cancelAnimationFrame(raf);
-		resized.disconnect();
-		seen.disconnect();
-		host.removeEventListener('pointermove', onMove);
-		host.removeEventListener('pointerleave', onLeave);
+	const pointer = scene.pointer ?? host;
+	const at = (event: PointerEvent): readonly [number, number] => {
+		const box = canvas.getBoundingClientRect();
+		return [(event.clientX - box.left) / size, (event.clientY - box.top) / size];
+	};
+	const onMove = (event: PointerEvent): void => { const [x, y] = at(event); painter?.move?.(x, y); };
+	const onDown = (event: PointerEvent): void => { const [x, y] = at(event); painter?.poke?.(x, y); };
+	const onLeave = (): void => { painter?.leave?.(); };
+	const onScroll = (): void => { if (seen && !on) draw(0); };
+	pointer.addEventListener('pointermove', onMove);
+	pointer.addEventListener('pointerdown', onDown);
+	pointer.addEventListener('pointerleave', onLeave);
+	if (scene.scroll === true) addEventListener('scroll', onScroll, { passive: true });
+
+	const resized = new ResizeObserver(() => { layout(false); });
+	resized.observe(host);
+	layout(false);
+	const watched = new IntersectionObserver(([entry]) => {
+		seen = entry?.isIntersecting ?? false;
+		if (seen && stale) layout(true);
+		loop();
+	}, { rootMargin: '60px' });
+	watched.observe(host);
+	const offNight = night.watch(() => { refresh(true); });
+	const offMotion = motion.watch((moving) => {
+		if (!moving) held = performance.now() / 1000;
+		refresh(false);
+		loop();
+	});
+
+	return {
+		again: () => { refresh(false); },
+		stop: () => {
+			on = false;
+			cancelAnimationFrame(raf);
+			resized.disconnect();
+			watched.disconnect();
+			offNight();
+			offMotion();
+			pointer.removeEventListener('pointermove', onMove);
+			pointer.removeEventListener('pointerdown', onDown);
+			pointer.removeEventListener('pointerleave', onLeave);
+			removeEventListener('scroll', onScroll);
+		},
 	};
 };
 
-// --- the bird on the resume button ------------------------------------------------------------
+/** A strip as a scene's painter, its sky's top colour see-through. */
+export const stripPainter = (config: StripConfig, width: number, height: number, moving: boolean): Strip & Painter =>
+	Object.assign(createStrip(config, width, height, { motion: moving }), { clear: pack(config.palette.sky[0]!) });
+
+// --- the birds on the page ----------------------------------------------------------------------
 //
-// One of the strip's birds, drawn a size closer: it flies down to the resume button as the page
-// opens, pecks at it, and leaves when the pointer reaches the button. Like the strip, `createPerch`
-// is the bird alone and needs no DOM; `runPerch` puts it on a page.
+// One of the strip's birds, drawn a size closer. One flies down to the resume button as the page
+// opens, pecks at it, and leaves when the pointer reaches the button. Another lands on the contact
+// form once the form is in full view, hops to Submit once the form would send, and carries a letter
+// off when it is sent. Like the strip, `createPerch` is the bird alone and needs no DOM; `runPerch`
+// puts it on a page.
 
 type Pose = readonly (readonly [x: number, y: number])[];
 
@@ -747,87 +1311,143 @@ export const createPerch = (from: { readonly x: number; readonly y: number }, ra
 	};
 };
 
+// A letter the bird carries off when the contact form is sent: paper with an ink edge and a flap,
+// held under its feet.
+const LETTER = ['#####', '##.##', '#...#', '#####'];
+
+/** A bird flown on a page by `runPerch`. */
+export interface Flight {
+	/** What the bird is doing, or null before it sets off and once it is gone. */
+	readonly state: PerchState | null;
+	/** Set off from above the window for the element it lands on, unless it is already out. */
+	start(): void;
+	/** Fly on to another element from where it is, and land there. */
+	land(on: HTMLElement): void;
+	/** Fly off, holding a letter with `letter`. */
+	leave(letter?: boolean): void;
+	/** Take every listener and observer back off. */
+	stop(): void;
+}
+
 /**
- * Run the bird on `canvas`, a child of `hero` placed against it, landing on `button`.
+ * Run a bird on `canvas`, a child of `host` placed against it, landing on `target`.
  *
- * It sets off from above the top of the page, to the right of the button, and is painted in the
- * strip's bird colour for the mode `night` reports, at the strip's pixel size. The pointer reaching
- * the button, or the keyboard focusing it, sends it off; once it is past the edge of the page it is
- * gone for good. Nothing happens for a visitor who asked for reduced motion.
- *
- * Returns: a stop function.
+ * It sets off from above the top of the window, to the right of where it lands, and is painted in
+ * the strip's bird colour for the mode `night` reports, at the strip's pixel size. It sets off at
+ * once unless `wait`, in which case `start` sends it. A `shy` bird flies off when the pointer reaches
+ * its element or the keyboard focuses it. Once it is past the edge of the window it is gone. Nothing
+ * flies while `motion` is off, and switching motion off takes a bird in flight away.
  */
 export const runPerch = (
-	hero: HTMLElement,
+	host: HTMLElement,
 	canvas: HTMLCanvasElement,
-	button: HTMLElement,
+	target: HTMLElement,
 	scale: (width: number) => number,
 	night: () => boolean,
-): (() => void) => {
+	options: { readonly wait?: boolean; readonly shy?: boolean; readonly letter?: boolean } = {},
+): Flight => {
 	const context = canvas.getContext('2d');
-	if (!context || matchMedia('(prefers-reduced-motion: reduce)').matches) return () => {};
-
-	// The canvas holds every pose: x from -4 to 3, y from -5 to 0, in strip pixels.
-	canvas.width = 8; canvas.height = 6;
+	// The canvas holds every pose: x from -4 to 3, y from -5 to 0, in strip pixels, and below the
+	// feet the letter when the bird can carry one.
+	const rows = options.letter === true ? 9 : 6;
+	canvas.width = 8; canvas.height = rows;
+	let on = target;
 	const spot = (): { x: number; y: number } => {
-		const h = hero.getBoundingClientRect(), b = button.getBoundingClientRect();
+		const h = host.getBoundingClientRect(), b = on.getBoundingClientRect();
 		return { x: b.left - h.left + b.width * 0.72, y: b.top - h.top };
 	};
-	const start = spot(), top = hero.getBoundingClientRect().top + scrollY;
-	const bird = createPerch({ x: start.x + 240, y: -top - 30 });
 
-	let raf = 0, last = performance.now(), size = 0;
+	let bird: Perch | null = null, carrying = false;
+	let raf = 0, last = performance.now(), size = 0, seen = true, running = false;
 	const paint = (): void => {
-		const next = scale(hero.getBoundingClientRect().width);
+		if (bird === null || context === null) return;
+		const next = scale(host.getBoundingClientRect().width);
 		if (next !== size) {
 			size = next;
-			canvas.style.width = `${String(8 * size)}px`; canvas.style.height = `${String(6 * size)}px`;
+			canvas.style.width = `${String(8 * size)}px`; canvas.style.height = `${String(rows * size)}px`;
 		}
-		// Across, on the strip's pixel grid; down, on the button's edge exactly, so the feet touch it.
+		// Across, on the strip's pixel grid; down, on the element's edge exactly, so the feet touch it.
 		const left = Math.round(bird.x / size) * size - 4 * size, high = Math.round(bird.y) - 6 * size;
 		canvas.style.transform = `translate(${String(left)}px, ${String(high)}px)`;
-		context.clearRect(0, 0, 8, 6);
-		context.fillStyle = (night() ? NIGHT : LIGHT).bird;
+		context.clearRect(0, 0, 8, rows);
+		const ink = (night() ? NIGHT : LIGHT).bird;
+		context.fillStyle = ink;
 		for (const [px, py] of bird.pose) context.fillRect(px + 4, py + 5, 1, 1);
+		if (carrying && bird.state === 'away') {
+			for (let j = 0; j < LETTER.length; j++) for (let i = 0; i < 5; i++) {
+				context.fillStyle = LETTER[j]![i] === '#' ? ink : PAPER_A;
+				context.fillRect(i + 2, j + 5, 1, 1);
+			}
+		}
 	};
 	const gone = (): boolean => {
-		const h = hero.getBoundingClientRect();
-		return bird.y + h.top + scrollY < -40 || bird.x + h.left < -40 || bird.x + h.left > innerWidth + 40;
+		if (bird === null) return true;
+		const h = host.getBoundingClientRect();
+		return bird.y + h.top < -40 || bird.x + h.left < -40 || bird.x + h.left > innerWidth + 40;
+	};
+	const away = (): void => {
+		bird = null; running = false;
+		canvas.style.display = 'none';
+		delete canvas.dataset['state'];
 	};
 
-	// Standing on a button that is off screen, nothing needs drawing: the loop rests until the button
-	// is back, or until the bird is scared.
-	let seen = true, running = false, done = false;
+	// Standing on an element that is off screen, nothing needs drawing: the loop rests until the
+	// element is back, or until the bird is scared.
 	const tick = (ms: number): void => {
+		if (bird === null) { running = false; return; }
 		bird.step(Math.min(0.05, (ms - last) / 1000), spot());
 		last = ms;
-		if (bird.state === 'perch' && button.matches(':hover')) bird.scare();
+		if (options.shy === true && bird.state === 'perch' && on.matches(':hover')) bird.scare();
 		canvas.dataset['state'] = bird.state;
-		if (bird.state === 'away' && gone()) { canvas.style.display = 'none'; running = false; done = true; return; }
+		if (bird.state === 'away' && gone()) { away(); return; }
 		paint();
 		if (bird.state === 'perch' && !seen) { running = false; return; }
 		raf = requestAnimationFrame(tick);
 	};
 	const run = (): void => {
-		if (running || done) return;
+		if (running || bird === null) return;
 		running = true; last = performance.now(); raf = requestAnimationFrame(tick);
 	};
-	const scare = (): void => { bird.scare(); run(); };
-	button.addEventListener('pointerenter', scare);
-	button.addEventListener('focus', scare);
+	const start = (): void => {
+		if (!motion.get() || context === null || (bird !== null && bird.state !== 'away')) return;
+		const from = spot();
+		bird = createPerch({ x: from.x + 240, y: -host.getBoundingClientRect().top - 30 });
+		carrying = false;
+		canvas.style.display = 'block';
+		paint();
+		run();
+	};
+	const scare = (): void => { bird?.scare(); run(); };
+	if (options.shy === true) {
+		target.addEventListener('pointerenter', scare);
+		target.addEventListener('focus', scare);
+	}
 	const watch = new IntersectionObserver(([entry]) => {
 		seen = entry?.isIntersecting ?? true;
 		if (seen) run();
 	});
-	watch.observe(button);
-	canvas.style.display = 'block';
-	paint();
-	run();
+	watch.observe(target);
+	const offMotion = motion.watch((moving) => { if (!moving) { cancelAnimationFrame(raf); away(); } });
+	if (options.wait !== true) start();
 
-	return () => {
-		cancelAnimationFrame(raf);
-		watch.disconnect();
-		button.removeEventListener('pointerenter', scare);
-		button.removeEventListener('focus', scare);
+	return {
+		get state() { return bird?.state ?? null; },
+		start,
+		land: (next) => {
+			if (next === on) return;
+			on = next;
+			watch.disconnect();
+			watch.observe(on);
+			if (bird !== null && bird.state !== 'away') { bird = createPerch({ x: bird.x, y: bird.y }); run(); }
+		},
+		leave: (letter = false) => { carrying = letter; scare(); },
+		stop: () => {
+			cancelAnimationFrame(raf);
+			running = false;
+			watch.disconnect();
+			offMotion();
+			target.removeEventListener('pointerenter', scare);
+			target.removeEventListener('focus', scare);
+		},
 	};
 };

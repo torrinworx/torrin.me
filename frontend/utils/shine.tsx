@@ -17,6 +17,8 @@
 import { mutable, timer } from '@aweftjs/core';
 import { h } from '@aweftjs/ui';
 
+import { motion } from '../strip.ts';
+
 const RUN = 'transform 0.8s ease-out, opacity 0.8s ease-out';
 
 const framesOf = (): ((fn: () => void) => number) | undefined =>
@@ -50,9 +52,10 @@ export const useShine = (cleanup: (...fns: (() => void)[]) => void): unknown => 
 				opacity.set(0);
 			}));
 		};
-		// Every other tick of a two-second timer, which is one sweep every four seconds.
-		cleanup(timer(2000).watch((tick) => { if (tick % 2 === 0) sweep(); }));
-		sweep();
+		// Every other tick of a two-second timer, which is one sweep every four seconds, and none while
+		// the menu's switch holds the site still.
+		cleanup(timer(2000).watch((tick) => { if (tick % 2 === 0 && motion.get()) sweep(); }));
+		if (motion.get()) sweep();
 	}
 
 	return <span

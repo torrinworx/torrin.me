@@ -9,10 +9,12 @@ import type { Derived } from '@aweftjs/core';
 import { Button, Icon, Typography, h } from '@aweftjs/ui';
 
 import resume from '../data/resume.json' with { type: 'json' };
-import { heroScale, heroScene, runPerch, runStrip } from '../strip.ts';
-import { ModeContext, dark } from '../theme.ts';
+import { heroScale, heroScene, photoBox, runPerch, runScene, stripPainter } from '../strip.ts';
+import type { Painter } from '../strip.ts';
+import { ModeContext } from '../theme.ts';
 import { Contact } from '../utils/contact.tsx';
 import { Email } from '../utils/email.tsx';
+import { Rule, nightOf } from '../utils/forest.tsx';
 import { Resume } from '../utils/resume.tsx';
 
 const { profile } = resume;
@@ -137,60 +139,149 @@ const Entry = (props: { item: Item }): unknown => {
 	);
 };
 
-const Section = (props: { title: string; children?: unknown[] }): unknown => (
+/**
+ * A section of the page under its heading. The heading's rule is the bank of a small strip whose
+ * tree grows taller under each heading down the page (forest.tsx); `index` is its place.
+ */
+const Section = (props: { title: string; index: number; children?: unknown[] }): unknown => (
 	<div theme="content">
-		<Typography theme={['row', 'wide', 'start']} type="h2" label={props.title} />
-		{/* Every section heading carries one. The live site drew a rule under Experience and
-		    Projects only, and that was the first entry's own rule showing through rather than a
-		    decision: Skills and Education, whose first child is not an entry, had none. */}
-		<div theme="divider" />
+		<div theme="heading">
+			<Typography theme={['row', 'wide', 'start', 'heading_title']} type="h2" label={props.title} />
+			<Rule index={props.index} />
+		</div>
 		{props.children}
 	</div>
 );
 
 const STRIP = 'hero-strip';
 const BIRD = 'hero-bird';
+const PHOTO = 'hero-photo';
+const FRONT = 'hero-front';
 
 /**
- * The top of the landing page: the pixel strip across the window, the name, the role, a sentence and
- * the photo in its sky, and on its water the resume, the two ways to get in touch, and where the work
- * can happen.
+ * The photo's pixels at a size, read from the photo the page already shows, or null until it has
+ * loaded. Each size is read once.
+ */
+const pixelsOf = (photo: HTMLImageElement): ((width: number, height: number) => Uint32Array | null) => {
+	const read = new Map<string, Uint32Array>();
+	return (width, height) => {
+		const key = `${String(width)}x${String(height)}`;
+		const held = read.get(key);
+		if (held !== undefined) return held;
+		if (!photo.complete || photo.naturalWidth === 0) return null;
+		const canvas = document.createElement('canvas');
+		canvas.width = width; canvas.height = height;
+		const context = canvas.getContext('2d');
+		if (context === null) return null;
+		context.imageSmoothingQuality = 'high';
+		context.drawImage(photo, 0, 0, width, height);
+		const pixels = new Uint32Array(context.getImageData(0, 0, width, height).data.buffer.slice(0));
+		read.set(key, pixels);
+		return pixels;
+	};
+};
+
+/**
+ * Keep the sharp photo over the strip's pixel copy of it, and lay over the photo whatever the strip
+ * draws in front of it: the pixels of the copy that are not the photo's own are a leaf, a vine or a
+ * bird, and go on the canvas above. Moved by transform, so its floating is never a layout shift.
+ */
+const overlay = (
+	photo: HTMLImageElement,
+	cover: HTMLCanvasElement,
+	pixels: (width: number, height: number) => Uint32Array | null,
+	box: () => { readonly width: number; readonly height: number },
+): ((painter: Painter, shown: Uint32Array, size: number) => void) => {
+	let image: ImageData | null = null, sized = '', placed = '';
+	return (painter, shown, size) => {
+		const at = 'stoneAt' in painter ? (painter.stoneAt as { x: number; y: number } | null) : null;
+		const { width, height } = box(), iw = width - 2, ih = height - 2, own = pixels(iw, ih);
+		if (at === null || own === null) return;
+		const left = at.x + 1, top = at.y + 1;
+		const fit = `${String(iw)} ${String(ih)} ${String(size)}`;
+		if (fit !== sized) {
+			sized = fit;
+			for (const element of [photo, cover]) { element.style.width = `${String(iw * size)}px`; element.style.height = `${String(ih * size)}px`; }
+		}
+		const where = `translate(${String(left * size)}px, ${String(top * size)}px)`;
+		if (where !== placed) { placed = where; photo.style.transform = where; cover.style.transform = where; }
+		const context = cover.getContext('2d');
+		if (context === null) return;
+		if (cover.width !== iw || cover.height !== ih || image === null) { cover.width = iw; cover.height = ih; image = context.createImageData(iw, ih); }
+		const out = new Uint32Array(image.data.buffer), W = painter.width, H = painter.height;
+		for (let y = 0; y < ih; y++) {
+			const row = top + y;
+			for (let x = 0; x < iw; x++) {
+				const col = left + x, c = row >= 0 && row < H && col >= 0 && col < W ? shown[row * W + col]! : 0;
+				out[y * iw + x] = c === own[y * iw + x] ? 0 : c;
+			}
+		}
+		context.putImageData(image, 0, 0);
+	};
+};
+
+/**
+ * The top of the landing page: the pixel strip across the window with the photo floating over its
+ * bank, the name, the role and a sentence in its sky, and on its water the resume, the two ways to
+ * get in touch, and where the work can happen.
  *
- * The strip only exists in a browser. The page the build writes has the words and an empty canvas,
- * and the scene starts on the first frame after the page comes alive, in the mode the page is in.
- * On that frame a bird sets off for the resume button too. A change of mode repaints both and
- * sends neither back to the start.
+ * The strip only exists in a browser. The page the build writes has the words, the photo near where
+ * it floats, and an empty canvas, and the scene starts on the first frame after the page comes
+ * alive, in the mode the page is in; once the photo has loaded the strip takes it in. On that frame
+ * a bird sets off for the resume button too.
  */
 const Hero = ModeContext.use((mode) => (
 	props: { focused: Derived<boolean> },
 	cleanup: (...fns: (() => void)[]) => void,
 ): unknown => {
 	if (typeof requestAnimationFrame === 'function') {
+		const night = nightOf(mode);
 		let stop = (): void => {};
-		let off = (): void => {};
-		const start = (night: boolean): void => {
-			stop();
-			const host = document.getElementById(STRIP);
-			stop = host === null ? () => {} : runStrip(host, (width) => heroScene(night, width), heroScale);
-		};
 		let perch = (): void => {};
 		const first = requestAnimationFrame(() => {
-			if (mode === null) start(false);
-			else off = mode.effect((held) => { start(held === dark); });
-			const hero = document.getElementById(STRIP)?.parentElement;
+			const host = document.getElementById(STRIP);
+			const photo = document.getElementById(PHOTO);
+			const cover = document.getElementById(FRONT);
+			if (host === null || !(photo instanceof HTMLImageElement) || !(cover instanceof HTMLCanvasElement)) return;
+			const pixels = pixelsOf(photo);
+			let width = host.getBoundingClientRect().width;
+			const running = runScene(host, {
+				paint: (dark, across, down, css, moving) => {
+					width = css;
+					return stripPainter(heroScene(dark, css, pixels), across, down, moving);
+				},
+				drawn: overlay(photo, cover, pixels, () => photoBox(width)),
+			}, night);
+			stop = running.stop;
+			// The photo is in the page the build wrote, so it is often loaded by now; when it is not,
+			// the strip starts without it and takes it in once it is.
+			photo.decode().then(() => { running.again(); }, () => {});
+			const hero = host.parentElement;
 			const bird = document.getElementById(BIRD);
 			const resume = hero?.querySelector<HTMLElement>('a[download]');
 			if (hero && bird instanceof HTMLCanvasElement && resume) {
-				perch = runPerch(hero, bird, resume, heroScale, () => mode?.get() === dark);
+				perch = runPerch(hero, bird, resume, heroScale, () => night.get(), { shy: true }).stop;
 			}
 		});
-		cleanup(() => { cancelAnimationFrame(first); off(); stop(); perch(); });
+		cleanup(() => { cancelAnimationFrame(first); stop(); perch(); });
 	}
 
 	return (
 		<div theme="hero">
-			<div id={STRIP} theme="hero_strip" aria-hidden="true">
-				<canvas theme="hero_canvas" />
+			<div id={STRIP} theme="hero_strip">
+				<canvas theme="hero_canvas" aria-hidden="true" />
+				{/* A head-and-shoulders crop of headshot.webp (930 by 1240 from x 135, y 356), at 600 by 800.
+				    Pressing it dips it into the pond. */}
+				<img
+					id={PHOTO}
+					theme="hero_photo"
+					src="/portrait.webp"
+					width="600"
+					height="800"
+					alt="Torrin Leonard, head and shoulders, in front of evergreens."
+					draggable="false"
+				/>
+				<canvas id={FRONT} theme="hero_front" aria-hidden="true" />
 			</div>
 			<div theme="hero_over">
 				<div theme="hero_sky">
@@ -199,8 +290,6 @@ const Hero = ModeContext.use((mode) => (
 						<Typography type="date" label={profile.heroLabel} />
 						<Typography type="p1" theme="hero_lede" label={profile.heroLede} />
 					</div>
-					{/* A square head-and-shoulders crop of headshot.webp (800px from x 200, y 360), at 360px. */}
-					<img theme="hero_photo" src="/headshot-square.webp" width="120" height="120" alt="Profile image of Torrin Leonard." />
 				</div>
 				<div theme="hero_water">
 					<div theme="hero_actions">
@@ -234,19 +323,19 @@ export const Landing = (): unknown => {
 	return [
 		<Hero focused={focused} />,
 
-		<Section title="Experience">
+		<Section title="Experience" index={0}>
 			<div theme="column" style={{ width: '100%', gap: 20 }}>
 				{work.map((item) => <Entry item={item} />)}
 			</div>
 		</Section>,
 
-		<Section title="Projects">
+		<Section title="Projects" index={1}>
 			<div theme="column" style={{ width: '100%', gap: 20 }}>
 				{projects.map((item) => <Entry item={item} />)}
 			</div>
 		</Section>,
 
-		<Section title="Skills">
+		<Section title="Skills" index={2}>
 			<ul style={{ paddingLeft: 25 }}>
 				{resume.skills.map((skill) => (
 					<li>
@@ -257,7 +346,7 @@ export const Landing = (): unknown => {
 			</ul>
 		</Section>,
 
-		<Section title="Education">
+		<Section title="Education" index={3}>
 			<Typography theme={['row', 'wide', 'start']} type="p1" label={resume.education.summary} />
 			<ul style={{ paddingLeft: 25 }}>
 				{resume.education.credentials.map((credential) => (
@@ -275,6 +364,6 @@ export const Landing = (): unknown => {
 			</ul>
 		</Section>,
 
-		<Contact focused={focused} />,
+		<Contact focused={focused} rule={4} />,
 	];
 };

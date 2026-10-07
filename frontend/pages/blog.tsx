@@ -5,6 +5,9 @@
 // markdown cannot say: the head tags, the structured data, the date line, the contents list,
 // and three modifiers (the YouTube poster, superscript, the callout). The same components render
 // the post's body for the feeds, in `feed` mode, where nothing can be clicked.
+//
+// Each post has a tree of its own, grown from its slug: beside it on the index and above its title.
+// On a post, a vine grows down the left margin as it is read (forest.tsx).
 
 import { mutable } from '@aweftjs/core';
 import { Button, Head, Icon, Link, Markdown, Meta, Script, Title, Typography, h, suspend } from '@aweftjs/ui';
@@ -13,6 +16,8 @@ import type { Act, TextModifier } from '@aweftjs/ui';
 import { AUTHOR_ID, SITE_URL, WEBSITE_ID } from '../head.tsx';
 import { ContentContext, posts, postAt } from '../posts.ts';
 import type { Body, Content, Fence, Listed } from '../posts.ts';
+import { seedOf } from '../strip.ts';
+import { Canopy, Plot, Tile } from '../utils/forest.tsx';
 
 const BLOG_URL = `${SITE_URL}/blog`;
 const BLOG_ID = `${BLOG_URL}#blog`;
@@ -252,6 +257,8 @@ const Article = (props: { post: Listed; body: Body }): unknown => {
 	return (
 		<article theme={['content', 'start', 'post']}>
 			<PostHead post={post} />
+			<Canopy grow />
+			<Plot seed={seedOf(post.slug)} />
 			<header theme={['column', 'wide']} style={{ gap: 10 }}>
 				<PostMeta post={post} />
 				<Typography theme={['row', 'wide', 'start']} type="h1" label={post.title} />
@@ -321,18 +328,22 @@ const PostPage = ContentContext.use((content: Content) => (props: { stage?: { pa
 });
 
 const Entry = (props: { post: Listed }): unknown => (
-	<li theme={['column', 'wide', 'blog_entry']}>
-		<PostMeta post={props.post} />
-		<a theme="blog_title" href={`/blog/${props.post.slug}`}>
-			<Typography type="h2" label={props.post.title} />
-		</a>
-		<Typography type="p1" label={props.post.description} />
+	<li theme={['wide', 'blog_entry']}>
+		<div theme={['column', 'blog_text']}>
+			<PostMeta post={props.post} />
+			<a theme="blog_title" href={`/blog/${props.post.slug}`}>
+				<Typography type="h2" label={props.post.title} />
+			</a>
+			<Typography type="p1" label={props.post.description} />
+		</div>
+		<Tile slug={props.post.slug} seed={seedOf(props.post.slug)} />
 	</li>
 );
 
 const Index = (): unknown => (
 	<div theme={['content', 'start']}>
 		<IndexHead />
+		<Canopy />
 		<Typography theme={['row', 'wide', 'start']} type="h1" label={BLOG_TITLE} />
 		<Typography theme={['row', 'wide', 'start']} type="p1" label={BLOG_DESCRIPTION} />
 		<div theme="divider" />

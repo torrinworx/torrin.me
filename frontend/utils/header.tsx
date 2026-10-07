@@ -1,6 +1,7 @@
 // The top of every page. The name, a link home, heads every page but the landing, whose hero
 // carries it. The hamburger floats at the top right of the window on every page, and opens home,
-// resume, contact, the blog, the radio, GitHub, the address and the dark mode switch.
+// resume, contact, the blog, the radio, GitHub, the address, the dark mode switch and the switch
+// that holds the forest still.
 //
 // `Detached` places the panel and `Card` paints it. Every row is a `Button` with a real `href`, so
 // the four internal links are in the markup a crawler reads and `router.links` turns a click into
@@ -9,8 +10,10 @@
 import { mutable } from '@aweftjs/core';
 import { Button, Card, Detached, Icon, StageContext, Theme, Toggle, h, mark, useAbort } from '@aweftjs/ui';
 
+import { motion } from '../strip.ts';
 import { ModeContext, dark, light, menuSwitch } from '../theme.ts';
 import { Email } from './email.tsx';
+import { crossfade } from './forest.tsx';
 import { Resume } from './resume.tsx';
 
 const ROW = ['bare', 'brand'];
@@ -56,7 +59,7 @@ export const Header = StageContext.use((stage) => ModeContext.use((mode) => (
 
 	const close = (): void => { open.set(false); };
 
-	const darkOn = mode?.map((held) => held === dark).setter((on) => { mode.set(on ? dark : light); });
+	const darkOn = mode?.map((held) => held === dark).setter((on) => { crossfade(); mode.set(on ? dark : light); });
 
 	return [
 		unless('', (
@@ -151,13 +154,18 @@ export const Header = StageContext.use((stage) => ModeContext.use((mode) => (
 								href="https://github.com/torrinworx"
 							/>
 							<Email theme={ROW} />
-							{darkOn === undefined ? null : (
-								<Theme value={menuSwitch}>
+							<Theme value={menuSwitch}>
+								{darkOn === undefined ? null : (
 									<div theme={['row', 'center']} style={{ padding: '8px 10px' }}>
 										<Toggle value={darkOn} label="Dark mode" theme="brandswitch" />
 									</div>
-								</Theme>
-							)}
+								)}
+								{/* Off, nothing on the site moves on its own: the forest, its birds, the shine
+								    on the buttons and the contact block's blink (WCAG 2.2.2). */}
+								<div theme={['row', 'center']} style={{ padding: '8px 10px' }}>
+									<Toggle value={motion} label="Motion" theme="brandswitch" />
+								</div>
+							</Theme>
 						</div>
 					</Card>
 				</mark.popup>

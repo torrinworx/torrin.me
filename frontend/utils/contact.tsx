@@ -2,9 +2,13 @@
 //
 // The same block appears at the foot of the landing page and as the whole of the /contact page.
 // On the landing page the "Contact" button hands it a `focused` cell, which rings and blinks the
-// block until the pointer reaches it.
+// block until the pointer reaches it, and its heading's rule is the last of the landing's growing
+// trees.
+//
+// One of the strip's birds lands on the form once the whole form is on screen, hops to Submit once
+// the form would send, and carries a letter off when it is sent (strip.ts).
 
-import { mutable } from '@aweftjs/core';
+import { all, mutable } from '@aweftjs/core';
 import type { Derived } from '@aweftjs/core';
 import {
 	Button,
@@ -18,6 +22,11 @@ import {
 	h,
 	mark,
 } from '@aweftjs/ui';
+
+import { heroScale, motion, runPerch } from '../strip.ts';
+import type { Flight } from '../strip.ts';
+import { ModeContext } from '../theme.ts';
+import { Rule, nightOf } from './forest.tsx';
 
 /** What the server is sent. `company` is the trap: a person never sees it, so it stays empty. */
 interface Message {
@@ -38,11 +47,16 @@ const words = (cell: Cell): string => {
 	return '';
 };
 
+// A message is anything said: digits included, since a message may well carry a phone number.
+const filled = (cell: Cell): string => (String(cell.get() ?? '').trim() ? '' : 'This field is required.');
+
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const address = (cell: Cell): string => {
 	const said = String(cell.get() ?? '').trim();
 	cell.set(said);
 	if (!said) return 'Email address is required.';
-	if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(said)) return 'Please enter a valid email address.';
+	if (!EMAIL.test(said)) return 'Please enter a valid email address.';
 	return '';
 };
 
@@ -56,8 +70,15 @@ const send = async (body: Message): Promise<void> => {
 	if (!answer.ok || said.ok !== true) throw new Error(said.error ?? 'Failed to send message');
 };
 
-export const Contact = StageContext.use((stage) => (
-	props: { focused?: Derived<boolean> },
+const BIRD = 'contact-bird';
+const FORM = 'contact-form';
+const SUBMIT = 'contact-submit';
+// How long the bird is given to carry the letter off before the form gives way to its answer.
+const CARRY = 700;
+
+export const Contact = StageContext.use((stage) => ModeContext.use((mode) => (
+	props: { focused?: Derived<boolean>; rule?: number },
+	cleanup: (...fns: (() => void)[]) => void,
 ): unknown => {
 	const focused = props.focused;
 	const submitted = mutable(false);
@@ -70,15 +91,51 @@ export const Contact = StageContext.use((stage) => (
 
 	const quiet = (): void => { focused?.set(false); };
 
+	// Whether the form would send as it stands, asked without the email check's tidying.
+	const ready = (): boolean => words(fullName) === '' && EMAIL.test(email.get().trim()) && filled(message) === '';
+	let flight: Flight | null = null;
+	if (typeof requestAnimationFrame === 'function') {
+		const night = nightOf(mode);
+		let off = (): void => {};
+		const first = requestAnimationFrame(() => {
+			const block = document.getElementById('contact');
+			const bird = document.getElementById(BIRD);
+			const form = document.getElementById(FORM);
+			const name = form?.querySelector<HTMLElement>('input');
+			const submit = document.getElementById(SUBMIT);
+			if (block === null || !(bird instanceof HTMLCanvasElement) || !form || !name || submit === null) return;
+			const bound = runPerch(block, bird, name, heroScale, () => night.get(), { wait: true, letter: true });
+			flight = bound;
+			const toward = (): HTMLElement => (ready() ? submit : name);
+			const typed = all([fullName, email, message]).watch(() => { bound.land(toward()); });
+			// It comes once the whole form is in view, so it is never landing on something half off screen.
+			const shown = new IntersectionObserver(([entry]) => {
+				if ((entry?.intersectionRatio ?? 0) >= 0.99 && !submitted.get()) { bound.land(toward()); bound.start(); }
+			}, { threshold: [0.99] });
+			shown.observe(form);
+			off = () => { typed(); shown.disconnect(); bound.stop(); };
+		});
+		cleanup(() => { cancelAnimationFrame(first); off(); });
+	}
+
 	return (
 		<div
 			id="contact"
-			theme={['content', 'radius', focused === undefined ? null : focused.bool('blink', null)]}
+			theme={['content', 'radius', 'contact', focused === undefined ? null : all([focused, motion]).map(([on, moving]) => (on ? (moving ? 'blink' : 'ring') : null))]}
 			onMouseDown={quiet}
 			onMouseEnter={quiet}
 		>
-			<Typography theme={['row', 'wide', 'start']} type="h2" label="Interested? Let's talk! " />
-			<div theme="divider" />
+			{props.rule === undefined
+				? [
+					<Typography theme={['row', 'wide', 'start']} type="h2" label="Interested? Let's talk! " />,
+					<div theme="divider" />,
+				]
+				: (
+					<div theme="heading">
+						<Typography theme={['row', 'wide', 'start', 'heading_title']} type="h2" label="Interested? Let's talk! " />
+						<Rule index={props.rule} />
+					</div>
+				)}
 			<Typography type="p1" theme={['row', 'wide', 'start']}>
 				Fill out the form below, email me directly, or dm me on LinkedIn. Either way I'll get back to you quickly!
 			</Typography>
@@ -101,7 +158,7 @@ export const Contact = StageContext.use((stage) => (
 				</div>
 
 				<mark.else>
-					<div theme={['column', 'center']} style={{ width: '100%', gap: 10 }}>
+					<div id={FORM} theme={['column', 'center']} style={{ width: '100%', gap: 10 }}>
 						<div theme={['column', 'center']} style={{ width: '100%', maxWidth: 400, gap: 10 }}>
 							<Validate value={fullName} validate={words} signal={asked}>
 								<TextField placeholder="Full Name*" aria-label="Full Name" value={fullName} />
@@ -111,7 +168,7 @@ export const Contact = StageContext.use((stage) => (
 								<TextField placeholder="Email*" aria-label="Email" value={email} />
 							</Validate>
 
-							<Validate value={message} validate={words} signal={asked}>
+							<Validate value={message} validate={filled} signal={asked}>
 								{/* `rows` so the page the build writes is the height the browser settles on. A text area
 								    measures its content once it can, and until then it is the host default of two
 								    rows, which made the field 64px in the written page and 49px after hydration. */}
@@ -136,11 +193,12 @@ export const Contact = StageContext.use((stage) => (
 						</div>
 
 						<Button
+							id={SUBMIT}
 							label="Submit"
 							onClick={async () => {
 								// The checks run here rather than through a `ValidateContext`, so
 								// the answer is known in this handler instead of one delivery later.
-								const problems = [words(fullName), address(email), words(message)];
+								const problems = [words(fullName), address(email), filled(message)];
 								asked.set(true);
 								if (problems.some((said) => said !== '')) return;
 
@@ -151,12 +209,19 @@ export const Contact = StageContext.use((stage) => (
 									page: stage?.current.get() || 'landing',
 									company: company.get(),
 								});
+								if (flight?.state === 'perch' || flight?.state === 'in') {
+									flight.leave(true);
+									await new Promise((done) => { setTimeout(done, CARRY); });
+								}
 								submitted.set(true);
 							}}
 						/>
 					</div>
 				</mark.else>
 			</Shown>
+			{/* Always on the page, so a screen reader hears the answer when it arrives (WCAG 4.1.3). */}
+			<p theme="unseen" role="status">{submitted.map((sent) => (sent ? 'Received! Thank you for reaching out.' : ''))}</p>
+			<canvas id={BIRD} theme="perch" aria-hidden="true" />
 		</div>
 	);
-});
+}));

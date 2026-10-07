@@ -10,9 +10,9 @@ import { icons } from '../favicons.ts';
 import { ARRIVE, createPerch, createStrip, heroScene, pack } from '../frontend/strip.ts';
 import { FOREST, PAPER } from '../frontend/theme.ts';
 
-// A wide screen and a phone: CSS width, then the strip's size in its own pixels, then where the
-// moon stands across it at night.
-const SIZES = [['wide', 1905, 635, 187, 0.6], ['phone', 390, 195, 150, 0.8]] as const;
+// A wide screen and a phone: CSS width, then the strip's size in its own pixels (680 CSS pixels
+// tall at three to a pixel, and 440 at two).
+const SIZES = [['wide', 1905, 635, 227], ['phone', 390, 195, 220]] as const;
 
 const still = (night: boolean, css: number, width: number, height: number) => {
 	const strip = createStrip(heroScene(night, css), width, height, { motion: false });
@@ -23,7 +23,8 @@ const row = (strip: { width: number; pixels: Uint32Array }, y: number): number[]
 	Array.from(strip.pixels.subarray(y * strip.width, (y + 1) * strip.width));
 
 describe('the hero strip', () => {
-	for (const [name, css, width, height, moon] of SIZES) {
+	for (const [name, css, width, height] of SIZES) {
+		const moon = heroScene(true, css).moon![0];
 		it(`its sky starts at the page colour, light and dark, on a ${name} screen`, () => {
 			assert.ok(row(still(false, css, width, height), 0).every((c) => c === pack(PAPER)), 'the light sky starts at paper');
 			assert.ok(row(still(true, css, width, height), 0).every((c) => c === pack(FOREST)), 'the night sky starts at forest');
@@ -43,18 +44,18 @@ describe('the hero strip', () => {
 	}
 
 	it('draws the same scene from the same seed', () => {
-		assert.deepEqual(still(false, 1905, 635, 187).pixels, still(false, 1905, 635, 187).pixels);
+		assert.deepEqual(still(false, 1905, 635, 227).pixels, still(false, 1905, 635, 227).pixels);
 	});
 
 	// "25 a second at an easy pace": an easy pace is two strip pixels a move, sixty moves a second.
 	it('a second of brushing a crown at an easy pace shakes about 25 leaves loose', () => {
 		let seed = 1;
 		const random = (): number => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
-		const strip = createStrip(heroScene(false, 1905), 635, 187, { motion: true, random });
+		const scene = heroScene(false, 1905), strip = createStrip(scene, 635, 227, { motion: true, random });
 		strip.frame(0, 0);
-		// Inside the crown of the hero's second tree: it stands at 0.74 of the width, and its crown is
-		// centred well above the bank.
-		const x = Math.round(0.74 * 635), y = 52;
+		// Inside the crown of the hero's second tree, which starts 72 rows down and is centred well
+		// above the bank.
+		const x = Math.round(scene.trees[1]![0] * 635), y = 85;
 		for (let i = 0; i < 60; i++) {
 			strip.move(x + (i % 2 ? 1 : -1), y);
 			strip.frame(1 / 60, 0.5 + i / 60);
@@ -65,9 +66,9 @@ describe('the hero strip', () => {
 
 	// Five seconds, past the moment the first leaf would fall on its own.
 	it('lets nothing fall with motion off, brushed or not', () => {
-		const strip = createStrip(heroScene(false, 1905), 635, 187, { motion: false });
+		const scene = heroScene(false, 1905), strip = createStrip(scene, 635, 227, { motion: false });
 		strip.frame(0, 0);
-		for (let i = 0; i < 300; i++) { strip.move(Math.round(0.74 * 635) + (i % 2), 52); strip.frame(1 / 60, i / 60); }
+		for (let i = 0; i < 300; i++) { strip.move(Math.round(scene.trees[1]![0] * 635) + (i % 2), 85); strip.frame(1 / 60, i / 60); }
 		assert.equal(strip.leaves(), 0);
 	});
 });

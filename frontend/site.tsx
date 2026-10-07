@@ -28,6 +28,7 @@ import type { Content } from './posts.ts';
 import { ModeContext, light, siteTheme } from './theme.ts';
 import type { Mode } from './theme.ts';
 import { Contact } from './utils/contact.tsx';
+import { Canopy, Shore } from './utils/forest.tsx';
 import { Header } from './utils/header.tsx';
 import { blogActs } from './pages/blog.tsx';
 import { Landing } from './pages/landing.tsx';
@@ -41,52 +42,53 @@ const icons = { icons: { 'triangle-alert': alertTriangle } };
 /** What a click reports. The browser half hands in the log's writer; a render hands in none. */
 export type Track = (event: string, options: { props: Record<string, string> }) => void;
 
+/**
+ * The foot of every page: a shore across the window, the social row standing in its sky and the
+ * copyright on its water (forest.tsx).
+ */
 const Footer = (): unknown => (
-	<div theme="content">
-		<div theme={['column', 'center']} style={{ width: '100%', gap: 10 }}>
-			<div theme={['row', 'wrap', 'center']} style={{ width: '100%', gap: 10 }}>
-				<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
-					title="LinkedIn" aria-label="LinkedIn"
-					href="https://www.linkedin.com/in/torrin-leonard-8343a1154/"
-					icon={<Icon name="simple-icons:linkedin" size={30} />} />
-				<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
-					title="Instagram" aria-label="Instagram"
-					href="https://www.instagram.com/torrinleonard/"
-					icon={<Icon name="simple-icons:instagram" size={30} />} />
-				<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
-					title="GitHub" aria-label="GitHub"
-					href="https://github.com/torrinworx"
-					icon={<Icon name="simple-icons:github" size={30} />} />
-				<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
-					title="GitLab" aria-label="GitLab"
-					href="https://gitlab.com/torrin1"
-					icon={<Icon name="simple-icons:gitlab" size={30} />} />
-				<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
-					title="YouTube" aria-label="YouTube"
-					href="https://www.youtube.com/@TorrinZLeonard"
-					icon={<Icon name="simple-icons:youtube" size={30} />} />
-				<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
-					title="Medium" aria-label="Medium"
-					href="https://medium.com/@torrin_49072"
-					icon={<Icon name="simple-icons:medium" size={30} />} />
-				<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
-					title="dev.to" aria-label="dev.to"
-					href="https://dev.to/torrin"
-					icon={<Icon name="simple-icons:devdotto" size={30} />} />
-				<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
-					title="Hacker News" aria-label="Hacker News"
-					href="https://news.ycombinator.com/user?id=torrinleonard"
-					icon={<Icon name="simple-icons:ycombinator" size={30} />} />
-			</div>
+	<footer theme="shore">
+		<Shore />
+		<div theme="shore_row">
+			<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
+				title="LinkedIn" aria-label="LinkedIn"
+				href="https://www.linkedin.com/in/torrin-leonard-8343a1154/"
+				icon={<Icon name="simple-icons:linkedin" size={30} />} />
+			<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
+				title="Instagram" aria-label="Instagram"
+				href="https://www.instagram.com/torrinleonard/"
+				icon={<Icon name="simple-icons:instagram" size={30} />} />
+			<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
+				title="GitHub" aria-label="GitHub"
+				href="https://github.com/torrinworx"
+				icon={<Icon name="simple-icons:github" size={30} />} />
+			<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
+				title="GitLab" aria-label="GitLab"
+				href="https://gitlab.com/torrin1"
+				icon={<Icon name="simple-icons:gitlab" size={30} />} />
+			<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
+				title="YouTube" aria-label="YouTube"
+				href="https://www.youtube.com/@TorrinZLeonard"
+				icon={<Icon name="simple-icons:youtube" size={30} />} />
+			<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
+				title="Medium" aria-label="Medium"
+				href="https://medium.com/@torrin_49072"
+				icon={<Icon name="simple-icons:medium" size={30} />} />
+			<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
+				title="dev.to" aria-label="dev.to"
+				href="https://dev.to/torrin"
+				icon={<Icon name="simple-icons:devdotto" size={30} />} />
+			<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
+				title="Hacker News" aria-label="Hacker News"
+				href="https://news.ycombinator.com/user?id=torrinleonard"
+				icon={<Icon name="simple-icons:ycombinator" size={30} />} />
 		</div>
-		<div theme={['row', 'center', 'wide', 'wrap', 'tight']}>
-			<Typography
-				style={{ textAlign: 'center' }}
-				type="p1"
-				label={`© Torrin Leonard ${String(new Date().getFullYear())} 🇨🇦 `}
-			/>
-		</div>
-	</div>
+		<Typography
+			theme="shore_line"
+			type="p1"
+			label={`© Torrin Leonard ${String(new Date().getFullYear())} 🇨🇦 `}
+		/>
+	</footer>
 );
 
 /** The frame every act sits in: the head tags, the menu above it and the social row below. */
@@ -103,7 +105,7 @@ const Frame = (props: { children?: unknown[] }): unknown => (
 
 export const acts: Record<string, Act> = {
 	'': Landing,
-	contact: () => <Contact />,
+	contact: () => [<Canopy />, <Contact />],
 	radio: RadioPage,
 	...blogActs,
 	missing: NotFound,
