@@ -299,8 +299,8 @@ export const siteTheme: Definitions = {
 		// Stacked, its two halves are the hero's own rows, so the strip can stand between them.
 		[stacked]: { display: 'contents' },
 	},
-	// The words at the start of the column. The row itself lets the pointer through to the strip,
-	// and only the words take it.
+	// The words at the start of the column. The row itself lets pointer events through to the strip,
+	// and only the words receive them.
 	hero_sky: {
 		position: 'absolute',
 		top: '16px',

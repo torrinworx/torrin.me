@@ -1210,8 +1210,8 @@ export const stripPainter = (config: StripConfig, width: number, height: number,
 // One of the strip's birds, drawn a size closer. One flies down to the resume button as the page
 // opens, pecks at it, and leaves when the pointer reaches the button. Another lands on the contact
 // form once the form is in full view, hops to Submit once the form would send, and carries a letter
-// off when it is sent. Like the strip, `createPerch` is the bird alone and needs no DOM, and
-// `runPerch` puts it on a page.
+// off when it is sent. Like the strip, `createPerch` only moves the bird and needs no DOM, and
+// `runPerch` draws it on a page.
 
 type Pose = readonly (readonly [x: number, y: number])[];
 
