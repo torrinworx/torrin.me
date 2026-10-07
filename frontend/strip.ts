@@ -1,8 +1,8 @@
-// The pixel forest: the strip at the top of the landing page (trees, a pond that mirrors them,
-// leaves that fall when the cursor brushes a crown, birds, fireflies at night, ripples where the
-// cursor crosses the water) and the smaller scenes the rest of the site carries. The strip was
-// approved as https://claude.ai/artifact/WfGHVZb54iFvZTbUHKXwfP (work order 485); the photo floating
-// over it and the scenes around the site as https://claude.ai/artifact/8LvHKbwqDGKm2dgPnZHTw5.
+// The pixel-art scenes: the strip at the top of the landing page (drawn trees, a pond that reflects
+// them, leaves that fall when the cursor touches a tree's crown, birds, fireflies at night, ripples
+// where the cursor crosses the pond) and the smaller scenes on the other pages. The strip was
+// approved as https://claude.ai/artifact/WfGHVZb54iFvZTbUHKXwfP (work order 485). The photo floating
+// over it and the other scenes were approved as https://claude.ai/artifact/8LvHKbwqDGKm2dgPnZHTw5.
 //
 // Two halves. `createStrip`, `createCanopy` and `createReeds` paint into pixel buffers and need no
 // DOM, so the favicon script and the tests run them in Node. `runScene` puts one on a canvas in a
@@ -15,9 +15,9 @@ import { mutable } from '@aweftjs/core';
 import { FOREST, LIME, MOSS, PAPER, PAPER_A, PINE, SAGE, STACKED } from './theme.ts';
 
 /**
- * Whether the forest moves. Off, every scene holds still and no bird flies, which is the pause
- * WCAG 2.2.2 asks of anything that moves on its own for more than five seconds. The page starts it
- * off for a visitor whose system asks for reduced motion, and the menu's switch writes it.
+ * Whether the scenes animate. Off, every scene holds still and no bird flies. WCAG 2.2.2 asks for a
+ * way to stop anything that moves on its own for more than five seconds, and this is it. It starts
+ * off for a visitor whose system asks for reduced motion, and the menu's switch sets it.
  */
 export const motion = mutable(true);
 
@@ -168,7 +168,7 @@ export const photoBox = (width: number): { readonly width: number; readonly heig
 
 /**
  * Where the photo's left edge stands in a hero this wide, in strip pixels. On a wide screen it ends
- * where the column the words sit in ends; stacked, it is centred.
+ * where the words' column ends. Stacked, it is centred.
  */
 export const photoLeft = (width: number): number => {
 	const size = heroScale(width), box = photoBox(width), across = Math.ceil(width / size);
@@ -190,11 +190,11 @@ const heroCache = new Map<string, StripConfig>();
  * The hero's scene for a mode and a width in CSS pixels.
  *
  * `photo` is the photo's pixels at a size, its inner box without the frame, or null while it has
- * not loaded; with none the trees stand where they would around it and nothing floats. The same
+ * not loaded. Without it the trees stand where they would around it and nothing floats. The same
  * object comes back for the same answer, so a resize that keeps the layout keeps the scene.
  *
  * The bank is a little over halfway down on a wide screen, so the pond is shallower than the sky
- * and its reflections fade into the page before its bottom edge; stacked, the strip is taller and
+ * and its reflections fade into the page before its bottom edge. Stacked, the strip is taller and
  * the bank lower. The hills are kept low so the words in the sky stand clear of them.
  */
 export const heroScene = (
@@ -221,7 +221,7 @@ export const heroScene = (
 			const edge = x === 0 || y === 0 || x === box.width - 1 || y === box.height - 1;
 			pixels[y * box.width + x] = edge ? frame : inner[(y - 1) * iw + x - 1]!;
 		}
-		// Birds stand on it by day, as the rest of the strip has them; the night has fireflies instead.
+		// Birds stand on it by day, as elsewhere in the strip. At night there are fireflies instead.
 		stone = { x: left, width: box.width, height: box.height, pixels, ...FLOAT, island: true, birds: night ? 0 : 2 };
 	}
 	const scene: StripConfig = {
@@ -234,11 +234,11 @@ export const heroScene = (
 		trees,
 		palette,
 		...(stone === undefined ? {} : { stone }),
-		// On a wide screen the words stand in the sky and the buttons in the pond; the fireflies keep
-		// below the words, and their reflections above the buttons.
+		// On a wide screen the words sit over the strip's upper half and the buttons over its pond.
+		// The fireflies are kept below the words, and their reflections above the buttons.
 		...(night ? { fireflies: 12, moon: stacked ? [0.84, 0.1] as const : [0.53, 0.12] as const, ...(stacked ? {} : { fireflyTop: 0.6 }) } : { birds: 2, flock: true }),
 	};
-	// One width at a time is all a page shows; the cache holds the last few so a mode switch back is free.
+	// A page shows one width at a time. The cache holds the last few, so switching the mode back is free.
 	if (heroCache.size > 8) heroCache.clear();
 	heroCache.set(key, scene);
 	return scene;
@@ -246,21 +246,21 @@ export const heroScene = (
 
 // --- the scenes around the site -------------------------------------------------------------
 //
-// Each is a strip whose sky is the page colour all the way down and which has no hills, so once the
-// runner makes that colour see-through, the page is the sky and nothing but the forest is drawn.
+// Each is a strip whose sky is the page colour all the way down, with no hills. The runner makes that
+// colour transparent, so the page shows through and only the trees, the bank and the pond are drawn.
 
 const paged = (night: boolean): Palette => {
 	const palette = night ? NIGHT : LIGHT, page = night ? FOREST : PAPER;
 	return { ...palette, sky: [page, page], hills: [] };
 };
 
-/** The heights of the trees under the landing's five section headings, in strip pixels: one tree growing down the page. */
+/** The heights of the trees under the landing's five section headings, in strip pixels. Each is taller than the last. */
 export const RULE_HEIGHTS = [14, 22, 32, 44, 58] as const;
 
 /**
- * The rule under the landing's `index`th section heading: a bank one pixel tall in the accent,
- * which is the rule, and a tree at its end that is taller under each heading than the last. The
- * fourth and fifth grow vines; a bird stands in the last by day.
+ * The rule under the landing's `index`th section heading: a bank one pixel tall in the accent colour,
+ * which draws the rule, and a tree at its right end that is taller under each heading than the last.
+ * The trees under the fourth and fifth headings have vines, and by day a bird stands on the last.
  */
 export const ruleScene = (index: number, night: boolean, height: number): StripConfig => {
 	const line = night ? LIME : MOSS;
@@ -278,8 +278,8 @@ export const ruleScene = (index: number, night: boolean, height: number): StripC
 };
 
 /**
- * A post's own tree, from a seed its slug gives it, so a post keeps its tree. FNV-1a over the slug,
- * folded into the range the trees are seeded from.
+ * The seed of a post's tree, from its slug, so a post always gets the same tree. FNV-1a over the
+ * slug, reduced to the range of tree seeds.
  */
 export const seedOf = (slug: string): number => {
 	let h = 2166136261;
@@ -300,10 +300,10 @@ export const plotScene = (seed: number, night: boolean): StripConfig => ({
 	...(night ? { fireflies: 5 } : { birds: 1 }),
 });
 
-/** Where the footer's trees stand: in two groves at the sides, clear of the social row and the line under it. */
+/** Where the footer's trees are drawn: four at each side, clear of the social links and the copyright line. */
 export const SHORE_TREES: readonly Tree[] = [[0.04, 0.42], [0.11, 0.62], [0.19, 0.38], [0.27, 0.5], [0.73, 0.48], [0.81, 0.36], [0.89, 0.6], [0.97, 0.44]];
 
-/** The footer: a shore across the window, the social row in its sky and the copyright on its water. */
+/** The footer's scene: a pixel-art shore across the window, the social links over its upper half and the copyright over its pond. */
 export const shoreScene = (night: boolean, trees: readonly Tree[] = SHORE_TREES): StripConfig => ({
 	seed: 11, ground: 0.5, hills: 0.8, reflection: true, ambient: 2, light: lightOf(night), trees,
 	palette: night ? NIGHT : LIGHT,
@@ -311,7 +311,7 @@ export const shoreScene = (night: boolean, trees: readonly Tree[] = SHORE_TREES)
 	...(night ? { fireflies: 8, fireflyTop: 0.5, moon: [0.62, 0.7] as const } : { birds: 1, flock: true }),
 });
 
-/** The 404 page: one tree on its own. */
+/** The 404 page's scene: one drawn tree. */
 export const lostScene = (night: boolean): StripConfig => ({
 	seed: 404, ground: 0.56, hills: 0.7, reflection: true, ambient: 1.6, light: lightOf(night), trees: [[0.5, 0.8]],
 	palette: night ? NIGHT : LIGHT,
@@ -546,8 +546,8 @@ export const createStrip = (
 	const sr = rng(config.seed + 7919);
 	const stoneVines = stone ? Array.from({ length: 7 }, (_, i) => ({ u: (i + 0.5 + (sr() - 0.5) * 0.7) / 7, len: 0.45 + sr() * 0.55, phase: sr() * 6, push: 0, pv: 0, x: 0, y: 0, n: 0 })) : [];
 	const lump = { x: 0, vx: 0, dip: 0, dv: 0, left: 0, top: 0 };
-	// Birds on the stone are the resume button's bird at the strip's size. `createPerch` flies in page
-	// pixels; three of them make one strip pixel. Each bird keeps to its own third of the top edge.
+	// The birds on the photo are the resume button's bird, drawn at the strip's size. `createPerch` works
+	// in page pixels, and three of them make one strip pixel. Each bird stays on its own third of the top edge.
 	const K = 3, SPOTS = [0.2, 0.5, 0.8];
 	const sitters = Array.from({ length: Math.min(3, stone?.birds ?? 0) }, (_, i) => (
 		{ bird: null as Perch | null, spot: i * 2 % 3, face: 1, look: 1, wait: 1.5 + i * 2.5 + sr() * 2 }
@@ -566,7 +566,7 @@ export const createStrip = (
 			}
 			const b = s.bird;
 			b.step(dt, sitAt(s.spot));
-			// Standing, it turns to look about now and then; pecking keeps it facing one way.
+			// Standing, it turns to look about now and then. While pecking it faces one way.
 			if (b.state === 'perch' && b.pose === STAND && (s.look -= dt) <= 0) { s.face = -s.face; s.look = 0.8 + random() * 1.8; }
 			if (b.state === 'away' && (b.y < -20 * K || b.x < -20 * K)) { s.bird = null; s.wait = 6 + random() * 8; continue; }
 			const face = b.state === 'perch' ? s.face : 1, bx = Math.round(b.x / K), by = Math.round(b.y / K) - 1;
@@ -579,7 +579,7 @@ export const createStrip = (
 	const on = (x: number, y: number): boolean => !!stone && x >= lump.left && x < lump.left + stone.width && y >= lump.top && y < lump.top + stone.height;
 	const drawStone = (dt: number): void => {
 		if (!stone) return;
-		// A brush moves it two pixels at most, on a stiff spring: enough to feel, not enough to pull the eye.
+		// The pointer moving across it shifts it two pixels at most, on a stiff spring: enough to notice, not enough to distract.
 		lump.vx += (-lump.x * 40 - lump.vx * 9) * dt; lump.x = clamp(lump.x + lump.vx * dt, -2, 2);
 		lump.dv += (-lump.dip * 30 - lump.dv * 5) * dt; lump.dip += lump.dv * dt;
 		const lift = (stone.lift ?? 0) + (stone.bob ?? 0) * Math.sin(now * 1.3) - lump.dip;
@@ -978,7 +978,7 @@ export const createCanopy = (options: {
  * into the page before its bottom edge, and fading out at the sides.
  *
  * `heard`, called every frame, fills one level per band, 0 to 1, and answers whether anything is
- * playing; while nothing is, the reeds stand at a third of their height and sway.
+ * playing. While nothing is, the reeds stand at a third of their height and sway.
  */
 export const createReeds = (options: {
 	readonly width: number;
@@ -1099,7 +1099,7 @@ const ghost = (canvas: HTMLCanvasElement): void => {
  * Run a scene on the canvas that is the first child of `host`, filling the host.
  *
  * Whatever the painter draws in 0 or in its `clear` colour is see-through, so a strip's sky is the
- * page itself. The scene runs only while the host is on screen and `motion` is on; still, it shows
+ * page itself. The scene runs only while the host is on screen and `motion` is on. Otherwise it shows
  * one frame and holds it. A change of mode fades a scene on screen from its last frame to the new
  * one, and repaints one off screen when it next comes into view.
  */
@@ -1210,8 +1210,8 @@ export const stripPainter = (config: StripConfig, width: number, height: number,
 // One of the strip's birds, drawn a size closer. One flies down to the resume button as the page
 // opens, pecks at it, and leaves when the pointer reaches the button. Another lands on the contact
 // form once the form is in full view, hops to Submit once the form would send, and carries a letter
-// off when it is sent. Like the strip, `createPerch` is the bird alone and needs no DOM; `runPerch`
-// puts it on a page.
+// off when it is sent. Like the strip, `createPerch` is the bird alone and needs no DOM, and
+// `runPerch` puts it on a page.
 
 type Pose = readonly (readonly [x: number, y: number])[];
 
@@ -1366,7 +1366,7 @@ export const runPerch = (
 			size = next;
 			canvas.style.width = `${String(8 * size)}px`; canvas.style.height = `${String(rows * size)}px`;
 		}
-		// Across, on the strip's pixel grid; down, on the element's edge exactly, so the feet touch it.
+		// Across, on the strip's pixel grid. Down, on the element's edge exactly, so the feet touch it.
 		const left = Math.round(bird.x / size) * size - 4 * size, high = Math.round(bird.y) - 6 * size;
 		canvas.style.transform = `translate(${String(left)}px, ${String(high)}px)`;
 		context.clearRect(0, 0, 8, rows);

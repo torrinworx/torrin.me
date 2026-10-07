@@ -6,8 +6,8 @@
 // and three modifiers (the YouTube poster, superscript, the callout). The same components render
 // the post's body for the feeds, in `feed` mode, where nothing can be clicked.
 //
-// Each post has a tree of its own, grown from its slug: beside it on the index and above its title.
-// On a post, a vine grows down the left margin as it is read (forest.tsx).
+// Each post has its own drawn tree, generated from its slug: beside the post on the index and above
+// its title. On a post, a drawn vine in the left margin gets longer as the reader scrolls (forest.tsx).
 
 import { mutable } from '@aweftjs/core';
 import { Button, Head, Icon, Link, Markdown, Meta, Script, Title, Typography, h, suspend } from '@aweftjs/ui';

@@ -1,5 +1,5 @@
-// The radio page: a small player. The reeds, which stand as tall as each band is loud (forest.tsx),
-// the track on the air, one button, a status word.
+// The radio page: a small player. Drawn reeds, each clump as tall as its frequency band is loud
+// (forest.tsx), the track now playing, one button and a status word.
 
 import { Button, Head, Icon, Link, Meta, Shown, Title, Typography, h, mark } from '@aweftjs/ui';
 

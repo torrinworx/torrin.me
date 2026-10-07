@@ -140,8 +140,8 @@ const Entry = (props: { item: Item }): unknown => {
 };
 
 /**
- * A section of the page under its heading. The heading's rule is the bank of a small strip whose
- * tree grows taller under each heading down the page (forest.tsx); `index` is its place.
+ * A section of the page under its heading. The rule under the heading is drawn as a strip with a
+ * tree at its right end, taller under each later heading (forest.tsx). `index` is the section's place.
  */
 const Section = (props: { title: string; index: number; children?: unknown[] }): unknown => (
 	<div theme="content">
@@ -182,9 +182,9 @@ const pixelsOf = (photo: HTMLImageElement): ((width: number, height: number) => 
 };
 
 /**
- * Keep the sharp photo over the strip's pixel copy of it, and lay over the photo whatever the strip
- * draws in front of it: the pixels of the copy that are not the photo's own are a leaf, a vine or a
- * bird, and go on the canvas above. Moved by transform, so its floating is never a layout shift.
+ * Place the sharp photo exactly over the strip's pixel copy of it. Where the strip drew a leaf, a
+ * vine or a bird over the copy, those pixels go on the canvas above the photo, so they still show in
+ * front of it. Both move by transform, so the photo's bobbing never shifts the layout.
  */
 const overlay = (
 	photo: HTMLImageElement,
@@ -221,13 +221,13 @@ const overlay = (
 };
 
 /**
- * The top of the landing page: the pixel strip across the window with the photo floating over its
- * bank, the name, the role and a sentence in its sky, and on its water the resume, the two ways to
- * get in touch, and where the work can happen.
+ * The top of the landing page: the pixel strip across the window, with the photo drawn floating
+ * above its bank. The name, the role and a sentence sit over the strip's upper half, and the resume,
+ * the two ways to get in touch and where the work can happen sit over its pond.
  *
  * The strip only exists in a browser. The page the build writes has the words, the photo near where
  * it floats, and an empty canvas, and the scene starts on the first frame after the page comes
- * alive, in the mode the page is in; once the photo has loaded the strip takes it in. On that frame
+ * alive, in the mode the page is in. Once the photo has loaded, the strip draws it in. On that frame
  * a bird sets off for the resume button too.
  */
 const Hero = ModeContext.use((mode) => (
@@ -253,8 +253,8 @@ const Hero = ModeContext.use((mode) => (
 				drawn: overlay(photo, cover, pixels, () => photoBox(width)),
 			}, night);
 			stop = running.stop;
-			// The photo is in the page the build wrote, so it is often loaded by now; when it is not,
-			// the strip starts without it and takes it in once it is.
+			// The photo is in the page the build wrote, so it is often loaded by now. When it is not,
+			// the strip starts without it and adds it once it loads.
 			photo.decode().then(() => { running.again(); }, () => {});
 			const hero = host.parentElement;
 			const bird = document.getElementById(BIRD);

@@ -87,7 +87,9 @@ const mode = mutable<Mode>(light);
 // off from the menu. Set before the page comes alive, so nothing starts moving only to stop.
 const held = ((): string | null => { try { return localStorage.getItem('motionChoice'); } catch { return null; } })();
 motion.set(held === null ? !matchMedia('(prefers-reduced-motion: reduce)').matches : held === 'on');
-motion.watch((moving) => { try { localStorage.setItem('motionChoice', moving ? 'on' : 'off'); } catch { /* a private window keeps nothing */ } });
+motion.watch((moving) => {
+	try { localStorage.setItem('motionChoice', moving ? 'on' : 'off'); } catch { /* A private window keeps nothing. */ }
+});
 attach(document.body as never, <Site router={router} content={fetching(seed, written)} track={track} mode={mode} />);
 router.links(document.body as never);
 

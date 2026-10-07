@@ -262,7 +262,7 @@ export const siteTheme: Definitions = {
 	},
 	hero_canvas: { position: 'absolute', left: 0, top: 0, display: 'block', imageRendering: 'pixelated' },
 	// The photo floating over the strip's bank, kept over the strip's pixel copy of it (landing.tsx).
-	// Placed by transform, so its bobbing is never a layout shift; until the page comes alive it
+	// Placed by transform, so its bobbing never shifts the layout. Until the page comes alive it
 	// stands about where it floats: at the end of the words' column, or centred when stacked.
 	hero_photo: {
 		position: 'absolute',
@@ -299,8 +299,8 @@ export const siteTheme: Definitions = {
 		// Stacked, its two halves are the hero's own rows, so the strip can stand between them.
 		[stacked]: { display: 'contents' },
 	},
-	// The words at the start of the column. The row itself lets the pointer through to the strip;
-	// only the words catch it.
+	// The words at the start of the column. The row itself lets the pointer through to the strip,
+	// and only the words take it.
 	hero_sky: {
 		position: 'absolute',
 		top: '16px',

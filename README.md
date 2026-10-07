@@ -59,8 +59,8 @@ it on its own. Then `npm run content` builds the blog (below), before vite copie
 The tab and home screen icons (`frontend/public/favicon-16.png`, `favicon-32.png` and
 `apple-touch-icon.png`) are the landing hero's third tree, drawn by the strip's own generator.
 `npm run favicons` redraws them, and the tests fail when the committed files no longer match it.
-The hero's photo, `frontend/public/portrait.webp`, is a 600 by 800 crop of `headshot.webp`; the
-strip floats it over its bank and mirrors it in its pond.
+The hero's photo, `frontend/public/portrait.webp`, is a 600 by 800 crop of `headshot.webp`. The
+strip draws it floating above the bank, with its reflection in the pond.
 
 ## The radio
 
@@ -72,7 +72,7 @@ the wall clock, so every listener hears the same moment and a restart resumes th
 Two styles take turns, three tracks each: sleep (low pads and a drone, nothing struck, a low-pass
 near 600 Hz) and synthwave (a kick on every beat, a bass that ducks under it, pads, a saw lead, a
 breakdown). Each track has a name made from its seed. `GET /radio/now` says what is on the air,
-and the page's reeds stand to it: the real spectrum on a desktop, a pulse on the beat on a phone,
+and the page draws its reeds from it: the real spectrum on a desktop, a pulse on the beat on a phone,
 where the audio is never routed through the browser's audio engine so lock-screen play holds.
 
 ```
@@ -149,8 +149,8 @@ description, the first paragraph and a link, for dev.to's import).
 | `frontend/pages.ts` | writes every page, `404.html`, `shell.html`, `sitemap.xml` and the feeds |
 | `frontend/data/resume.json` | the content, shared with the resume generator; the hero's three lines are its `hero*` fields |
 | `frontend/theme.ts` | the look: a light and a dark mode holding the colours, and `siteTheme` holding the rest |
-| `frontend/strip.ts` | the pixel forest: the strip painter (no DOM) for the landing's hero and the scenes around the site, the canopy and reeds painters, the canvas runner, the Motion switch's cell, and the bird that lands on the resume button or the contact form |
-| `frontend/utils/forest.tsx` | the scenes on the pages: the rule under each landing heading, the canopy over an inner page, a post's tree, the footer's shore, the radio's reeds, the 404's tree, and the fade between modes |
+| `frontend/strip.ts` | the pixel-art scenes: the strip painter (no DOM) for the landing's hero and the smaller scenes on other pages, the canopy and reeds painters, the canvas runner, the Motion switch's cell, and the bird that lands on the resume button or the contact form |
+| `frontend/utils/forest.tsx` | where each pixel-art scene goes on the pages: under each landing heading, in an inner page's margins, beside and above each post, in the footer, on the radio and on the 404; and the fade between modes |
 | `favicons.ts` | draws the icons from the strip's generator |
 | `content/blog/` | the posts and their media |
 | `content/blog.ts` | the blog's build step; `content/highlight.ts` and `content/cards.ts` are its fences and its cards |

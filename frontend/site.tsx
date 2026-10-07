@@ -43,8 +43,8 @@ const icons = { icons: { 'triangle-alert': alertTriangle } };
 export type Track = (event: string, options: { props: Record<string, string> }) => void;
 
 /**
- * The foot of every page: a shore across the window, the social row standing in its sky and the
- * copyright on its water (forest.tsx).
+ * The foot of every page: a pixel-art shore drawn across the window, with the social links over its
+ * upper half and the copyright over its pond (forest.tsx).
  */
 const Footer = (): unknown => (
 	<footer theme="shore">
