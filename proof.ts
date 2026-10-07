@@ -405,8 +405,8 @@ try {
 	assert.deepEqual(bare.map((seen) => JSON.stringify(seen?.entries.find((entry) => entry.kind === 'url') ?? seen?.id)), [], 'each visit carries browser facts and no user');
 	assert.ok(opened.some((seen) => seen?.entries.some((entry) => entry.kind === 'url')), 'a visit recorded the URL it showed');
 
-	// A post's vine grows down the left margin as it is read. In a laptop's window, half way through
-	// and at the end, its tip is in the window and above the footer.
+	// On a post, the vine drawn in the left margin gets longer as the reader scrolls. In a 1280 by
+	// 800 window, half way down and at the end, its lowest pixel is in the window and above the footer.
 	const reader = await browser.newPage({ viewport: { width: 1280, height: 800 } });
 	await reader.goto(`${site.url}/blog/${newest.slug}`, { waitUntil: 'networkidle' });
 	for (const through of [0.5, 1]) {
