@@ -62,6 +62,18 @@ The tab and home screen icons (`frontend/public/favicon-16.png`, `favicon-32.png
 The hero's photo, `frontend/public/portrait.webp`, is a 600 by 800 crop of `headshot.webp`. The
 strip draws it floating above the bank, with its reflection in the pond.
 
+## Accessibility
+
+`npm run proof` checks the landing, contact, the blog's index, the newest post, the radio and the
+404 against WCAG 2.1 AA, light and dark, at 1280, 600 and 320 CSS pixels wide: axe-core over the
+markup, and then, because axe cannot see into a canvas, each word and icon against what the
+browser painted under it. Neither looks at keyboard focus: where it goes and whether it shows.
+
+The canvases the scenes are drawn on are hidden from assistive technology. The menu's Motion switch holds every
+scene still, stops the button shine and the contact block's blink, and leaves the block's halo
+still (SC 2.2.2). It starts off when the system asks for reduced motion, and a visitor's choice is
+kept in `localStorage` as `motionChoice`.
+
 ## The radio
 
 `/radio` plays one live station: `radio/` composes music in code, plays it through a soundfont

@@ -3,8 +3,10 @@
 // Tests pin pieces; this proves the whole thing: the server serves what the build wrote, the page
 // comes alive without replacing anything the server sent, every route works as a deep link (the
 // blog index and the newest post among them, with the title as the h1 and every image loaded),
-// the contact form actually posts, the pages look right at desktop and phone width, and the radio
-// process, run as the droplet runs it, streams audio that is not silence to a listener joining now.
+// the contact form actually posts, the pages look right at desktop and phone width, every page
+// passes axe's WCAG 2.1 AA rules in both modes and every word on it stands out from the scenes
+// drawn behind it, the Motion switch holds the scenes still, and the radio process, run as the
+// droplet runs it, streams audio that is not silence to a listener joining now.
 //
 // Run: npm run proof   (after npm run build, or at least
 //      vite build --configLoader native && npm run pages)
@@ -15,6 +17,7 @@ import { mkdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import { visit, visits } from '@aweftjs/logs';
+import { audit } from '@aweftjs/testing/browser';
 import { chromium } from 'playwright';
 
 import { firstSlot, slotOf } from './radio/schedule.ts';
@@ -94,6 +97,98 @@ const onAir = async (view: import('playwright').Page): Promise<void> => {
 	await view.route('**/radio/now', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ON_AIR) }));
 };
 
+// A word or an icon on a page: its colour, the contrast it needs, and its box in the window.
+interface Mark { readonly what: string; readonly color: string; readonly need: number; readonly box: readonly [number, number, number, number] }
+
+/**
+ * Every visible word and icon on the page. A word's own line box, not its element's, since a
+ * heading's box runs the width of the column. Emoji are left out: they are drawn in their own
+ * colours. 4.5:1 for text, 3:1 for large text (24px, or 18.66px bold) and for icons.
+ */
+const marksOf = (): Mark[] => {
+	const found: Mark[] = [];
+	const large = (style: CSSStyleDeclaration): boolean => {
+		const size = parseFloat(style.fontSize);
+		return size >= 24 || (size >= 18.66 && Number(style.fontWeight) >= 700);
+	};
+	// Visually hidden text, for a screen reader only, is clipped to nothing.
+	const hidden = (element: Element): boolean => {
+		for (let at: Element | null = element; at !== null; at = at.parentElement) if (getComputedStyle(at).clip.startsWith('rect')) return true;
+		return !element.checkVisibility({ opacityProperty: true, visibilityProperty: true });
+	};
+	const box = (rect: DOMRect): Mark['box'] => [rect.left, rect.top, rect.right, rect.bottom];
+	// What of a word shows: a code block that scrolls sideways hides the rest of a long line.
+	const shown = (element: Element, rect: DOMRect): Mark['box'] => {
+		let [left, top, right, bottom] = box(rect);
+		for (let at = element.parentElement; at !== null; at = at.parentElement) {
+			const style = getComputedStyle(at);
+			if (style.overflowX === 'visible' && style.overflowY === 'visible') continue;
+			const clip = at.getBoundingClientRect();
+			left = Math.max(left, clip.left); top = Math.max(top, clip.top);
+			right = Math.min(right, clip.right); bottom = Math.min(bottom, clip.bottom);
+		}
+		return [left, top, right, bottom];
+	};
+	const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+	for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) {
+		const parent = node.parentElement;
+		if (parent === null || parent.closest('script, style, noscript, svg, textarea') !== null || hidden(parent)) continue;
+		const style = getComputedStyle(parent);
+		for (const word of (node.textContent ?? '').matchAll(/\S+/gu)) {
+			if (/\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(word[0])) continue;
+			const range = document.createRange();
+			range.setStart(node, word.index);
+			range.setEnd(node, word.index + word[0].length);
+			for (const rect of Array.from(range.getClientRects())) {
+				const [left, top, right, bottom] = shown(parent, rect);
+				if (right - left >= 2 && bottom - top >= 2) found.push({ what: word[0], color: style.color, need: large(style) ? 3 : 4.5, box: [left, top, right, bottom] });
+			}
+		}
+	}
+	for (const icon of Array.from(document.querySelectorAll('svg'))) {
+		const rect = icon.getBoundingClientRect();
+		if (hidden(icon) || rect.width < 2 || rect.height < 2) continue;
+		found.push({ what: icon.closest('[aria-label]')?.getAttribute('aria-label') ?? 'an icon', color: getComputedStyle(icon).color, need: 3, box: box(rect) });
+	}
+	return found;
+};
+
+/** What a page looks like with its words and icons taken off: everything they are drawn over. */
+const BARE = `*, *::before, *::after { color: transparent !important; -webkit-text-fill-color: transparent !important;
+	text-decoration-color: transparent !important; text-shadow: none !important; transition: none !important; }
+svg { visibility: hidden !important; }`;
+
+/** The marks with any pixel under them, in a screenshot of the bare page, below the contrast they need. */
+const judge = async ([shot, marks]: readonly [string, Mark[]]): Promise<string[]> => {
+	const image = new Image();
+	image.src = `data:image/png;base64,${shot}`;
+	await image.decode();
+	const canvas = document.createElement('canvas');
+	canvas.width = image.width;
+	canvas.height = image.height;
+	const context = canvas.getContext('2d')!;
+	context.drawImage(image, 0, 0);
+	const { data } = context.getImageData(0, 0, canvas.width, canvas.height);
+	const channel = (v: number): number => { const c = v / 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
+	const luminance = (r: number, g: number, b: number): number => 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+	const low: string[] = [];
+	for (const mark of marks) {
+		const [r, g, b] = (mark.color.match(/[\d.]+/g) ?? []).map(Number);
+		const ink = luminance(r!, g!, b!);
+		let worst = Infinity, count = 0;
+		const [x0, y0, x1, y1] = mark.box.map(Math.round) as [number, number, number, number];
+		for (let y = Math.max(0, y0); y < Math.min(canvas.height, y1); y++) {
+			for (let x = Math.max(0, x0); x < Math.min(canvas.width, x1); x++) {
+				const i = (y * canvas.width + x) * 4, under = luminance(data[i]!, data[i + 1]!, data[i + 2]!);
+				const ratio = (Math.max(ink, under) + 0.05) / (Math.min(ink, under) + 0.05);
+				if (ratio < mark.need) { count++; worst = Math.min(worst, ratio); }
+			}
+		}
+		if (count > 0) low.push(`"${mark.what}" at (${String(x0)}, ${String(y0)}): ${worst.toFixed(2)}:1 under ${String(count)} pixels, needs ${String(mark.need)}:1`);
+	}
+	return low;
+};
+
 const post = await mailbox();
 // A fixed port, because the page's own origin has to be allowed before the server starts.
 const port = 4173;
@@ -163,13 +258,19 @@ try {
 	}
 
 	// The landing's strip, its bird and the dark mode switch, as a visitor uses them: the browser
-	// draws the strip with its sky in the page colour, the menu's switch turns the page and the strip
+	// draws the strip with a transparent sky, the menu's switch turns the page and the strip
 	// dark, and the choice is still there after a reload (work order 485).
 	const landing = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 	landing.on('pageerror', (error) => problems.push(`mode: ${String(error)}`));
 	// Each load of the page is a visit, and every visit must post its first batch, browser facts
 	// and all, before the page reloads or closes, as the pages above do.
-	const posted = (): Promise<unknown> => landing.waitForResponse((answer) => answer.url() === `${site.url}/api/logs`, { timeout: 15_000 });
+	// A wait still pending when a check fails rejects as the page closes; caught here, so the failure
+	// reported is the check's.
+	const posted = (): Promise<unknown> => {
+		const answered = landing.waitForResponse((answer) => answer.url() === `${site.url}/api/logs`, { timeout: 15_000 });
+		answered.catch(() => undefined);
+		return answered;
+	};
 	let batch = posted();
 	await landing.goto(`${site.url}/`, { waitUntil: 'commit' });
 	// A bird lands on the resume button in the first second and a half, and flies off when the
@@ -195,15 +296,19 @@ try {
 	assert.ok(flown, 'and is gone once the pointer reaches the button');
 	await landing.mouse.move(640, 300);
 	await landing.waitForLoadState('networkidle');
-	const skyIs = async (rgb: string): Promise<void> => {
+	// The sky is transparent, so the page shows through it. The far hills at the strip's left edge,
+	// half way down, are pale by day and dark by night.
+	const skyIs = async (hills: string): Promise<void> => {
 		await landing.waitForFunction((want) => {
 			const canvas = document.querySelector<HTMLCanvasElement>('#hero-strip canvas');
 			if (canvas === null || canvas.width === 0) return false;
-			const [r, g, b] = canvas.getContext('2d')?.getImageData(0, 0, 1, 1).data ?? [];
-			return `${String(r)},${String(g)},${String(b)}` === want;
-		}, rgb, { timeout: 5_000 });
+			const context = canvas.getContext('2d')!;
+			const sky = context.getImageData(0, 0, 1, 1).data[3];
+			const [r, g, b] = context.getImageData(0, Math.floor(canvas.height / 2), 1, 1).data;
+			return sky === 0 && `${String(r)},${String(g)},${String(b)}` === want;
+		}, hills, { timeout: 5_000 });
 	};
-	await skyIs('244,246,236');
+	await skyIs('227,234,208');
 	// The menu floats at the top right of the window, so a visitor deep in the page still has it.
 	await landing.evaluate(() => { document.querySelector('h2')!.scrollIntoView(); });
 	const menu = await landing.locator('button[aria-label="Menu"]').boundingBox();
@@ -211,7 +316,7 @@ try {
 	await landing.click('button[aria-label="Menu"]');
 	await landing.click('text=Dark mode');
 	await landing.evaluate(() => { scrollTo(0, 0); });
-	await skyIs('19,42,19');
+	await skyIs('27,56,28');
 	// The page eases into its new background over a moment, so this waits for it to arrive.
 	const forest = await landing.waitForFunction(
 		() => getComputedStyle(document.querySelector('main')!.parentElement!).backgroundColor === 'rgb(19, 42, 19)',
@@ -222,7 +327,7 @@ try {
 	await batch;
 	batch = posted();
 	await landing.reload({ waitUntil: 'networkidle' });
-	await skyIs('19,42,19');
+	await skyIs('27,56,28');
 	assert.equal(await landing.evaluate(() => localStorage.getItem('modeChoice')), 'dark', 'and the choice is kept across a reload');
 	await landing.screenshot({ path: `${shots}landing-dark.png` });
 	await batch;
@@ -266,6 +371,19 @@ try {
 	});
 	assert.deepEqual(trapped, sent, 'the honeypot answers exactly what a real send answers');
 	assert.equal(post.sent.length, before + 1, 'and sent nothing');
+
+	// The form as a visitor fills it, with a phone number in the message: a bird lands on the form
+	// once it is all in view, the message is sent, and a screen reader hears that it was (SC 4.1.3).
+	const landed = await view.waitForFunction(() => document.getElementById('contact-bird')?.dataset['state'] === 'perch', undefined, { timeout: 5_000 }).then(() => true, () => false);
+	assert.ok(landed, 'a bird lands on the form');
+	await view.fill('[aria-label="Full Name"]', 'A Reader');
+	await view.fill('[aria-label="Email"]', 'reader@example.com');
+	await view.fill('[aria-label="Message"]', 'Call me at 519 555 0100.');
+	await view.click('#contact-submit');
+	const heard = await view.waitForFunction(() => document.querySelector('[role="status"]')?.textContent?.includes('Received') === true, undefined, { timeout: 5_000 }).then(() => true, () => false);
+	assert.ok(heard, 'the page says it was received, in a live region');
+	assert.equal(post.sent.length, before + 2, 'and it reached the endpoint');
+	assert.ok(String((post.sent[post.sent.length - 1]!.body as { text?: string }).text).includes('519 555 0100'), 'digits and all');
 	const formLogged = await view.waitForResponse((answer) => answer.url() === `${site.url}/api/logs`, { timeout: 15_000 }).catch(() => undefined);
 	assert.ok(formLogged !== undefined && formLogged.status() === 200, 'the form page posted its log batch and was answered 200');
 	await view.close();
@@ -283,15 +401,72 @@ try {
 	})();
 	assert.ok(recorded.length >= expected, `${String(expected)} pages were opened and ${String(recorded.length)} visits were recorded`);
 	const opened = await Promise.all(recorded.map((summary) => visit(site.store, summary.id)));
-	assert.ok(opened.every((seen) => seen !== undefined && seen.browser !== null && seen.user === null), 'each visit carries browser facts and no user');
+	const bare = opened.filter((seen) => seen === undefined || seen.browser === null || seen.user !== null);
+	assert.deepEqual(bare.map((seen) => JSON.stringify(seen?.entries.find((entry) => entry.kind === 'url') ?? seen?.id)), [], 'each visit carries browser facts and no user');
 	assert.ok(opened.some((seen) => seen?.entries.some((entry) => entry.kind === 'url')), 'a visit recorded the URL it showed');
 
-	// The radio page has its button and its bars before anything is pressed.
+	// The pages below are opened after the visit check above, which counts every page opened before it.
+	// Every page against WCAG 2.1 AA, light and dark, at a desktop, a tablet and the 320 CSS pixels a
+	// phone reflows to (SC 1.4.10). axe checks the markup, but it cannot read a canvas, and the
+	// scenes' canvases sit behind and beside the words. So each word and icon is also measured
+	// against what the browser painted under it, with the words hidden (SC 1.4.3, 1.4.11). Motion is
+	// off, so every run measures the same frame.
+	for (const [name, path] of [...PAGES.map(([page, at]) => [page, at] as const), ['404', '/nope'] as const]) {
+		for (const dark of [false, true]) {
+			for (const width of [1280, 600, 320]) {
+				const where = `${name}, ${dark ? 'dark' : 'light'}, ${String(width)}px`;
+				const context = await browser.newContext({ viewport: { width, height: 900 } });
+				await context.addInitScript((night) => {
+					localStorage.setItem('motionChoice', 'off');
+					if (night) localStorage.setItem('modeChoice', 'dark');
+				}, dark);
+				const view = await context.newPage();
+				await onAir(view);
+				await view.goto(`${site.url}${path}`, { waitUntil: 'networkidle' });
+				const { violations } = await audit(view);
+				assert.deepEqual(violations.map((found) => `${found.rule}: ${found.help} (${found.nodes.map((node) => node.target).join(', ')})`), [], `${where}: axe`);
+
+				// The whole page in the window at once, so every scene has drawn.
+				const tall = await view.evaluate(() => document.documentElement.scrollHeight);
+				await view.setViewportSize({ width, height: tall });
+				await view.waitForFunction(() => Array.from(document.querySelectorAll<HTMLCanvasElement>('[aria-hidden="true"] > canvas')).every((canvas) => canvas.width > 0));
+				const settle = (): Promise<void> => view.evaluate(() => new Promise<void>((done) => { requestAnimationFrame(() => { requestAnimationFrame(() => { done(); }); }); }));
+				await settle();
+				const marks = await view.evaluate(marksOf);
+				await view.addStyleTag({ content: BARE });
+				await settle();
+				const shot = (await view.screenshot()).toString('base64');
+				assert.deepEqual(await view.evaluate(judge, [shot, marks] as const), [], `${where}: every word and icon stands out from what is drawn under it`);
+				await context.close();
+			}
+		}
+	}
+
+	// The menu's Motion switch holds the scenes still for a visitor they distract (SC 2.2.2), and the
+	// choice is kept.
+	const calm = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+	calm.on('pageerror', (error) => problems.push(`motion: ${String(error)}`));
+	await calm.goto(`${site.url}/`, { waitUntil: 'networkidle' });
+	const frameOf = (): Promise<string> => calm.evaluate(() => document.querySelector<HTMLCanvasElement>('#hero-strip canvas')!.toDataURL());
+	const pause = (ms: number): Promise<void> => new Promise((done) => setTimeout(done, ms));
+	const moving = await frameOf();
+	await pause(400);
+	assert.notEqual(await frameOf(), moving, 'the forest moves');
+	await calm.click('button[aria-label="Menu"]');
+	await calm.click('text="Motion"');
+	await pause(200);
+	const held = await frameOf();
+	await pause(400);
+	assert.equal(await frameOf(), held, 'and holds still once Motion is off');
+	assert.equal(await calm.evaluate(() => localStorage.getItem('motionChoice')), 'off', 'and the choice is kept');
+	await calm.close();
+
+	// The radio page has its button and its reeds before anything is pressed.
 	const dial = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 	await onAir(dial);
 	await dial.goto(`${site.url}/radio`, { waitUntil: 'networkidle' });
 	assert.equal(await dial.textContent('#radio-play'), 'Play', 'the radio page offers Play');
-	assert.ok(await dial.$('#radio-bars') !== null, 'and draws its bars');
+	assert.ok(await dial.$('#radio-reeds canvas') !== null, 'and draws its reeds');
 	assert.ok((await dial.textContent('main'))?.includes('Proof Signal · Synthwave · A minor · 100 bpm'), 'and says what is on the air');
 	await dial.close();
 
