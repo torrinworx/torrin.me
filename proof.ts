@@ -264,8 +264,8 @@ try {
 	landing.on('pageerror', (error) => problems.push(`mode: ${String(error)}`));
 	// Each load of the page is a visit, and every visit must post its first batch, browser facts
 	// and all, before the page reloads or closes, as the pages above do.
-	// A wait still pending when a check fails rejects as the page closes; caught here, so the failure
-	// reported is the check's.
+	// A wait still pending when a check fails rejects as the page closes. It is caught here, so the
+	// failure reported is the check's.
 	const posted = (): Promise<unknown> => {
 		const answered = landing.waitForResponse((answer) => answer.url() === `${site.url}/api/logs`, { timeout: 15_000 });
 		answered.catch(() => undefined);
@@ -373,7 +373,7 @@ try {
 	assert.equal(post.sent.length, before + 1, 'and sent nothing');
 
 	// The form as a visitor fills it, with a phone number in the message: a bird lands on the form
-	// once it is all in view, the message is sent, and a screen reader hears that it was (SC 4.1.3).
+	// once it is all in view, the message is sent, and a live region announces it (SC 4.1.3).
 	const landed = await view.waitForFunction(() => document.getElementById('contact-bird')?.dataset['state'] === 'perch', undefined, { timeout: 5_000 }).then(() => true, () => false);
 	assert.ok(landed, 'a bird lands on the form');
 	await view.fill('[aria-label="Full Name"]', 'A Reader');
@@ -442,8 +442,8 @@ try {
 		}
 	}
 
-	// The menu's Motion switch holds the scenes still for a visitor they distract (SC 2.2.2), and the
-	// choice is kept.
+	// The menu's Motion switch stops the scenes for a visitor who finds motion distracting
+	// (SC 2.2.2), and the choice is kept.
 	const calm = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 	calm.on('pageerror', (error) => problems.push(`motion: ${String(error)}`));
 	await calm.goto(`${site.url}/`, { waitUntil: 'networkidle' });
