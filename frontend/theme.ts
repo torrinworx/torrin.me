@@ -554,6 +554,10 @@ export const siteTheme: Definitions = {
 
 	// The canopy over an inner page's margins, from the top of the window, out of the pointer's way.
 	canopy: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 3, pointerEvents: 'none', overflow: 'hidden' },
+	// On a post it stays at the top of the window while the post scrolls under it, so the vine
+	// growing down it is in view however far the reader is. It stops a shore's height above the
+	// window's bottom, so at the end the vine buds above the footer's trees and not in them.
+	canopy_reading: { position: 'fixed', height: 'min(640px, calc(100vh - 300px))' },
 
 	// A post's tree beside it on the index, and above its title.
 	tile: { position: 'relative', width: '72px', height: '108px', overflow: 'hidden', marginTop: '22px' },

@@ -117,7 +117,7 @@ export const Canopy = ModeContext.use((mode) => (props: { grow?: boolean }, clea
 			...(reading ? { grow: through } : {}),
 		}),
 	}), night);
-	return <Painted id="canopy" theme="canopy" style={{ height: reading ? 640 : 440 }} />;
+	return reading ? <Painted id="canopy" theme={['canopy', 'reading']} /> : <Painted id="canopy" theme="canopy" style={{ height: 440 }} />;
 });
 
 /** The tree beside a post on the blog's index, the post's own. */

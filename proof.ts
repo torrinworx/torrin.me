@@ -405,6 +405,27 @@ try {
 	assert.deepEqual(bare.map((seen) => JSON.stringify(seen?.entries.find((entry) => entry.kind === 'url') ?? seen?.id)), [], 'each visit carries browser facts and no user');
 	assert.ok(opened.some((seen) => seen?.entries.some((entry) => entry.kind === 'url')), 'a visit recorded the URL it showed');
 
+	// A post's vine grows down the left margin as it is read. In a laptop's window, half way through
+	// and at the end, its tip is in the window and above the footer.
+	const reader = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+	await reader.goto(`${site.url}/blog/${newest.slug}`, { waitUntil: 'networkidle' });
+	for (const through of [0.5, 1]) {
+		const { tip, shore } = await reader.evaluate(async (at) => {
+			scrollTo(0, at * (document.documentElement.scrollHeight - innerHeight));
+			await new Promise((done) => { requestAnimationFrame(() => { requestAnimationFrame(done); }); });
+			const canvas = document.querySelector<HTMLCanvasElement>('#canopy canvas')!;
+			const box = canvas.getBoundingClientRect(), size = box.width / canvas.width;
+			// Where createCanopy hangs it: seven strip pixels left of the 800 pixel column.
+			const x = Math.floor((canvas.width - 800 / size) / 2 - 7);
+			const { data } = canvas.getContext('2d')!.getImageData(x - 3, 0, 7, canvas.height);
+			let lowest = -1;
+			for (let i = 3; i < data.length; i += 4) if (data[i]! > 0) lowest = Math.floor(i / 4 / 7);
+			return { tip: box.top + (lowest + 0.5) * size, shore: document.getElementById('shore')!.getBoundingClientRect().top };
+		}, through);
+		assert.ok(tip > 20 && tip < Math.min(800, shore), `${String(through * 100)}% through a post, the vine's tip is in the window above the footer, not at ${String(tip)}px`);
+	}
+	await reader.close();
+
 	// The pages below are opened after the visit check above, which counts every page opened before it.
 	// Every page against WCAG 2.1 AA, light and dark, at a desktop, a tablet and the 320 CSS pixels a
 	// phone reflows to (SC 1.4.10). axe checks the markup, but it cannot read a canvas, and the
