@@ -81,7 +81,7 @@ EOF
     # HTTP/2 for this site alone (nginx 1.25.1 and later take it per server). nginx.conf turns gzip
     # on but compresses only HTML, so the bundle, the styles, the data and the feeds are added here.
     http2 on;
-    gzip_types text/plain text/css application/javascript application/json image/svg+xml application/xml application/atom+xml application/feed+json;
+    gzip_types text/plain text/css text/javascript application/javascript application/json image/svg+xml application/xml application/atom+xml application/feed+json;
     gzip_vary on;
 "
 }
