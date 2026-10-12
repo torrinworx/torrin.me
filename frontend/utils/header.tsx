@@ -29,7 +29,9 @@ export const Header = StageContext.use((stage) => ModeContext.use((mode) => (
 
 	// `Detached` closes itself when the page scrolls under the anchor, but not on Escape or on a
 	// click elsewhere: its own popup's dismissal writes the placement, which the placement loop
-	// puts straight back on the next frame. So the panel listens for both itself.
+	// puts straight back on the next frame. So the panel listens for both itself, and the popup's
+	// own dismissal is turned off below: left on, a press on the button to close the menu hid it,
+	// the loop showed it again, and the click hid it a second time.
 	const listen = useAbort((signal: AbortSignal) => {
 		const inside = (target: unknown): boolean =>
 			target instanceof Element && target.closest('[data-menu]') !== null;
@@ -89,7 +91,7 @@ export const Header = StageContext.use((stage) => ModeContext.use((mode) => (
 					icon={<Icon name="feather:menu" />}
 				/>
 
-				<mark.popup>
+				<mark.popup canClose={() => false}>
 					<Card
 						data-menu=""
 						theme="brandBox"
