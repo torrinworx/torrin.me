@@ -1111,9 +1111,9 @@ export const runScene = (host: HTMLElement, scene: Scene, night: Watched): Runni
 	let painter: Painter | null = null;
 	let image: ImageData | null = null;
 	let size = 1, stale = false, seen = false, on = false, raf = 0, last = 0;
-	// The scene's own time, moved on only by the step each frame takes, so it holds while the scene
-	// is still. Not the wall clock: a background tab gets about one frame a second, each step is
-	// capped, and birds and leaves timed by the wall clock piled up faster than they flew off.
+	// The scene's time, in seconds. Only each frame's step adds to it, so it stops while the scene
+	// is still. It is not the wall clock: a background tab gets about one frame a second and each
+	// step is capped, so on the wall clock new birds and leaves came faster than old ones left.
 	let clock = performance.now() / 1000;
 
 	const draw = (dt: number): void => {
