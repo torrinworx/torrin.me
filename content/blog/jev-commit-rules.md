@@ -26,7 +26,7 @@ Here are three comments Claude wrote in my repos after I'd told it not to write 
 
 Last week a new model came out called [Jev](https://typesafe.ai), made by TypeSafe. The cool thing about it is that it's just a pure decision model. It doesn't output any text at all. You send it some text and a question about that text, and it gives back an answer your program can use, with how sure it is.
 
-It's really fast. In a test I ran on the 1,560 startups in [kwbuilds.ca](https://kwbuilds.ca), Jev's median answer took 213 ms. Claude Sonnet 5 took 1,262 ms on the same questions. Jev did all 1,560 for $0.19. Sonnet cost $1.64 for 150 of them.
+It's really fast. In a test I ran on all 1,560 startups [kwbuilds.ca](https://kwbuilds.ca) had found, not just the 698 published in its directory at the time, Jev's median answer took 213 ms. Claude Sonnet 5 took 1,262 ms on the same questions. Jev did all 1,560 for $0.19. Sonnet cost $1.64 for 150 of them.
 
 ## The setup
 
