@@ -615,7 +615,7 @@ export const siteTheme: Definitions = {
 	// second ink.
 	post_meta: { display: 'block' },
 	post_lede: { color: '$ink2' },
-	// Who wrote it, under the body, above the links out, behind the hairline the index uses.
+	// Who wrote the post, between the body and the links out, with the index's 1px rule above it.
 	post_author: { display: 'flex', alignItems: 'center', gap: '16px', width: '100%', maxWidth: '$measure', marginTop: '30px', paddingTop: '20px', borderTop: '1px solid $border' },
 	post_author_photo: { width: '64px', height: '64px', flex: '0 0 auto', borderRadius: '50%', objectFit: 'cover', objectPosition: 'top' },
 
