@@ -13,6 +13,7 @@ import { mutable } from '@aweftjs/core';
 import { Button, Head, Icon, Link, Markdown, Meta, Script, Title, Typography, h, suspend } from '@aweftjs/ui';
 import type { Act, TextModifier } from '@aweftjs/ui';
 
+import resume from '../data/resume.json' with { type: 'json' };
 import { AUTHOR_ID, SITE_URL, WEBSITE_ID } from '../head.tsx';
 import { ContentContext, posts, postAt } from '../posts.ts';
 import type { Body, Content, Fence, Listed } from '../posts.ts';
@@ -267,6 +268,13 @@ const Article = (props: { post: Listed; body: Body }): unknown => {
 			</header>
 			<Contents post={post} />
 			<Markdown source={props.body.markdown} code={codeOf(props.body.fences)} modifiers={modifiersOf(post)} theme="post" />
+			<aside theme="post_author">
+				<img theme="post_author_photo" src="/portrait.webp" width="64" height="64" alt="" />
+				<div theme="column">
+					<a theme="blog_title" href="/"><Typography type="p1_bold" label={resume.profile.name} /></a>
+					<Typography type="body" label={`${resume.profile.tagline} ${resume.profile.heroWhere}`} />
+				</div>
+			</aside>
 			<footer theme={['row', 'wrap', 'wide']} style={{ gap: 10, marginTop: 20 }}>
 				{post.discuss === undefined ? null : (
 					<Button

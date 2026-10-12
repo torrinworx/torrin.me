@@ -55,33 +55,17 @@ const Footer = (): unknown => (
 				href="https://www.linkedin.com/in/torrin-leonard-8343a1154/"
 				icon={<Icon name="simple-icons:linkedin" size={30} />} />
 			<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
-				title="Instagram" aria-label="Instagram"
-				href="https://www.instagram.com/torrinleonard/"
-				icon={<Icon name="simple-icons:instagram" size={30} />} />
-			<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
 				title="GitHub" aria-label="GitHub"
 				href="https://github.com/torrinworx"
 				icon={<Icon name="simple-icons:github" size={30} />} />
 			<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
-				title="GitLab" aria-label="GitLab"
-				href="https://gitlab.com/torrin1"
-				icon={<Icon name="simple-icons:gitlab" size={30} />} />
-			<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
-				title="YouTube" aria-label="YouTube"
-				href="https://www.youtube.com/@TorrinZLeonard"
-				icon={<Icon name="simple-icons:youtube" size={30} />} />
-			<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
-				title="Medium" aria-label="Medium"
-				href="https://medium.com/@torrin_49072"
-				icon={<Icon name="simple-icons:medium" size={30} />} />
-			<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
-				title="dev.to" aria-label="dev.to"
-				href="https://dev.to/torrin"
-				icon={<Icon name="simple-icons:devdotto" size={30} />} />
-			<Button theme="bare" size="icon" style={{ height: 50, width: 50 }}
-				title="Hacker News" aria-label="Hacker News"
-				href="https://news.ycombinator.com/user?id=torrinleonard"
-				icon={<Icon name="simple-icons:ycombinator" size={30} />} />
+				title="Email torrin@torrin.me" aria-label="Email"
+				href="mailto:torrin@torrin.me"
+				icon={<Icon name="feather:mail" size={30} />} />
+			<Button theme="bare" style={{ height: 50 }}
+				title="Read the blog" label="Blog"
+				icon={<Icon name="feather:book-open" size={30} />} iconPosition="right"
+				href="/blog" hrefNewTab={false} />
 		</div>
 		<Typography
 			theme="shore_line"

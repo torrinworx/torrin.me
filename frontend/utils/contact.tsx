@@ -137,7 +137,11 @@ export const Contact = StageContext.use((stage) => ModeContext.use((mode) => (
 					</div>
 				)}
 			<Typography type="p1" theme={['row', 'wide', 'start']}>
-				Fill out the form below, email me directly, or dm me on LinkedIn. Either way I'll get back to you quickly!
+				{/* One span, so the row lays the sentence out as text rather than as three flex items. */}
+				<span>
+					Fill out the form below, email me at <a theme="markdown_link" href="mailto:torrin@torrin.me">torrin@torrin.me</a>,
+					or dm me on LinkedIn. Either way I'll get back to you quickly!
+				</span>
 			</Typography>
 
 			<Shown value={submitted}>

@@ -615,6 +615,9 @@ export const siteTheme: Definitions = {
 	// second ink.
 	post_meta: { display: 'block' },
 	post_lede: { color: '$ink2' },
+	// Who wrote it, under the body, above the links out, behind the hairline the index uses.
+	post_author: { display: 'flex', alignItems: 'center', gap: '16px', width: '100%', maxWidth: '$measure', marginTop: '30px', paddingTop: '20px', borderTop: '1px solid $border' },
+	post_author_photo: { width: '64px', height: '64px', flex: '0 0 auto', borderRadius: '50%', objectFit: 'cover', objectPosition: 'top' },
 
 	// The body. The `markdown` box carries the paragraph's face and size so its `$measure` is the
 	// paragraph's `$measure`, and every block inside it, a figure or a code box included, stops
