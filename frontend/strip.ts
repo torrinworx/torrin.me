@@ -1111,12 +1111,15 @@ export const runScene = (host: HTMLElement, scene: Scene, night: Watched): Runni
 	let painter: Painter | null = null;
 	let image: ImageData | null = null;
 	let size = 1, stale = false, seen = false, on = false, raf = 0, last = 0;
-	// The moment a still scene is held at.
-	let held = performance.now() / 1000;
+	// The scene's own time, moved on only by the step each frame takes, so it holds while the scene
+	// is still. Not the wall clock: a background tab gets about one frame a second, each step is
+	// capped, and birds and leaves timed by the wall clock piled up faster than they flew off.
+	let clock = performance.now() / 1000;
 
 	const draw = (dt: number): void => {
 		if (painter === null || image === null) return;
-		painter.frame(dt, motion.get() ? performance.now() / 1000 : held);
+		clock += dt;
+		painter.frame(dt, clock);
 		const shown = new Uint32Array(image.data.buffer), from = painter.pixels, clear = painter.clear;
 		for (let i = 0; i < from.length; i++) { const c = from[i]!; shown[i] = c === clear ? 0 : c; }
 		context.putImageData(image, 0, 0);
@@ -1178,8 +1181,7 @@ export const runScene = (host: HTMLElement, scene: Scene, night: Watched): Runni
 	}, { rootMargin: '60px' });
 	watched.observe(host);
 	const offNight = night.watch(() => { refresh(true); });
-	const offMotion = motion.watch((moving) => {
-		if (!moving) held = performance.now() / 1000;
+	const offMotion = motion.watch(() => {
 		refresh(false);
 		loop();
 	});
