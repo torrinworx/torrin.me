@@ -20,7 +20,7 @@
     "heroLabel": "Product Engineer · Available now",
     "heroLede": "I build and lead production AI software 0 to 1, end to end.",
     "heroWhere": "Open to remote roles · Located in Waterloo 🇨🇦",
-    "summary": "Product engineer, full stack and applied AI. I build and own production products end to end with React, TypeScript, Node and Python, and I take AI features from 0 to 1: retrieval-augmented generation (RAG) and vector search, fine-tuning, and guards against prompt injection and hallucination. I ran production releases and mentored developers at Equator, and ran my own studio before that. I work through coding agents (Claude Code) daily, plan first, and review every diff before it ships."
+    "summary": "Product engineer, full stack and applied AI. I build and own production products end to end with React, TypeScript, Node and Python, and I take AI features from 0 to 1: retrieval-augmented generation (RAG) and vector search, fine-tuning, and guards against prompt injection and hallucination. I ran production releases and mentored developers at Equator, and ran my own studio before that. I work through coding agents (Claude Code) daily: I plan first, test every change, and keep the agent's work reviewable, so a mistake is caught before it ships and not repeated."
   },
 
   "work": [
@@ -78,7 +78,7 @@
       ]
     },
     {
-      "role": "Automation & Accessibility Engineer (Contract / Part-time)",
+      "role": "Software QA Tester (Contract / Part-time)",
       "company": "worX4you",
       "companyUrl": "https://worx4you.com/",
       "logo": "/worX4youLogo.jpg",
@@ -88,7 +88,7 @@
       "end": "2021-03-01",
       "tech": null,
       "bullets": [
-        "Delivered manual and automated testing as a contractor for clients including TunnelBear, Hubba, THRILLWORKS, and Hopscotch, building reusable test tooling and cross-browser checklists for WCAG-aligned releases."
+        "Tested web and mobile apps part time, on and off, for clients including TunnelBear, Hubba and Hopscotch: manual, cross-browser and regression testing."
       ]
     }
   ],
@@ -99,7 +99,7 @@
       "url": "https://builderloo.ca",
       "description": "Public directory of Waterloo-region tech startups (formerly KWBuilds), with news, events, jobs, a forum, and a public MCP server.",
       "bullets": [
-        "Built solo across 483 commits: a live directory of 824 published startups scraped and enriched from Communitech, Velocity, and other regional hubs, with news, events, and jobs subsystems running on the same pipeline machinery.",
+        "Built solo across 483 commits: a live directory of 800+ published startups (October 2026) scraped and enriched from Communitech, Velocity, and other regional hubs, with news, events, and jobs subsystems running on the same pipeline machinery.",
         "Chose browserless scraping (got, cheerio) after a measured bake-off across 493 sites recovered content for 98.8%, retiring the headless browser and Docker from the stack.",
         "Serves a public MCP server with a hand-rolled OAuth 2.1 authorization server (Dynamic Client Registration, PKCE) so claude.ai and ChatGPT connectors can attach while anonymous clients still work."
       ]
@@ -114,8 +114,7 @@
       ]
     },
     {
-      "name": "mcp.torrin.me",
-      "url": "https://mcp.torrin.me",
+      "name": "MCP dashboard",
       "description": "Sandboxed execution platform for agent-authored modules, running live.",
       "bullets": [
         "Agent-authored modules stored as Postgres rows, each run in an isolated child process that cannot reach the filesystem or its peers.",
@@ -127,11 +126,11 @@
       "url": "https://aweft.dev",
       "description": "Full-stack TypeScript toolkit for apps whose state is an observable document, published to npm under MIT as @aweftjs.",
       "bullets": [
-        "Built solo across 399 commits: 23 packages covering state, sync, storage, server, UI, sandboxing, jobs, and auth. Builderloo, maccobylab.com, mcp.torrin.me, and torrin.me all run on it."
+        "Built solo across 399 commits: 23 packages covering state, sync, storage, server, UI, sandboxing, jobs, and auth. Builderloo, maccobylab.com, my MCP dashboard, and torrin.me all run on it."
       ]
     },
     {
-      "name": "Blend_My_NFTs",
+      "name": "Blender generative rendering add-on",
       "url": "https://github.com/torrinworx/Blend_My_NFTs",
       "description": "Blender add-on automating procedural 3D asset generation and export, written against the Python/Blender API.",
       "bullets": [
@@ -144,16 +143,7 @@
       "description": "Reactive UI component library, published to npm.",
       "pdf": false,
       "bullets": [
-        "Lead developer of a 70 component library published to npm under MIT, 619 of 1,105 commits. It powers Equator's mapping and AI platform and OpenGig.org."
-      ]
-    },
-    {
-      "name": "OpenGig.org",
-      "url": "https://opengig.org",
-      "description": "Open-source platform for gig workers and customers.",
-      "pdf": false,
-      "bullets": [
-        "Built solo across 581 commits: full-stack JavaScript with a custom UI framework, database state-sync, and a WebSocket layer, deployed on DigitalOcean behind NGINX with GitHub Actions CI."
+        "Lead developer of a 70 component library published to npm under MIT, 619 of 1,105 commits. It powers Equator's mapping and AI platform."
       ]
     },
     {
@@ -182,9 +172,9 @@
     { "label": "Languages", "text": "JavaScript, TypeScript, Python, Rust" },
     { "label": "Frontend", "text": "React, Next.js, destamatic-ui, HTML/CSS" },
     { "label": "Backend", "text": "Node.js, Express, FastAPI, Django, REST APIs, WebSockets" },
-    { "label": "Databases", "text": "MongoDB, Qdrant, ChromaDB" },
+    { "label": "Databases", "text": "MongoDB, PostgreSQL, SQL, Qdrant, ChromaDB" },
     { "label": "AI & Data", "text": "OpenAI API (embeddings + fine-tuning), RAG (Retrieval-Augmented Generation), vector search, evals, prompt injection defense, Whisper, pandas" },
-    { "label": "AI-assisted development", "text": "Claude Code and OpenCode daily, plan first, every diff reviewed and tested before it ships" },
+    { "label": "AI-assisted development", "text": "Claude Code and OpenCode daily: plan first, test every change, keep agent work reviewable, build systems that fail safely" },
     { "label": "Cloud & DevOps", "text": "Docker, GitLab CI/CD (Continuous Integration/Continuous Deployment), GitHub Actions, DigitalOcean, AWS (Amazon Web Services), Proxmox, NGINX, Linux (Ubuntu/Arch)" },
     { "label": "Practices", "text": "Release management, code review, mentoring, technical interviewing, WCAG accessibility audits" },
     { "label": "Testing", "text": "TestCafe, automation and regression testing" }
@@ -204,20 +194,6 @@
         "issuer": "W3Cx",
         "year": "2021",
         "url": "https://courses.edx.org/certificates/05d8dc2dc24e42238e616f83329ee2f0"
-      },
-      {
-        "name": "ANU-ASTRO1x, Greatest Unsolved Mysteries of the Universe",
-        "issuer": "Australian National University",
-        "year": "2020",
-        "url": "https://courses.edx.org/certificates/24e0a4eb8d2c4bee94503c85ba31a7d5",
-        "pdf": false
-      },
-      {
-        "name": "16.00x, Introduction to Aerospace Engineering",
-        "issuer": "MIT",
-        "year": "2021",
-        "url": "https://courses.edx.org/certificates/4671ce0c456844ff81684660be3095e2",
-        "pdf": false
       }
     ]
   }

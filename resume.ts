@@ -33,7 +33,7 @@ interface Job extends Entry {
 	readonly bullets: readonly string[];
 }
 interface Project extends Entry {
-	readonly name: string; readonly url: string; readonly description: string;
+	readonly name: string; readonly url?: string; readonly description: string;
 	readonly bullets: readonly string[];
 }
 interface Credential extends Entry { readonly name: string; readonly issuer: string; readonly year: number | string }
@@ -167,10 +167,12 @@ for (const project of forPdf(resume.projects)) {
 	// One line in three runs, as the old generator drew it: the name, a separator, then the URL in
 	// blue and linked. `continued` is what keeps the runs from colliding.
 	doc.font('Helvetica-Bold').fontSize(8.5).fillColor('black')
-		.text(project.name, MARGIN, doc.y, { width: CONTENT, continued: true });
-	doc.font('Helvetica').text(' | ', { continued: true });
-	doc.fillColor('blue').text(project.url, { link: project.url, underline: false });
-	doc.fillColor('black');
+		.text(project.name, MARGIN, doc.y, { width: CONTENT, continued: project.url !== undefined });
+	if (project.url !== undefined) {
+		doc.font('Helvetica').text(' | ', { continued: true });
+		doc.fillColor('blue').text(project.url, { link: project.url, underline: false });
+		doc.fillColor('black');
+	}
 	doc.x = MARGIN;
 	italic(project.description);
 	bullets(project.bullets);

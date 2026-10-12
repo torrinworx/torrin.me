@@ -48,7 +48,8 @@ const work: readonly Item[] = resume.work.map((job) => ({
 
 const projects: readonly Item[] = resume.projects.map((project) => ({
 	header: project.name,
-	headerUrl: project.url,
+	// The MCP dashboard has no public page, so it has no link.
+	...(project.url === undefined ? {} : { headerUrl: project.url }),
 	description: project.description,
 	bullets: project.bullets,
 }));
