@@ -34,7 +34,7 @@
       "end": "2026-09-14",
       "tech": "Node.js/Express, React, Next.js, TypeScript, MongoDB, Python/FastAPI, OpenAI, Qdrant, ChromaDB, GeoPandas, Docker, GitLab CI/CD, AWS, Linux",
       "bullets": [
-        "Built a 0 to 1 AI proposal product as its sole engineer through the initial build, then led it as the team grew to seven, authoring the majority of commits and 64% of the code.",
+        "At a seven-person startup, built a 0 to 1 AI proposal product as its sole engineer through the initial build, then led it as its development team grew to three, authoring the majority of commits and 64% of the code.",
         "Rebuilt the marketing site on Next.js and owned it end to end through CI/CD and release, growing organic search from under 1,000 clicks and under 1M impressions to 52.1K clicks and 6.17M impressions in six months.",
         "Authored and merged 70 production releases on the AI product, and served as release manager for a main-product release, coordinating the rollout through pre- and post-push testing.",
         "Built the RAG ingestion and retrieval pipeline on OpenAI embeddings and Qdrant, migrated off ChromaDB, using query-expansion retrieval rather than single-vector search.",
