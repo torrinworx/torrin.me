@@ -28,4 +28,4 @@ As someone who builds AI products, the adoption point is the one I keep thinking
 
 ## Days two and three
 
-That was only opening night. I met some great people and made some good connections, and I'm back for the next two days. If you're at Nrth, send me a message and let's meet up. I'll write up the rest when it's over.
+That was only opening night. I met some great people and made some good connections, and I'm back for the next two days. If you're at Nrth, send me a message and let's meet up.

@@ -6,7 +6,7 @@ date: 2026-09-23T18:10:00-04:00
 
 I made a short about this: [watch it here](https://www.youtube.com/shorts/Dcsu7z7do_0). This is the longer version.
 
-Over the past year I've been building a lot with Claude Code. I built three sites, [maccobylab.com](https://maccobylab.com), [kwbuilds.ca](https://kwbuilds.ca) and this one, all running on the same stack. It's called [aweft](https://aweft.dev).
+Over the past year I've been building a lot with Claude Code. I built sites like [maccobylab.com](https://maccobylab.com), [kwbuilds.ca](https://kwbuilds.ca) and this one, all running on the same stack. It's called [aweft](https://aweft.dev).
 
 ## The problem
 
