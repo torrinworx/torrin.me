@@ -437,7 +437,7 @@ describe('the posts in content/blog', () => {
 		const built = await buildBlog({ content: `${repo}content/blog`, data: where.data, public: where.public, studio: null });
 		assert.equal(built.posts.length, 8, 'the eight published posts');
 		const published = built.posts.filter((post) => !post.draft);
-		assert.deepEqual(published.map((post) => post.slug).sort(), ['aweft-for-agents', 'builderloo-rebrand', 'equator-ai-proposal-writer', 'equator-gis-pages', 'harvest-to-kimai', 'jev-commit-rules', 'kik-v-rim', 'kimai-setup', 'nrth-day-one', 'when-to-open-source']);
+		assert.deepEqual(published.map((post) => post.slug).sort(), ['aweft-for-agents', 'builderloo-rebrand', 'harvest-to-kimai', 'jev-commit-rules', 'kik-v-rim', 'kimai-setup', 'nrth-day-one', 'when-to-open-source']);
 		assert.deepEqual(built.warnings, []);
 	});
 });
