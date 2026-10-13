@@ -15,7 +15,8 @@ import { memory, posts, tokensOf, twinOf } from './posts.ts';
 import type { Body, Fence } from './posts.ts';
 import { Site } from './site.tsx';
 
-const dist = 'dist';
+// PAGES_DIR writes them beside another bundle instead, as the proof's development bundle.
+const dist = process.env['PAGES_DIR'] ?? 'dist';
 
 // Every published post's body, from the files the build step wrote and vite copied.
 const bodies = new Map<string, Body>(posts.map((post) => {

@@ -5,21 +5,28 @@
 // blog index and the newest post among them, with the title as the h1 and every image loaded),
 // the contact form actually posts, the pages look right at desktop and phone width, every page
 // passes axe's WCAG 2.1 AA rules in both modes and every word on it stands out from the scenes
-// drawn behind it, the Motion switch holds the scenes still, and the radio process, run as the
-// droplet runs it, streams audio that is not silence to a listener joining now.
+// drawn behind it, the Motion switch holds the scenes still, the pixel scenes in posts keep what
+// reduced motion promises and come alive on a development bundle with nothing thrown, and the
+// radio process, run as the droplet runs it, streams audio that is not silence to a listener
+// joining now.
 //
 // Run: npm run proof   (after npm run build, or at least
-//      vite build --configLoader native && npm run pages)
+//      vite build --configLoader native && npm run pages). It builds the development bundle
+//      itself, into a temporary directory.
 
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
-import { mkdirSync, readFileSync } from 'node:fs';
+import { spawn, spawnSync } from 'node:child_process';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { visit, visits } from '@aweftjs/logs';
 import { audit } from '@aweftjs/testing/browser';
 import { chromium } from 'playwright';
 
+import { mapArea, mapOf, narrowMap } from './frontend/scenes.ts';
+import { heroScale } from './frontend/strip.ts';
 import { firstSlot, slotOf } from './radio/schedule.ts';
 import type { StyleName } from './radio/config.ts';
 import { boot, mailbox } from './tests/boot.ts';
@@ -145,7 +152,7 @@ const marksOf = (): Mark[] => {
 			}
 		}
 	}
-	for (const icon of Array.from(document.querySelectorAll('svg'))) {
+	for (const icon of Array.from(document.querySelectorAll('svg, [data-icon]'))) {
 		const rect = icon.getBoundingClientRect();
 		if (hidden(icon) || rect.width < 2 || rect.height < 2) continue;
 		found.push({ what: icon.closest('[aria-label]')?.getAttribute('aria-label') ?? 'an icon', color: getComputedStyle(icon).color, need: 3, box: box(rect) });
@@ -156,7 +163,39 @@ const marksOf = (): Mark[] => {
 /** What a page looks like with its words and icons taken off: everything they are drawn over. */
 const BARE = `*, *::before, *::after { color: transparent !important; -webkit-text-fill-color: transparent !important;
 	text-decoration-color: transparent !important; text-shadow: none !important; transition: none !important; }
-svg { visibility: hidden !important; }`;
+svg, [data-icon] { visibility: hidden !important; }`;
+
+/**
+ * The words of the pixel scenes on a page that do not show, those that cover each other, those a
+ * screen reader is still given though they do not show, and the maps where no search found
+ * anything. All show but those the reader brings up: a deploy's page names, under the pointer,
+ * the state a switch is not on, and in a scene under 440px wide, a phone's, the snippets a map's
+ * search did not find, which a tap brings up. Every snippet it found shows.
+ */
+const sceneWords = (): { hidden: string[]; overlaps: string[]; unseen: string[]; unfound: string[] } => {
+	const things = Array.from(document.querySelectorAll<HTMLElement>('[data-scene] [data-thing]')).map((element) => ({
+		element, name: element.dataset['thing']!, scene: element.closest<HTMLElement>('[data-scene]')!, box: element.getBoundingClientRect(),
+	}));
+	const shown = things.filter((thing) => Number(getComputedStyle(thing.element).opacity) >= 1);
+	const hidden = things.filter((thing) => !shown.includes(thing) && !/^page:|^seek:one$/.test(thing.name)
+		&& !(thing.name.startsWith('snippet:') && !thing.element.hasAttribute('data-found') && thing.scene.getBoundingClientRect().width < 440)).map((thing) => thing.name);
+	const overlaps: string[] = [];
+	for (const a of shown) for (const b of shown) {
+		if (a.name >= b.name || a.scene !== b.scene || a.element.contains(b.element) || b.element.contains(a.element)) continue;
+		// An admin's edit lies over the prompt it replaces.
+		if (a.name.replace('edit:', 'prompt:') === b.name) continue;
+		const across = Math.min(a.box.right, b.box.right) - Math.max(a.box.left, b.box.left), down = Math.min(a.box.bottom, b.box.bottom) - Math.max(a.box.top, b.box.top);
+		if (across > 3 && down > 3) overlaps.push(`${a.name} and ${b.name}`);
+	}
+	const unseen = things.filter((thing) => !shown.includes(thing) && thing.element.closest('[aria-hidden="true"]') === null).map((thing) => thing.name);
+	const unfound = Array.from(document.querySelectorAll<HTMLElement>('[data-scene="cluster"], [data-scene="fanout"]'))
+		.filter((scene) => scene.querySelector('[data-thing^="snippet:"]') !== null && scene.querySelector('[data-found]') === null).map((scene) => scene.dataset['scene']!);
+	return { hidden, overlaps, unseen, unfound };
+};
+
+/** What a scene shows: its canvas, and how much of each of its words. */
+const sceneState = (scene: Element): string =>
+	`${scene.querySelector('canvas')!.toDataURL()} ${Array.from(scene.querySelectorAll<HTMLElement>('[data-thing]')).map((thing) => `${getComputedStyle(thing).opacity}${thing.style.transform}${thing.textContent ?? ''}`).join()}`;
 
 /** The marks with any pixel under them, in a screenshot of the bare page, below the contrast they need. */
 const judge = async ([shot, marks]: readonly [string, Mark[]]): Promise<string[]> => {
@@ -202,7 +241,10 @@ const problems: string[] = [];
 
 // The newest published post, from the index the build wrote: the page a reader lands on from the
 // feed, and the one the blog's markup is proven on.
-const newest = (JSON.parse(readFileSync(new URL('./frontend/data/posts.json', import.meta.url), 'utf8')) as { slug: string; title: string }[])[0]!;
+const index = JSON.parse(readFileSync(new URL('./frontend/data/posts.json', import.meta.url), 'utf8')) as { slug: string; title: string; scenes: number }[];
+const newest = index[0]!;
+// Every post with a pixel scene in it, which the WCAG pass and the scene checks below cover too.
+const sceneful = index.filter((post) => post.scenes > 0);
 const PAGES: readonly (readonly [name: string, path: string, h1: string | null])[] = [
 	['landing', '/', null],
 	['contact', '/contact', null],
@@ -430,37 +472,269 @@ try {
 	// Every page against WCAG 2.1 AA, light and dark, at a desktop, a tablet and the 320 CSS pixels a
 	// phone reflows to (SC 1.4.10). axe checks the markup, but it cannot read a canvas, and the
 	// scenes' canvases sit behind and beside the words. So each word and icon is also measured
-	// against what the browser painted under it, with the words hidden (SC 1.4.3, 1.4.11). Motion is
-	// off, so every run measures the same frame.
-	for (const [name, path] of [...PAGES.map(([page, at]) => [page, at] as const), ['404', '/nope'] as const]) {
+	// against what the browser painted under it, with the words hidden (SC 1.4.3, 1.4.11). The
+	// system asks for reduced motion, so every run measures the same frame, and on a page with
+	// pixel scenes the proof checks what reduced motion promises them.
+	const scenePages = sceneful.filter((post) => post.slug !== newest.slug).map((post) => [`post ${post.slug}`, `/blog/${post.slug}`] as const);
+	for (const [name, path] of [...PAGES.map(([page, at]) => [page, at] as const), ...scenePages, ['404', '/nope'] as const]) {
 		for (const dark of [false, true]) {
 			for (const width of [1280, 600, 320]) {
 				const where = `${name}, ${dark ? 'dark' : 'light'}, ${String(width)}px`;
-				const context = await browser.newContext({ viewport: { width, height: 900 } });
+				const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: 'reduce' });
 				await context.addInitScript((night) => {
-					localStorage.setItem('motionChoice', 'off');
 					if (night) localStorage.setItem('modeChoice', 'dark');
+					// How tall each scene with a picture of fixed height (a map, a deploy) is in the page as
+					// the build wrote it, before the bundle runs.
+					document.addEventListener('readystatechange', () => {
+						if (document.readyState === 'interactive') (window as unknown as { written: number[] }).written = Array.from(document.querySelectorAll('[data-scene] [id]')).filter((stage) => stage.querySelector('[data-placed]') !== null).map((stage) => stage.getBoundingClientRect().height);
+					});
 				}, dark);
 				const view = await context.newPage();
 				await onAir(view);
 				await view.goto(`${site.url}${path}`, { waitUntil: 'networkidle' });
+				// Every themed element eases its colours over 0.15s, and a dark page turns dark once it
+				// is alive, so the audit waits for the easing to end rather than measure a colour mid-way.
+				await view.waitForFunction(() => document.getAnimations().length === 0, undefined, { timeout: 5_000 }).catch(() => undefined);
 				const { violations } = await audit(view);
 				assert.deepEqual(violations.map((found) => `${found.rule}: ${found.help} (${found.nodes.map((node) => node.target).join(', ')})`), [], `${where}: axe`);
 
 				// The whole page in the window at once, so every scene has drawn.
 				const tall = await view.evaluate(() => document.documentElement.scrollHeight);
 				await view.setViewportSize({ width, height: tall });
-				await view.waitForFunction(() => Array.from(document.querySelectorAll<HTMLCanvasElement>('[aria-hidden="true"] > canvas')).every((canvas) => canvas.width > 0));
+				await view.waitForFunction(() => Array.from(document.querySelectorAll<HTMLCanvasElement>('[aria-hidden="true"] > canvas, [data-scene] canvas')).every((canvas) => canvas.width > 0));
 				const settle = (): Promise<void> => view.evaluate(() => new Promise<void>((done) => { requestAnimationFrame(() => { requestAnimationFrame(() => { done(); }); }); }));
 				await settle();
+				const scenes = await view.$$('[data-scene]');
+				if (scenes.length > 0) {
+					// Such a scene is as tall in the page the build wrote as once it is alive, a still map
+					// on a phone included, so nothing below it jumps.
+					const heights = await view.evaluate(() => ({ written: (window as unknown as { written: number[] }).written, alive: Array.from(document.querySelectorAll('[data-scene] [id]')).filter((stage) => stage.querySelector('[data-placed]') !== null).map((stage) => stage.getBoundingClientRect().height) }));
+					assert.ok(heights.alive.length > 0, `${where}: a scene with a picture of fixed height`);
+					assert.deepEqual(heights.alive, heights.written, `${where}: each is as tall as the build wrote it`);
+					// Nothing in a scene moves, and it shows the end of its story with its words.
+					const frames = (): Promise<string[]> => view.evaluate(() => Array.from(document.querySelectorAll<HTMLCanvasElement>('[data-scene] canvas')).map((canvas) => canvas.toDataURL()));
+					const first = await frames();
+					await view.waitForTimeout(1200);
+					assert.deepEqual(await frames(), first, `${where}: with reduced motion no scene moves`);
+					const words = await view.evaluate(sceneWords);
+					assert.deepEqual(words.hidden, [], `${where}: every word of every scene shows`);
+					assert.deepEqual(words.overlaps, [], `${where}: and none covers another`);
+					assert.deepEqual(words.unseen, [], `${where}: and a word that does not show is hidden from a screen reader too`);
+					assert.deepEqual(words.unfound, [], `${where}: a map's search finds snippets, so every found word is checked`);
+					// A map rests where its searches end: on the last.
+					const fences = await view.evaluate(async (at) => (await fetch(at)).json() as Promise<{ scene?: { name: string; data: { searches?: { words: string }[]; regions?: { name: string; snippets: string[] }[] } } }[]>, `/blog/${path.split('/').pop()!}.tokens.json`);
+					const cluster = await view.$('[data-scene="cluster"]');
+					if (cluster !== null) {
+						const searches = fences.find((fence) => fence.scene?.name === 'cluster')!.scene!.data.searches!;
+						assert.equal(await cluster.$eval('[data-thing="seek:q"]', (pin) => pin.textContent), searches.at(-1)!.words, `${where}: the map rests on its last search`);
+					}
+					// On a phone, each word a map shows sits nearer its own point than the middle of any
+					// other region, so no snippet reads as part of the wrong one. The points and middles
+					// are where the painter puts them for a stage this size.
+					const regionsOf = fences.flatMap((fence) => (fence.scene?.data.regions === undefined ? [] : [fence.scene.data.regions]));
+					const maps = await view.evaluate(() => Array.from(document.querySelectorAll<HTMLElement>('[data-scene]')).filter((scene) => scene.querySelector('[data-thing^="snippet:"]') !== null).map((scene) => {
+						const stage = scene.querySelector<HTMLElement>('[id]')!.getBoundingClientRect();
+						return {
+							width: stage.width, height: stage.height,
+							words: Array.from(scene.querySelectorAll<HTMLElement>('[data-thing^="snippet:"]')).filter((word) => Number(getComputedStyle(word).opacity) >= 1).map((word) => {
+								const box = word.getBoundingClientRect();
+								return { name: word.dataset['thing']!, box: [box.left - stage.left, box.top - stage.top, box.right - stage.left, box.bottom - stage.top] as const };
+							}),
+						};
+					}));
+					assert.equal(maps.length, regionsOf.length, `${where}: a map on the page for each map in the post`);
+					const away = (box: readonly number[], [x, y]: readonly [number, number]): number => Math.hypot(Math.max(box[0]! - x, 0, x - box[2]!), Math.max(box[1]! - y, 0, y - box[3]!));
+					maps.forEach((map, k) => {
+						if (map.width >= 440) return;
+						const size = heroScale(map.width), W = Math.ceil(map.width / size), area = mapArea(W, Math.ceil(map.height / size));
+						const at = (x: number, y: number): readonly [number, number] => [(area.x + x * area.width) * size, (area.y + y * area.height) * size];
+						const laid = mapOf(regionsOf[k]!, narrowMap(W));
+						const strays = map.words.filter((word) => {
+							const [i, j] = word.name.slice('snippet:'.length).split('.').map(Number) as [number, number];
+							const own = away(word.box, at(laid[i]!.snippets[j]!.x, laid[i]!.snippets[j]!.y));
+							return laid.some((region, r) => r !== i && away(word.box, at(region.x, region.y)) <= own);
+						}).map((word) => word.name);
+						assert.deepEqual(strays, [], `${where}: every word on map ${String(k + 1)} sits by its own point`);
+					});
+				}
 				const marks = await view.evaluate(marksOf);
 				await view.addStyleTag({ content: BARE });
 				await settle();
 				const shot = (await view.screenshot()).toString('base64');
 				assert.deepEqual(await view.evaluate(judge, [shot, marks] as const), [], `${where}: every word and icon stands out from what is drawn under it`);
+
+				// Still, a scene draws only when something changes, and a switch, the arrow keys on a
+				// map and the pointer over a deploy's pages all change what it shows.
+				for (const scene of scenes) {
+					const kind = await scene.getAttribute('data-scene');
+					const changes = async (act: () => Promise<void>, what: string): Promise<void> => {
+						const before = await scene.evaluate(sceneState);
+						await act();
+						await settle();
+						assert.notEqual(await scene.evaluate(sceneState), before, `${where}: still, ${what} changes what the ${String(kind)} scene shows`);
+					};
+					const choice = await scene.$('[aria-pressed="false"]');
+					if (choice !== null) await changes(() => choice.click(), `its switch, ${String(await choice.textContent())},`);
+					const pin = await scene.$('[data-thing="seek:q"]');
+					if (pin !== null) await changes(async () => { await pin.focus(); for (let press = 0; press < 3; press++) await view.keyboard.press('ArrowRight'); }, 'the arrow keys');
+					if (await scene.$('[data-thing^="page:"]') !== null) {
+						const named = async (): Promise<boolean> => scene.evaluate((element) => Array.from(element.querySelectorAll<HTMLElement>('[data-thing^="page:"]')).some((page) => page.style.opacity === '1'));
+						const stage = (await (await scene.$('[id]'))!.boundingBox())!, size = width >= 440 ? 3 : 2;
+						let found = false;
+						// Along the first row of pages, which a deploy draws 64 strip pixels down.
+						for (let x = stage.x; x < stage.x + stage.width && !found; x += size * 2) {
+							await view.mouse.move(x, stage.y + 68 * size);
+							found = await named();
+						}
+						assert.ok(found, `${where}: still, the pointer over a page shows its name`);
+					}
+				}
 				await context.close();
 			}
 		}
+	}
+
+	// The pixel scenes in posts (work order 519), on every post that has one.
+	for (const post of sceneful) {
+		const path = `/blog/${post.slug}`;
+		// The nodes the server wrote for each scene are still the page's after it comes alive: held
+		// when parsing ends, before the bundle runs, and compared once it has.
+		const alive = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+		alive.on('pageerror', (error) => problems.push(`${post.slug}: ${String(error)}`));
+		await alive.addInitScript(() => {
+			document.addEventListener('readystatechange', () => {
+				if (document.readyState === 'interactive') (window as unknown as { held: Element[] }).held = Array.from(document.querySelectorAll('[data-scene], [data-scene] [data-thing]'));
+			});
+		});
+		await alive.goto(`${site.url}${path}`, { waitUntil: 'networkidle' });
+		const kept = await alive.evaluate(() => {
+			const held = (window as unknown as { held: Element[] }).held;
+			const now = Array.from(document.querySelectorAll('[data-scene], [data-scene] [data-thing]'));
+			return { held: held.length, same: held.length === now.length && held.every((node, i) => node === now[i]) };
+		});
+		assert.ok(kept.held > 0 && kept.same, `${post.slug}: the ${String(kept.held)} scene nodes the server wrote are the same nodes once the page is alive`);
+
+		// Every control in a scene is reached with the Tab key, in the order of the page.
+		const controls = await alive.evaluate(() => {
+			const found = Array.from(document.querySelectorAll<HTMLElement>('[data-scene] button'));
+			found.forEach((button, k) => { button.dataset['proof'] = String(k); });
+			return found.length;
+		});
+		const reached = new Set<string>();
+		await alive.evaluate(() => { (document.activeElement as HTMLElement | null)?.blur(); scrollTo(0, 0); });
+		for (let press = 0; press < 400 && reached.size < controls; press++) {
+			await alive.keyboard.press('Tab');
+			const at = await alive.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset['proof'] ?? null);
+			if (at !== null) reached.add(at);
+		}
+		assert.equal(reached.size, controls, `${post.slug}: Tab reaches all ${String(controls)} of the scenes' controls`);
+
+		// Dragging the search across a map moves it and selects no text, wherever it goes.
+		const map = await alive.$('[data-scene="cluster"] [id]');
+		if (map !== null) {
+			await map.scrollIntoViewIfNeeded();
+			const box = (await map.boundingBox())!;
+			await alive.mouse.move(box.x + box.width * 0.2, box.y + box.height * 0.3);
+			await alive.mouse.down();
+			for (let step = 1; step <= 12; step++) await alive.mouse.move(box.x + box.width * (0.2 + step * 0.06), box.y + box.height * (0.3 + step * 0.04));
+			await alive.mouse.move(box.x + box.width * 1.4, box.y + box.height * 1.3);
+			await alive.mouse.up();
+			const after = await alive.evaluate(() => ({
+				selected: getSelection()?.toString() ?? '',
+				words: document.querySelector('[data-scene="cluster"] [data-thing="seek:q"]')?.textContent ?? '',
+				touch: getComputedStyle(document.querySelector('[data-scene="cluster"] [data-thing="seek:q"]')!).touchAction,
+			}));
+			assert.equal(after.selected, '', `${post.slug}: a drag across the map selects no text`);
+			assert.equal(after.words, 'your search', `${post.slug}: and moves the search`);
+			assert.equal(after.touch, 'none', `${post.slug}: the pin takes a drag on a touch screen, and the page scrolls anywhere else`);
+		}
+		await alive.close();
+
+		// The menu's Motion switch, pressed while the scenes play, stops them at the end of their
+		// story, and nothing changes after.
+		const playing = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+		await playing.goto(`${site.url}${path}`, { waitUntil: 'networkidle' });
+		await playing.setViewportSize({ width: 1280, height: await playing.evaluate(() => document.documentElement.scrollHeight) });
+		await playing.waitForTimeout(1500);
+		await playing.click('button[aria-label="Menu"]');
+		await playing.click('text="Motion"');
+		await playing.keyboard.press('Escape');
+		await playing.waitForTimeout(600);
+		const stopped = async (): Promise<string[]> => Promise.all((await playing.$$('[data-scene]')).map((scene) => scene.evaluate(sceneState)));
+		const held = await stopped();
+		await playing.waitForTimeout(5000);
+		assert.deepEqual(await stopped(), held, `${post.slug}: Motion switched off mid-story holds every scene where it stopped`);
+		await playing.close();
+
+		// On a phone, a finger that scrolls the page from a map, away from its pin, scrolls the page
+		// and leaves the search where it was.
+		if (map !== null) {
+			const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+			const swiped = await phone.newPage();
+			await swiped.goto(`${site.url}${path}`, { waitUntil: 'networkidle' });
+			const stage = swiped.locator('[data-scene="cluster"] [id]');
+			await stage.scrollIntoViewIfNeeded();
+			const box = (await stage.boundingBox())!;
+			const before = await swiped.evaluate(() => [scrollY, document.querySelector('[data-thing="seek:q"]')!.textContent] as const);
+			const touch = await phone.newCDPSession(swiped);
+			const x = box.x + 20, y = box.y + box.height * 0.75;
+			await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
+			for (let step = 1; step <= 12; step++) await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y: y - step * 25 }] });
+			await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+			await swiped.waitForTimeout(500);
+			const after = await swiped.evaluate(() => [scrollY, document.querySelector('[data-thing="seek:q"]')!.textContent] as const);
+			assert.ok(after[0] > before[0], `${post.slug}: a swipe from the map scrolls the page`);
+			assert.notEqual(after[1], 'your search', `${post.slug}: and does not take the search`);
+			await phone.close();
+		}
+	}
+
+	// A development bundle keeps the checks a release bundle drops, among them the one that throws
+	// when the page the server wrote and the page the bundle builds disagree on an element or an
+	// attribute. On it, every page with a scene comes alive, light and dark, with nothing thrown or
+	// logged, and so does each one reached by a link from /blog, its icons drawn.
+	const developed = mkdtempSync(join(tmpdir(), 'torrin-me-dev-'));
+	const built = (command: string, args: string[], env: Record<string, string>): void => {
+		const run = spawnSync(command, args, { env: { ...process.env, ...env }, stdio: 'inherit' });
+		assert.equal(run.status, 0, `${command} ${args.join(' ')} exited ${String(run.status)}`);
+	};
+	built('npx', ['--no-install', 'vite', 'build', '--configLoader', 'native', '--outDir', developed, '--emptyOutDir', '--logLevel', 'warn'], { NODE_ENV: 'development' });
+	built('npm', ['run', 'pages', '--silent'], { PAGES_DIR: developed });
+	const devSite = await boot({ 'static/Files': { dir: developed, unknown: '404' } });
+	try {
+		for (const dark of [false, true]) {
+			const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+			await context.addInitScript((night) => { if (night) localStorage.setItem('modeChoice', 'dark'); }, dark);
+			for (const post of sceneful) {
+				for (const linked of [false, true]) {
+					const where = `${post.slug}, ${dark ? 'dark' : 'light'}, development bundle${linked ? ', by a link from /blog' : ''}`;
+					const view = await context.newPage();
+					const said: string[] = [];
+					view.on('pageerror', (error) => said.push(String(error)));
+					view.on('console', (message) => { if (message.type() === 'error') said.push(message.text()); });
+					await onAir(view);
+					if (linked) {
+						await view.goto(`${devSite.url}/blog`, { waitUntil: 'networkidle' });
+						await view.click(`a[href="/blog/${post.slug}"]`);
+						await view.waitForSelector('[data-scene]');
+					} else await view.goto(`${devSite.url}/blog/${post.slug}`, { waitUntil: 'networkidle' });
+					await view.setViewportSize({ width: 1280, height: await view.evaluate(() => document.documentElement.scrollHeight) });
+					await view.waitForFunction(() => Array.from(document.querySelectorAll<HTMLCanvasElement>('[data-scene] canvas')).every((canvas) => canvas.width > 0));
+					const icons = await view.evaluate(() => Array.from(document.querySelectorAll<HTMLElement>('[data-scene] [data-icon]')).filter((icon) => {
+						const style = getComputedStyle(icon), box = icon.getBoundingClientRect();
+						return style.maskImage.startsWith('url(') && box.width >= 8 && box.height >= 8;
+					}).length);
+					const all = await view.evaluate(() => document.querySelectorAll('[data-scene] [data-icon]').length);
+					assert.ok(all > 0 && icons === all, `${where}: ${String(icons)} of ${String(all)} icons drawn`);
+					assert.deepEqual(said, [], `${where}: nothing thrown or logged`);
+					await view.close();
+				}
+			}
+			await context.close();
+		}
+	} finally {
+		await devSite.stop();
+		rmSync(developed, { recursive: true, force: true });
 	}
 
 	// The menu's Motion switch stops the scenes for a visitor who finds motion distracting

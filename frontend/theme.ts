@@ -48,6 +48,36 @@ export const LINE = 'rgba(19, 42, 19, 0.16)';
  */
 export const STACKED = 860;
 const stacked = `_media_(max-width: ${String(STACKED)}px)`;
+// A scene's own width, not the window's, decides when its steps stack, and under 440px its pixels
+// are two CSS pixels, as heroScale has them (utils/scenes.tsx).
+const narrow = '_container_(max-width: 599px)';
+const phone = '_container_(max-width: 439px)';
+const reduced = '_media_(prefers-reduced-motion: reduce)';
+
+/** The small icons beside a scene's words, six by six, as rows of `#`. A painter draws them too (scenes.ts). */
+export const ICONS = {
+	file: ['####..', '#..##.', '#...##', '#.##.#', '#....#', '######'],
+	search: ['.##...', '#..#..', '#..#..', '.##...', '...##.', '....##'],
+	found: ['######', '......', '####..', '......', '#####.', '......'],
+	prompt: ['#.....', '.#....', '..#...', '.#....', '#.###.', '......'],
+	draft: ['....##', '...###', '..###.', '.###..', '##....', '#.....'],
+	request: ['######', '#....#', '#....#', '######', '.#....', '#.....'],
+	cv: ['.##...', '#..#..', '.##...', '####..', '......', '######'],
+	proposal: ['#####.', '#...#.', '#.###.', '#.#.##', '###..#', '..####'],
+	page: ['####..', '#..##.', '#...#.', '#####.', '#...#.', '#####.'],
+	person: ['..##..', '.####.', '..##..', '......', '.####.', '######'],
+	code: ['......', '.#..#.', '#....#', '.#..#.', '......', '......'],
+} as const;
+export type IconName = keyof typeof ICONS;
+
+// An icon is a box in the colour of its words with the bitmap as its mask. An inline <svg> would
+// hydrate as an HTML element, which draws nothing.
+const maskOf = (rows: readonly string[]): string => {
+	let d = '';
+	rows.forEach((row, y) => { for (let x = 0; x < row.length; x++) if (row[x] === '#') d += `M${String(x)} ${String(y)}h1v1h-1z`; });
+	return `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 6" shape-rendering="crispEdges"><path d="${d}"/></svg>`)}")`;
+};
+const icons = Object.fromEntries(Object.entries(ICONS).map(([name, rows]) => [`scene_icon_${name}`, { maskImage: maskOf(rows) }]));
 
 /** What the switch moves between: one of the two modes below. */
 export type Mode = Definitions;
@@ -70,6 +100,10 @@ const lightTokens: Record<string, string> = {
 	$ring: MOSS,
 	$input: MOSS,
 	$border: LINE,
+	// What a scene found: lime under the ink, 13:1, edged in sage.
+	$highlight: LIME,
+	$highlightForeground: FOREST,
+	$highlightEdge: SAGE,
 };
 
 // The brand's dark roles. Lime on forest is 13:1 and sage 5.8:1 (tokens.json); the muted ink is
@@ -88,6 +122,10 @@ const darkTokens: Record<string, string> = {
 	$ring: LIME,
 	$input: LIME,
 	$border: 'rgba(250, 248, 244, 0.16)',
+	// In the dark, a deep green under paper-a, 8.7:1, edged in lime.
+	$highlight: '#33521F',
+	$highlightForeground: PAPER_A,
+	$highlightEdge: LIME,
 };
 
 /** The light mode, which is how every page is written. */
@@ -636,6 +674,8 @@ export const siteTheme: Definitions = {
 		borderRadius: '$radiusLg',
 		maxWidth: '100%',
 		boxSizing: 'border-box',
+		// A scene's fence is a code box too, and the scene is drawn without one.
+		'_cssProp_has(> [data-scene])': { padding: 0, border: 0, background: 'transparent', overflowX: 'visible', whiteSpace: 'normal', fontFamily: '$font', color: '$foreground' },
 	},
 	markdown_inline: { fontFamily: '$fontMono', fontSize: '0.9em', background: '$surface', border: '1px solid $border', padding: '0 4px', borderRadius: '$radius' },
 	// A figure fills the measure and no more; its caption is the second ink, in the paragraph
@@ -677,6 +717,150 @@ export const siteTheme: Definitions = {
 	code_function: { color: '$foreground', fontWeight: 600 },
 	code_tag: { color: '$accent' },
 	code_variable: { color: '$foreground' },
+
+	// --- the scenes in a post (utils/scenes.tsx) --------------------------------------------
+
+	// A scene: its words at the label size over the canvas its pictures are painted on. Every box
+	// is drawn in the scene's pixel size, three CSS pixels or two in a scene under 440px wide, as
+	// four copies of itself one pixel out, which leaves its corners notched as pixel art's are.
+	scene: { margin: 0, width: '100%', containerType: 'inline-size', display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '$sizeLabel', lineHeight: 1.4 },
+	scene_stage: { position: 'relative', isolation: 'isolate', '--px': '3px', [phone]: { '--px': '2px' } },
+	scene_stage_flow: { display: 'flex', flexDirection: 'column', gap: '18px', padding: 'calc(var(--px) * 2) 0', touchAction: 'pan-y' },
+	// A map is dragged and tapped, so nothing on it is ever selected as text.
+	scene_stage_map: { touchAction: 'pan-y', userSelect: 'none', WebkitUserSelect: 'none', '_cssProp_is([data-dragging])': { cursor: 'grabbing' } },
+	scene_paint: { position: 'absolute', left: 0, top: 0, zIndex: -1, display: 'block', imageRendering: 'pixelated', pointerEvents: 'none' },
+	// A stage whose picture has a fixed height is as tall as one of these, by the scene's own width.
+	scene_height: { display: 'none' },
+	scene_height_wide: { display: 'block', [narrow]: { display: 'none' } },
+	scene_height_mid: { [narrow]: { display: 'block' }, [phone]: { display: 'none' } },
+	scene_height_narrow: { [phone]: { display: 'block' } },
+	// A narrow map is taller while still. Before the page is alive only the system's choice is
+	// known, so the build's page has the right height for it and nothing moves once it is alive;
+	// after, the stage says whether the menu's Motion switch is on or off.
+	scene_height_yields: { [phone]: { [reduced]: { display: 'none' }, '_elem_[data-motion="off"]': { display: 'none' }, '_elem_[data-motion="on"]': { display: 'block' } } },
+	scene_height_still: { [phone]: { [reduced]: { display: 'block' }, '_elem_[data-motion="off"]': { display: 'block' }, '_elem_[data-motion="on"]': { display: 'none' } } },
+	// Words the painter places: at the stage's corner, hidden, until it says where and how much.
+	scene_placed: { position: 'absolute', left: 0, top: 0, opacity: 0, whiteSpace: 'nowrap', transition: 'opacity 0.3s ease', [reduced]: { transition: 'none' } },
+	scene_handle: { touchAction: 'none', cursor: 'grab', '_cssProp_focus-visible': { outline: '2px solid $ring', outlineOffset: '3px' } },
+
+	// The boxes: a card of words, a search, something found.
+	scene_card: {
+		display: 'inline-flex', alignItems: 'flex-start', gap: 'calc(var(--px) * 1.5)', boxSizing: 'border-box', maxWidth: 'calc(100% - var(--px) * 2)',
+		margin: 'var(--px)', padding: 'calc(var(--px) * 0.5) calc(var(--px) * 1.5)', background: '$surface', color: '$foreground',
+		boxShadow: '0 calc(-1 * var(--px)) 0 0 $ink2, 0 var(--px) 0 0 $ink2, calc(-1 * var(--px)) 0 0 0 $ink2, var(--px) 0 0 0 $ink2',
+	},
+	scene_card_wide: { display: 'flex' },
+	scene_card_under: { gridArea: '1 / 1' },
+	scene_card_small: { fontSize: '0.85em' },
+	// Above a map, outside its stage, so it says the pixel size again.
+	scene_card_request: { maxWidth: 'none', marginBottom: 'calc(var(--px) * 3)', '--px': '3px', [phone]: { '--px': '2px' } },
+	scene_search: {
+		display: 'inline-flex', alignItems: 'center', gap: 'calc(var(--px) * 1.5)', margin: 'var(--px)', padding: 'calc(var(--px) * 0.5) calc(var(--px) * 1.5)',
+		background: '$accent', color: '$accentForeground', fontFamily: '$fontMono', fontSize: '0.92em', whiteSpace: 'nowrap', border: 0,
+		boxShadow: '0 calc(-1 * var(--px)) 0 0 $accent, 0 var(--px) 0 0 $accent, calc(-1 * var(--px)) 0 0 0 $accent, var(--px) 0 0 0 $accent',
+	},
+	scene_found: {
+		display: 'inline-flex', alignItems: 'flex-start', gap: 'calc(var(--px) * 1.5)', boxSizing: 'border-box', maxWidth: 'calc(100% - var(--px) * 2)',
+		margin: 'var(--px)', padding: 'calc(var(--px) * 0.5) calc(var(--px) * 1.5)', background: '$highlight', color: '$highlightForeground',
+		boxShadow: '0 calc(-1 * var(--px)) 0 0 $highlightEdge, 0 var(--px) 0 0 $highlightEdge, calc(-1 * var(--px)) 0 0 0 $highlightEdge, var(--px) 0 0 0 $highlightEdge',
+	},
+	scene_found_edit: { gridArea: '1 / 1', zIndex: 1 },
+	scene_icon: {
+		display: 'inline-block', width: 'calc(var(--px) * 5)', height: 'calc(var(--px) * 5)', flex: '0 0 auto', marginTop: '0.2em',
+		background: 'currentColor', maskSize: '100% 100%', maskRepeat: 'no-repeat', forcedColorAdjust: 'none',
+	},
+	...icons,
+	scene_tag: { margin: 0, maxWidth: 'none', width: 'fit-content', padding: '0 2px', background: '$background', fontFamily: '$fontMono', fontSize: '0.9em', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '$tracking', color: '$ink2' },
+	scene_eyebrow: { display: 'block', fontFamily: '$fontMono', fontSize: '0.82em', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '$tracking', color: '$ink2' },
+	scene_name: { fontWeight: 600 },
+	scene_line: { display: 'block', color: '$ink2' },
+	scene_badge: {
+		display: 'inline-block', marginLeft: '6px', padding: '0 5px', fontFamily: '$fontMono', fontSize: '0.78em', fontWeight: 500,
+		textTransform: 'uppercase', letterSpacing: '0.1em', color: '$accentForeground', background: '$accent', borderRadius: '$radius',
+	},
+	scene_shows: { display: 'inline-block', marginTop: '6px', padding: '0 4px', fontFamily: '$fontMono', fontSize: '0.85em', whiteSpace: 'nowrap', color: '$ink2', background: '$surface', boxShadow: '0 0 0 var(--px) $border' },
+	scene_count: { fontFamily: '$fontMono', color: '$foreground', background: '$background', padding: '0 2px' },
+	scene_note: { margin: 0, maxWidth: 'none', color: '$ink2' },
+	scene_words: { display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0, background: '$background' },
+	scene_rest: { visibility: 'hidden' },
+	scene_unseen: { position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' },
+
+	// The boxes the pictures are painted into, each the size of its picture.
+	scene_slot: { display: 'block', flex: '0 0 auto' },
+	scene_slot_model: { width: 'calc(var(--px) * 18)', height: 'calc(var(--px) * 18)' },
+	scene_slot_build: { width: 'calc(var(--px) * 20)', height: 'calc(var(--px) * 20)' },
+	scene_slot_database: { width: 'calc(var(--px) * 22)', height: 'calc(var(--px) * 28)' },
+	scene_slot_data: { width: 'calc(var(--px) * 22)', height: 'calc(var(--px) * 18)' },
+	scene_slot_pages: { width: 'calc(var(--px) * 22)', height: 'calc(var(--px) * 18)' },
+	scene_slot_upload: { width: 'calc(var(--px) * 20)', height: 'calc(var(--px) * 20)' },
+	scene_slot_cloud: { width: 'calc(var(--px) * 30)', height: 'calc(var(--px) * 22)' },
+	scene_slot_who: { width: 'calc(var(--px) * 16)', height: 'calc(var(--px) * 14)' },
+	scene_slot_mark: { width: 'calc(var(--px) * 5)', height: 'calc(var(--px) * 6)' },
+	scene_slot_marks: { width: 'calc(var(--px) * 20)', height: 'calc(var(--px) * 6)' },
+	scene_slot_bar: { width: '100%', height: 'calc(var(--px) * 6)' },
+	scene_slot_blocks: { width: '100%', height: 'calc(var(--px) * 9)' },
+
+	// pipeline: each lane a row of steps, stacked in a narrow scene.
+	scene_lane: { display: 'flex', flexDirection: 'column', gap: '10px' },
+	scene_steps: { listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '14px 26px', [narrow]: { flexDirection: 'column', alignItems: 'stretch', gap: '12px' } },
+	scene_step: { display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 },
+	scene_step_items: { flexDirection: 'column', alignItems: 'flex-start', gap: '6px', maxWidth: '15rem', [narrow]: { maxWidth: 'none' } },
+	scene_step_card: { maxWidth: '13rem', [narrow]: { maxWidth: 'none' } },
+	scene_step_pictured: { flex: '1 1 0', flexDirection: 'column', textAlign: 'center', maxWidth: '9.5rem', [narrow]: { flex: '0 0 auto', flexDirection: 'row', textAlign: 'left', maxWidth: 'none' } },
+	// On a narrow page the database searches reach is drawn again beside them.
+	scene_echo: { display: 'none', [narrow]: { display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' } },
+
+	// fanout without a map: the source, and the branches it makes.
+	scene_stage_branches: { display: 'grid', gridTemplateColumns: 'auto minmax(0, 1fr)', columnGap: '72px', alignItems: 'center', [narrow]: { gridTemplateColumns: 'minmax(0, 1fr)', rowGap: '18px' } },
+	scene_source: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', textAlign: 'center', maxWidth: '12rem', [narrow]: { flexDirection: 'row', textAlign: 'left', maxWidth: 'none' } },
+	scene_branches: { listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '12px' },
+	scene_branch: { display: 'flex', alignItems: 'center', gap: '12px' },
+
+	// toggle, prompts: each task beside the prompt it runs with.
+	scene_tasks: { listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '16px' },
+	scene_task: { display: 'grid', gridTemplateColumns: 'minmax(0, 11rem) auto minmax(0, 1fr)', alignItems: 'center', columnGap: '18px', [narrow]: { gridTemplateColumns: 'auto minmax(0, 1fr)', rowGap: '6px', '_children_> :first-child': { gridColumn: '1 / -1', justifySelf: 'start' } } },
+	// The default and an admin's edit share one cell, the edit on top and as tall as the taller of the two.
+	scene_prompt: { display: 'grid', alignItems: 'stretch', minWidth: 0 },
+
+	// match: what was asked for, and what answers it, side by side or one above the other.
+	scene_stage_match: { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', columnGap: '84px', alignItems: 'start', [narrow]: { gridTemplateColumns: 'minmax(0, 1fr)', rowGap: '26px' } },
+	scene_side: { display: 'flex', flexDirection: 'column', gap: '8px', minWidth: 0 },
+	scene_rows: { listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '8px' },
+	scene_row: { display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 },
+
+	// numbers: each figure in the heading face, and its bar.
+	scene_figures: { listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '20px' },
+	scene_figure: { display: 'grid', gridTemplateColumns: 'minmax(0, 13rem) minmax(0, 1fr)', alignItems: 'center', columnGap: '20px', [narrow]: { gridTemplateColumns: 'minmax(0, 1fr)', rowGap: '8px' } },
+	scene_value: { display: 'block', fontFamily: '$fontSerif', fontSize: '2em', fontWeight: 600, lineHeight: 1.1, color: '$foreground' },
+	scene_ends: { display: 'grid', gridTemplateColumns: 'max-content minmax(0, 1fr)', columnGap: '10px', rowGap: '6px', alignItems: 'center' },
+	scene_end: { fontFamily: '$fontMono', fontSize: '0.9em', color: '$ink2' },
+
+	// Under every scene: Play again, quiet as a link, a two-way switch where the scene has one,
+	// what is an invented example, and the caption.
+	scene_controls: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px 18px' },
+	scene_again: {
+		display: 'inline-flex', alignItems: 'center', minHeight: '32px', padding: 0, border: 0, background: 'none', cursor: 'pointer',
+		fontFamily: '$fontMono', fontSize: '$sizeLabel', fontWeight: 500, letterSpacing: '$tracking', textTransform: 'uppercase', color: '$accent',
+		textDecoration: 'underline', textDecorationThickness: '1px', textUnderlineOffset: '5px',
+		_cssProp_hover: { textDecorationThickness: '2px' },
+		'_cssProp_focus-visible': { outline: '2px solid $ring', outlineOffset: '4px' },
+	},
+	scene_pick: { display: 'inline-flex', border: '2px solid $accent', borderRadius: '$radius' },
+	scene_choice: {
+		minHeight: '36px', padding: '0 12px', border: 0, background: 'transparent', cursor: 'pointer',
+		fontFamily: '$fontMono', fontSize: '$sizeLabel', fontWeight: 500, letterSpacing: '$tracking', textTransform: 'uppercase', color: '$accent',
+		'_cssProp_is([aria-pressed="true"])': { background: '$accent', color: '$accentForeground' },
+		'_cssProp_focus-visible': { outline: '2px solid $ring', outlineOffset: '4px' },
+	},
+	scene_example: { margin: 0, maxWidth: 'none', fontFamily: '$fontMono', fontSize: '0.85em', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '$tracking', color: '$mutedForeground' },
+	scene_caption: { color: '$ink2' },
+
+	// The post's own words a scene draws, drawn the same way: a search, something found, a thing, a change.
+	term: { padding: '0 0.2em', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' },
+	term_search: { background: '$accent', color: '$accentForeground', boxShadow: '0 -2px 0 0 $accent, 0 2px 0 0 $accent' },
+	term_found: { background: '$highlight', color: '$highlightForeground', boxShadow: '0 -2px 0 0 $highlight, 0 2px 0 0 $highlight' },
+	term_thing: { padding: 0, borderBottom: '2px solid $ink2' },
+	term_changed: { padding: 0, borderBottom: '3px solid $accent' },
 
 	// The contents list: a paper-a box before the body, a numbered list of the second-level
 	// headings in the paragraph face.

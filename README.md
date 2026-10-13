@@ -64,10 +64,15 @@ strip draws it floating above the bank, with its reflection in the pond.
 
 ## Accessibility
 
-`npm run proof` checks the landing, contact, the blog's index, the newest post, the radio and the
-404 against WCAG 2.1 AA, light and dark, at 1280, 600 and 320 CSS pixels wide: axe-core over the
-markup, and then, because axe cannot see into a canvas, each word and icon against what the
-browser painted under it. Neither looks at keyboard focus: where it goes and whether it shows.
+`npm run proof` checks the landing, contact, the blog's index, the newest post, every post with a
+pixel scene, the radio and the 404 against WCAG 2.1 AA, light and dark, at 1280, 600 and 320 CSS
+pixels wide: axe-core over the markup, and then, because axe cannot see into a canvas, each word
+and icon against what the browser painted under it. Neither looks at keyboard focus: where it goes
+and whether it shows. On each post with a scene it also checks that every scene control is reached
+with the Tab key, that with reduced motion no scene moves, every word of it shows and its switches
+still change what it shows, that the scenes' nodes are the ones the server wrote and hydrate with
+no mismatch on a development bundle, which keeps the checks a release bundle drops, that a post
+reached by a link from `/blog` draws its scenes too, and that dragging on a map selects no text.
 
 The canvases the scenes are drawn on are hidden from assistive technology. The menu's Motion switch holds every
 scene still, stops the button shine and the contact block's blink, and leaves the block's halo
@@ -145,6 +150,189 @@ are warnings and the links go unchecked. An image whose path climbs out of the p
 fails the build either way. Everything it writes is generated and ignored by git; the sources
 under `content/` are what is committed.
 
+### Pixel scenes
+
+A post can hold a pixel scene: a small illustration of one idea, drawn in the site's pixel style
+with its words as real text. Write it as a fence named `scene:<name>`, with YAML inside, on its own
+between paragraphs:
+
+````markdown
+```scene:numbers
+caption: My share of the commits
+figures:
+  - label: of the commits
+    value: 56%
+```
+````
+
+A scene plays once when half of it is on screen, then rests; Play again plays it again. With
+motion off, or a system that asks for reduced motion, it shows its end and nothing moves. Every
+word of that end shows, but three kinds the reader brings up: a page's name in a deploy, under the
+pointer; the words of the state a switch is not on; and a map's snippets its search did not find,
+when the map has no room for all of them beside their own points, where a tap brings them up. On a
+phone a still map is taller than a moving one, so the words its story ends on fit beside their
+points, never by another region; for a system that asks for reduced motion the page the build
+writes already has that height, so nothing jumps once the page is alive. Its switches, the drag and the pointer still change what it shows. In a feed it is a still frame, drawn by the build, with its words as a list.
+
+The fence holds YAML, so a value with a colon and a space in it (`"CV: water resources lead"`)
+or one that starts with `[` goes in quotes.
+
+Every scene takes these three fields beside its own:
+
+- `caption` (needed): one line under the scene saying what it shows.
+- `example`: says what in the scene is made up to show the idea, shown under it, as
+  `Example request, searches and snippets`. Anything invented is labelled here. The build
+  refuses a scene without it that shows a figure (any number in its words) the post's own text
+  does not state; a scene with it may show made-up figures, such as a deploy's 48 pages.
+- `terms`: up to six phrases of the post's own text, each drawn the way the scene draws the same
+  thing, the first time the post says it: `text` (exactly as the post writes it) and `as`, one of
+  `search` (a search chip), `found` (a found snippet), `thing` (underlined) or `changed`
+  (underlined in the accent). The build refuses a term the post never says. Only words a reader
+  sees count, for terms and figures alike: a link's target and code do not.
+
+The build refuses a scene it cannot draw, naming the file and line: a name that is no scene, YAML
+that does not parse, a field the scene does not have or lacks, a field it has but would not draw
+in that place, empty text, a list too long or too short, two of a name the scene finds things by
+(a database, a region, a left item, a cluster's `id`), and what each scene's own rules below say.
+For a draft these are warnings. A scene's YAML is left out of the post's reading time.
+
+**`pipeline`**: things carried through steps, lane by lane. `lanes` (1 to 3), each with an
+optional `label` and `steps` (1 to 6). Each step has a `kind`, which says how it is drawn and
+what else it takes:
+
+- `files`, `searches` and `found` hold `items` (1 to 4, shown as file cards, search chips and
+  found snippets), with an optional `name` over them.
+- `request` and `draft` hold `text` in a card, with an optional `name` over it; a draft is typed
+  out as the story plays.
+- `prompt` has a `name` and an optional `line` beside it, in a card.
+- `model`, `database`, `data`, `build`, `pages`, `upload` and `cloud` have a `name` and are drawn
+  as a picture of their own, with an optional `line` under the name, a `badge` beside it (`me`,
+  `colleague`) and `shows`, a small tag of what it makes.
+
+A field a step's kind does not list is refused. A `searches` step may `reach` a `database` step
+in another lane by its exact `name`: lines run from each search to it, and a `found` step right
+after the searches, the next step in their lane, comes out of it. `note`: a line under the lanes.
+
+```yaml
+caption: From the data to a page in Google
+lanes:
+  - steps:
+      - kind: data
+        name: Data
+        line: gathered for each county and region
+        badge: colleague
+      - kind: build
+        name: Generate
+        line: every page type in one build
+      - kind: cloud
+        name: Serve
+        line: from object storage to people and Google
+```
+
+**`cluster`**: snippets on a map where similar meanings sit close together, and a search the
+reader drags, whose nearest snippets light up. `regions` (2 to 4), each a `name` and its
+`snippets` (1 to 4). `searches` (1 to 3), each `words` and `at`, one or two regions it lands in
+or between, written exactly as their `name`; until the reader touches it, the search visits each
+once, and with motion off it rests on the last. `id` names the map for a `fanout` in the same
+post.
+
+```yaml
+caption: Similar meanings sit close together
+id: meanings
+regions:
+  - name: Stormwater
+    snippets: [culvert sizing, stormwater pond retrofit]
+  - name: Roads
+    snippets: [pavement rehabilitation, intersection redesign]
+searches:
+  - words: detention pond design
+    at: [Stormwater]
+```
+
+**`fanout`**: one thing split into several, `from` and `into` (2 to 4 branches, each a `name`).
+It is drawn one of two ways, and the fields follow:
+
+- Without `map`, the branches are pages the `from` makes: `from` has a `name` and an optional
+  `line` under it, and each branch a `name` and an optional `line`.
+- With `map`, the `id` of a cluster in the same post, the `from` stands over the map as a
+  request, with its `name` and an optional `label`, the small word over it, and its words land as
+  one search per branch. Each branch has a `name`, the search's words, and `at`, which it needs:
+  one or two of the map's region names, written exactly. No `line` on a map. With `one` (`name`,
+  and `toggle`, the switch's word for it) and `toggle` (the switch's word for the split), the
+  scene first lands the whole of `from` as one search between the regions, then splits it, and a
+  switch goes between the two.
+
+`at` without a map, `label` without a map, and `one` without a map are refused.
+
+```yaml
+caption: One search for the whole request, or one for each part of it
+map: meanings
+from:
+  label: Request
+  name: Describe your stormwater experience on road projects.
+into:
+  - name: stormwater design
+    at: [Stormwater]
+  - name: road reconstruction
+    at: [Roads]
+one:
+  name: the whole request
+  toggle: One search
+toggle: Several searches
+```
+
+**`toggle`**: the same scene in two states, and a switch between them: `first` and `second` are
+the switch's words. `kind` is `deploy` or `prompts`. A deploy draws `pages` (2 to 48) under its
+`store`, `changed` of them marked, and uploads every page, then only the changed ones; `names`
+(one per page) shows each page's name under the pointer. Prompts draws `tasks` (1 to 4), each a
+`name`, its `prompt` from the code and an optional `edit`, an admin's edit shown over it while
+the first state is on.
+
+```yaml
+kind: deploy
+caption: Every page uploaded, or only the changed ones
+example: "Example: 48 county pages, 5 changed"
+first: Every page
+second: Only changed pages
+store: Object storage
+pages: "48"
+changed: "5"
+```
+
+**`match`**: two columns joined by lines. `left` (`label`, `items`: 1 to 5) and `right` (`label`,
+`items`: 1 to 8, each `text`, `answers`, the left items it answers, and an optional `kind` for its
+icon: `file`, `cv`, `proposal`, `page` or `search`). Each left item has a mark, and each right
+item gets the marks of the items it answers.
+
+```yaml
+caption: An RFP's criteria, and the past work that answers each
+left:
+  label: The RFP asks for
+  items: [Stormwater design experience, A qualified project lead]
+right:
+  label: From the firm's past work
+  items:
+    - text: "CV: water resources lead"
+      kind: cv
+      answers: [A qualified project lead]
+```
+
+**`numbers`**: the post's figures as pixel bars, 1 to 4 of them, each a `label` and either a
+`value` or both `from` and `to`, never the two together, written as the post writes them. A
+percentage fills that much of a bar, a whole number of 200 or fewer is that many blocks, and from
+and to are two bars on one scale. Nothing is drawn between the two ends, on purpose: a curve
+would need the figures in between, and a post rarely has them. A figure that starts with "under"
+ends in a dither. The build reads the bars off the words, and refuses a figure the post's text
+does not state, as for every scene.
+
+```yaml
+caption: Organic search over six months
+figures:
+  - label: clicks
+    from: under 1,000
+    to: 52,100
+```
+
 The pages step then writes `/blog`, a page per published post, and three feeds beside the
 sitemap: `feed.xml` (Atom, full text), `feed.json` (JSON Feed 1.1) and `feed-summary.xml` (the
 description, the first paragraph and a link, for dev.to's import).
@@ -162,10 +350,12 @@ description, the first paragraph and a link, for dev.to's import).
 | `frontend/data/resume.json` | the content, shared with the resume generator; the hero's three lines are its `hero*` fields |
 | `frontend/theme.ts` | the look: a light and a dark mode holding the colours, and `siteTheme` holding the rest |
 | `frontend/strip.ts` | the pixel-art scenes: the strip painter (no DOM) for the landing's hero and the smaller scenes on other pages, the canopy and reeds painters, the canvas runner, the Motion switch's cell, and the bird that lands on the resume button or the contact form |
+| `frontend/scenes.ts` | the pixel scenes in posts: one painter per kind of scene, no DOM, run in Node by the tests and the feed's still frames |
+| `frontend/utils/scenes.tsx` | the scenes' components: their words laid out, the canvas under them, the story, the switches and the drag |
 | `frontend/utils/forest.tsx` | where each pixel-art scene goes on the pages (under each landing heading, in an inner page's margins, beside and above each post, in the footer, on the radio and on the 404), and the fade between modes |
 | `favicons.ts` | draws the icons from the strip's generator |
 | `content/blog/` | the posts and their media |
-| `content/blog.ts` | the blog's build step; `content/highlight.ts` and `content/cards.ts` are its fences and its cards |
+| `content/blog.ts` | the blog's build step; `content/highlight.ts` and `content/cards.ts` are its fences and its cards, `content/scenes.ts` the scenes a post can hold and the check their YAML goes through |
 | `frontend/pages/radio.tsx` | the radio page, and `frontend/radio.ts` the player, one audio element for the whole site |
 | `main.ts` | the server: the site's modules, the health and static batteries, the build stamp |
 | `modules/` | the site's own server modules: the gate, and the contact form |

@@ -17,7 +17,7 @@ import { chromium } from 'playwright';
 import {
 	PostError, buildBlog, headings, inlineReferences, isDate, markNotes, markYoutube, minutesOf, readPost, readPosts, slugOf, stripInline, words, youtubeId,
 } from '../content/blog.ts';
-import { summaryOf } from '../frontend/feeds.ts';
+import { renderBody, summaryOf } from '../frontend/feeds.ts';
 import { codeOf, dateShown, modifiersOf } from '../frontend/pages/blog.tsx';
 import type { Listed } from '../frontend/posts.ts';
 import { siteTheme } from '../frontend/theme.ts';
@@ -320,6 +320,115 @@ describe('the build', () => {
 		assert.equal((html.match(/data-callout/g) ?? []).length, 1);
 		assert.match(html, /<pre[^>]*data-language="constructor"[^>]*><code[^>]*>x = 1<\/code><\/pre>/);
 	});
+
+	const PIPELINE = 'caption: How it goes\nlanes:\n  - label: Upload\n    steps:\n      - kind: files\n        items: [a.pdf]\n      - kind: database\n        name: Store\n        line: kept\n';
+
+	it('writes a scene\'s checked data beside the post, with the tokens, and leaves its YAML out of the reading time', async () => {
+		const where = scratch();
+		const prose = Array.from({ length: 190 }, () => 'word').join(' ');
+		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', `${prose}\n\n\`\`\`scene:pipeline\n${PIPELINE}\`\`\`\n\n\`\`\`bash\necho hi\n\`\`\`\n`);
+		const built = await buildBlog({ ...where, studio: null });
+		const post = built.posts[0]!;
+		assert.equal(post.words, 190 + 4, 'the prose and the code fence, and not the scene');
+		assert.equal(post.minutes, 1, 'the scene\'s YAML would take it over 200 words and two minutes');
+		assert.equal(post.scenes, 1);
+		const tokens = JSON.parse(readFileSync(join(where.public, 'blog', 'a.tokens.json'), 'utf8')) as { language: string; scene?: { name: string; data: { lanes: { steps: { name?: string; items?: string[] }[] }[]; frame: string; words: string[] } } }[];
+		const scene = tokens.find((fence) => fence.language === 'scene:pipeline')?.scene;
+		assert.equal(scene?.name, 'pipeline');
+		assert.deepEqual(scene?.data.lanes[0]!.steps.map((step) => step.name ?? step.items), [['a.pdf'], 'Store']);
+		assert.deepEqual(scene?.data.words, ['Upload', 'a.pdf', 'Store', 'kept'], 'the words a feed lists, in reading order');
+		assert.ok(tokens.some((fence) => fence.language === 'bash' && fence.scene === undefined), 'a code fence still gets its tokens');
+	});
+
+	it('writes each scene\'s still frame for the feeds, and the feed shows it with the scene\'s words as a list', async () => {
+		const where = scratch();
+		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', `Text.\n\n\`\`\`scene:pipeline\n${PIPELINE}\`\`\`\n`);
+		const built = await buildBlog({ ...where, studio: null });
+		const scene = built.fences.get('a')!.find((fence) => fence.scene !== undefined)!.scene!;
+		assert.match(scene.data.frame ?? '', /^\/media\/a\/scene-1\.[0-9a-f]{8}\.png$/);
+		const png = readFileSync(join(where.public, scene.data.frame!));
+		assert.deepEqual([...png.subarray(1, 4)], [...Buffer.from('PNG')], 'the frame is a PNG');
+		assert.ok(png.readUInt32BE(16) >= 240 * 3, 'drawn three times its pixel size');
+		const html = await renderBody(built.posts[0]! as unknown as Listed, built.twins.get('a')!, built.fences.get('a')!);
+		assert.match(html, /<img src="https:\/\/torrin\.me\/media\/a\/scene-1\.[0-9a-f]{8}\.png" alt="How it goes"/);
+		assert.match(html, /<li[^>]*>a\.pdf<\/li>/);
+		assert.ok(!html.includes('<canvas'), 'no canvas in a feed');
+	});
+
+	it('refuses a published post\'s scene that does not check, naming the line in the file; a draft\'s is a warning', async () => {
+		const where = scratch();
+		// The front matter is lines 1 to 5, the blank line 6, the paragraph 7, the fence opens on 9.
+		const bad = (yaml: string, draft = false): string => write(where.content, 'a.md', `title: A\ndescription: d\ndate: 2026-01-01${draft ? '\ndraft: true' : ''}`, `First paragraph.\n\n\`\`\`scene:pipeline\n${yaml}\`\`\`\n`);
+		bad(PIPELINE.replace('line: kept', 'lin: kept'));
+		await assert.rejects(buildBlog({ ...where, studio: null }), /a\.md: line 18: scene:pipeline: lane 1, step 2: there is no field "lin"; the fields are kind, name, line, badge, text, shows, reach, items/);
+		bad(PIPELINE.replace('caption: How it goes', 'caption: ""'));
+		await assert.rejects(buildBlog({ ...where, studio: null }), /a\.md: line 10: scene:pipeline: caption is empty/);
+		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', 'Text.\n\n```scene:maze\ncaption: x\n```\n');
+		await assert.rejects(buildBlog({ ...where, studio: null }), /a\.md: line 9: scene:maze: there is no scene called "maze"; the scenes are pipeline, cluster, fanout, toggle, match, numbers/);
+		bad(PIPELINE.replace('line: kept', `line: kept\n${'      - kind: cloud\n        name: x\n'.repeat(5)}`));
+		await assert.rejects(buildBlog({ ...where, studio: null }), /line 13: scene:pipeline: lane 1: steps holds 7 steps, and it holds 1 to 6/);
+		bad(PIPELINE.replace('kind: database', 'kind: datbase'));
+		await assert.rejects(buildBlog({ ...where, studio: null }), /line 16: scene:pipeline: lane 1, step 2: kind is "datbase", and it is one of files, model, database/);
+		bad(PIPELINE.replace('line: kept', 'lin: kept'), true);
+		const built = await buildBlog({ ...where, studio: null });
+		assert.equal(built.warnings.length, 1);
+		assert.match(built.warnings[0]!, /a\.md: line 19: scene:pipeline: lane 1, step 2: there is no field "lin"/);
+	});
+
+	it('refuses a fanout whose map is no cluster in the post, and a term the post never says, at the fence', async () => {
+		const where = scratch();
+		const cluster = 'caption: c\nid: meanings\nregions:\n  - name: A\n    snippets: [one]\n  - name: B\n    snippets: [two]\nsearches:\n  - words: w\n    at: [A]\n';
+		const fanout = (map: string, at = 'A'): string => `caption: f\nmap: ${map}\nfrom:\n  name: ask\ninto:\n  - name: x\n    at: [${at}]\n  - name: y\n    at: [B]\n`;
+		const post = (body: string): string => write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', body);
+		post(`The words.\n\n\`\`\`scene:cluster\n${cluster}\`\`\`\n\n\`\`\`scene:fanout\n${fanout('meaning')}\`\`\`\n`);
+		await assert.rejects(buildBlog({ ...where, studio: null }), /line 22: scene:fanout: map names "meaning", which is the id of no cluster in this post/);
+		post(`The words.\n\n\`\`\`scene:cluster\n${cluster}\`\`\`\n\n\`\`\`scene:fanout\n${fanout('meanings', 'C')}\`\`\`\n`);
+		await assert.rejects(buildBlog({ ...where, studio: null }), /scene:fanout: a branch lands at "C", which is no region of the map "meanings"; its regions are A, B/);
+		post(`The words.\n\n\`\`\`scene:cluster\n${cluster.replace('id: meanings', 'terms:\n  - text: the wordz\n    as: found')}\`\`\`\n`);
+		await assert.rejects(buildBlog({ ...where, studio: null }), /line 9: scene:cluster: term "the wordz" is not in the post's own words/);
+		post(`The words.\n\n\`\`\`scene:cluster\n${cluster.replace('id: meanings', 'terms:\n  - text: The words\n    as: found')}\`\`\`\n\n\`\`\`scene:fanout\n${fanout('meanings').replace('caption: f', 'caption: f\nterms:\n  - text: words\n    as: search')}\`\`\`\n`);
+		await assert.rejects(buildBlog({ ...where, studio: null }), /map names "meanings", which is the id of no cluster/, 'a cluster with no id is no map');
+		post(`The words.\n\n\`\`\`scene:cluster\n${cluster.replace('caption: c', 'caption: c\nterms:\n  - text: The words\n    as: found')}\`\`\`\n\n\`\`\`scene:fanout\n${fanout('meanings')}\`\`\`\n`);
+		const built = await buildBlog({ ...where, studio: null });
+		assert.deepEqual(built.posts[0]!.terms, [{ text: 'The words', as: 'found' }]);
+		const fanoutScene = built.fences.get('a')!.find((fence) => fence.scene?.name === 'fanout')!.scene!;
+		assert.deepEqual(fanoutScene.name === 'fanout' ? fanoutScene.data.regions : null, [{ name: 'A', snippets: ['one'] }, { name: 'B', snippets: ['two'] }], 'the fanout carries its map\'s regions');
+		post(`The words.\n\n\`\`\`scene:cluster\n${cluster}\`\`\`\n\n\`\`\`scene:cluster\n${cluster.replace('snippets: [one]', 'snippets: [three]')}\`\`\`\n`);
+		await assert.rejects(buildBlog({ ...where, studio: null }), /line 9: scene:cluster: id "meanings" names another cluster in this post too/);
+	});
+
+	it('refuses a figure a scene shows that the post never states, unless the scene says it is an example, and a term or a figure only in a link or in code', async () => {
+		const where = scratch();
+		const numbers = 'caption: Clicks\nfigures:\n  - label: clicks\n    from: under 1,000\n    to: 52,100\n';
+		const deploy = 'caption: A deploy\nkind: deploy\nfirst: Every page\nsecond: Changed pages\nstore: Storage\npages: "48"\nchanged: "5"\n';
+		const post = (prose: string, fence: string, yaml: string): Promise<unknown> => {
+			write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', `${prose}\n\n\`\`\`scene:${fence}\n${yaml}\`\`\`\n`);
+			return buildBlog({ ...where, studio: null });
+		};
+		await post('Clicks grew from under 1000 to 52,100.', 'numbers', numbers);
+		await assert.rejects(post('Clicks grew from under 1,000 to 52,000.', 'numbers', numbers), /line 9: scene:numbers: the figure 52,100 is not in the post's own words/);
+		await assert.rejects(post('A deploy uploads only the pages that changed.', 'toggle', deploy), /scene:toggle: the figure 48 is not in the post's own words, and a scene shows only figures the post states; a scene that invents one says so in example/);
+		await post('A deploy uploads only the pages that changed.', 'toggle', deploy.replace('caption: A deploy', 'caption: A deploy\nexample: "Example: 48 pages, 5 changed"'));
+		await assert.rejects(post('Clicks grew [a lot](https://example.com/52100) from under `1,000`.', 'numbers', numbers.replace('52,100', '52100')), /the figure 1,000 is not in the post's own words/);
+		const pipeline = 'caption: c\nterms:\n  - text: query expansion\n    as: search\nlanes:\n  - steps:\n      - kind: files\n        items: [a.pdf]\n';
+		await post('It uses query expansion.', 'pipeline', pipeline);
+		await assert.rejects(post('It uses [this](https://example.com/query expansion).', 'pipeline', pipeline), /term "query expansion" is not in the post's own words, and a term marks the post's own words; a link's target and code do not count/);
+		await assert.rejects(post('It uses `query expansion`.', 'pipeline', pipeline), /term "query expansion" is not in the post's own words/);
+	});
+
+	it('gives two scenes with the same words a stage each', async () => {
+		const where = scratch();
+		const numbers = 'caption: Commits\nfigures:\n  - label: of the commits\n    value: 56%\n';
+		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', `I made 56% of the commits.\n\n\`\`\`scene:numbers\n${numbers}\`\`\`\n\nAgain.\n\n\`\`\`scene:numbers\n${numbers}\`\`\`\n`);
+		const built = await buildBlog({ ...where, studio: null });
+		const html = await render(
+			h(Theme, { value: siteTheme }, h(Markdown, { source: built.twins.get('a')!, code: codeOf(built.fences.get('a')!), modifiers: modifiersOf(built.posts[0]! as unknown as Listed) })),
+			{ context: context() },
+		);
+		const ids = [...html.matchAll(/id="(scene-[^"]+)"/g)].map((found) => found[1]);
+		assert.equal(ids.length, 2);
+		assert.notEqual(ids[0], ids[1]);
+	});
 });
 
 describe('the posts in content/blog', () => {
@@ -328,14 +437,14 @@ describe('the posts in content/blog', () => {
 		const built = await buildBlog({ content: `${repo}content/blog`, data: where.data, public: where.public, studio: null });
 		assert.equal(built.posts.length, 8, 'the eight published posts');
 		const published = built.posts.filter((post) => !post.draft);
-		assert.deepEqual(published.map((post) => post.slug).sort(), ['aweft-for-agents', 'builderloo-rebrand', 'harvest-to-kimai', 'jev-commit-rules', 'kik-v-rim', 'kimai-setup', 'nrth-day-one', 'when-to-open-source']);
+		assert.deepEqual(published.map((post) => post.slug).sort(), ['aweft-for-agents', 'builderloo-rebrand', 'equator-ai-proposal-writer', 'equator-gis-pages', 'harvest-to-kimai', 'jev-commit-rules', 'kik-v-rim', 'kimai-setup', 'nrth-day-one', 'when-to-open-source']);
 		assert.deepEqual(built.warnings, []);
 	});
 });
 
 describe('what the modifiers render', () => {
 	const post: Listed = {
-		slug: 'p', title: 'P', description: '', date: '2026-01-01', words: 1, minutes: 1, headings: [], og: null, code: false,
+		slug: 'p', title: 'P', description: '', date: '2026-01-01', words: 1, minutes: 1, headings: [], og: null, code: false, scenes: 0, terms: [],
 		posters: { D2d7aqB4eHY: '/media/p/youtube-D2d7aqB4eHY.abcdef12.jpg' },
 	};
 	// The render's own markers between nodes are dropped, so a pattern reads the elements alone.
@@ -397,6 +506,28 @@ describe('the pages and feeds the build wrote', () => {
 		const html = readFileSync(`${dist}blog/${newest.slug}/index.html`, 'utf8');
 		assert.match(html, h1Of(newest.title));
 		assert.ok(html.includes('data-aweft-ssg'), 'written by the ssg');
+	});
+
+	it('a post with scenes holds every word of every scene in the page the server wrote, and the feed holds each one\'s still frame', () => {
+		const escape = (text: string): string => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+		const unmark = (html: string): string => html.replace(/<!--[\s\S]*?-->/g, '').replace(/&#x27;|&#39;|&apos;/g, '\'').replace(/&quot;/g, '"');
+		const feed = unmark(readFileSync(`${dist}feed.xml`, 'utf8'));
+		for (const post of posts().filter((listed) => (listed as Listed).scenes > 0)) {
+			const html = unmark(readFileSync(`${dist}blog/${post.slug}/index.html`, 'utf8'));
+			const fences = JSON.parse(readFileSync(`${dist}blog/${post.slug}.tokens.json`, 'utf8')) as { scene?: { data: { words: string[]; frame: string } } }[];
+			const scenes = fences.filter((fence) => fence.scene !== undefined);
+			assert.equal(scenes.length, (post as Listed).scenes);
+			// Every text the scene's data holds, but the fields that say how it is drawn rather than what it says.
+			const STRUCTURE = new Set(['kind', 'as', 'reach', 'at', 'map', 'id', 'frame', 'words', 'terms', 'answers', 'pages', 'changed']);
+			const texts = (value: unknown, key = ''): string[] => (STRUCTURE.has(key) ? []
+				: typeof value === 'string' ? [value]
+					: Array.isArray(value) ? value.flatMap((item) => texts(item))
+						: value !== null && typeof value === 'object' ? Object.entries(value).flatMap(([name, inner]) => texts(inner, name)) : []);
+			for (const scene of scenes) {
+				for (const text of texts(scene.scene!.data)) assert.ok(html.includes(unmark(escape(text))), `${post.slug}: the page shows "${text}"`);
+				assert.ok(feed.includes(scene.scene!.data.frame), `${post.slug}: the feed shows ${scene.scene!.data.frame}`);
+			}
+		}
 	});
 
 	it('the site card and the dark profile image head.tsx names are real PNGs', () => {

@@ -19,6 +19,7 @@ import { ContentContext, posts, postAt } from '../posts.ts';
 import type { Body, Content, Fence, Listed } from '../posts.ts';
 import { seedOf } from '../strip.ts';
 import { Canopy, Plot, Tile } from '../utils/forest.tsx';
+import { SceneBlock } from '../utils/scenes.tsx';
 
 const BLOG_URL = `${SITE_URL}/blog`;
 const BLOG_ID = `${BLOG_URL}#blog`;
@@ -45,12 +46,24 @@ const PostMeta = (props: { post: Listed }): unknown => (
 
 // --- the fences ---------------------------------------------------------------------------
 
-/** The `code` hook for a post: each fence's tokens, looked up by what the block says. */
-export const codeOf = (fences: readonly Fence[]) => {
+/**
+ * The `code` hook for a post: each fence's tokens, looked up by what the block says, or for a
+ * `scene:<name>` fence, the scene, named after its text so the server and the browser agree. A
+ * second scene with the same text is told apart by how many came before it, which is the same on
+ * both, since each renders the body once and in order. In a feed a scene is its still frame and
+ * its words.
+ */
+export const codeOf = (fences: readonly Fence[], feed = false) => {
 	const held = new Map(fences.map((fence) => [`${fence.language ?? ''}\u0000${fence.text}`, fence]));
+	const named = new Map<string, number>();
 	return (text: string, language: string | null): unknown => {
 		const fence = held.get(`${language ?? ''}\u0000${text}`);
 		if (fence === undefined) return <code>{text}</code>;
+		if (fence.scene !== undefined) {
+			const id = `scene-${String(seedOf(text))}`, before = named.get(id) ?? 0;
+			named.set(id, before + 1);
+			return <SceneBlock id={before === 0 ? id : `${id}-${String(before)}`} scene={fence.scene} feed={feed} />;
+		}
 		const last = fence.lines.length - 1;
 		return (
 			<code>
@@ -96,6 +109,7 @@ const linked = (text: string): unknown[] => {
  *         a click
  */
 export const modifiersOf = (post: Listed, feed = false): TextModifier[] => [
+	...termsOf(post),
 	{
 		check: VIDEO,
 		return: (match) => {
@@ -140,6 +154,24 @@ export const modifiersOf = (post: Listed, feed = false): TextModifier[] => [
 		return: () => <strong theme="callout_label" data-callout="">Note</strong>,
 	},
 ];
+
+/**
+ * The words of a post's own text its scenes draw, each marked the way its scene draws it: a search
+ * as a search chip, a found snippet as one, a thing or a change underlined. The first time each is
+ * said only, so a paragraph does not fill with them; the count starts again with every render, so
+ * the server and the browser mark the same ones.
+ */
+const termsOf = (post: Listed): TextModifier[] => post.terms.map((term) => {
+	let marked = false;
+	return {
+		check: new RegExp(term.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
+		return: (match: string) => {
+			if (marked) return match;
+			marked = true;
+			return <span theme={['term', term.as]}>{match}</span>;
+		},
+	};
+});
 
 // --- the head and the structured data ---------------------------------------------------------
 

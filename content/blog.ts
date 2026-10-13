@@ -5,7 +5,8 @@
 // dist/ beside the pages. It writes the index the bundle imports (frontend/data/posts.json, no
 // bodies), a markdown twin and the tokens of its fences per post (frontend/public/blog/), the
 // post's media under a hashed name (frontend/public/media/<slug>/), the card a link to the post
-// unfurls to, and the site's own card and dark profile image.
+// unfurls to, and the site's own card and dark profile image. A fence named `scene:<name>` is a
+// pixel scene: its YAML is checked here (content/scenes.ts) and its data goes in the tokens file.
 //
 // A post is `content/blog/<slug>.md` with YAML front matter (`title`, `description`, `date`,
 // `updated`, `draft`, `future`, `discuss`, `image`) and its media in `content/blog/<slug>/`. The
@@ -23,6 +24,13 @@ import { parse as parseYaml } from 'yaml';
 import { OG, PROFILE, cardHtml, openCards, profileHtml, templatesOf } from './cards.ts';
 import { highlight } from './highlight.ts';
 import type { Fence } from './highlight.ts';
+import { pngOf } from '../favicons.ts';
+import { changedOf, stillFrame } from '../frontend/scenes.ts';
+import type { StillScene } from '../frontend/scenes.ts';
+import { pack } from '../frontend/strip.ts';
+import { PAPER } from '../frontend/theme.ts';
+import { SceneError, readScene, sceneOf, wordsOf } from './scenes.ts';
+import type { Scene, Term } from './scenes.ts';
 
 /** A heading of a post, with the id `Markdown` gives it. */
 export interface Heading {
@@ -54,6 +62,9 @@ export interface Post {
 	readonly og: string | null;
 	/** Whether the post has a fenced block, so the client knows to fetch its tokens. */
 	readonly code: boolean;
+	/** How many scenes the post holds, and the words of its own text its scenes draw as they draw them. */
+	readonly scenes: number;
+	readonly terms: readonly Term[];
 }
 
 /** A post as read from its file, before any rewrite. */
@@ -62,6 +73,8 @@ export interface Source {
 	readonly slug: string;
 	readonly front: Front;
 	readonly body: string;
+	/** The line of the file the body starts on, counted from 1. */
+	readonly line: number;
 }
 
 export interface Front {
@@ -181,6 +194,7 @@ export const readPost = (file: string): Source => {
 			...(image === undefined || image === '' ? {} : { image }),
 		},
 		body: raw.slice(match[0].length),
+		line: (match[0].match(/\n/g) ?? []).length + 1,
 	};
 };
 
@@ -432,8 +446,125 @@ export const headings = async (markdown: string): Promise<Heading[]> => {
 	}));
 };
 
-/** The words of a body, fences included: they are read too. */
-export const words = (markdown: string): number => markdown.split(/\s+/).filter((word) => word !== '').length;
+/** The words of a body, code fences included: they are read too. A scene's YAML is not, so it is left out. */
+export const words = (markdown: string): number => runs(markdown)
+	.filter((run) => run.kind === 'prose' || sceneOf(FENCE.exec(run.text)?.[2] || null) === null)
+	.map((run) => run.text)
+	.join('\n')
+	.split(/\s+/)
+	.filter((word) => word !== '').length;
+
+/** A fenced block as the page gets it: its tokens, or for a scene, its checked data. */
+export type Block = Fence & { readonly scene?: Scene };
+
+// How a fence is looked up: what it is called with, and its text, as blog.tsx's `code` hook does.
+const fenceKey = (language: string | null, text: string): string => `${language ?? ''}\u0000${text}`;
+
+// The words of prose a reader sees: no code span, and no link's or image's target.
+const shownOf = (prose: string): string => prose.replace(/`[^`\n]+`/g, ' ').replace(/\]\([^)\n]*\)/g, ']').replace(/^\s*\[[^\]\n]+\]:.*$/gm, '');
+
+// The figures in some text, as it writes them, and a figure without its commas, to compare.
+const figuresIn = (text: string): string[] => text.match(/\d+(?:[.,]\d+)*/g) ?? [];
+const bare = (figure: string): string => figure.replace(/,/g, '');
+
+// Every text of a scene the page shows, but what is invented by its own say (`example`) and the
+// fields that name or mark rather than show.
+const shownTexts = (data: unknown, key = ''): string[] => {
+	if (typeof data === 'string') return ['example', 'id', 'map', 'kind', 'frame'].includes(key) ? [] : [data];
+	if (Array.isArray(data)) return data.flatMap((item) => shownTexts(item, key));
+	if (typeof data === 'object' && data !== null) return Object.entries(data).flatMap(([name, value]) => (name === 'terms' || name === 'words' ? [] : shownTexts(value, name)));
+	return [];
+};
+
+/**
+ * Every scene fence of a body, checked, by `fenceKey`. `first` is the file's line the body starts
+ * on, so each refusal names the line in the file: the fence's own line for a name that is no
+ * scene, for a fanout whose map is no cluster in the post, for a cluster id two clusters have, and
+ * for a term or a figure the post never says, and the line of the YAML at fault for anything else.
+ */
+export const scenesOf = (body: string, first: number): { scenes: Map<string, Scene>; refused: string[] } => {
+	const read: { key: string; line: number; language: string; scene: Scene }[] = [];
+	const refused: string[] = [];
+	let line = first;
+	for (const run of runs(body)) {
+		const held = run.text.split('\n');
+		const language = run.kind === 'fence' ? FENCE.exec(held[0]!)![2]! : '';
+		const name = sceneOf(language);
+		if (name !== null) {
+			const closed = held.length > 1 && /^(`{3,}|~{3,})$/.test(held[held.length - 1]!.trim());
+			const text = held.slice(1, closed ? -1 : undefined).join('\n');
+			try {
+				read.push({ key: fenceKey(language, text), line, language, scene: readScene(name, text) });
+			} catch (error) {
+				if (!(error instanceof SceneError)) throw error;
+				refused.push(`line ${String(line + error.line)}: ${language}: ${error.message}`);
+			}
+		}
+		line += held.length;
+	}
+	// What a scene asks of the rest of the post: a fanout's map is a cluster in it, and each term and
+	// each figure it shows is in the post's own words, unless the scene says it is an example.
+	const prose = shownOf(runs(body).filter((run) => run.kind === 'prose').map((run) => run.text).join('\n'));
+	const stated = new Set(figuresIn(prose).map(bare));
+	const scenes = new Map<string, Scene>();
+	for (const entry of read) {
+		const say = (what: string): void => { refused.push(`line ${String(entry.line)}: ${entry.language}: ${what}`); };
+		let scene = entry.scene;
+		if (scene.name === 'cluster' && scene.data.id !== undefined) {
+			const id = scene.data.id;
+			if (read.filter((other) => other.scene.name === 'cluster' && other.scene.data.id === id).length > 1) { say(`id "${id}" names another cluster in this post too, and a fanout finds its map by it`); continue; }
+		}
+		if (scene.name === 'fanout' && scene.data.map !== undefined) {
+			const map = scene.data.map;
+			const cluster = read.find((other) => other.scene.name === 'cluster' && other.scene.data.id === map)?.scene;
+			if (cluster?.name !== 'cluster') { say(`map names "${map}", which is the id of no cluster in this post`); continue; }
+			const names = cluster.data.regions.map((region) => region.name);
+			const stray = scene.data.into.flatMap((branch) => branch.at ?? []).find((at) => !names.includes(at));
+			if (stray !== undefined) { say(`a branch lands at "${stray}", which is no region of the map "${map}"; its regions are ${names.join(', ')}`); continue; }
+			scene = { name: 'fanout', data: { ...scene.data, regions: cluster.data.regions } };
+		}
+		const missing = (scene.data.terms ?? []).find((term) => !prose.includes(term.text));
+		if (missing !== undefined) { say(`term "${missing.text}" is not in the post's own words, and a term marks the post's own words; a link's target and code do not count`); continue; }
+		const invented = scene.data.example === undefined ? shownTexts(entry.scene.data).flatMap(figuresIn).find((figure) => !stated.has(bare(figure))) : undefined;
+		if (invented !== undefined) { say(`the figure ${invented} is not in the post's own words, and a scene shows only figures the post states; a scene that invents one says so in example`); continue; }
+		scenes.set(entry.key, scene);
+	}
+	return { scenes, refused };
+};
+
+/** What a scene's still frame draws: the scene in the shape its painter takes. */
+const stillOf = (scene: Scene): StillScene => {
+	switch (scene.name) {
+		case 'pipeline': return { kind: 'pipeline', shape: scene.data };
+		case 'cluster': {
+			const to = scene.data.searches[0]!.at;
+			return { kind: 'map', regions: scene.data.regions, seeks: [{ id: 'q', x: 0, y: 0, from: [0, 0], to, fromTo: to, at: 0, near: 3 }] };
+		}
+		case 'fanout': {
+			if (scene.data.regions === undefined) return { kind: 'branches', branches: scene.data.into.length };
+			return { kind: 'map', regions: scene.data.regions, seeks: scene.data.into.map((branch, k) => ({ id: String(k), x: 0, y: 0, from: [0, 0], to: branch.at ?? [], fromTo: branch.at ?? [], at: 0, near: 2 })) };
+		}
+		case 'toggle': return scene.data.kind === 'deploy'
+			? { kind: 'deploy', pages: Number(scene.data.pages), changed: changedOf(Number(scene.data.pages), Number(scene.data.changed)) }
+			: { kind: 'prompts', tasks: (scene.data.tasks ?? []).map((task) => ({ edit: task.edit !== undefined })) };
+		case 'match': {
+			const left = scene.data.left.items;
+			return { kind: 'match', left: left.length, right: scene.data.right.items.length, links: scene.data.right.items.flatMap((item, j) => item.answers.map((answer) => [left.indexOf(answer), j] as const)) };
+		}
+		case 'numbers': return {
+			kind: 'numbers',
+			figures: scene.data.figures.map((figure) => (figure.share !== undefined ? { share: figure.share } : figure.count !== undefined ? { count: figure.count } : { ends: figure.ends!, under: figure.under! })),
+		};
+	}
+};
+
+/** A scene's still frame for a feed, as an opaque PNG three times its size, on the light page. */
+export const framePng = (scene: Scene): Buffer => {
+	const still = stillFrame(stillOf(scene)), by = 3, page = pack(PAPER);
+	const width = still.width * by, height = still.height * by, pixels = new Uint32Array(width * height);
+	for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) pixels[y * width + x] = still.pixels[Math.floor(y / by) * still.width + Math.floor(x / by)] || page;
+	return pngOf(width, height, pixels);
+};
 
 // At 200 words a minute, the figure most readers of a technical post are quoted.
 export const minutesOf = (count: number): number => Math.max(1, Math.ceil(count / 200));
@@ -480,8 +611,8 @@ export interface Built {
 	readonly posts: readonly Post[];
 	/** The markdown twin of every post, by slug, after the rewrites. */
 	readonly twins: ReadonlyMap<string, string>;
-	/** The fences of every post, by slug. */
-	readonly fences: ReadonlyMap<string, readonly Fence[]>;
+	/** The fences of every post, by slug: tokens for code, checked data for a scene. */
+	readonly fences: ReadonlyMap<string, readonly Block[]>;
 	readonly warnings: readonly string[];
 	/** Every file written under `public` and `data`. */
 	readonly files: readonly string[];
@@ -514,7 +645,7 @@ export const buildBlog = async (options: BuildOptions): Promise<Built> => {
 	const put = (file: string, bytes: () => Buffer | null): void => { wanted.set(file, bytes); };
 	const posts: Post[] = [];
 	const twins = new Map<string, string>();
-	const allFences = new Map<string, readonly Fence[]>();
+	const allFences = new Map<string, readonly Block[]>();
 	const cards: { html: string; out: string }[] = [];
 
 	for (const source of sources) {
@@ -525,6 +656,9 @@ export const buildBlog = async (options: BuildOptions): Promise<Built> => {
 			else throw new PostError(source.file, what);
 		};
 
+		// Before the rewrites, which drop lines and would move every line a refusal names.
+		const checked = scenesOf(source.body, source.line);
+		for (const refusal of checked.refused) say(refusal);
 		let body = markNotes(inlineReferences(source.body));
 		for (const line of brokenImageLines(body)) say(`the image line ${line} would show as text, not a figure: one image alone on its line, no space in its source, and a size as =WxH with two numbers`);
 		// A link to a draft is a 404 on the live site until the draft is published.
@@ -608,6 +742,8 @@ export const buildBlog = async (options: BuildOptions): Promise<Built> => {
 			posters,
 			og,
 			code: own.length > 0,
+			scenes: checked.scenes.size,
+			terms: [...checked.scenes.values()].flatMap((scene) => scene.data.terms ?? []),
 		};
 		posts.push(post);
 		if (isDraft) continue;
@@ -615,7 +751,17 @@ export const buildBlog = async (options: BuildOptions): Promise<Built> => {
 		twins.set(source.slug, body);
 		put(join(options.public, 'blog', `${source.slug}.md`), () => Buffer.from(body));
 		if (own.length > 0) {
-			const tokens = await highlight(own);
+			const scene = (fence: { language: string | null }): boolean => sceneOf(fence.language) !== null;
+			const tokens: Block[] = [
+				...await highlight(own.filter((fence) => !scene(fence))),
+				// Each scene with its still frame and its words, for the feeds.
+				...own.filter(scene).map((fence, n) => {
+					const found = checked.scenes.get(fenceKey(fence.language, fence.text))!, bytes = framePng(found);
+					const name = `scene-${String(n + 1)}.${hashOf(bytes)}.png`;
+					put(join(options.public, 'media', source.slug, name), () => bytes);
+					return { ...fence, lines: [], scene: { ...found, data: { ...found.data, frame: `/media/${source.slug}/${name}`, words: wordsOf(found) } } as Scene };
+				}),
+			];
 			allFences.set(source.slug, tokens);
 			put(join(options.public, 'blog', `${source.slug}.tokens.json`), () => Buffer.from(JSON.stringify(tokens)));
 		}

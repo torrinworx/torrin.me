@@ -29,7 +29,7 @@ const unmarked = (html: string): string => html.replace(/<!--[\s\S]*?-->/g, '');
 /** One post's markdown as HTML, the way the page renders it. */
 export const renderBody = async (post: Listed, markdown: string, fences: Body['fences']): Promise<string> => {
 	const html = await render(
-		h(Theme, { value: siteTheme }, h(Markdown, { source: markdown, code: codeOf(fences), modifiers: modifiersOf(post, true) })),
+		h(Theme, { value: siteTheme }, h(Markdown, { source: markdown, code: codeOf(fences, true), modifiers: modifiersOf(post, true) })),
 		{ context: context() },
 	);
 	return absolute(unmarked(html));

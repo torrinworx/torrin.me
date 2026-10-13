@@ -322,7 +322,8 @@ export const lostScene = (night: boolean): StripConfig => ({
 const FADE = 0.4;
 
 const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
-const bayer = (x: number, y: number): number => BAYER[(y & 3) * 4 + (x & 3)]!;
+/** The ordered dither every fade here uses: a threshold from 0 to 1 per pixel, repeating every four. */
+export const bayer = (x: number, y: number): number => BAYER[(y & 3) * 4 + (x & 3)]!;
 const hash = (x: number, y: number): number => { const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return s - Math.floor(s); };
 const clamp = (v: number, a: number, b: number): number => (v < a ? a : v > b ? b : v);
 
@@ -1077,6 +1078,8 @@ export interface Watched {
 export interface Running {
 	/** Paint it afresh, as for a change of mode, without the fade. */
 	again(): void;
+	/** Draw one frame now if the scene is still, so a change such as a switch shows. A moving scene shows it on its next frame. */
+	draw(): void;
 	/** Take every listener and observer back off. */
 	stop(): void;
 }
@@ -1106,7 +1109,7 @@ const ghost = (canvas: HTMLCanvasElement): void => {
 export const runScene = (host: HTMLElement, scene: Scene, night: Watched): Running => {
 	const canvas = host.firstElementChild;
 	const context = canvas instanceof HTMLCanvasElement ? canvas.getContext('2d') : null;
-	if (!(canvas instanceof HTMLCanvasElement) || context === null) return { again: () => {}, stop: () => {} };
+	if (!(canvas instanceof HTMLCanvasElement) || context === null) return { again: () => {}, draw: () => {}, stop: () => {} };
 	const scale = scene.scale ?? heroScale;
 	let painter: Painter | null = null;
 	let image: ImageData | null = null;
@@ -1188,6 +1191,7 @@ export const runScene = (host: HTMLElement, scene: Scene, night: Watched): Runni
 
 	return {
 		again: () => { refresh(false); },
+		draw: () => { if (stale) layout(true); else if (!on) draw(0); },
 		stop: () => {
 			on = false;
 			cancelAnimationFrame(raf);
