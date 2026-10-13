@@ -59,8 +59,8 @@ const useStage = (cleanup: Cleanup, id: string, spec: StageSpec, night: ReturnTy
 	let live: Live | null = null, running: Running | null = null;
 	const play = (): void => {
 		if (live === null || !motion.get()) return;
-		// The scene's clock, not the wall clock: it only moves while the scene runs, so a story stamped
-		// on the wall clock waited as long as the reader took to scroll down to it.
+		// The scene's time, not performance.now(). It only advances while the scene runs, so a start
+		// taken from performance.now() came that much later than the scene's time reached it.
 		live.started = running?.time() ?? 0;
 		spec.begin?.(live);
 	};

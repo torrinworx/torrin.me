@@ -1082,7 +1082,7 @@ export interface Running {
 	draw(): void;
 	/** Take every listener and observer back off. */
 	stop(): void;
-	/** The scene's own time, the clock its painter's `frame` is given. A story stamps its start on it. */
+	/** The scene's own time in seconds, the value its painter's `frame` is given. A scene records the start of its story in it. */
 	time(): number;
 }
 
