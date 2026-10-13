@@ -823,7 +823,7 @@ export const siteTheme: Definitions = {
 	// column's edge. Stacked, the tasks stand in the middle.
 	scene_stage_tasks: { [narrow]: { alignSelf: 'center', maxWidth: '100%' } },
 	scene_tasks: { listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '16px' },
-	scene_task: { display: 'grid', gridTemplateColumns: 'minmax(0, 11rem) auto minmax(0, 1fr)', alignItems: 'center', columnGap: '18px', [narrow]: { gridTemplateColumns: 'auto minmax(0, 1fr)', rowGap: '6px', '_children_> :first-child': { gridColumn: '1 / -1', justifySelf: 'start' } } },
+	scene_task: { display: 'grid', gridTemplateColumns: 'minmax(0, 11rem) auto minmax(0, 1fr)', alignItems: 'center', columnGap: '18px', [narrow]: { gridTemplateColumns: 'auto minmax(0, 1fr)', rowGap: '6px', '_children_:first-child': { gridColumn: '1 / -1', justifySelf: 'start' } } },
 	// The default and an admin's edit share one cell, the edit on top and as tall as the taller of the two.
 	scene_prompt: { display: 'grid', alignItems: 'stretch', minWidth: 0 },
 
