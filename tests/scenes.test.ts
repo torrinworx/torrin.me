@@ -309,11 +309,11 @@ describe('the scenes\' painters', () => {
 			}).map(([key]) => key);
 		};
 		const shown = (painter: Explainer): number => [...painter.anchors].filter(([key, anchor]) => key.startsWith('snippet:') && anchor.alpha === 1).length;
-		// Words as wide as a phone's map.
+		// A map 120 pixels wide, as on a phone, with words 80 pixels wide.
 		const four = ['A', 'B', 'C', 'D'].map((name) => ({ name, snippets: [`${name}1`, `${name}2`] }));
 		const phone = new Map(four.flatMap((region, i) => region.snippets.map((_, j) => [`snippet:${String(i)}.${String(j)}`, { width: 80, height: 8 }] as const)));
-		// The post's map on a desktop, its words at the sizes the page measured, on a stage as short
-		// as it once was, where the third of the second region's words had no room by its own point.
+		// The post's map at 1280px, with its words at the sizes the page measured, and 330px tall as it
+		// was before. At that height the word for B3 had no free place by its own point.
 		const post = ['A', 'B', 'C', 'D'].map((name) => ({ name, snippets: [`${name}1`, `${name}2`, `${name}3`] }));
 		const desktop = new Map<string, Size>([
 			...[34, 18, 21, 24].map((width, i) => [`region:${String(i)}`, { width, height: 6 }] as const),

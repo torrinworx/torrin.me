@@ -213,8 +213,8 @@ const mapWords = (): { width: number; height: number; words: { name: string; box
 });
 
 /**
- * The words on maps that are out of place: a snippet nearer the middle of another region than its
- * own point, which reads as part of the wrong region, and two words that cover each other. The
+ * The words on maps that break a rule: a snippet nearer the middle of another region than its own
+ * point, which makes it look like part of that region, and two words that cover each other. The
  * points and middles are where the painter puts them for a stage this size.
  */
 const misplaced = (maps: ReturnType<typeof mapWords>, regions: readonly (readonly { name: string; snippets: readonly string[] }[])[]): string[] => {
@@ -566,8 +566,8 @@ try {
 						const searches = fences.find((fence) => fence.scene?.name === 'cluster')!.scene!.data.searches!;
 						assert.equal(await cluster.$eval('[data-thing="seek:q"]', (pin) => pin.textContent), searches.at(-1)!.words, `${where}: the map rests on its last search`);
 					}
-					// Each word a map shows sits nearer its own point than the middle of any other region,
-					// so no snippet reads as part of the wrong one.
+					// Each word a map shows is nearer its own point than the middle of any other region,
+					// so no snippet looks like part of the wrong one.
 					const regionsOf = fences.flatMap((fence) => (fence.scene?.data.regions === undefined ? [] : [fence.scene.data.regions]));
 					const maps = await view.evaluate(mapWords);
 					assert.equal(maps.length, regionsOf.length, `${where}: a map on the page for each map in the post`);
@@ -682,8 +682,8 @@ try {
 		assert.deepEqual(await stopped(), held, `${post.slug}: Motion switched off mid-story holds every scene where it stopped`);
 		await playing.close();
 
-		// With motion on, every map's story ends with each word it shows by its own point and none
-		// covering another, at a desktop, a tablet and a phone, light and dark.
+		// With motion on, once every map has finished moving, each word it shows is by its own point
+		// and no two words cover each other. At 1280, 600 and 320, light and dark.
 		const fences = await (await fetch(`${site.url}/blog/${post.slug}.tokens.json`)).json() as Fence[];
 		const regionsOf = fences.flatMap((fence) => (fence.scene?.data.regions === undefined ? [] : [fence.scene.data.regions]));
 		const last = fences.find((fence) => fence.scene?.name === 'cluster')?.scene?.data.searches?.at(-1)?.words;
