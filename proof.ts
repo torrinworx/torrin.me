@@ -197,6 +197,44 @@ const sceneWords = (): { hidden: string[]; overlaps: string[]; unseen: string[];
 const sceneState = (scene: Element): string =>
 	`${scene.querySelector('canvas')!.toDataURL()} ${Array.from(scene.querySelectorAll<HTMLElement>('[data-thing]')).map((thing) => `${getComputedStyle(thing).opacity}${thing.style.transform}${thing.textContent ?? ''}`).join()}`;
 
+/** A post's scene fences, as the build wrote them beside the post. */
+type Fence = { scene?: { name: string; data: { searches?: { words: string }[]; regions?: { name: string; snippets: string[] }[] } } };
+
+/** Each map on the page: its stage's size, and the box of each word it shows, from the stage's corner. */
+const mapWords = (): { width: number; height: number; words: { name: string; box: readonly [number, number, number, number] }[] }[] => Array.from(document.querySelectorAll<HTMLElement>('[data-scene]')).filter((scene) => scene.querySelector('[data-thing^="snippet:"]') !== null).map((scene) => {
+	const stage = scene.querySelector<HTMLElement>('[id]')!.getBoundingClientRect();
+	return {
+		width: stage.width, height: stage.height,
+		words: Array.from(scene.querySelectorAll<HTMLElement>('[data-thing]')).filter((word) => Number(getComputedStyle(word).opacity) >= 1).map((word) => {
+			const box = word.getBoundingClientRect();
+			return { name: word.dataset['thing']!, box: [box.left - stage.left, box.top - stage.top, box.right - stage.left, box.bottom - stage.top] as const };
+		}),
+	};
+});
+
+/**
+ * The words on maps that are out of place: a snippet nearer the middle of another region than its
+ * own point, which reads as part of the wrong region, and two words that cover each other. The
+ * points and middles are where the painter puts them for a stage this size.
+ */
+const misplaced = (maps: ReturnType<typeof mapWords>, regions: readonly (readonly { name: string; snippets: readonly string[] }[])[]): string[] => {
+	const away = (box: readonly number[], [x, y]: readonly [number, number]): number => Math.hypot(Math.max(box[0]! - x, 0, x - box[2]!), Math.max(box[1]! - y, 0, y - box[3]!));
+	return maps.flatMap((map, k) => {
+		const size = heroScale(map.width), W = Math.ceil(map.width / size), area = mapArea(W, Math.ceil(map.height / size));
+		const at = (x: number, y: number): readonly [number, number] => [(area.x + x * area.width) * size, (area.y + y * area.height) * size];
+		const laid = mapOf(regions[k]!, narrowMap(W));
+		const strays = map.words.filter((word) => {
+			if (!word.name.startsWith('snippet:')) return false;
+			const [i, j] = word.name.slice('snippet:'.length).split('.').map(Number) as [number, number];
+			const own = away(word.box, at(laid[i]!.snippets[j]!.x, laid[i]!.snippets[j]!.y));
+			return laid.some((region, r) => r !== i && away(word.box, at(region.x, region.y)) <= own);
+		}).map((word) => `map ${String(k + 1)}: ${word.name} is by another region`);
+		const covered = map.words.flatMap((a) => map.words.filter((b) => a.name < b.name
+			&& Math.min(a.box[2], b.box[2]) - Math.max(a.box[0], b.box[0]) > 3 && Math.min(a.box[3], b.box[3]) - Math.max(a.box[1], b.box[1]) > 3).map((b) => `map ${String(k + 1)}: ${a.name} and ${b.name} overlap`));
+		return [...strays, ...covered];
+	});
+};
+
 /** The marks with any pixel under them, in a screenshot of the bare page, below the contrast they need. */
 const judge = async ([shot, marks]: readonly [string, Mark[]]): Promise<string[]> => {
 	const image = new Image();
@@ -522,40 +560,18 @@ try {
 					assert.deepEqual(words.unseen, [], `${where}: and a word that does not show is hidden from a screen reader too`);
 					assert.deepEqual(words.unfound, [], `${where}: a map's search finds snippets, so every found word is checked`);
 					// A map rests where its searches end: on the last.
-					const fences = await view.evaluate(async (at) => (await fetch(at)).json() as Promise<{ scene?: { name: string; data: { searches?: { words: string }[]; regions?: { name: string; snippets: string[] }[] } } }[]>, `/blog/${path.split('/').pop()!}.tokens.json`);
+					const fences = await view.evaluate(async (at) => (await fetch(at)).json() as Promise<Fence[]>, `/blog/${path.split('/').pop()!}.tokens.json`);
 					const cluster = await view.$('[data-scene="cluster"]');
 					if (cluster !== null) {
 						const searches = fences.find((fence) => fence.scene?.name === 'cluster')!.scene!.data.searches!;
 						assert.equal(await cluster.$eval('[data-thing="seek:q"]', (pin) => pin.textContent), searches.at(-1)!.words, `${where}: the map rests on its last search`);
 					}
-					// On a phone, each word a map shows sits nearer its own point than the middle of any
-					// other region, so no snippet reads as part of the wrong one. The points and middles
-					// are where the painter puts them for a stage this size.
+					// Each word a map shows sits nearer its own point than the middle of any other region,
+					// so no snippet reads as part of the wrong one.
 					const regionsOf = fences.flatMap((fence) => (fence.scene?.data.regions === undefined ? [] : [fence.scene.data.regions]));
-					const maps = await view.evaluate(() => Array.from(document.querySelectorAll<HTMLElement>('[data-scene]')).filter((scene) => scene.querySelector('[data-thing^="snippet:"]') !== null).map((scene) => {
-						const stage = scene.querySelector<HTMLElement>('[id]')!.getBoundingClientRect();
-						return {
-							width: stage.width, height: stage.height,
-							words: Array.from(scene.querySelectorAll<HTMLElement>('[data-thing^="snippet:"]')).filter((word) => Number(getComputedStyle(word).opacity) >= 1).map((word) => {
-								const box = word.getBoundingClientRect();
-								return { name: word.dataset['thing']!, box: [box.left - stage.left, box.top - stage.top, box.right - stage.left, box.bottom - stage.top] as const };
-							}),
-						};
-					}));
+					const maps = await view.evaluate(mapWords);
 					assert.equal(maps.length, regionsOf.length, `${where}: a map on the page for each map in the post`);
-					const away = (box: readonly number[], [x, y]: readonly [number, number]): number => Math.hypot(Math.max(box[0]! - x, 0, x - box[2]!), Math.max(box[1]! - y, 0, y - box[3]!));
-					maps.forEach((map, k) => {
-						if (map.width >= 440) return;
-						const size = heroScale(map.width), W = Math.ceil(map.width / size), area = mapArea(W, Math.ceil(map.height / size));
-						const at = (x: number, y: number): readonly [number, number] => [(area.x + x * area.width) * size, (area.y + y * area.height) * size];
-						const laid = mapOf(regionsOf[k]!, narrowMap(W));
-						const strays = map.words.filter((word) => {
-							const [i, j] = word.name.slice('snippet:'.length).split('.').map(Number) as [number, number];
-							const own = away(word.box, at(laid[i]!.snippets[j]!.x, laid[i]!.snippets[j]!.y));
-							return laid.some((region, r) => r !== i && away(word.box, at(region.x, region.y)) <= own);
-						}).map((word) => word.name);
-						assert.deepEqual(strays, [], `${where}: every word on map ${String(k + 1)} sits by its own point`);
-					});
+					assert.deepEqual(misplaced(maps, regionsOf), [], `${where}: every word on a map sits by its own point`);
 				}
 				const marks = await view.evaluate(marksOf);
 				await view.addStyleTag({ content: BARE });
@@ -665,6 +681,36 @@ try {
 		await playing.waitForTimeout(5000);
 		assert.deepEqual(await stopped(), held, `${post.slug}: Motion switched off mid-story holds every scene where it stopped`);
 		await playing.close();
+
+		// With motion on, every map's story ends with each word it shows by its own point and none
+		// covering another, at a desktop, a tablet and a phone, light and dark.
+		const fences = await (await fetch(`${site.url}/blog/${post.slug}.tokens.json`)).json() as Fence[];
+		const regionsOf = fences.flatMap((fence) => (fence.scene?.data.regions === undefined ? [] : [fence.scene.data.regions]));
+		const last = fences.find((fence) => fence.scene?.name === 'cluster')?.scene?.data.searches?.at(-1)?.words;
+		if (regionsOf.length > 0) for (const dark of [false, true]) for (const width of [1280, 600, 320]) {
+			const where = `${post.slug}, ${dark ? 'dark' : 'light'}, ${String(width)}px, at the end of the story`;
+			const context = await browser.newContext({ viewport: { width, height: 900 } });
+			await context.addInitScript((night) => { if (night) localStorage.setItem('modeChoice', 'dark'); }, dark);
+			const ended = await context.newPage();
+			await ended.goto(`${site.url}${path}`, { waitUntil: 'networkidle' });
+			// The whole page in the window, so every scene plays at once.
+			await ended.setViewportSize({ width, height: await ended.evaluate(() => document.documentElement.scrollHeight) });
+			// A cluster's tour ends on its last search. After that, a map is at its end once nothing on
+			// it changes for three seconds, longer than a fanout waits before it splits.
+			if (last !== undefined) await ended.waitForFunction((words) => document.querySelector('[data-scene="cluster"] [data-thing="seek:q"]')?.textContent === words, last, { timeout: 30_000 });
+			const shows = async (): Promise<string> => (await Promise.all((await ended.$$('[data-scene="cluster"], [data-scene="fanout"]')).map((scene) => scene.evaluate(sceneState)))).join();
+			let before = '', now = await shows();
+			for (let tries = 0; now !== before && tries < 10; tries++) {
+				await ended.waitForTimeout(3000);
+				[before, now] = [now, await shows()];
+			}
+			assert.equal(now, before, `${where}: the maps come to rest`);
+			const maps = await ended.evaluate(mapWords);
+			assert.equal(maps.length, regionsOf.length, `${where}: a map on the page for each map in the post`);
+			assert.ok(maps.every((map) => map.words.some((word) => word.name.startsWith('snippet:'))), `${where}: each map shows what its searches found`);
+			assert.deepEqual(misplaced(maps, regionsOf), [], `${where}: every word on a map sits by its own point, and none covers another`);
+			await context.close();
+		}
 
 		// On a phone, a finger that scrolls the page from a map, away from its pin, scrolls the page
 		// and leaves the search where it was.

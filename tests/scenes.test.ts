@@ -9,7 +9,7 @@ import { SceneError, readFigure, readScene, sceneOf, wordsOf } from '../content/
 import type { Fanout, Numbers, Pipeline } from '../content/scenes.ts';
 import {
 	changedOf, createBranches, createDeploy, createMap, createMatch, createNumbers, createPipeline, createPrompts, deployLayout, inksOf, landing,
-	mapArea, mapOf, pipelineLength, stillFrame, uploadsOf,
+	mapArea, mapOf, narrowMap, pipelineLength, stillFrame, uploadsOf,
 } from '../frontend/scenes.ts';
 import type { Box, Explainer, Seek, Size } from '../frontend/scenes.ts';
 import { pack } from '../frontend/strip.ts';
@@ -297,22 +297,43 @@ describe('the scenes\' painters', () => {
 		assert.ok(shown(phone).length > 0);
 	});
 
-	it('never puts a word on a narrow still map nearer another region than its own point', () => {
-		const regions = ['A', 'B', 'C', 'D'].map((name) => ({ name, snippets: [`${name}1`, `${name}2`] }));
-		const sizes = (): ReadonlyMap<string, Size> => new Map(regions.flatMap((region, i) => region.snippets.map((_, j) => [`snippet:${String(i)}.${String(j)}`, { width: 80, height: 8 }] as const)));
-		const map = { width: 120, height: 210, regions, seeks: () => [seekAt(['A'])], sizes };
-		const area = mapArea(120, 210), laid = mapOf(regions, true);
-		const at = (x: number, y: number): readonly [number, number] => [area.x + x * area.width, area.y + y * area.height];
+	it('never puts a word on a map nearer another region than its own point, narrow or wide, moving or still', () => {
 		const away = (box: Box, [x, y]: readonly [number, number]): number => Math.hypot(Math.max(box.x - x, 0, x - box.x - box.width), Math.max(box.y - y, 0, y - box.y - box.height));
-		const strays = (painter: Explainer): string[] => [...painter.anchors].filter(([key, anchor]) => key.startsWith('snippet:') && anchor.alpha === 1).filter(([key, anchor]) => {
-			const [i, j] = key.slice('snippet:'.length).split('.').map(Number) as [number, number], box = { x: anchor.x, y: anchor.y, width: 80, height: 8 };
-			const own = away(box, at(laid[i]!.snippets[j]!.x, laid[i]!.snippets[j]!.y));
-			return laid.some((region, r) => r !== i && away(box, at(region.x, region.y)) <= own);
-		}).map(([key]) => key);
-		assert.ok(strays(play(createMap({ ...stage(false, true), ...map }), 3)).length > 0, 'moving, a word here takes a place by another region');
-		const still = createMap({ ...stage(false, false), ...map });
-		still.frame(0, 0);
-		assert.deepEqual(strays(still), [], 'still, none does');
+		const strays = (painter: Explainer, regions: typeof REGIONS, sizes: ReadonlyMap<string, Size>): string[] => {
+			const area = mapArea(painter.width, painter.height), laid = mapOf(regions, narrowMap(painter.width));
+			const at = (x: number, y: number): readonly [number, number] => [area.x + x * area.width, area.y + y * area.height];
+			return [...painter.anchors].filter(([key, anchor]) => key.startsWith('snippet:') && anchor.alpha === 1).filter(([key, anchor]) => {
+				const [i, j] = key.slice('snippet:'.length).split('.').map(Number) as [number, number], box = { x: anchor.x, y: anchor.y, ...sizes.get(key)! };
+				const own = away(box, at(laid[i]!.snippets[j]!.x, laid[i]!.snippets[j]!.y));
+				return laid.some((region, r) => r !== i && away(box, at(region.x, region.y)) <= own);
+			}).map(([key]) => key);
+		};
+		const shown = (painter: Explainer): number => [...painter.anchors].filter(([key, anchor]) => key.startsWith('snippet:') && anchor.alpha === 1).length;
+		// Words as wide as a phone's map.
+		const four = ['A', 'B', 'C', 'D'].map((name) => ({ name, snippets: [`${name}1`, `${name}2`] }));
+		const phone = new Map(four.flatMap((region, i) => region.snippets.map((_, j) => [`snippet:${String(i)}.${String(j)}`, { width: 80, height: 8 }] as const)));
+		// The post's map on a desktop, its words at the sizes the page measured, on a stage as short
+		// as it once was, where the third of the second region's words had no room by its own point.
+		const post = ['A', 'B', 'C', 'D'].map((name) => ({ name, snippets: [`${name}1`, `${name}2`, `${name}3`] }));
+		const desktop = new Map<string, Size>([
+			...[34, 18, 21, 24].map((width, i) => [`region:${String(i)}`, { width, height: 6 }] as const),
+			...[[33, 57, 72], [56, 50, 68], [67, 54, 54], [57, 63, 58]].flatMap((row, i) => row.map((width, j) => [`snippet:${String(i)}.${String(j)}`, { width, height: 10 }] as const)),
+			['seek:q', { width: 71, height: 9 }], ['seek:b0', { width: 57, height: 10 }], ['seek:b1', { width: 63, height: 10 }], ['seek:b2', { width: 60, height: 10 }],
+		]);
+		const cases = [
+			{ width: 120, height: 210, regions: four, sizes: phone, seeks: [seekAt(['A'])] },
+			{ width: 242, height: 110, regions: post, sizes: desktop, seeks: [{ ...seekAt(['C', 'D']), near: 3 }] },
+			{ width: 242, height: 110, regions: post, sizes: desktop, seeks: ['A', 'B', 'C'].map((name, k): Seek => ({ id: `b${String(k)}`, x: 0, y: 0, from: [0.5, -0.12], to: [name], at: 0, near: 2 })) },
+		];
+		for (const { seeks, sizes, ...map } of cases) {
+			const where = `${String(map.width)} by ${String(map.height)}, ${String(seeks.length)} searches`;
+			const moving = play(createMap({ ...stage(false, true), ...map, seeks: () => seeks, sizes: () => sizes }), 3);
+			const still = createMap({ ...stage(false, false), ...map, seeks: () => seeks, sizes: () => sizes });
+			still.frame(0, 0);
+			assert.deepEqual(strays(moving, map.regions, sizes), [], `${where}, moving`);
+			assert.deepEqual(strays(still, map.regions, sizes), [], `${where}, still`);
+			assert.ok(shown(moving) > 0 && shown(still) > 0, `${where}: and words show`);
+		}
 	});
 
 	it('places the words on a map where they cover no other words', () => {

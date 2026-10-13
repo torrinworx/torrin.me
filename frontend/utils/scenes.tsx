@@ -267,7 +267,7 @@ const MapWords = (props: { regions: Cluster['regions'] }): unknown => props.regi
 
 // A map's stage: as tall as its painter lays the map out for, at each width, and on a phone
 // taller while still, so every word its story ends on has room beside its point.
-const MAP_HEIGHT = { wide: 330, mid: 510, narrow: 420, still: 640 } as const;
+const MAP_HEIGHT = { wide: 360, mid: 510, narrow: 420, still: 640 } as const;
 
 /**
  * Snippets on a map where similar meanings are close together, and a search the reader drags,

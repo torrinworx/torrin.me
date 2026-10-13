@@ -453,16 +453,16 @@ export const createMap = (options: Stage & {
 			anchors.set(`seek:${id}`, { x: box.x, y: box.y, alpha: 1 });
 		}
 		// The snippets shown, each placed beside its point in turn. With no free place near its
-		// point, a snippet's words are not shown, but its point is still lit. On a narrow map held
-		// still, a word must also be nearer its own point than any other region's middle, so it never
-		// looks like part of the wrong region.
+		// point, a snippet's words are not shown, but its point is still lit. A word must also be
+		// nearer its own point than any other region's middle, so it never looks like part of the
+		// wrong region.
 		const away = (box: Box, [px, py]: readonly [number, number]): number => Math.hypot(Math.max(box.x - px, 0, px - box.x - box.width), Math.max(box.y - py, 0, py - box.y - box.height));
 		const place = (shown: (key: string) => boolean): Map<string, Box | null> => {
 			const room = [...taken], boxes = new Map<string, Box | null>();
 			for (const snippet of snippets) {
 				if (!shown(snippet.key)) continue;
 				const [x, y] = snippet.at, { width: w, height: h } = sizeOf(`snippet:${snippet.key}`), own = Number(snippet.key.split('.')[0]);
-				const fits = (box: Box): boolean => options.moving || !narrowMap(W) || regions.every((region, r) => r === own || away(box, snippet.at) < away(box, at(region.x, region.y)));
+				const fits = (box: Box): boolean => regions.every((region, r) => r === own || away(box, snippet.at) < away(box, at(region.x, region.y)));
 				const box = placeAmong([
 					{ x: x + 4, y: y - h / 2, width: w, height: h },
 					{ x: x - 4 - w, y: y - h / 2, width: w, height: h },
