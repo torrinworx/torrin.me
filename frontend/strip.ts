@@ -255,7 +255,7 @@ const paged = (night: boolean): Palette => {
 };
 
 /** The heights of the trees under the landing's five section headings, in strip pixels. Each is taller than the last. */
-export const RULE_HEIGHTS = [14, 22, 32, 44, 58] as const;
+export const RULE_HEIGHTS = [14, 22, 32, 44, 58, 74] as const;
 
 /**
  * The rule under the landing's `index`th section heading: a bank one pixel tall in the accent colour,

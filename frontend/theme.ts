@@ -653,6 +653,10 @@ export const siteTheme: Definitions = {
 	// second ink.
 	post_meta: { display: 'block' },
 	post_lede: { color: '$ink2' },
+	// A recommendation on the landing: the quote behind the accent bar a post's quote uses, then who said it.
+	testimonial: { margin: 0, display: 'flex', flexDirection: 'column', gap: '6px', borderLeft: '3px solid $accent', paddingLeft: '16px' },
+	testimonial_quote: { margin: 0 },
+	testimonial_by: { color: '$ink2' },
 	// Who wrote the post, between the body and the links out, with the index's 1px rule above it.
 	post_author: { display: 'flex', alignItems: 'center', gap: '16px', width: '100%', maxWidth: '$measure', marginTop: '30px', paddingTop: '20px', borderTop: '1px solid $border' },
 	post_author_photo: { width: '64px', height: '64px', flex: '0 0 auto', borderRadius: '50%', objectFit: 'cover', objectPosition: 'top' },

@@ -93,6 +93,32 @@
     }
   ],
 
+  "recommendations": {
+    "url": "https://www.linkedin.com/in/torrin-leonard-8343a1154/details/recommendations/",
+    "items": [
+      {
+        "name": "Rebecca Swabey",
+        "context": "CEO and co-founder, Equator Studios",
+        "quote": "He wanted to understand how the different systems and parts of the business worked together, and how his contributions could support its success."
+      },
+      {
+        "name": "Morgan Lim",
+        "context": "Senior colleague, Equator Studios",
+        "quote": "Not only is Torrin a quick study, he is also a pleasure to work with, which made him a valuable bridge between the coding, business, and customer service parts of our company."
+      },
+      {
+        "name": "Max Weissman",
+        "context": "Teammate, Equator Studios",
+        "quote": "In our time together at Equator, I witnessed him develop skills to design AI systems purely through his capacity for self learning."
+      },
+      {
+        "name": "Vijay Raj",
+        "context": "Engineering leader, League",
+        "quote": "He was detail-oriented, proactive in identifying issues, and quick to suggest practical solutions."
+      }
+    ]
+  },
+
   "projects": [
     {
       "name": "Builderloo.ca",

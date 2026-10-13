@@ -330,13 +330,36 @@ export const Landing = (): unknown => {
 			</div>
 		</Section>,
 
-		<Section title="Projects" index={1}>
+		<Section title="Recommendations" index={1}>
+			<div theme="column" style={{ width: '100%', gap: 20 }}>
+				{resume.recommendations.items.map((said) => (
+					<figure theme="testimonial">
+						<blockquote theme="testimonial_quote"><Typography type="body" label={`"${said.quote}"`} /></blockquote>
+						<figcaption>
+							<Typography type="body_bold" label={said.name} />
+							<Typography type="body" theme="testimonial_by" label={`, ${said.context}`} />
+						</figcaption>
+					</figure>
+				))}
+				<div theme="row">
+					<Button
+						inline
+						iconPosition="right"
+						icon={<Away />}
+						href={resume.recommendations.url}
+						label={<Typography type="body" label="All recommendations on LinkedIn" />}
+					/>
+				</div>
+			</div>
+		</Section>,
+
+		<Section title="Projects" index={2}>
 			<div theme="column" style={{ width: '100%', gap: 20 }}>
 				{projects.map((item) => <Entry item={item} />)}
 			</div>
 		</Section>,
 
-		<Section title="Skills" index={2}>
+		<Section title="Skills" index={3}>
 			<ul style={{ paddingLeft: 25 }}>
 				{resume.skills.map((skill) => (
 					<li>
@@ -347,7 +370,7 @@ export const Landing = (): unknown => {
 			</ul>
 		</Section>,
 
-		<Section title="Education" index={3}>
+		<Section title="Education" index={4}>
 			<Typography theme={['row', 'wide', 'start']} type="p1" label={resume.education.summary} />
 			<ul style={{ paddingLeft: 25 }}>
 				{resume.education.credentials.map((credential) => (
@@ -365,6 +388,6 @@ export const Landing = (): unknown => {
 			</ul>
 		</Section>,
 
-		<Contact focused={focused} rule={4} />,
+		<Contact focused={focused} rule={5} />,
 	];
 };
