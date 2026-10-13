@@ -239,7 +239,7 @@ const SCENES: Readonly<Record<Scene['name'], Kind>> = {
 				each: 'lane', min: 1, max: 3, fields: {
 					label: 'text?',
 					steps: {
-						each: 'step', min: 1, max: 6, fields: {
+						each: 'step', min: 1, max: 5, fields: {
 							kind: 'text', name: 'text?', line: 'text?', badge: 'text?', text: 'text?', shows: 'text?', reach: 'text?',
 							items: { each: 'item', min: 1, max: 4, optional: true },
 						},

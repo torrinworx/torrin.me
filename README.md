@@ -209,7 +209,7 @@ regions or left items, or two clusters with the same `id`. Each scene's own rule
 For a draft these are warnings. A scene's YAML is left out of the post's reading time.
 
 **`pipeline`**: things carried through steps, lane by lane. `lanes` (1 to 3), each with an
-optional `label` and `steps` (1 to 6). Each step has a `kind`, which says how it is drawn and
+optional `label` and `steps` (1 to 5). Each step has a `kind`, which says how it is drawn and
 what else it takes:
 
 - `files`, `searches` and `found` hold `items` (1 to 4, shown as file cards, search chips and

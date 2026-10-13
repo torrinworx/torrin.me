@@ -365,8 +365,8 @@ describe('the build', () => {
 		await assert.rejects(buildBlog({ ...where, studio: null }), /a\.md: line 10: scene:pipeline: caption is empty/);
 		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', 'Text.\n\n```scene:maze\ncaption: x\n```\n');
 		await assert.rejects(buildBlog({ ...where, studio: null }), /a\.md: line 9: scene:maze: there is no scene called "maze"; the scenes are pipeline, cluster, fanout, toggle, match, numbers/);
-		bad(PIPELINE.replace('line: kept', `line: kept\n${'      - kind: cloud\n        name: x\n'.repeat(5)}`));
-		await assert.rejects(buildBlog({ ...where, studio: null }), /line 13: scene:pipeline: lane 1: steps holds 7 steps, and it holds 1 to 6/);
+		bad(PIPELINE.replace('line: kept', `line: kept\n${'      - kind: cloud\n        name: x\n'.repeat(4)}`));
+		await assert.rejects(buildBlog({ ...where, studio: null }), /line 13: scene:pipeline: lane 1: steps holds 6 steps, and it holds 1 to 5/);
 		bad(PIPELINE.replace('kind: database', 'kind: datbase'));
 		await assert.rejects(buildBlog({ ...where, studio: null }), /line 16: scene:pipeline: lane 1, step 2: kind is "datbase", and it is one of files, model, database/);
 		bad(PIPELINE.replace('line: kept', 'lin: kept'), true);
