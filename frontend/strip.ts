@@ -1082,6 +1082,8 @@ export interface Running {
 	draw(): void;
 	/** Take every listener and observer back off. */
 	stop(): void;
+	/** The scene's own time, the clock its painter's `frame` is given. A story stamps its start on it. */
+	time(): number;
 }
 
 // A copy of a canvas's last frame laid over it, fading out while the canvas draws the new mode
@@ -1109,7 +1111,7 @@ const ghost = (canvas: HTMLCanvasElement): void => {
 export const runScene = (host: HTMLElement, scene: Scene, night: Watched): Running => {
 	const canvas = host.firstElementChild;
 	const context = canvas instanceof HTMLCanvasElement ? canvas.getContext('2d') : null;
-	if (!(canvas instanceof HTMLCanvasElement) || context === null) return { again: () => {}, draw: () => {}, stop: () => {} };
+	if (!(canvas instanceof HTMLCanvasElement) || context === null) return { again: () => {}, draw: () => {}, stop: () => {}, time: () => 0 };
 	const scale = scene.scale ?? heroScale;
 	let painter: Painter | null = null;
 	let image: ImageData | null = null;
@@ -1192,6 +1194,7 @@ export const runScene = (host: HTMLElement, scene: Scene, night: Watched): Runni
 	return {
 		again: () => { refresh(false); },
 		draw: () => { if (stale) layout(true); else if (!on) draw(0); },
+		time: () => clock,
 		stop: () => {
 			on = false;
 			cancelAnimationFrame(raf);

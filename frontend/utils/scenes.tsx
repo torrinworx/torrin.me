@@ -50,22 +50,22 @@ interface StageSpec {
 	readonly end?: () => void;
 }
 
-const now = (): number => performance.now() / 1000;
-
 /**
  * Run a scene on the stage with this id once the page is alive, and stop it with the component.
  * Answers what the scene's controls call: `play` starts the story over, `again` lays it out anew,
  * and `redraw` shows a change of state, which a still scene draws no frame of its own for.
  */
-const useStage = (cleanup: Cleanup, id: string, spec: StageSpec, night: ReturnType<typeof nightOf>): { play: () => void; again: () => void; redraw: () => void; live: () => Live | null } => {
+const useStage = (cleanup: Cleanup, id: string, spec: StageSpec, night: ReturnType<typeof nightOf>): { play: () => void; again: () => void; redraw: () => void; live: () => Live | null; time: () => number } => {
 	let live: Live | null = null, running: Running | null = null;
 	const play = (): void => {
 		if (live === null || !motion.get()) return;
-		live.started = now();
+		// The scene's clock, not the wall clock: it only moves while the scene runs, so a story stamped
+		// on the wall clock waited as long as the reader took to scroll down to it.
+		live.started = running?.time() ?? 0;
 		spec.begin?.(live);
 	};
 	const redraw = (): void => { running?.draw(); };
-	const out = { play, again: () => { running?.again(); }, redraw, live: () => live };
+	const out = { play, again: () => { running?.again(); }, redraw, live: () => live, time: () => running?.time() ?? 0 };
 	if (typeof requestAnimationFrame !== 'function') return out;
 	let watched: IntersectionObserver | null = null, offMotion = (): void => {}, offPointer = (): void => {}, seen = false;
 	const first = requestAnimationFrame(() => {
@@ -294,7 +294,7 @@ const ClusterScene = ModeContext.use((mode) => (props: { id: string; data: Clust
 		if (touched || tour >= spots.length - 1) { clearInterval(timer); return; }
 		const from = seek.to ?? spots[tour]!.at;
 		tour++;
-		seek = { id: 'q', x: 0, y: 0, from: [0, 0], to: spots[tour]!.at, fromTo: from, at: motion.get() ? now() : 0, near: 3 };
+		seek = { id: 'q', x: 0, y: 0, from: [0, 0], to: spots[tour]!.at, fromTo: from, at: motion.get() ? stage.time() : 0, near: 3 };
 		words.set(spots[tour]!.words);
 	};
 	const stage = useStage(cleanup, props.id, {
@@ -405,7 +405,7 @@ const FanoutScene = ModeContext.use((mode) => (props: { id: string; data: Fanout
 	let pending: ReturnType<typeof setTimeout> | undefined;
 	const set = (three: boolean): void => {
 		split.set(three);
-		const t = motion.get() ? now() : 0, one = seeks.some((seek) => seek.id === 'one');
+		const t = motion.get() ? stage.time() : 0, one = seeks.some((seek) => seek.id === 'one');
 		seeks = three || data.one === undefined
 			? data.into.map((branch, k) => ({ id: `b${String(k)}`, x: 0, y: 0, from: top, to: branch.at ?? [], at: t, near: 2, ...(one ? { fromTo: all } : {}) }))
 			: [{ id: 'one', x: 0, y: 0, from: top, to: all, at: t, near: 3 }];
@@ -499,7 +499,7 @@ const DeployScene = ModeContext.use((mode) => (props: { id: string; data: Toggle
 	const run = (all: boolean): void => {
 		every = all;
 		second.set(!all);
-		began = motion.get() ? now() : 0;
+		began = motion.get() ? stage.time() : 0;
 		stage.redraw();
 	};
 	const stage = useStage(cleanup, props.id, {
@@ -553,7 +553,7 @@ const PromptsScene = ModeContext.use((mode) => (props: { id: string; data: Toggl
 	}, nightOf(mode));
 	const choose = (defaults: boolean): void => {
 		off.set(defaults);
-		edits = { on: !defaults, since: motion.get() ? now() : 0 };
+		edits = { on: !defaults, since: motion.get() ? stage.time() : 0 };
 		stage.redraw();
 	};
 	return (
