@@ -59,13 +59,13 @@ export interface Pipeline extends Common {
 	readonly note?: string;
 }
 
-/** A neighbourhood of the map of meanings, and the snippets that sit in it. */
+/** A named area of the map, and the snippets drawn in it. */
 export interface Region {
 	readonly name: string;
 	readonly snippets: readonly string[];
 }
 
-/** Snippets on a map where similar meanings sit close together, and searches that land on it. */
+/** Snippets on a map where similar meanings are close together, and searches placed on it. */
 export interface Cluster extends Common {
 	/** The name a fanout in the same post gives to draw on this map. */
 	readonly id?: string;
@@ -74,7 +74,7 @@ export interface Cluster extends Common {
 	readonly searches: readonly { readonly words: string; readonly at: readonly string[] }[];
 }
 
-/** One of the things a fanout splits into: on a map, a search and where it lands; without one, a page and its line. */
+/** One of the things a fanout splits into. On a map, a search and where it lands. Without a map, a page and its line. */
 export interface Branch {
 	readonly name: string;
 	readonly line?: string;

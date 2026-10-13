@@ -66,13 +66,18 @@ strip draws it floating above the bank, with its reflection in the pond.
 
 `npm run proof` checks the landing, contact, the blog's index, the newest post, every post with a
 pixel scene, the radio and the 404 against WCAG 2.1 AA, light and dark, at 1280, 600 and 320 CSS
-pixels wide: axe-core over the markup, and then, because axe cannot see into a canvas, each word
-and icon against what the browser painted under it. Neither looks at keyboard focus: where it goes
-and whether it shows. On each post with a scene it also checks that every scene control is reached
-with the Tab key, that with reduced motion no scene moves, every word of it shows and its switches
-still change what it shows, that the scenes' nodes are the ones the server wrote and hydrate with
-no mismatch on a development bundle, which keeps the checks a release bundle drops, that a post
-reached by a link from `/blog` draws its scenes too, and that dragging on a map selects no text.
+pixels wide. It runs axe-core over the markup. Axe cannot see into a canvas, so the proof also
+checks each word and icon against what the browser painted under it. Neither check looks at
+keyboard focus: where it goes and whether it shows. On each post with a scene the proof also
+checks that:
+
+- the Tab key reaches every scene control,
+- with reduced motion no scene moves, every word of it shows, and its switches still change what
+  it shows,
+- the scenes' nodes are the ones the server wrote, and they hydrate with no mismatch on a
+  development bundle, which keeps the checks a release bundle drops,
+- a post reached by a link from `/blog` draws its scenes too,
+- dragging on a map selects no text.
 
 The canvases the scenes are drawn on are hidden from assistive technology. The menu's Motion switch holds every
 scene still, stops the button shine and the contact block's blink, and leaves the block's halo
@@ -165,14 +170,20 @@ figures:
 ```
 ````
 
-A scene plays once when half of it is on screen, then rests; Play again plays it again. With
-motion off, or a system that asks for reduced motion, it shows its end and nothing moves. Every
-word of that end shows, but three kinds the reader brings up: a page's name in a deploy, under the
-pointer; the words of the state a switch is not on; and a map's snippets its search did not find,
-when the map has no room for all of them beside their own points, where a tap brings them up. On a
-phone a still map is taller than a moving one, so the words its story ends on fit beside their
-points, never by another region; for a system that asks for reduced motion the page the build
-writes already has that height, so nothing jumps once the page is alive. Its switches, the drag and the pointer still change what it shows. In a feed it is a still frame, drawn by the build, with its words as a list.
+A scene plays once when half of it is on screen, then rests. Play again plays it again. With
+motion off, or a system that asks for reduced motion, it shows its end and nothing moves, but its
+switches, the drag and the pointer still change what it shows. Every word of that end shows,
+except three kinds that show only when the reader asks:
+
+- a page's name in a deploy, under the pointer,
+- the words of the state a switch is not on,
+- a map's snippets its search did not find, when the map has no room for all of them beside
+  their own points. A tap on the map shows the ones near it.
+
+On a phone a still map is taller than a moving one, so the words its story ends on fit beside
+their points, never by another region. For a system that asks for reduced motion, the page the
+build writes already has that height, so nothing jumps once the page is alive. In a feed a scene
+is a still frame, drawn by the build, with its words as a list.
 
 The fence holds YAML, so a value with a colon and a space in it (`"CV: water resources lead"`)
 or one that starts with `[` goes in quotes.
@@ -183,17 +194,18 @@ Every scene takes these three fields beside its own:
 - `example`: says what in the scene is made up to show the idea, shown under it, as
   `Example request, searches and snippets`. Anything invented is labelled here. The build
   refuses a scene without it that shows a figure (any number in its words) the post's own text
-  does not state; a scene with it may show made-up figures, such as a deploy's 48 pages.
+  does not state. A scene with it may show made-up figures, such as a deploy's 48 pages.
 - `terms`: up to six phrases of the post's own text, each drawn the way the scene draws the same
   thing, the first time the post says it: `text` (exactly as the post writes it) and `as`, one of
   `search` (a search chip), `found` (a found snippet), `thing` (underlined) or `changed`
   (underlined in the accent). The build refuses a term the post never says. Only words a reader
   sees count, for terms and figures alike: a link's target and code do not.
 
-The build refuses a scene it cannot draw, naming the file and line: a name that is no scene, YAML
-that does not parse, a field the scene does not have or lacks, a field it has but would not draw
-in that place, empty text, a list too long or too short, two of a name the scene finds things by
-(a database, a region, a left item, a cluster's `id`), and what each scene's own rules below say.
+The build refuses a scene it cannot draw, and names the file and line. It refuses a name that is
+no scene, YAML that does not parse, a field the scene does not have, a field it needs but lacks, a
+field it has but would not draw in that place, empty text, and a list too long or too short. It
+also refuses two things with the same name where the scene finds things by name: two databases,
+regions or left items, or two clusters with the same `id`. Each scene's own rules below add more.
 For a draft these are warnings. A scene's YAML is left out of the post's reading time.
 
 **`pipeline`**: things carried through steps, lane by lane. `lanes` (1 to 3), each with an
@@ -202,7 +214,7 @@ what else it takes:
 
 - `files`, `searches` and `found` hold `items` (1 to 4, shown as file cards, search chips and
   found snippets), with an optional `name` over them.
-- `request` and `draft` hold `text` in a card, with an optional `name` over it; a draft is typed
+- `request` and `draft` hold `text` in a card, with an optional `name` over it. A draft is typed
   out as the story plays.
 - `prompt` has a `name` and an optional `line` beside it, in a card.
 - `model`, `database`, `data`, `build`, `pages`, `upload` and `cloud` have a `name` and are drawn
@@ -210,8 +222,9 @@ what else it takes:
   `colleague`) and `shows`, a small tag of what it makes.
 
 A field a step's kind does not list is refused. A `searches` step may `reach` a `database` step
-in another lane by its exact `name`: lines run from each search to it, and a `found` step right
-after the searches, the next step in their lane, comes out of it. `note`: a line under the lanes.
+in another lane, by its exact `name`. Lines then run from each search to that database. When the
+next step in the searches' lane is `found`, its snippets are drawn coming from the database.
+`note`: a line under the lanes.
 
 ```yaml
 caption: From the data to a page in Google
@@ -229,12 +242,12 @@ lanes:
         line: from object storage to people and Google
 ```
 
-**`cluster`**: snippets on a map where similar meanings sit close together, and a search the
+**`cluster`**: snippets on a map where similar meanings are close together, and a search the
 reader drags, whose nearest snippets light up. `regions` (2 to 4), each a `name` and its
-`snippets` (1 to 4). `searches` (1 to 3), each `words` and `at`, one or two regions it lands in
-or between, written exactly as their `name`; until the reader touches it, the search visits each
-once, and with motion off it rests on the last. `id` names the map for a `fanout` in the same
-post.
+`snippets` (1 to 4). `searches` (1 to 3), each `words` and `at`, one or two regions to place it
+in or between, written exactly as their `name`. Until the reader touches it, the search moves
+through each example once, and with motion off it stays at the last. `id` names the map for a
+`fanout` in the same post.
 
 ```yaml
 caption: Similar meanings sit close together
@@ -253,14 +266,14 @@ searches:
 It is drawn one of two ways, and the fields follow:
 
 - Without `map`, the branches are pages the `from` makes: `from` has a `name` and an optional
-  `line` under it, and each branch a `name` and an optional `line`.
-- With `map`, the `id` of a cluster in the same post, the `from` stands over the map as a
-  request, with its `name` and an optional `label`, the small word over it, and its words land as
-  one search per branch. Each branch has a `name`, the search's words, and `at`, which it needs:
-  one or two of the map's region names, written exactly. No `line` on a map. With `one` (`name`,
-  and `toggle`, the switch's word for it) and `toggle` (the switch's word for the split), the
-  scene first lands the whole of `from` as one search between the regions, then splits it, and a
-  switch goes between the two.
+  `line` under it, and so does each branch.
+- With `map`, the `id` of a cluster in the same post, `from` is drawn above the map as a request:
+  its `name`, and an optional `label`, a small word above it. Each branch is one search on the
+  map. Its `name` is the search's words, and it needs `at`: one or two of the map's region names,
+  written exactly. No `line` on a map. To show the whole request as one search first, add `one`
+  (`name`, and `toggle`, the switch's word for it) and `toggle` (the switch's word for the
+  split). The scene then places the whole of `from` between the regions as one search, splits it
+  into the branches, and shows a switch to go between the two.
 
 `at` without a map, `label` without a map, and `one` without a map are refused.
 
@@ -283,7 +296,7 @@ toggle: Several searches
 
 **`toggle`**: the same scene in two states, and a switch between them: `first` and `second` are
 the switch's words. `kind` is `deploy` or `prompts`. A deploy draws `pages` (2 to 48) under its
-`store`, `changed` of them marked, and uploads every page, then only the changed ones; `names`
+`store`, `changed` of them marked, and uploads every page, then only the changed ones. `names`
 (one per page) shows each page's name under the pointer. Prompts draws `tasks` (1 to 4), each a
 `name`, its `prompt` from the code and an optional `edit`, an admin's edit shown over it while
 the first state is on.
@@ -355,7 +368,7 @@ description, the first paragraph and a link, for dev.to's import).
 | `frontend/utils/forest.tsx` | where each pixel-art scene goes on the pages (under each landing heading, in an inner page's margins, beside and above each post, in the footer, on the radio and on the 404), and the fade between modes |
 | `favicons.ts` | draws the icons from the strip's generator |
 | `content/blog/` | the posts and their media |
-| `content/blog.ts` | the blog's build step; `content/highlight.ts` and `content/cards.ts` are its fences and its cards, `content/scenes.ts` the scenes a post can hold and the check their YAML goes through |
+| `content/blog.ts` | the blog's build step. `content/highlight.ts` turns its code fences into tokens, `content/cards.ts` renders the cards a link unfurls to, and `content/scenes.ts` lists the scenes a post can hold and checks their YAML |
 | `frontend/pages/radio.tsx` | the radio page, and `frontend/radio.ts` the player, one audio element for the whole site |
 | `main.ts` | the server: the site's modules, the health and static batteries, the build stamp |
 | `modules/` | the site's own server modules: the gate, and the contact form |

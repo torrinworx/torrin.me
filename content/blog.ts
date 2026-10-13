@@ -62,7 +62,10 @@ export interface Post {
 	readonly og: string | null;
 	/** Whether the post has a fenced block, so the client knows to fetch its tokens. */
 	readonly code: boolean;
-	/** How many scenes the post holds, and the words of its own text its scenes draw as they draw them. */
+	/**
+	 * How many scenes the post holds, and `terms`: phrases of its text that a scene also shows,
+	 * marked in the text the way the scene draws them.
+	 */
 	readonly scenes: number;
 	readonly terms: readonly Term[];
 }
@@ -467,8 +470,8 @@ const shownOf = (prose: string): string => prose.replace(/`[^`\n]+`/g, ' ').repl
 const figuresIn = (text: string): string[] => text.match(/\d+(?:[.,]\d+)*/g) ?? [];
 const bare = (figure: string): string => figure.replace(/,/g, '');
 
-// Every text of a scene the page shows, but what is invented by its own say (`example`) and the
-// fields that name or mark rather than show.
+// Every text of a scene that the page shows. It leaves out `example`, where the scene says what it
+// invented, and the fields that name or mark something rather than show it.
 const shownTexts = (data: unknown, key = ''): string[] => {
 	if (typeof data === 'string') return ['example', 'id', 'map', 'kind', 'frame'].includes(key) ? [] : [data];
 	if (Array.isArray(data)) return data.flatMap((item) => shownTexts(item, key));
@@ -478,9 +481,9 @@ const shownTexts = (data: unknown, key = ''): string[] => {
 
 /**
  * Every scene fence of a body, checked, by `fenceKey`. `first` is the file's line the body starts
- * on, so each refusal names the line in the file: the fence's own line for a name that is no
- * scene, for a fanout whose map is no cluster in the post, for a cluster id two clusters have, and
- * for a term or a figure the post never says, and the line of the YAML at fault for anything else.
+ * on, so each refusal names a line in the file. These name the fence's own line: a name that is no
+ * scene, a fanout whose map is no cluster in the post, a cluster id two clusters have, and a term
+ * or a figure the post never says. Every other refusal names the line of the YAML at fault.
  */
 export const scenesOf = (body: string, first: number): { scenes: Map<string, Scene>; refused: string[] } => {
 	const read: { key: string; line: number; language: string; scene: Scene }[] = [];
@@ -502,8 +505,9 @@ export const scenesOf = (body: string, first: number): { scenes: Map<string, Sce
 		}
 		line += held.length;
 	}
-	// What a scene asks of the rest of the post: a fanout's map is a cluster in it, and each term and
-	// each figure it shows is in the post's own words, unless the scene says it is an example.
+	// Checked against the rest of the post: a fanout's map must be a cluster in it, and each term a
+	// scene shows must be in the post's own words. So must each figure, unless the scene says it is
+	// an example.
 	const prose = shownOf(runs(body).filter((run) => run.kind === 'prose').map((run) => run.text).join('\n'));
 	const stated = new Set(figuresIn(prose).map(bare));
 	const scenes = new Map<string, Scene>();
@@ -532,7 +536,7 @@ export const scenesOf = (body: string, first: number): { scenes: Map<string, Sce
 	return { scenes, refused };
 };
 
-/** What a scene's still frame draws: the scene in the shape its painter takes. */
+/** A scene's data in the form `stillFrame` reads, to draw its still frame. */
 const stillOf = (scene: Scene): StillScene => {
 	switch (scene.name) {
 		case 'pipeline': return { kind: 'pipeline', shape: scene.data };

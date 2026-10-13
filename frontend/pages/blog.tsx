@@ -158,7 +158,7 @@ export const modifiersOf = (post: Listed, feed = false): TextModifier[] => [
 /**
  * The words of a post's own text its scenes draw, each marked the way its scene draws it: a search
  * as a search chip, a found snippet as one, a thing or a change underlined. The first time each is
- * said only, so a paragraph does not fill with them; the count starts again with every render, so
+ * said only, so a paragraph does not fill with them. The count starts again with every render, so
  * the server and the browser mark the same ones.
  */
 const termsOf = (post: Listed): TextModifier[] => post.terms.map((term) => {

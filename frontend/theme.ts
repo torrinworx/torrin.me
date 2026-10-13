@@ -735,8 +735,8 @@ export const siteTheme: Definitions = {
 	scene_height_mid: { [narrow]: { display: 'block' }, [phone]: { display: 'none' } },
 	scene_height_narrow: { [phone]: { display: 'block' } },
 	// A narrow map is taller while still. Before the page is alive only the system's choice is
-	// known, so the build's page has the right height for it and nothing moves once it is alive;
-	// after, the stage says whether the menu's Motion switch is on or off.
+	// known, so the build's page has the right height for it and nothing moves once it is alive.
+	// After, the stage says whether the menu's Motion switch is on or off.
 	scene_height_yields: { [phone]: { [reduced]: { display: 'none' }, '_elem_[data-motion="off"]': { display: 'none' }, '_elem_[data-motion="on"]': { display: 'block' } } },
 	scene_height_still: { [phone]: { [reduced]: { display: 'block' }, '_elem_[data-motion="off"]': { display: 'block' }, '_elem_[data-motion="on"]': { display: 'none' } } },
 	// Words the painter places: at the stage's corner, hidden, until it says where and how much.

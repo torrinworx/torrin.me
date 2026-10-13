@@ -3,8 +3,8 @@
 //
 // The page the build writes has every word, laid out, and an empty canvas. Once the page is
 // alive, the canvas reads where the words went and frontend/scenes.ts paints the pictures and the
-// motion around them; on a map it says where each word goes. The story plays once when half the
-// scene is on screen and again from the button; with motion off the scene shows its end. In a
+// motion around them. On a map it says where each word goes. The story plays once when half the
+// scene is on screen, and again from the button. With motion off the scene shows its end. In a
 // feed a scene is its still frame, which the build painted, and its words as a list.
 
 import { mutable } from '@aweftjs/core';
@@ -270,11 +270,11 @@ const MapWords = (props: { regions: Cluster['regions'] }): unknown => props.regi
 const MAP_HEIGHT = { wide: 330, mid: 510, narrow: 420, still: 640 } as const;
 
 /**
- * Snippets on a map where similar meanings sit close together, and a search the reader drags,
- * whose nearest snippets light up. Until the reader touches it, the search visits each example
- * once; still, it rests on the last. The pin is the handle: a drag there moves it and never
- * selects text; a tap elsewhere on the map moves it there and leaves the page free to scroll; the
- * arrow keys move it too.
+ * Snippets on a map where similar meanings are close together, and a search the reader drags,
+ * whose nearest snippets light up. Until the reader touches it, the search moves through each
+ * example once, and with motion off it stays at the last. The pin is the handle: a drag there
+ * moves it and never selects text. A tap elsewhere on the map moves it there and leaves the page
+ * free to scroll. The arrow keys move it too.
  */
 const ClusterScene = ModeContext.use((mode) => (props: { id: string; data: Cluster }, cleanup: Cleanup): unknown => {
 	const data = props.data, spots = data.searches;

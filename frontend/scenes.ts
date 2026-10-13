@@ -32,7 +32,7 @@ export const inksOf = (night: boolean): Inks => (night
 
 /**
  * Where a thing with words stands this frame, in strip pixels, and how much of it shows. A thing
- * the page lays out is moved by `x` and `y` from where it stands (`offset`); a thing the painter
+ * the page lays out is moved by `x` and `y` from where it stands (`offset`). A thing the painter
  * places has its top left corner at them.
  */
 export interface Anchor {
@@ -83,7 +83,7 @@ export const through = (t: number, start: number, length: number): number => {
 	return u <= 0 ? 0 : u >= 1 ? 1 : u * u * (3 - 2 * u);
 };
 
-/** How far into its story a scene is: before it starts, -1; with motion off, the end, Infinity. */
+/** How far into its story a scene is: -1 before it starts, Infinity (the end) with motion off. */
 const storyAt = (stage: Stage, t: number): number => {
 	if (!stage.moving) return Infinity;
 	const start = stage.started();
@@ -113,9 +113,9 @@ const overlap = (a: Box, b: Box): number =>
 	Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
 
 /**
- * Where a word goes: the first of the places, each kept inside the stage, that covers nothing
- * taken and `fits`; else the free place that fits nearest the spot, within `reach`; else, when it
- * must show, the place that covers least, and when it need not, nowhere.
+ * Where a word goes. First, the first of the places, each kept inside the stage, that covers
+ * nothing taken and `fits`. Else the free place that fits nearest the spot, within `reach`. Else,
+ * when it must show, the place that covers least, and when it need not, nowhere.
  */
 const placeAmong = (places: readonly Box[], taken: readonly Box[], W: number, H: number, spot: readonly [number, number], must: boolean, reach = 45, fits = (_box: Box): boolean => true): Box | null => {
 	let best = places[0]!, least = Infinity;
@@ -374,7 +374,7 @@ export const mapArea = (width: number, height: number): Box => (width >= 200
  * search by changing it. Anchors, each placed by its top left corner: `region:<i>`,
  * `snippet:<i>.<j>` (shown while lit or under the pointer, and when still, all of them if all fit) and
  * `seek:<id>`. Words are placed where they cover no other words, no pin and no lit point, by the
- * sizes the page measured; with no room anywhere, where they cover least.
+ * sizes the page measured. With no room anywhere, they go where they cover least.
  */
 export const createMap = (options: Stage & {
 	readonly regions: readonly { readonly name: string; readonly snippets: readonly string[] }[];
@@ -452,9 +452,9 @@ export const createMap = (options: Stage & {
 			anchors.set(`seek:${id}`, { x: box.x, y: box.y, alpha: 1 });
 		}
 		// The snippets shown, each placed beside its point in turn. With no free place near its
-		// point, a snippet's words wait; the point is still lit. On a narrow map held still, a word
-		// also sits nearer its own point than any other region's middle, so it never reads as part
-		// of the wrong region.
+		// point, a snippet's words wait, but the point is still lit. On a narrow map held still, a
+		// word also sits nearer its own point than any other region's middle, so it never reads as
+		// part of the wrong region.
 		const away = (box: Box, [px, py]: readonly [number, number]): number => Math.hypot(Math.max(box.x - px, 0, px - box.x - box.width), Math.max(box.y - py, 0, py - box.y - box.height));
 		const place = (shown: (key: string) => boolean): Map<string, Box | null> => {
 			const room = [...taken], boxes = new Map<string, Box | null>();
@@ -534,7 +534,7 @@ export const deployLayout = (width: number, pages: number) => {
 
 /**
  * A site's pages in a grid under the object storage they are served from. A deploy sends a copy
- * of each page it uploads up into the storage; `uploaded` is how many have arrived. Anchors:
+ * of each page it uploads up into the storage. `uploaded` is how many have arrived. Anchors:
  * `store`, `count` and `page:<i>`, shown under the pointer.
  */
 export const createDeploy = (options: Stage & {
@@ -611,7 +611,7 @@ const laidOut = (options: Laid) => {
 	const inks = inksOf(options.night), pen = penOf(options.width, options.height);
 	const anchors = new Map<string, Anchor>(), typed = new Map<string, number>();
 	let hover: string | null = null;
-	// A thing comes in from `dx`, `dy` as it fades in; under the pointer it stands a pixel higher.
+	// A thing comes in from `dx`, `dy` as it fades in. Under the pointer it stands a pixel higher.
 	const show = (name: string, alpha: number, dx = 0, dy = 0): void => {
 		anchors.set(name, { x: Math.round(dx * (1 - alpha)), y: Math.round(dy * (1 - alpha)) - (hover === name && alpha >= 1 ? 1 : 0), alpha, offset: true });
 	};
@@ -639,7 +639,7 @@ const stepTime = (g: number): number => 0.3 + g * STEP;
 /** How long a pipeline's story runs, in seconds. */
 export const pipelineLength = (shape: PipelineShape): number => stepTime(shape.lanes.reduce((n, lane) => n + lane.steps.length, 0)) + 1.6;
 
-// The kinds drawn in a picture of their own; the rest are words in boxes.
+// The kinds drawn in a picture of their own. The rest are words in boxes.
 const PICTURED = new Set(['model', 'database', 'data', 'build', 'pages', 'upload', 'cloud']);
 const ICON_OF: Readonly<Record<string, IconName>> = { files: 'file', searches: 'search', found: 'found', request: 'request', prompt: 'prompt', draft: 'draft' };
 
@@ -647,7 +647,7 @@ const ICON_OF: Readonly<Record<string, IconName>> = { files: 'file', searches: '
  * Things carried through steps, lane by lane: a step comes in, then what it hands on travels to
  * the next one (slips of a file, the points a model makes, pages), searches reach into the
  * database they name, and what they find comes out of it. Things: `lane:<l>`, `step:<l>.<s>`,
- * `item:<l>.<s>.<k>`, `card:<l>.<s>`, `shows:<l>.<s>`, `note`; boxes for pictures:
+ * `item:<l>.<s>.<k>`, `card:<l>.<s>`, `shows:<l>.<s>`, `note`. Boxes for pictures:
  * `slot:<l>.<s>`, and on a narrow page `slot:echo:<l>.<s>`, where searches reach a copy of the
  * database beside them.
  */
@@ -676,7 +676,7 @@ export const createPipeline = (options: Laid & { readonly shape: PipelineShape }
 			const reached = step.reach === undefined ? undefined : databases.get(step.reach);
 			const after = steps[g - 1];
 			(step.items ?? []).forEach((_, k) => {
-				// Searches come out of the request; what is found comes out of the database searched.
+				// Searches come out of the request. What is found comes out of the database searched.
 				const from = step.kind === 'found' && after?.reach !== undefined ? -6 : 0;
 				show(`item:${step.key}.${String(k)}`, at(t0 + k * 0.2, 0.6), step.kind === 'files' ? -8 : step.kind === 'searches' ? -10 : 0, from);
 			});
@@ -728,8 +728,8 @@ export const createPipeline = (options: Laid & { readonly shape: PipelineShape }
 			const a = boxOf(step), b = boxOf(next);
 			if (a === undefined || b === undefined) return;
 			const [x0, y0, x1, y1] = between(a, b);
-			// A dotted line joins a step to the next where the next stands beside it or under it; one
-			// that wrapped to the start of the next row is joined only by what travels to it.
+			// A dotted line joins a step to the next where the next stands beside it or under it. A
+			// step that wrapped to the start of the next row is joined only by what travels to it.
 			const beside = b.y < a.y + a.height && b.y + b.height > a.y, under = b.x < a.x + a.width && b.x + b.width > a.x;
 			if (beside || under) pen.line(x0, y0, x1, y1, inks.ink2, 3, at(t0 + 0.6, 0.6));
 			// What a step hands on travels to the next: slips of text, the points a model makes, pages.
@@ -771,7 +771,7 @@ const drawPicture = (pen: Pen, kind: string, box: Box, inks: Inks, since: number
 
 /**
  * One thing split into several: the source's picture, then a copy of what it makes carried to
- * each branch, whose picture and words come in as it lands. Things: `from`, `branch:<k>`; boxes
+ * each branch, whose picture and words come in as it lands. Things: `from`, `branch:<k>`. Boxes
  * for pictures: `slot:from`, `slot:branch:<k>`.
  */
 export const createBranches = (options: Laid & { readonly branches: number }): Explainer => {
@@ -807,7 +807,7 @@ export const createBranches = (options: Laid & { readonly branches: number }): E
 /**
  * Each task beside the prompt it runs with: an admin's edit while one is live, else the default
  * from the code. Switching to `edits` slides each edit over its default, and away again for the
- * defaults. Things: `task:<k>`, `prompt:<k>`, `edit:<k>`; boxes for pictures: `slot:who:<k>`,
+ * defaults. Things: `task:<k>`, `prompt:<k>`, `edit:<k>`. Boxes for pictures: `slot:who:<k>`,
  * where a person stands for a live edit and the code's brackets for a default.
  */
 export const createPrompts = (options: Laid & { readonly tasks: readonly { readonly edit: boolean }[]; readonly edits: () => { readonly on: boolean; readonly since: number } }): Explainer => {
@@ -856,7 +856,7 @@ const MARKS = [
 /**
  * What was asked for on the left, what answers it on the right, a line from each left item to
  * each right item that answers it, drawn one left item at a time, and beside each right item the
- * marks of the left items it answers. Things: `left:<k>`, `right:<j>`; boxes for pictures:
+ * marks of the left items it answers. Things: `left:<k>`, `right:<j>`. Boxes for pictures:
  * `slot:mark:<k>` beside each left item, `slot:marks:<j>` beside each right one.
  */
 export const createMatch = (options: Laid & { readonly links: readonly (readonly [left: number, right: number])[]; readonly left: number; readonly right: number }): Explainer => {
@@ -907,7 +907,7 @@ export type FigureShape = { readonly share: number } | { readonly count: number 
  * The post's figures as pixel bars: a share fills a bar of the whole, a count is that many
  * blocks, and a change is two bars, from and to, on one scale, with nothing drawn between them.
  * A figure written as "under" ends in a dither, since the post says only that it was less. Things:
- * `figure:<k>`; boxes for pictures: `slot:bar:<k>`, and for a change `slot:bar:<k>:from` and
+ * `figure:<k>`. Boxes for pictures: `slot:bar:<k>`, and for a change `slot:bar:<k>:from` and
  * `slot:bar:<k>:to`.
  */
 export const createNumbers = (options: Laid & { readonly figures: readonly FigureShape[] }): Explainer => {
@@ -954,7 +954,7 @@ export const createNumbers = (options: Laid & { readonly figures: readonly Figur
 /**
  * A scene's still frame where no page lays it out, for a feed: each laid-out thing given a box on
  * a plain grid, drawn as a pixel box with its icon, and the story at its end. `kind` and the
- * counts say what to draw; the words go under the frame as a list.
+ * counts say what to draw. The words go under the frame as a list.
  */
 export const stillFrame = (scene: StillScene, night = false): { readonly width: number; readonly height: number; readonly pixels: Uint32Array } => {
 	const W = 240, boxes = new Map<string, Box>();
