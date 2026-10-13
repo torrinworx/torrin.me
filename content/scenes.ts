@@ -74,7 +74,10 @@ export interface Cluster extends Common {
 	readonly searches: readonly { readonly words: string; readonly at: readonly string[] }[];
 }
 
-/** One of the things a fanout splits into. On a map, a search and where it lands. Without a map, a page and its line. */
+/**
+ * One of the parts a fanout splits `from` into. On a map, a search and the regions it is placed
+ * in. Without a map, a page and its line.
+ */
 export interface Branch {
 	readonly name: string;
 	readonly line?: string;

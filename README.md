@@ -180,10 +180,10 @@ except three kinds that show only when the reader asks:
 - a map's snippets its search did not find, when the map has no room for all of them beside
   their own points. A tap on the map shows the ones near it.
 
-On a phone a still map is taller than a moving one, so the words its story ends on fit beside
-their points, never by another region. For a system that asks for reduced motion, the page the
-build writes already has that height, so nothing jumps once the page is alive. In a feed a scene
-is a still frame, drawn by the build, with its words as a list.
+On a phone a still map is taller than a moving one, so every word shown at the end of its story
+fits beside its own point, never by another region. For a system that asks for reduced motion, the
+page the build writes already has that height, so nothing jumps once the page is alive. In a feed a
+scene is a still frame, drawn by the build, with its words as a list.
 
 The fence holds YAML, so a value with a colon and a space in it (`"CV: water resources lead"`)
 or one that starts with `[` goes in quotes.
@@ -270,10 +270,11 @@ It is drawn one of two ways, and the fields follow:
 - With `map`, the `id` of a cluster in the same post, `from` is drawn above the map as a request:
   its `name`, and an optional `label`, a small word above it. Each branch is one search on the
   map. Its `name` is the search's words, and it needs `at`: one or two of the map's region names,
-  written exactly. No `line` on a map. To show the whole request as one search first, add `one`
-  (`name`, and `toggle`, the switch's word for it) and `toggle` (the switch's word for the
-  split). The scene then places the whole of `from` between the regions as one search, splits it
-  into the branches, and shows a switch to go between the two.
+  written exactly. No `line` on a map.
+- A fanout on a map can first show the whole request as one search. For that, add `one`, with a
+  `name` for that search and a `toggle`, the switch's word for it, and a top-level `toggle`, the
+  switch's word for the split. The scene then places the whole of `from` between the regions as
+  one search, splits it into the branches, and shows a switch to go between the two.
 
 `at` without a map, `label` without a map, and `one` without a map are refused.
 

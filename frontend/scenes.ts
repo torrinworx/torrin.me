@@ -113,9 +113,10 @@ const overlap = (a: Box, b: Box): number =>
 	Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
 
 /**
- * Where a word goes. First, the first of the places, each kept inside the stage, that covers
- * nothing taken and `fits`. Else the free place that fits nearest the spot, within `reach`. Else,
- * when it must show, the place that covers least, and when it need not, nowhere.
+ * Where a word goes. It takes the first of the places, each kept inside the stage, that covers
+ * nothing taken and `fits`. If none does, the free place that fits nearest the spot, within
+ * `reach`. If there is none, the place that covers least when the word must show, or nowhere when
+ * it need not.
  */
 const placeAmong = (places: readonly Box[], taken: readonly Box[], W: number, H: number, spot: readonly [number, number], must: boolean, reach = 45, fits = (_box: Box): boolean => true): Box | null => {
 	let best = places[0]!, least = Infinity;
@@ -452,9 +453,9 @@ export const createMap = (options: Stage & {
 			anchors.set(`seek:${id}`, { x: box.x, y: box.y, alpha: 1 });
 		}
 		// The snippets shown, each placed beside its point in turn. With no free place near its
-		// point, a snippet's words wait, but the point is still lit. On a narrow map held still, a
-		// word also sits nearer its own point than any other region's middle, so it never reads as
-		// part of the wrong region.
+		// point, a snippet's words are not shown, but its point is still lit. On a narrow map held
+		// still, a word must also be nearer its own point than any other region's middle, so it never
+		// looks like part of the wrong region.
 		const away = (box: Box, [px, py]: readonly [number, number]): number => Math.hypot(Math.max(box.x - px, 0, px - box.x - box.width), Math.max(box.y - py, 0, py - box.y - box.height));
 		const place = (shown: (key: string) => boolean): Map<string, Box | null> => {
 			const room = [...taken], boxes = new Map<string, Box | null>();
@@ -770,9 +771,9 @@ const drawPicture = (pen: Pen, kind: string, box: Box, inks: Inks, since: number
 // --- fanout, without a map -------------------------------------------------------------------------
 
 /**
- * One thing split into several: the source's picture, then a copy of what it makes carried to
- * each branch, whose picture and words come in as it lands. Things: `from`, `branch:<k>`. Boxes
- * for pictures: `slot:from`, `slot:branch:<k>`.
+ * One thing split into several: the source's picture, then a copy of what it makes moving along a
+ * line to each branch, whose picture and words fade in as it arrives. Things: `from`,
+ * `branch:<k>`. Boxes for pictures: `slot:from`, `slot:branch:<k>`.
  */
 export const createBranches = (options: Laid & { readonly branches: number }): Explainer => {
 	const { inks, pen, show, painter } = laidOut(options);

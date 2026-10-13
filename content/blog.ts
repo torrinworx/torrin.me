@@ -480,10 +480,11 @@ const shownTexts = (data: unknown, key = ''): string[] => {
 };
 
 /**
- * Every scene fence of a body, checked, by `fenceKey`. `first` is the file's line the body starts
- * on, so each refusal names a line in the file. These name the fence's own line: a name that is no
- * scene, a fanout whose map is no cluster in the post, a cluster id two clusters have, and a term
- * or a figure the post never says. Every other refusal names the line of the YAML at fault.
+ * Every scene fence of a body, checked, by `fenceKey`. `first` is the line of the file the body
+ * starts on, so a refusal can name its line in the file. A refusal names the fence's own line when
+ * the name is no scene, when a fanout's map is no cluster in the post, when two clusters have the
+ * same id, or when the scene shows a term or figure the post never says. Any other refusal names
+ * the line of the YAML at fault.
  */
 export const scenesOf = (body: string, first: number): { scenes: Map<string, Scene>; refused: string[] } => {
 	const read: { key: string; line: number; language: string; scene: Scene }[] = [];
