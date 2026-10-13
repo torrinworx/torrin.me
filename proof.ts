@@ -355,6 +355,12 @@ const scenesHold = async (view: import('playwright').Page, fences: readonly Fenc
 	assert.deepEqual(await sceneNames(view), said.map((scene) => `figure: ${scene.caption}`), `${where}: each scene is a figure named by its caption`);
 };
 
+/** Whether every scene canvas matching the selector has drawn: sized by runScene, unless its box has no size to draw in. */
+const drawn = (selector: string): boolean => Array.from(document.querySelectorAll<HTMLCanvasElement>(selector)).every((canvas) => {
+	const box = canvas.parentElement!.getBoundingClientRect();
+	return canvas.style.width !== '' || box.width === 0 || box.height === 0;
+});
+
 /** The marks with any pixel under them, in a screenshot of the bare page, below the contrast they need. */
 const judge = async ([shot, marks]: readonly [string, Mark[]]): Promise<string[]> => {
 	const image = new Image();
@@ -656,10 +662,12 @@ try {
 				const { violations } = await audit(view);
 				assert.deepEqual(violations.map((found) => `${found.rule}: ${found.help} (${found.nodes.map((node) => node.target).join(', ')})`), [], `${where}: axe`);
 
-				// The whole page in the window at once, so every scene has drawn.
+				// The whole page in the window at once, so every scene draws. Scenes draw as they come near
+				// and one a frame (runScene), so this waits for the last: a scene has drawn once its canvas
+				// is sized, as an undrawn canvas is still 300 wide.
 				const tall = await view.evaluate(() => document.documentElement.scrollHeight);
 				await view.setViewportSize({ width, height: tall });
-				await view.waitForFunction(() => Array.from(document.querySelectorAll<HTMLCanvasElement>('[aria-hidden="true"] > canvas, [data-scene] canvas')).every((canvas) => canvas.width > 0));
+				await view.waitForFunction(drawn, '[aria-hidden="true"] > canvas, [data-scene] canvas');
 				const settle = (): Promise<void> => view.evaluate(() => new Promise<void>((done) => { requestAnimationFrame(() => { requestAnimationFrame(() => { done(); }); }); }));
 				await settle();
 				const scenes = await view.$$('[data-scene]');
@@ -891,7 +899,7 @@ try {
 						await view.waitForSelector('[data-scene]');
 					} else await view.goto(`${devSite.url}/blog/${post.slug}`, { waitUntil: 'networkidle' });
 					await view.setViewportSize({ width: 1280, height: await view.evaluate(() => document.documentElement.scrollHeight) });
-					await view.waitForFunction(() => Array.from(document.querySelectorAll<HTMLCanvasElement>('[data-scene] canvas')).every((canvas) => canvas.width > 0));
+					await view.waitForFunction(drawn, '[data-scene] canvas');
 					const icons = await view.evaluate(() => Array.from(document.querySelectorAll<HTMLElement>('[data-scene] [data-icon]')).filter((icon) => {
 						const style = getComputedStyle(icon), box = icon.getBoundingClientRect();
 						return style.maskImage.startsWith('url(') && box.width >= 8 && box.height >= 8;

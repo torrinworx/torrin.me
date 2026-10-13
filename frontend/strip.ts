@@ -1100,6 +1100,21 @@ const ghost = (canvas: HTMLCanvasElement): void => {
 	setTimeout(() => { copy.remove(); }, SWITCH_SECONDS * 1000 + 100);
 };
 
+// Scenes take turns at their first paint, one a frame, so a page that opens with several of them
+// spreads the work over frames rather than building them all in one long task.
+const turns: (() => void)[] = [];
+let turning = false;
+const nextTurn = (): void => {
+	const next = turns.shift();
+	if (next === undefined) { turning = false; return; }
+	next();
+	requestAnimationFrame(nextTurn);
+};
+const inTurn = (fn: () => void): void => {
+	turns.push(fn);
+	if (!turning) { turning = true; nextTurn(); }
+};
+
 /**
  * Run a scene on the canvas that is the first child of `host`, filling the host.
  *
@@ -1176,9 +1191,19 @@ export const runScene = (host: HTMLElement, scene: Scene, night: Watched): Runni
 	pointer.addEventListener('pointerleave', onLeave);
 	if (scene.scroll === true) addEventListener('scroll', onScroll, { passive: true });
 
-	const resized = new ResizeObserver(() => { layout(false); });
+	let begun = false, stopped = false;
+	const begin = (): void => { inTurn(() => { if (stopped) return; begun = true; layout(false); }); };
+	const resized = new ResizeObserver(() => { if (begun) layout(false); });
 	resized.observe(host);
-	layout(false);
+	// A scene more than a window away from the window is first painted when it comes that near, not
+	// as the page opens, so a page only builds the scenes a reader is about to see.
+	const nearby = new IntersectionObserver(([entry]) => {
+		if (entry?.isIntersecting !== true) return;
+		nearby.disconnect();
+		begin();
+	}, { rootMargin: '100% 0px' });
+	const box = host.getBoundingClientRect();
+	if (box.bottom > -innerHeight && box.top < 2 * innerHeight) begin(); else nearby.observe(host);
 	const watched = new IntersectionObserver(([entry]) => {
 		seen = entry?.isIntersecting ?? false;
 		if (seen && stale) layout(true);
@@ -1198,7 +1223,9 @@ export const runScene = (host: HTMLElement, scene: Scene, night: Watched): Runni
 		stop: () => {
 			on = false;
 			cancelAnimationFrame(raf);
+			stopped = true;
 			resized.disconnect();
+			nearby.disconnect();
 			watched.disconnect();
 			offNight();
 			offMotion();
