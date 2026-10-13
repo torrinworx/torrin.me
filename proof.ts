@@ -355,7 +355,7 @@ const scenesHold = async (view: import('playwright').Page, fences: readonly Fenc
 	assert.deepEqual(await sceneNames(view), said.map((scene) => `figure: ${scene.caption}`), `${where}: each scene is a figure named by its caption`);
 };
 
-/** Whether every scene canvas matching the selector has drawn: sized by runScene, unless its box has no size to draw in. */
+/** True once runScene has sized every scene canvas matching the selector. A canvas whose host has no width or height is skipped, as runScene never paints it. */
 const drawn = (selector: string): boolean => Array.from(document.querySelectorAll<HTMLCanvasElement>(selector)).every((canvas) => {
 	const box = canvas.parentElement!.getBoundingClientRect();
 	return canvas.style.width !== '' || box.width === 0 || box.height === 0;
@@ -662,9 +662,9 @@ try {
 				const { violations } = await audit(view);
 				assert.deepEqual(violations.map((found) => `${found.rule}: ${found.help} (${found.nodes.map((node) => node.target).join(', ')})`), [], `${where}: axe`);
 
-				// The whole page in the window at once, so every scene draws. Scenes draw as they come near
-				// and one a frame (runScene), so this waits for the last: a scene has drawn once its canvas
-				// is sized, as an undrawn canvas is still 300 wide.
+				// The window is made as tall as the page, so every scene is close enough to paint. runScene
+				// paints them one per frame, so this waits until all are sized. A canvas that has not painted
+				// is still 300 wide, so its width cannot tell.
 				const tall = await view.evaluate(() => document.documentElement.scrollHeight);
 				await view.setViewportSize({ width, height: tall });
 				await view.waitForFunction(drawn, '[aria-hidden="true"] > canvas, [data-scene] canvas');

@@ -1100,8 +1100,8 @@ const ghost = (canvas: HTMLCanvasElement): void => {
 	setTimeout(() => { copy.remove(); }, SWITCH_SECONDS * 1000 + 100);
 };
 
-// Scenes take turns at their first paint, one a frame, so a page that opens with several of them
-// spreads the work over frames rather than building them all in one long task.
+// Scenes paint for the first time one per frame, in the order they start, so a page that opens
+// with several of them runs several short tasks instead of one long one.
 const turns: (() => void)[] = [];
 let turning = false;
 const nextTurn = (): void => {
@@ -1195,8 +1195,9 @@ export const runScene = (host: HTMLElement, scene: Scene, night: Watched): Runni
 	const begin = (): void => { inTurn(() => { if (stopped) return; begun = true; layout(false); }); };
 	const resized = new ResizeObserver(() => { if (begun) layout(false); });
 	resized.observe(host);
-	// A scene more than a window away from the window is first painted when it comes that near, not
-	// as the page opens, so a page only builds the scenes a reader is about to see.
+	// A scene more than one window height above or below the window is first painted once scrolling
+	// brings it within that distance, not as the page opens. A page paints only the scenes near the
+	// part of it on screen.
 	const nearby = new IntersectionObserver(([entry]) => {
 		if (entry?.isIntersecting !== true) return;
 		nearby.disconnect();
