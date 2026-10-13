@@ -726,6 +726,9 @@ export const siteTheme: Definitions = {
 	scene: { margin: 0, width: '100%', containerType: 'inline-size', display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '$sizeLabel', lineHeight: 1.4 },
 	scene_stage: { position: 'relative', isolation: 'isolate', '--px': '3px', [phone]: { '--px': '2px' } },
 	scene_stage_flow: { display: 'flex', flexDirection: 'column', gap: '18px', padding: 'calc(var(--px) * 2) 0', touchAction: 'pan-y' },
+	// A stage whose words, set on one line, are narrower than the column stands in the middle of
+	// it, canvas and all. One that needs the whole column takes it, as before.
+	scene_stage_fit: { alignSelf: 'center', maxWidth: '100%' },
 	// A map is dragged and tapped, so nothing on it is ever selected as text.
 	scene_stage_map: { touchAction: 'pan-y', userSelect: 'none', WebkitUserSelect: 'none', '_cssProp_is([data-dragging])': { cursor: 'grabbing' } },
 	scene_paint: { position: 'absolute', left: 0, top: 0, zIndex: -1, display: 'block', imageRendering: 'pixelated', pointerEvents: 'none' },
@@ -816,7 +819,9 @@ export const siteTheme: Definitions = {
 	scene_branches: { listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '12px' },
 	scene_branch: { display: 'flex', alignItems: 'center', gap: '12px' },
 
-	// toggle, prompts: each task beside the prompt it runs with.
+	// toggle, prompts: each task beside the prompt it runs with. Side by side the prompts reach the
+	// column's edge. Stacked, the tasks stand in the middle.
+	scene_stage_tasks: { [narrow]: { alignSelf: 'center', maxWidth: '100%' } },
 	scene_tasks: { listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '16px' },
 	scene_task: { display: 'grid', gridTemplateColumns: 'minmax(0, 11rem) auto minmax(0, 1fr)', alignItems: 'center', columnGap: '18px', [narrow]: { gridTemplateColumns: 'auto minmax(0, 1fr)', rowGap: '6px', '_children_> :first-child': { gridColumn: '1 / -1', justifySelf: 'start' } } },
 	// The default and an admin's edit share one cell, the edit on top and as tall as the taller of the two.
@@ -836,7 +841,7 @@ export const siteTheme: Definitions = {
 	scene_end: { fontFamily: '$fontMono', fontSize: '0.9em', color: '$ink2' },
 
 	// Under every scene: Play again, quiet as a link, a two-way switch where the scene has one,
-	// what is an invented example, and the caption.
+	// and what is an invented example.
 	scene_controls: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px 18px' },
 	scene_again: {
 		display: 'inline-flex', alignItems: 'center', minHeight: '32px', padding: 0, border: 0, background: 'none', cursor: 'pointer',
@@ -853,7 +858,6 @@ export const siteTheme: Definitions = {
 		'_cssProp_focus-visible': { outline: '2px solid $ring', outlineOffset: '4px' },
 	},
 	scene_example: { margin: 0, maxWidth: 'none', fontFamily: '$fontMono', fontSize: '0.85em', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '$tracking', color: '$mutedForeground' },
-	scene_caption: { color: '$ink2' },
 
 	// The post's own words a scene draws, drawn the same way: a search, something found, a thing, a change.
 	term: { padding: '0 0.2em', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' },

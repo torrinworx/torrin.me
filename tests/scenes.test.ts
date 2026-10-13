@@ -1,9 +1,12 @@
-// The pixel scenes a post can hold: the check each scene's YAML goes through, and the painters,
-// run in Node on pixel buffers as the strip's tests run it.
+// The pixel scenes a post can hold: the check each scene's YAML goes through, the painters, run
+// in Node on pixel buffers as the strip's tests run it, and the markup the build writes, in Chrome.
 
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { describe, it } from 'node:test';
+
+import { Theme, context, h, render } from '@aweftjs/ui';
+import { chromium } from 'playwright';
 
 import { SceneError, readFigure, readScene, sceneOf, wordsOf } from '../content/scenes.ts';
 import type { Fanout, Numbers, Pipeline } from '../content/scenes.ts';
@@ -13,7 +16,8 @@ import {
 } from '../frontend/scenes.ts';
 import type { Box, Explainer, Seek, Size } from '../frontend/scenes.ts';
 import { pack } from '../frontend/strip.ts';
-import { LIME, MOSS } from '../frontend/theme.ts';
+import { LIME, MOSS, siteTheme } from '../frontend/theme.ts';
+import { SceneBlock } from '../frontend/utils/scenes.tsx';
 
 const refused = (name: string, yaml: string): { line: number; message: string } => {
 	try {
@@ -407,6 +411,81 @@ describe('the scenes\' painters', () => {
 			assert.equal(still.pixels.length, still.width * still.height);
 			assert.ok(still.pixels.filter((c) => c !== 0).length > 50, 'something drawn');
 			assert.ok(!still.pixels.includes(pack(LIME)) || still.pixels.includes(pack(MOSS)), 'in the day\'s inks');
+		}
+	});
+});
+
+// --- the scenes on a page -------------------------------------------------------------------------
+
+describe('a scene as the build writes it into a post', () => {
+	// One of every way a scene is laid out, as the page the build writes has it, before any script runs.
+	const SCENES = {
+		pipeline: readScene('pipeline', 'caption: Three steps\nlanes:\n  - steps:\n      - kind: data\n        name: Data\n      - kind: build\n        name: Build\n      - kind: cloud\n        name: Serve\n'),
+		branches: readScene('fanout', 'caption: One build, two pages\nexample: Example pages\nfrom:\n  name: Build\ninto:\n  - name: County\n  - name: State\n'),
+		match: readScene('match', 'caption: Asked and answered\nleft:\n  label: Asks\n  items: [one, two]\nright:\n  label: Answers\n  items:\n    - text: a\n      answers: [one, two]\n'),
+		prompts: readScene('toggle', 'caption: Prompts\nkind: prompts\nfirst: Edits\nsecond: Defaults\ntasks:\n  - name: Write\n    prompt: Write it.\n    edit: Write it well.\n'),
+		numbers: readScene('numbers', 'caption: Commits\nfigures:\n  - label: of the commits\n    value: 56%\n'),
+		map: readScene('cluster', CLUSTER),
+		deploy: readScene('toggle', 'caption: A deploy\nkind: deploy\nfirst: All\nsecond: Changed\nstore: S\npages: "8"\nchanged: "2"\n'),
+	};
+	// Each scene in a column as wide as a post's at a 1280px window, or at a 600px one.
+	const page = async (column: number): Promise<string> => {
+		const ui = context();
+		const html = await render(h(Theme, { value: siteTheme }, Object.entries(SCENES).map(([name, scene]) => h('div', { 'data-column': name, style: `width: ${String(column)}px` }, h(SceneBlock, { id: `scene-${name}`, scene })))), { context: ui });
+		return `<!doctype html><style>${ui.theme.markup()}</style><body style="margin: 0">${html}</body>`;
+	};
+	const placed = async (column: number) => {
+		const browser = await chromium.launch();
+		try {
+			const view = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+			await view.setContent(await page(column));
+			return await view.evaluate(() => Object.fromEntries(Array.from(document.querySelectorAll<HTMLElement>('[data-column]')).map((column) => {
+				const stage = column.querySelector('[data-scene] > [id]')!.getBoundingClientRect(), canvas = column.querySelector('canvas')!.getBoundingClientRect(), box = column.getBoundingClientRect();
+				return [column.dataset['column']!, { width: Math.round(stage.width), left: stage.left - box.left, right: box.right - stage.right, canvas: [canvas.left - stage.left, canvas.top - stage.top] }];
+			})));
+		} finally {
+			await browser.close();
+		}
+	};
+
+	it('stands a scene narrower than its column in the middle of it, its canvas with it, and leaves one that needs the column as it is', async () => {
+		const wide = await placed(726);
+		for (const name of ['pipeline', 'branches', 'match']) {
+			const { width, left, right, canvas } = wide[name]!;
+			assert.ok(width < 726 && Math.abs(left - right) <= 1, `${name}: ${String(width)}px wide, ${String(left)}px from the left and ${String(right)}px from the right`);
+			assert.deepEqual(canvas, [0, 0], `${name}: its canvas at its stage's corner`);
+		}
+		for (const name of ['prompts', 'numbers', 'map', 'deploy']) assert.equal(wide[name]!.width, 726, `${name} takes the whole column`);
+		const stacked = (await placed(520))['prompts']!;
+		assert.ok(stacked.width < 520 && Math.abs(stacked.left - stacked.right) <= 1, `prompts stacked: ${String(stacked.width)}px wide, ${String(stacked.left)}px from the left and ${String(stacked.right)}px from the right`);
+	});
+
+	it('names each scene by its caption and does not show it, and shows what is invented', async () => {
+		const browser = await chromium.launch();
+		try {
+			const view = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+			await view.setContent(await page(726));
+			const shown = await view.evaluate(() => Array.from(document.querySelectorAll<HTMLElement>('[data-scene]')).map((scene) => {
+				const caption = scene.querySelector('figcaption')!, box = caption.getBoundingClientRect();
+				return {
+					named: scene.getAttribute('aria-label'),
+					caption: caption.textContent, seen: box.width > 1 || box.height > 1 || !getComputedStyle(caption).clip.startsWith('rect'),
+					example: Array.from(scene.querySelectorAll<HTMLElement>('p')).find((line) => line.textContent === 'Example pages')?.checkVisibility() ?? null,
+				};
+			}));
+			const captions = Object.values(SCENES).map((scene) => scene.data.caption);
+			assert.deepEqual(shown.map((scene) => scene.named), captions, 'each figure is named by its caption');
+			assert.deepEqual(shown.map((scene) => scene.caption), captions, 'which its figcaption holds');
+			assert.deepEqual(shown.map((scene) => scene.seen), captions.map(() => false), 'and does not show');
+			assert.equal(shown[1]!.example, true, 'what is made up is labelled');
+			// Chrome takes no figure's name from its figcaption, so the name it gives a screen reader is checked too.
+			const cdp = await view.context().newCDPSession(view);
+			const { root } = await cdp.send('DOM.getDocument', { depth: 0 });
+			const { nodeIds } = await cdp.send('DOM.querySelectorAll', { nodeId: root.nodeId, selector: '[data-scene]' });
+			const names = await Promise.all(nodeIds.map(async (nodeId) => String((await cdp.send('Accessibility.getPartialAXTree', { nodeId, fetchRelatives: false })).nodes[0]?.name?.value)));
+			assert.deepEqual(names, captions, 'as Chrome gives it to a screen reader');
+		} finally {
+			await browser.close();
 		}
 	});
 });

@@ -190,7 +190,8 @@ or one that starts with `[` goes in quotes.
 
 Every scene takes these three fields beside its own:
 
-- `caption` (needed): one line under the scene saying what it shows.
+- `caption` (needed): one line saying what the scene shows. The page does not show it. A screen
+  reader reads it as the scene's name, and a feed shows it under the scene's still frame.
 - `example`: says what in the scene is made up to show the idea, shown under it, as
   `Example request, searches and snippets`. Anything invented is labelled here. The build
   refuses a scene without it that shows a figure (any number in its words) the post's own text

@@ -198,7 +198,7 @@ const sceneState = (scene: Element): string =>
 	`${scene.querySelector('canvas')!.toDataURL()} ${Array.from(scene.querySelectorAll<HTMLElement>('[data-thing]')).map((thing) => `${getComputedStyle(thing).opacity}${thing.style.transform}${thing.textContent ?? ''}`).join()}`;
 
 /** A post's scene fences, as the build wrote them beside the post. */
-type Fence = { scene?: { name: string; data: { searches?: { words: string }[]; regions?: { name: string; snippets: string[] }[] } } };
+type Fence = { scene?: { name: string; data: { caption: string; example?: string; kind?: string; searches?: { words: string }[]; regions?: { name: string; snippets: string[] }[] } } };
 
 /** Each map on the page: its stage's size, and the box of each word it shows, from the stage's corner. */
 const mapWords = (): { width: number; height: number; words: { name: string; box: readonly [number, number, number, number] }[] }[] => Array.from(document.querySelectorAll<HTMLElement>('[data-scene]')).filter((scene) => scene.querySelector('[data-thing^="snippet:"]') !== null).map((scene) => {
@@ -233,6 +233,126 @@ const misplaced = (maps: ReturnType<typeof mapWords>, regions: readonly (readonl
 			&& Math.min(a.box[2], b.box[2]) - Math.max(a.box[0], b.box[0]) > 3 && Math.min(a.box[3], b.box[3]) - Math.max(a.box[1], b.box[1]) > 3).map((b) => `map ${String(k + 1)}: ${a.name} and ${b.name} overlap`));
 		return [...strays, ...covered];
 	});
+};
+
+/**
+ * What is wrong with where each pixel scene stands and where its canvas draws. The canvas covers
+ * the stage at the scene's pixel size. A scene whose words, set on one line, are narrower than the
+ * column stands in its middle, to 2px. In a scene the page lays out, every pixel drawn is among
+ * its words and pictures, and each picture's box on the canvas has drawing in it. A map and a
+ * deploy place their own words on their drawing, across the column, so for them only the first holds.
+ */
+const sceneLayout = (): string[] => {
+	const wrong: string[] = [];
+	Array.from(document.querySelectorAll<HTMLElement>('[data-scene]')).forEach((scene, k) => {
+		const name = `scene ${String(k + 1)} (${scene.dataset['scene']!})`;
+		const stage = scene.querySelector<HTMLElement>('[id]')!, canvas = stage.querySelector('canvas')!;
+		const column = scene.getBoundingClientRect(), on = stage.getBoundingClientRect(), drawn = canvas.getBoundingClientRect();
+		const size = drawn.width / canvas.width, px = column.width >= 440 ? 3 : 2;
+		if (Math.abs(drawn.left - on.left) > 0.5 || Math.abs(drawn.top - on.top) > 0.5) wrong.push(`${name}: its canvas is not at its stage's corner`);
+		if (Math.abs(size - px) > 0.01) wrong.push(`${name}: its canvas draws ${String(size)}px pixels, and the scene's are ${String(px)}px`);
+		if (stage.querySelector('[data-placed]') !== null) return;
+
+		// What it shows: each thing and picture box, a boxed thing with its pixel outline, and any other words.
+		const boxes: DOMRect[] = [];
+		for (const element of Array.from(stage.querySelectorAll<HTMLElement>('[data-thing], [data-slot]'))) {
+			const box = element.getBoundingClientRect(), style = getComputedStyle(element);
+			if (box.width < 1 || box.height < 1 || Number(style.opacity) === 0) continue;
+			const out = style.boxShadow === 'none' ? 0 : px;
+			boxes.push(new DOMRect(box.x - out, box.y - out, box.width + 2 * out, box.height + 2 * out));
+		}
+		const walker = document.createTreeWalker(stage, NodeFilter.SHOW_TEXT);
+		for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) {
+			const parent = node.parentElement!;
+			if ((node.textContent ?? '').trim() === '' || parent.closest('[data-thing]') !== null || !parent.checkVisibility({ opacityProperty: true, visibilityProperty: true })) continue;
+			const range = document.createRange();
+			range.selectNodeContents(node);
+			boxes.push(...Array.from(range.getClientRects()));
+		}
+		const left = Math.min(...boxes.map((box) => box.left)), right = Math.max(...boxes.map((box) => box.right));
+		const top = Math.min(...boxes.map((box) => box.top)), bottom = Math.max(...boxes.map((box) => box.bottom));
+
+		// How wide its words are on one line: a hidden copy of the scene, its stage as wide as they need.
+		const copy = scene.cloneNode(true) as HTMLElement;
+		copy.querySelectorAll('[id]').forEach((element) => { element.removeAttribute('id'); });
+		Object.assign(copy.style, { position: 'absolute', left: '0', top: '0', width: `${String(column.width)}px`, visibility: 'hidden' });
+		scene.after(copy);
+		const own = copy.querySelector('canvas')!.parentElement!;
+		Object.assign(own.style, { width: 'max-content', maxWidth: 'none' });
+		const needs = own.getBoundingClientRect().width;
+		copy.remove();
+		const fromLeft = left - column.left, fromRight = column.right - right;
+		if (needs < column.width - 2 && Math.abs(fromLeft - fromRight) > 2) wrong.push(`${name}: ${String(Math.round(needs))}px wide on one line in a ${String(Math.round(column.width))}px column, and ${String(Math.round(fromLeft))}px from its left and ${String(Math.round(fromRight))}px from its right`);
+
+		const { data } = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height);
+		const inked = (x0: number, y0: number, x1: number, y1: number): boolean => {
+			for (let y = Math.max(0, y0); y < Math.min(canvas.height, y1); y++) for (let x = Math.max(0, x0); x < Math.min(canvas.width, x1); x++) if (data[(y * canvas.width + x) * 4 + 3]! > 0) return true;
+			return false;
+		};
+		let inkLeft = Infinity, inkRight = -Infinity, inkTop = Infinity, inkBottom = -Infinity;
+		for (let y = 0; y < canvas.height; y++) for (let x = 0; x < canvas.width; x++) {
+			if (data[(y * canvas.width + x) * 4 + 3] === 0) continue;
+			inkLeft = Math.min(inkLeft, x); inkRight = Math.max(inkRight, x + 1); inkTop = Math.min(inkTop, y); inkBottom = Math.max(inkBottom, y + 1);
+		}
+		const slack = 2 * size, at = (x: number, y: number): readonly [number, number] => [drawn.left + x * size, drawn.top + y * size];
+		const [l, t] = at(inkLeft, inkTop), [r, b] = at(inkRight, inkBottom);
+		if (l < left - slack || r > right + slack || t < top - slack || b > bottom + slack) wrong.push(`${name}: it draws from ${String(Math.round(l))} to ${String(Math.round(r))} across, and its words and pictures run from ${String(Math.round(left))} to ${String(Math.round(right))}`);
+		for (const slot of Array.from(stage.querySelectorAll<HTMLElement>('[data-slot]'))) {
+			const box = slot.getBoundingClientRect();
+			if (box.width < 1 || box.height < 1 || box.left < drawn.left || box.right > drawn.right || box.top < drawn.top || box.bottom > drawn.bottom) continue;
+			if (!inked(Math.floor((box.left - drawn.left) / size), Math.floor((box.top - drawn.top) / size), Math.ceil((box.right - drawn.left) / size), Math.ceil((box.bottom - drawn.top) / size))) wrong.push(`${name}: nothing is drawn in its picture ${slot.dataset['slot']!}`);
+		}
+	});
+	return wrong;
+};
+
+/**
+ * What is wrong with what each pixel scene shows around its pictures, beside what its fence says: a
+ * caption that shows, and an example that does not, since a post promises that what it made up is
+ * labelled.
+ */
+const sceneFeet = (said: readonly { caption: string; example: string | null }[]): string[] => {
+	const shown = (node: Node): boolean => {
+		const parent = node.parentElement!;
+		if (!parent.checkVisibility({ opacityProperty: true, visibilityProperty: true })) return false;
+		for (let at: Element | null = parent; at !== null; at = at.parentElement) if (getComputedStyle(at).clip.startsWith('rect')) return false;
+		const range = document.createRange();
+		range.selectNodeContents(node);
+		return Array.from(range.getClientRects()).some((rect) => rect.width >= 2 && rect.height >= 2);
+	};
+	return Array.from(document.querySelectorAll<HTMLElement>('[data-scene]')).flatMap((scene, k) => {
+		const name = `scene ${String(k + 1)} (${scene.dataset['scene']!})`, fence = said[k];
+		if (fence === undefined) return [`${name}: no fence says it`];
+		const texts: string[] = [];
+		const walker = document.createTreeWalker(scene, NodeFilter.SHOW_TEXT);
+		for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) if ((node.textContent ?? '').trim() !== '' && shown(node)) texts.push((node.textContent ?? '').trim());
+		const wrong: string[] = [];
+		if (texts.includes(fence.caption)) wrong.push(`${name}: its caption shows`);
+		if (fence.example !== null && !texts.includes(fence.example)) wrong.push(`${name}: its example, "${fence.example}", does not show`);
+		return wrong;
+	});
+};
+
+/** Each pixel scene's role and name, as Chrome gives them to a screen reader. */
+const sceneNames = async (view: import('playwright').Page): Promise<string[]> => {
+	const cdp = await view.context().newCDPSession(view);
+	const { root } = await cdp.send('DOM.getDocument', { depth: 0 });
+	const { nodeIds } = await cdp.send('DOM.querySelectorAll', { nodeId: root.nodeId, selector: '[data-scene]' });
+	const named: string[] = [];
+	for (const nodeId of nodeIds) {
+		const { nodes } = await cdp.send('Accessibility.getPartialAXTree', { nodeId, fetchRelatives: false });
+		named.push(`${String(nodes[0]?.role?.value)}: ${String(nodes[0]?.name?.value)}`);
+	}
+	await cdp.detach();
+	return named;
+};
+
+/** Where a post's scenes stand and draw, and what they show around their pictures, at one width in one mode. */
+const scenesHold = async (view: import('playwright').Page, fences: readonly Fence[], where: string): Promise<void> => {
+	assert.deepEqual(await view.evaluate(sceneLayout), [], `${where}: each scene stands in its column, and its canvas draws under and beside its words`);
+	const said = fences.flatMap((fence) => (fence.scene === undefined ? [] : [{ caption: fence.scene.data.caption, example: fence.scene.data.example ?? null }]));
+	assert.deepEqual(await view.evaluate(sceneFeet, said), [], `${where}: no scene shows its caption, and each shows its example`);
+	assert.deepEqual(await sceneNames(view), said.map((scene) => `figure: ${scene.caption}`), `${where}: each scene is a figure named by its caption`);
 };
 
 /** The marks with any pixel under them, in a screenshot of the bare page, below the contrast they need. */
@@ -544,10 +664,12 @@ try {
 				await settle();
 				const scenes = await view.$$('[data-scene]');
 				if (scenes.length > 0) {
+					const fences = await view.evaluate(async (at) => (await fetch(at)).json() as Promise<Fence[]>, `/blog/${path.split('/').pop()!}.tokens.json`);
 					// Such a scene is as tall in the page the build wrote as once it is alive, a still map
-					// on a phone included, so nothing below it jumps.
+					// on a phone included, so nothing below it jumps. A post may have none.
+					const fixed = fences.filter((fence) => fence.scene?.data.regions !== undefined || fence.scene?.data.kind === 'deploy').length;
 					const heights = await view.evaluate(() => ({ written: (window as unknown as { written: number[] }).written, alive: Array.from(document.querySelectorAll('[data-scene] [id]')).filter((stage) => stage.querySelector('[data-placed]') !== null).map((stage) => stage.getBoundingClientRect().height) }));
-					assert.ok(heights.alive.length > 0, `${where}: a scene with a picture of fixed height`);
+					assert.equal(heights.alive.length, fixed, `${where}: a stage for each scene with a picture of fixed height, a map or a deploy`);
 					assert.deepEqual(heights.alive, heights.written, `${where}: each is as tall as the build wrote it`);
 					// Nothing in a scene moves, and it shows the end of its story with its words.
 					const frames = (): Promise<string[]> => view.evaluate(() => Array.from(document.querySelectorAll<HTMLCanvasElement>('[data-scene] canvas')).map((canvas) => canvas.toDataURL()));
@@ -560,7 +682,6 @@ try {
 					assert.deepEqual(words.unseen, [], `${where}: and a word that does not show is hidden from a screen reader too`);
 					assert.deepEqual(words.unfound, [], `${where}: a map's search finds snippets, so every found word is checked`);
 					// A map rests where its searches end: on the last.
-					const fences = await view.evaluate(async (at) => (await fetch(at)).json() as Promise<Fence[]>, `/blog/${path.split('/').pop()!}.tokens.json`);
 					const cluster = await view.$('[data-scene="cluster"]');
 					if (cluster !== null) {
 						const searches = fences.find((fence) => fence.scene?.name === 'cluster')!.scene!.data.searches!;
@@ -572,6 +693,7 @@ try {
 					const maps = await view.evaluate(mapWords);
 					assert.equal(maps.length, regionsOf.length, `${where}: a map on the page for each map in the post`);
 					assert.deepEqual(misplaced(maps, regionsOf), [], `${where}: every word on a map sits by its own point`);
+					await scenesHold(view, fences, where);
 				}
 				const marks = await view.evaluate(marksOf);
 				await view.addStyleTag({ content: BARE });
@@ -682,12 +804,13 @@ try {
 		assert.deepEqual(await stopped(), held, `${post.slug}: Motion switched off mid-story holds every scene where it stopped`);
 		await playing.close();
 
-		// With motion on, once every map has finished moving, each word it shows is by its own point
-		// and no two words cover each other. At 1280, 600 and 320, light and dark.
+		// With motion on, once every scene has finished its story: each stands in its column and draws
+		// under its words, and shows no caption. On a map, each word it shows is by its own point and
+		// no two words cover each other. At 1280, 600 and 320, light and dark.
 		const fences = await (await fetch(`${site.url}/blog/${post.slug}.tokens.json`)).json() as Fence[];
 		const regionsOf = fences.flatMap((fence) => (fence.scene?.data.regions === undefined ? [] : [fence.scene.data.regions]));
 		const last = fences.find((fence) => fence.scene?.name === 'cluster')?.scene?.data.searches?.at(-1)?.words;
-		if (regionsOf.length > 0) for (const dark of [false, true]) for (const width of [1280, 600, 320]) {
+		for (const dark of [false, true]) for (const width of [1280, 600, 320]) {
 			const where = `${post.slug}, ${dark ? 'dark' : 'light'}, ${String(width)}px, at the end of the story`;
 			const context = await browser.newContext({ viewport: { width, height: 900 } });
 			await context.addInitScript((night) => { if (night) localStorage.setItem('modeChoice', 'dark'); }, dark);
@@ -695,20 +818,23 @@ try {
 			await ended.goto(`${site.url}${path}`, { waitUntil: 'networkidle' });
 			// The whole page in the window, so every scene plays at once.
 			await ended.setViewportSize({ width, height: await ended.evaluate(() => document.documentElement.scrollHeight) });
-			// A cluster's tour ends on its last search. After that, a map is at its end once nothing on
-			// it changes for three seconds, longer than a fanout waits before it splits.
+			// A cluster's tour ends on its last search. After that, the scenes are at their end once
+			// nothing in them changes for three seconds, longer than a fanout waits before it splits.
 			if (last !== undefined) await ended.waitForFunction((words) => document.querySelector('[data-scene="cluster"] [data-thing="seek:q"]')?.textContent === words, last, { timeout: 30_000 });
-			const shows = async (): Promise<string> => (await Promise.all((await ended.$$('[data-scene="cluster"], [data-scene="fanout"]')).map((scene) => scene.evaluate(sceneState)))).join();
+			const shows = async (): Promise<string> => (await Promise.all((await ended.$$('[data-scene]')).map((scene) => scene.evaluate(sceneState)))).join();
 			let before = '', now = await shows();
 			for (let tries = 0; now !== before && tries < 10; tries++) {
 				await ended.waitForTimeout(3000);
 				[before, now] = [now, await shows()];
 			}
-			assert.equal(now, before, `${where}: the maps come to rest`);
-			const maps = await ended.evaluate(mapWords);
-			assert.equal(maps.length, regionsOf.length, `${where}: a map on the page for each map in the post`);
-			assert.ok(maps.every((map) => map.words.some((word) => word.name.startsWith('snippet:'))), `${where}: each map shows what its searches found`);
-			assert.deepEqual(misplaced(maps, regionsOf), [], `${where}: every word on a map sits by its own point, and none covers another`);
+			assert.equal(now, before, `${where}: the scenes come to rest`);
+			if (regionsOf.length > 0) {
+				const maps = await ended.evaluate(mapWords);
+				assert.equal(maps.length, regionsOf.length, `${where}: a map on the page for each map in the post`);
+				assert.ok(maps.every((map) => map.words.some((word) => word.name.startsWith('snippet:'))), `${where}: each map shows what its searches found`);
+				assert.deepEqual(misplaced(maps, regionsOf), [], `${where}: every word on a map sits by its own point, and none covers another`);
+			}
+			await scenesHold(ended, fences, where);
 			await context.close();
 		}
 

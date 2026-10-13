@@ -74,6 +74,10 @@ const useStage = (cleanup: Cleanup, id: string, spec: StageSpec, night: ReturnTy
 		const things = new Map<string, HTMLElement>();
 		for (const element of Array.from(host.querySelectorAll<HTMLElement>('[data-thing]'))) things.set(element.dataset['thing']!, element);
 		const slots = Array.from(host.querySelectorAll<HTMLElement>('[data-slot]'));
+		// A stage narrower than the column stands in the middle of it (theme.ts), and its pixels are
+		// still the scene's size, which the scene's own width sets for its words' boxes.
+		const figure = host.closest<HTMLElement>('[data-scene]') ?? host;
+		const scale = (): number => heroScale(figure.getBoundingClientRect().width);
 		const state: Live = { host, started: null, sizes: new Map(), boxes: new Map(), again: () => { running?.again(); } };
 		live = state;
 		// Where everything stands, read once per layout: laid-out things by their box, placed ones by their size.
@@ -94,10 +98,11 @@ const useStage = (cleanup: Cleanup, id: string, spec: StageSpec, night: ReturnTy
 			}
 		};
 		running = runScene(host, {
-			paint: (dark, width, height, css, moving) => {
+			scale,
+			paint: (dark, width, height, _css, moving) => {
 				// A laid-out thing is measured where it stands, so any move the last frame gave it comes off first.
 				for (const element of things.values()) if (element.dataset['placed'] === undefined) element.style.transform = '';
-				measure(heroScale(css));
+				measure(scale());
 				return spec.paint(dark, width, height, moving, state);
 			},
 			drawn: (painter, _shown, size) => {
@@ -162,14 +167,18 @@ const Height = (props: { wide: number; mid: number; narrow: number; still?: numb
 	props.still === undefined ? null : <div theme={['scene_height', 'scene_height_still']} style={{ height: `${String(props.still)}px` }} />,
 ];
 
-/** The button under every scene, a switch where the scene has one, what is invented, and the caption. */
+/**
+ * The button under every scene, a switch where the scene has one, and what is invented. The
+ * caption is for a screen reader only. The figure carries it as `aria-label` too, since Chrome
+ * takes no figure's name from its figcaption.
+ */
 const Foot = (props: { caption: string; example?: string | undefined; play: () => void; extra?: unknown }): unknown => [
 	<div theme="scene_controls">
 		<button type="button" theme="scene_again" onClick={props.play}>Play again</button>
 		{props.extra ?? null}
 	</div>,
 	props.example === undefined ? null : <p theme="scene_example">{props.example}</p>,
-	<figcaption theme="scene_caption">{props.caption}</figcaption>,
+	<figcaption theme="scene_unseen">{props.caption}</figcaption>,
 ];
 
 /** A two-way switch: which of two states the scene shows. */
@@ -191,8 +200,8 @@ const PipelineScene = ModeContext.use((mode) => (props: { id: string; data: Pipe
 		paint: (night, width, height, moving, live) => createPipeline({ width, height, night, moving, started: () => live.started, boxes: () => live.boxes, shape: data }),
 	}, nightOf(mode));
 	return (
-		<figure theme="scene" data-scene="pipeline">
-			<div id={props.id} theme={['scene_stage', 'scene_stage_flow']}>
+		<figure theme="scene" data-scene="pipeline" aria-label={data.caption}>
+			<div id={props.id} theme={['scene_stage', 'scene_stage_flow', 'scene_stage_fit']}>
 				<canvas theme="scene_paint" aria-hidden="true" />
 				{data.lanes.map((lane, l) => (
 					<section theme="scene_lane">
@@ -373,7 +382,7 @@ const ClusterScene = ModeContext.use((mode) => (props: { id: string; data: Clust
 	};
 
 	return (
-		<figure theme="scene" data-scene="cluster">
+		<figure theme="scene" data-scene="cluster" aria-label={data.caption}>
 			<div id={props.id} theme={['scene_stage', 'scene_stage_map']} onPointerDown={down} onPointerMove={drag} onPointerUp={up} onPointerCancel={up} onDragStart={(event: Event) => { event.preventDefault(); }}>
 				<canvas theme="scene_paint" aria-hidden="true" />
 				<Height {...MAP_HEIGHT} />
@@ -429,7 +438,7 @@ const FanoutScene = ModeContext.use((mode) => (props: { id: string; data: Fanout
 	}, nightOf(mode));
 	cleanup(() => { clearTimeout(pending); });
 	return (
-		<figure theme="scene" data-scene="fanout">
+		<figure theme="scene" data-scene="fanout" aria-label={data.caption}>
 			<p theme={['scene_card', 'scene_card_wide', 'scene_card_request']}><Pixels name="request" /><span>{data.from.label === undefined ? null : <span theme="scene_eyebrow">{data.from.label}</span>}{data.from.name}</span></p>
 			<div id={props.id} theme={['scene_stage', 'scene_stage_map']}>
 				<canvas theme="scene_paint" aria-hidden="true" />
@@ -457,8 +466,8 @@ const BranchesScene = ModeContext.use((mode) => (props: { id: string; data: Fano
 		paint: (night, width, height, moving, live) => createBranches({ width, height, night, moving, started: () => live.started, boxes: () => live.boxes, branches: data.into.length }),
 	}, nightOf(mode));
 	return (
-		<figure theme="scene" data-scene="fanout">
-			<div id={props.id} theme={['scene_stage', 'scene_stage_flow', 'scene_stage_branches']}>
+		<figure theme="scene" data-scene="fanout" aria-label={data.caption}>
+			<div id={props.id} theme={['scene_stage', 'scene_stage_flow', 'scene_stage_fit', 'scene_stage_branches']}>
 				<canvas theme="scene_paint" aria-hidden="true" />
 				<div theme="scene_source">
 					<span theme={['scene_slot', 'scene_slot_build']} data-slot="from" />
@@ -525,7 +534,7 @@ const DeployScene = ModeContext.use((mode) => (props: { id: string; data: Toggle
 	cleanup(() => { clearTimeout(pending); });
 	const height = (width: number, size: number): number => deployLayout(width, pages).height * size;
 	return (
-		<figure theme="scene" data-scene="toggle">
+		<figure theme="scene" data-scene="toggle" aria-label={data.caption}>
 			<div id={props.id} theme={['scene_stage', 'scene_stage_map']}>
 				<canvas theme="scene_paint" aria-hidden="true" />
 				<Height wide={height(253, 3)} mid={height(173, 3)} narrow={height(155, 2)} />
@@ -557,8 +566,8 @@ const PromptsScene = ModeContext.use((mode) => (props: { id: string; data: Toggl
 		stage.redraw();
 	};
 	return (
-		<figure theme="scene" data-scene="toggle">
-			<div id={props.id} theme={['scene_stage', 'scene_stage_flow']}>
+		<figure theme="scene" data-scene="toggle" aria-label={data.caption}>
+			<div id={props.id} theme={['scene_stage', 'scene_stage_flow', 'scene_stage_tasks']}>
 				<canvas theme="scene_paint" aria-hidden="true" />
 				<ol theme="scene_tasks">
 					{tasks.map((task, k) => (
@@ -595,8 +604,8 @@ const MatchScene = ModeContext.use((mode) => (props: { id: string; data: Match }
 		paint: (night, width, height, moving, live) => createMatch({ width, height, night, moving, started: () => live.started, boxes: () => live.boxes, links, left: data.left.items.length, right: data.right.items.length }),
 	}, nightOf(mode));
 	return (
-		<figure theme="scene" data-scene="match">
-			<div id={props.id} theme={['scene_stage', 'scene_stage_flow', 'scene_stage_match']}>
+		<figure theme="scene" data-scene="match" aria-label={data.caption}>
+			<div id={props.id} theme={['scene_stage', 'scene_stage_flow', 'scene_stage_fit', 'scene_stage_match']}>
 				<canvas theme="scene_paint" aria-hidden="true" />
 				<div theme="scene_side">
 					<p theme="scene_tag">{data.left.label}</p>
@@ -634,7 +643,7 @@ const NumbersScene = ModeContext.use((mode) => (props: { id: string; data: Numbe
 		paint: (night, width, height, moving, live) => createNumbers({ width, height, night, moving, started: () => live.started, boxes: () => live.boxes, figures }),
 	}, nightOf(mode));
 	return (
-		<figure theme="scene" data-scene="numbers">
+		<figure theme="scene" data-scene="numbers" aria-label={data.caption}>
 			<div id={props.id} theme={['scene_stage', 'scene_stage_flow']}>
 				<canvas theme="scene_paint" aria-hidden="true" />
 				<ol theme="scene_figures">
