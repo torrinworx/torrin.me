@@ -104,7 +104,9 @@ const server = createServer({
 	sources: [own, health, logs, files],
 	store,
 	gate: 'gate',
-	listener: node({ port }),
+	// A deployed build sits behind nginx, which sets X-Real-IP from the socket it accepted. Without
+	// `forwarded` every visitor is 127.0.0.1 and shares one request limit.
+	listener: node({ port, ...(build === null ? {} : { forwarded: 'x-real-ip' as const }) }),
 	// The server's own Origin rule: a browser post from anywhere but the site's two names is
 	// refused before any module sees it. The contact route keeps its own list beneath this one.
 	origins: ['https://torrin.me', 'https://www.torrin.me'],
