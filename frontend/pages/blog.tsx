@@ -209,6 +209,10 @@ const PostHead = (props: { post: Listed }): unknown => {
 			<Meta property="og:type" content="article" />
 			<Meta property="og:url" content={url} />
 			{image === undefined ? null : <Meta property="og:image" content={image} />}
+			{/* LinkedIn shows a 160px thumbnail for a card whose size it is not told. */}
+			{image === undefined ? null : <Meta property="og:image:width" content="1200" />}
+			{image === undefined ? null : <Meta property="og:image:height" content="630" />}
+			{image === undefined ? null : <Meta property="og:image:alt" content={post.title} />}
 			<Meta property="article:published_time" content={post.date} />
 			{post.updated === undefined ? null : <Meta property="article:modified_time" content={post.updated} />}
 			<Meta property="article:author" content={SITE_URL} />

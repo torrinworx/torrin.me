@@ -186,6 +186,9 @@ export const SiteHead = ModeContext.use((mode) => (): unknown => <>
 	<Meta property="og:type" content="website" />
 	<Meta property="og:url" content={SITE_URL} />
 	<Meta property="og:image" content={IMAGE_URL} />
+	<Meta property="og:image:width" content="1200" />
+	<Meta property="og:image:height" content="630" />
+	<Meta property="og:image:alt" content={PAGE_TITLE} />
 	<Meta property="og:site_name" content="Torrin Leonard" />
 	<Meta property="og:locale" content="en_CA" />
 
