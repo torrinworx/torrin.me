@@ -1,9 +1,9 @@
 // The images a link unfurls to, rendered with Playwright: one card per post, the site's own card,
 // and the dark profile image the structured data names.
 //
-// A post's card carries its own tree, the one above its title on the page (`plotScene`, seeded
-// from the slug), so every post unfurls to a different picture. The tree is drawn in Node by the
-// same strip engine the page runs and handed to the card as raw pixels.
+// A post's card shows the tree drawn above its title on the page (`plotScene`, seeded from the
+// slug), so each post gets a different picture. Node draws the tree with the page's strip engine
+// and writes its raw pixels into the card.
 
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
