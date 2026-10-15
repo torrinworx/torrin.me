@@ -22,3 +22,6 @@ build.zip
 .env
 *.log
 .DS_Store
+
+# Git worktrees that Claude Code sessions make for branches
+/.claude/worktrees/
