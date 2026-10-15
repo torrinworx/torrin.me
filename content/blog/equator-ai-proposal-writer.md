@@ -1,7 +1,7 @@
 ---
 title: Building Equator's AI Proposal Writer From the First Commit
 description: Engineering firms win work by answering RFPs. I made the first commit on Equator's AI proposal writer, which drafts those answers from a firm's own past work, and was its largest contributor. This is the part I built.
-date: 2026-10-12
+date: 2026-10-15
 ---
 
 From March 2023 to September 2026 I was a software developer at Equator Studios in Kitchener. Equator makes mapping and site analysis software for civil engineering firms. It also has an AI proposal writer, Equator LDI, and I made its first commit in September 2023.
