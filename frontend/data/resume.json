@@ -25,6 +25,23 @@
 
   "work": [
     {
+      "role": "Founder & Engineer",
+      "company": "Builderloo",
+      "companyUrl": "https://builderloo.ca",
+      "logo": "/BuilderlooLogo.svg",
+      "location": "Self-employed / Waterloo, ON",
+      "start": "2026-02-13",
+      "end": null,
+      "tech": "TypeScript, Node.js, aweft, Postgres, cheerio, MCP, OAuth 2.1, Claude Code, Linux, nginx",
+      "bullets": [
+        "Built and run Builderloo.ca alone, a community platform for Waterloo Region tech (formerly KWBuilds): a directory of 851 local startups (October 2026), their open roles, local events and news, a forum, and a weekly newsletter. 507 commits.",
+        "Scrapers read 4 startup hubs, 18 news sources and 5 event calendars, plus every listed company's careers page and blog, on one 1 GB server.",
+        "Chose browserless scraping (got, cheerio) after a measured bake-off across 493 sites recovered content for 98.8%, retiring the headless browser and Docker from the stack.",
+        "Serves a public MCP server with a hand-rolled OAuth 2.1 authorization server (Dynamic Client Registration, PKCE) so claude.ai and ChatGPT connectors can attach while anonymous clients still work.",
+        "Build it with Claude Code agents from written work orders, with tests and reviews on every change."
+      ]
+    },
+    {
       "role": "Full Stack Software Developer",
       "company": "Equator Studios",
       "companyUrl": "https://equatorstudios.com/",
@@ -120,16 +137,6 @@
   },
 
   "projects": [
-    {
-      "name": "Builderloo.ca",
-      "url": "https://builderloo.ca",
-      "description": "Public directory of Waterloo-region tech startups (formerly KWBuilds), with news, events, jobs, a forum, and a public MCP server.",
-      "bullets": [
-        "Built solo across 483 commits: a live directory of 800+ published startups (October 2026) scraped and enriched from Communitech, Velocity, and other regional hubs, with news, events, and jobs subsystems running on the same pipeline machinery.",
-        "Chose browserless scraping (got, cheerio) after a measured bake-off across 493 sites recovered content for 98.8%, retiring the headless browser and Docker from the stack.",
-        "Serves a public MCP server with a hand-rolled OAuth 2.1 authorization server (Dynamic Client Registration, PKCE) so claude.ai and ChatGPT connectors can attach while anonymous clients still work."
-      ]
-    },
     {
       "name": "maccobylab.com",
       "url": "https://maccobylab.com",
