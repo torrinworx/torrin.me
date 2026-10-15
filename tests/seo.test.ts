@@ -92,7 +92,7 @@ describe('the head a crawler reads', () => {
 		assert.ok(html.includes('property="og:type" content="article"'), 'og:type article');
 		assert.ok(html.includes(`property="og:url" content="https://torrin.me/blog/${newest}"`), 'its own og:url');
 		assert.match(html, new RegExp(`<link[^>]*rel="canonical"[^>]*href="https://torrin\\.me/blog/${newest}"`), 'its own canonical');
-		assert.match(html, /property="og:image" content="https:\/\/torrin\.me\/media\/[^"]+\/og\.[0-9a-f]{8}\.png"/, 'its own card');
+		assert.match(html, /property="og:image" content="https:\/\/torrin\.me\/media\/[^"]+\/card\.[0-9a-f]{8}\.png"/, 'its own card');
 		assert.ok(html.includes('property="article:published_time"'), 'a published time');
 		assert.equal((html.match(/<title[^>]*>/g) ?? []).length, 1, 'one title');
 		assert.equal((html.match(/rel="canonical"/g) ?? []).length, 1, 'one canonical');

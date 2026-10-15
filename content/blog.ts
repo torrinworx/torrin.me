@@ -725,7 +725,8 @@ export const buildBlog = async (options: BuildOptions): Promise<Built> => {
 				footer: `${source.front.date.slice(0, 10)} · ${String(minutesOf(count))} min read`,
 				seed: seedOf(source.slug),
 			});
-			const name = `og.${hashOf(Buffer.from(html))}.png`;
+			// `card.`, not the old `og.`: LinkedIn keeps an image by its URL, so a new name makes it fetch again.
+			const name = `card.${hashOf(Buffer.from(html))}.png`;
 			const out = join(options.public, 'media', source.slug, name);
 			og = `/media/${source.slug}/${name}`;
 			put(out, () => null);
