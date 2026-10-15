@@ -10,9 +10,9 @@
 import { mutable } from '@aweftjs/core';
 import { h } from '@aweftjs/ui';
 
-import type { Cluster, Fanout, Match, Numbers, Pipeline, Scene, Toggle } from '../../content/scenes.ts';
+import type { Cluster, Fanout, Match, Numbers, Pipeline, Scene, Schedule, Toggle } from '../../content/scenes.ts';
 import {
-	GLIDE, changedOf, createBranches, createDeploy, createMap, createMatch, createNumbers, createPipeline, createPrompts, deployLayout,
+	GLIDE, changedOf, createBranches, createDeploy, createMap, createMatch, createNumbers, createPipeline, createPrompts, createSchedule, deployLayout,
 	landing, mapArea, mapOf, narrowMap, pipelineLength,
 } from '../scenes.ts';
 import type { Box, Explainer, Seek, Size } from '../scenes.ts';
@@ -672,6 +672,37 @@ const NumbersScene = ModeContext.use((mode) => (props: { id: string; data: Numbe
 	);
 });
 
+// --- schedule --------------------------------------------------------------------------------------
+
+/** An event's program under bunting, each item reached in turn down a rail. */
+const ScheduleScene = ModeContext.use((mode) => (props: { id: string; data: Schedule }, cleanup: Cleanup): unknown => {
+	const data = props.data, kinds = data.items.map((item) => item.kind ?? 'talk');
+	const stage = useStage(cleanup, props.id, {
+		paint: (night, width, height, moving, live) => createSchedule({ width, height, night, moving, started: () => live.started, boxes: () => live.boxes, kinds }),
+	}, nightOf(mode));
+	return (
+		<figure theme="scene" data-scene="schedule" aria-label={data.caption}>
+			<div id={props.id} theme={['scene_stage', 'scene_stage_flow']}>
+				<canvas theme="scene_paint" aria-hidden="true" />
+				<span theme={['scene_slot', 'scene_slot_bunting']} data-slot="bunting" />
+				<ol theme="scene_program">
+					{data.items.map((item, k) => (
+						<li theme="scene_event">
+							<span theme={['scene_slot', 'scene_slot_rail']} data-slot={`rail:${String(k)}`} />
+							<span theme={['scene_slot', 'scene_slot_event']} data-slot={`item:${String(k)}`} />
+							<span theme="scene_words" data-thing={`item:${String(k)}`}>
+								<span theme="scene_name">{item.name}</span>
+								{item.line === undefined ? null : <span theme="scene_line">{item.line}</span>}
+							</span>
+						</li>
+					))}
+				</ol>
+			</div>
+			<Foot caption={data.caption} example={data.example} play={stage.play} />
+		</figure>
+	);
+});
+
 // --- in a feed, and the hook -----------------------------------------------------------------------
 
 /** A scene in a feed: its still frame, which the build painted, and its words as a list. */
@@ -700,5 +731,6 @@ export const SceneBlock = (props: { id: string; scene: Scene; feed?: boolean }):
 		case 'toggle': return <ToggleScene id={props.id} data={scene.data} />;
 		case 'match': return <MatchScene id={props.id} data={scene.data} />;
 		case 'numbers': return <NumbersScene id={props.id} data={scene.data} />;
+		case 'schedule': return <ScheduleScene id={props.id} data={scene.data} />;
 	}
 };

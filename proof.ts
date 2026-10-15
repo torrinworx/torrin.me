@@ -881,6 +881,8 @@ try {
 	built('npx', ['--no-install', 'vite', 'build', '--configLoader', 'native', '--outDir', developed, '--emptyOutDir', '--logLevel', 'warn'], { NODE_ENV: 'development' });
 	built('npm', ['run', 'pages', '--silent'], { PAGES_DIR: developed });
 	const devSite = await boot({ 'static/Files': { dir: developed, unknown: '404' } });
+	// A post's scenes may have no icons (a schedule, figures), so the run as a whole must check some.
+	let checked = 0;
 	try {
 		for (const dark of [false, true]) {
 			const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
@@ -905,13 +907,15 @@ try {
 						return style.maskImage.startsWith('url(') && box.width >= 8 && box.height >= 8;
 					}).length);
 					const all = await view.evaluate(() => document.querySelectorAll('[data-scene] [data-icon]').length);
-					assert.ok(all > 0 && icons === all, `${where}: ${String(icons)} of ${String(all)} icons drawn`);
+					assert.ok(icons === all, `${where}: ${String(icons)} of ${String(all)} icons drawn`);
+					checked += all;
 					assert.deepEqual(said, [], `${where}: nothing thrown or logged`);
 					await view.close();
 				}
 			}
 			await context.close();
 		}
+		assert.ok(checked > 0, 'the development bundle drew at least one scene icon');
 	} finally {
 		await devSite.stop();
 		rmSync(developed, { recursive: true, force: true });

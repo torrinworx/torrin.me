@@ -348,6 +348,24 @@ figures:
     to: 52,100
 ```
 
+**`schedule`**: an event's program as it went, 2 to 6 `items`, each a `name`, an optional `line`
+under it and an optional `kind`: `talk` (a podium, the default), `panel` (three people at a
+table) or `drinks` (a stein that fills). Bunting unrolls across the top, then a marker travels
+down a rail, and each item's picture and words come in as it arrives. There is no field for a
+time. A time the post states can go in a `line`.
+
+```yaml
+caption: The afternoon program
+items:
+  - name: Keynote
+    line: on going the distance
+  - name: Quantum
+    line: two investors
+    kind: panel
+  - name: Biergarten
+    kind: drinks
+```
+
 The pages step then writes `/blog`, a page per published post, and three feeds beside the
 sitemap: `feed.xml` (Atom, full text), `feed.json` (JSON Feed 1.1) and `feed-summary.xml` (the
 description, the first paragraph and a link, for dev.to's import).

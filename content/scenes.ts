@@ -141,6 +141,15 @@ export interface Numbers extends Common {
 	readonly figures: readonly Figure[];
 }
 
+/** What a program item is, which says how it is drawn. */
+export const SCHEDULE_KINDS = ['talk', 'panel', 'drinks'] as const;
+export type ScheduleKind = typeof SCHEDULE_KINDS[number];
+
+/** An event's program as it went, in order, with no times: the post states none. */
+export interface Schedule extends Common {
+	readonly items: readonly { readonly name: string; readonly line?: string; readonly kind?: ScheduleKind }[];
+}
+
 /** A scene as the page gets it: its name, and its checked data. */
 export type Scene =
 	| { readonly name: 'pipeline'; readonly data: Pipeline }
@@ -148,7 +157,8 @@ export type Scene =
 	| { readonly name: 'fanout'; readonly data: Fanout }
 	| { readonly name: 'toggle'; readonly data: Toggle }
 	| { readonly name: 'match'; readonly data: Match }
-	| { readonly name: 'numbers'; readonly data: Numbers };
+	| { readonly name: 'numbers'; readonly data: Numbers }
+	| { readonly name: 'schedule'; readonly data: Schedule };
 
 // --- the fields --------------------------------------------------------------------------
 
@@ -392,6 +402,16 @@ const SCENES: Readonly<Record<Scene['name'], Kind>> = {
 			}),
 		}),
 	},
+	schedule: {
+		fields: {
+			...COMMON,
+			items: { each: 'item', min: 2, max: 6, fields: { name: 'text', line: 'text?', kind: 'text?' } },
+		},
+		check: (data: Schedule) => first(() => terms(data), () => {
+			const at = data.items.findIndex((item) => item.kind !== undefined && !(SCHEDULE_KINDS as readonly string[]).includes(item.kind));
+			return at < 0 ? null : { at: ['items', at, 'kind'], what: `item ${String(at + 1)}: kind is "${data.items[at]!.kind!}", and it is one of ${SCHEDULE_KINDS.join(', ')}` };
+		}),
+	},
 };
 
 /** The names a scene fence may use. */
@@ -484,5 +504,6 @@ export const wordsOf = (scene: Scene): string[] => {
 			: [`${scene.data.first}: ${String(scene.data.pages)} of ${String(scene.data.pages)} pages uploaded`, `${scene.data.second}: ${String(scene.data.changed)} of ${String(scene.data.pages)} pages uploaded`];
 		case 'match': return scene.data.left.items.map((item) => `${item}: ${scene.data.right.items.filter((right) => right.answers.includes(item)).map((right) => right.text).join('; ')}`);
 		case 'numbers': return scene.data.figures.map((figure) => (figure.value === undefined ? `${figure.label}: ${figure.from!} to ${figure.to!}` : `${figure.value} ${figure.label}`));
+		case 'schedule': return scene.data.items.map((item) => [item.name, item.line].filter(Boolean).join(': '));
 	}
 };

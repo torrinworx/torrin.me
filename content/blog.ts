@@ -560,6 +560,7 @@ const stillOf = (scene: Scene): StillScene => {
 			kind: 'numbers',
 			figures: scene.data.figures.map((figure) => (figure.share !== undefined ? { share: figure.share } : figure.count !== undefined ? { count: figure.count } : { ends: figure.ends!, under: figure.under! })),
 		};
+		case 'schedule': return { kind: 'schedule', kinds: scene.data.items.map((item) => item.kind ?? 'talk') };
 	}
 };
 

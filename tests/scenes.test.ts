@@ -9,10 +9,10 @@ import { Theme, context, h, render } from '@aweftjs/ui';
 import { chromium } from 'playwright';
 
 import { SceneError, readFigure, readScene, sceneOf, wordsOf } from '../content/scenes.ts';
-import type { Fanout, Numbers, Pipeline } from '../content/scenes.ts';
+import type { Fanout, Numbers, Pipeline, Schedule } from '../content/scenes.ts';
 import {
-	changedOf, createBranches, createDeploy, createMap, createMatch, createNumbers, createPipeline, createPrompts, deployLayout, inksOf, landing,
-	mapArea, mapOf, narrowMap, pipelineLength, stillFrame, uploadsOf,
+	changedOf, createBranches, createDeploy, createMap, createMatch, createNumbers, createPipeline, createPrompts, createSchedule, deployLayout, inksOf, landing,
+	mapArea, mapOf, narrowMap, pipelineLength, scheduleLength, stillFrame, uploadsOf,
 } from '../frontend/scenes.ts';
 import type { Box, Explainer, Seek, Size } from '../frontend/scenes.ts';
 import { pack } from '../frontend/strip.ts';
@@ -30,6 +30,7 @@ const refused = (name: string, yaml: string): { line: number; message: string } 
 };
 
 const PIPELINE = 'caption: c\nlanes:\n  - label: Up\n    steps:\n      - kind: files\n        items: [a.pdf, b.pdf]\n      - kind: database\n        name: Store\n  - steps:\n      - kind: searches\n        items: [q]\n        reach: Store\n      - kind: found\n        items: [hit]\n';
+const SCHEDULE = 'caption: c\nitems:\n  - name: Keynote\n    line: on going the distance\n  - name: Quantum\n    kind: panel\n  - name: Biergarten\n    line: Until six\n    kind: drinks\n';
 const CLUSTER = 'caption: c\nid: m\nregions:\n  - name: A\n    snippets: [one, two]\n  - name: B\n    snippets: [three]\nsearches:\n  - words: w\n    at: [A]\n';
 
 describe('a scene\'s YAML', () => {
@@ -54,7 +55,7 @@ describe('a scene\'s YAML', () => {
 	});
 
 	it('refuses a name that is no scene, own names only', () => {
-		assert.deepEqual(refused('maze', 'caption: c'), { line: 0, message: 'there is no scene called "maze"; the scenes are pipeline, cluster, fanout, toggle, match, numbers' });
+		assert.deepEqual(refused('maze', 'caption: c'), { line: 0, message: 'there is no scene called "maze"; the scenes are pipeline, cluster, fanout, toggle, match, numbers, schedule' });
 		assert.match(refused('constructor', 'caption: c').message, /no scene called "constructor"/);
 	});
 
@@ -143,6 +144,15 @@ describe('a scene\'s YAML', () => {
 		assert.match(refused('numbers', 'caption: c\nfigures:\n  - label: x\n    value: 5%\n    from: "1"\n    to: "2"\n').message, /^figure 1 has value and from, and it takes value, or from and to, not both$/);
 	});
 
+	it('takes a schedule\'s items in order, each a talk, a panel or drinks, and no time', () => {
+		const schedule = readScene('schedule', SCHEDULE).data as Schedule;
+		assert.deepEqual(schedule.items, [{ name: 'Keynote', line: 'on going the distance' }, { name: 'Quantum', kind: 'panel' }, { name: 'Biergarten', line: 'Until six', kind: 'drinks' }]);
+		assert.deepEqual(refused('schedule', SCHEDULE.replace('kind: panel', 'kind: workshop')), { line: 6, message: 'item 2: kind is "workshop", and it is one of talk, panel, drinks' });
+		assert.deepEqual(refused('schedule', SCHEDULE.replace('    kind: panel\n', '    kind: panel\n    time: "2:00"\n')), { line: 7, message: 'item 2: there is no field "time"; the fields are name, line, kind' });
+		assert.match(refused('schedule', 'caption: c\nitems:\n  - name: Keynote\n').message, /^items holds 1 item, and it holds 2 to 6$/);
+		assert.match(refused('schedule', 'caption: c\nitems:\n  - name: A\n  - line: b\n').message, /^item 2: name is missing$/);
+	});
+
 	it('checks each term\'s kind', () => {
 		assert.match(refused('cluster', `${CLUSTER}terms:\n  - text: x\n    as: shout\n`).message, /term 1: as is "shout", and it is one of search, found, thing, changed/);
 	});
@@ -151,13 +161,14 @@ describe('a scene\'s YAML', () => {
 		const text = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
 		const section = text.slice(text.indexOf('### Pixel scenes'), text.indexOf('## Layout'));
 		const examples = [...section.matchAll(/\*\*`(\w+)`\*\*[\s\S]*?```yaml\n([\s\S]*?)```/g)];
-		assert.deepEqual(examples.map((example) => example[1]), ['pipeline', 'cluster', 'fanout', 'toggle', 'match', 'numbers'], 'one example for every scene');
+		assert.deepEqual(examples.map((example) => example[1]), ['pipeline', 'cluster', 'fanout', 'toggle', 'match', 'numbers', 'schedule'], 'one example for every scene');
 		for (const [, name, yaml] of examples) assert.equal(readScene(name!, yaml!).name, name);
 	});
 
 	it('lists a scene\'s words in reading order, for a feed', () => {
 		assert.deepEqual(wordsOf(readScene('pipeline', PIPELINE)), ['Up', 'a.pdf', 'b.pdf', 'Store', 'q', 'hit']);
 		assert.deepEqual(wordsOf(readScene('cluster', CLUSTER)), ['A: one; two', 'B: three']);
+		assert.deepEqual(wordsOf(readScene('schedule', SCHEDULE)), ['Keynote: on going the distance', 'Quantum', 'Biergarten: Until six']);
 		assert.deepEqual(wordsOf(readScene('numbers', 'caption: c\nfigures:\n  - label: of the commits\n    value: 56%\n  - label: clicks\n    from: under 1,000\n    to: 52,100\n')), ['56% of the commits', 'clicks: under 1,000 to 52,100']);
 	});
 });
@@ -177,6 +188,12 @@ const PIPELINE_BOXES = boxes({
 });
 const MATCH_BOXES = boxes({ 'left:0': [14, 10, 50, 8], 'slot:mark:0': [6, 10, 5, 8], 'left:1': [14, 30, 50, 8], 'slot:mark:1': [6, 30, 5, 8], 'right:0': [120, 10, 50, 8], 'slot:marks:0': [174, 10, 20, 8], 'right:1': [120, 30, 50, 8], 'slot:marks:1': [174, 30, 20, 8] });
 const PROMPTS_BOXES = boxes({ 'task:0': [6, 10, 50, 8], 'slot:who:0': [70, 8, 16, 14], 'prompt:0': [96, 10, 90, 8], 'edit:0': [96, 10, 90, 8] });
+const SCHEDULE_BOXES = boxes({
+	'slot:bunting': [4, 2, 192, 14],
+	'slot:rail:0': [4, 18, 14, 20], 'slot:item:0': [20, 19, 26, 18], 'item:0': [52, 24, 80, 10],
+	'slot:rail:1': [4, 40, 14, 20], 'slot:item:1': [20, 41, 26, 18], 'item:1': [52, 46, 80, 10],
+	'slot:rail:2': [4, 62, 14, 20], 'slot:item:2': [20, 63, 26, 18], 'item:2': [52, 68, 80, 10],
+});
 const BRANCHES_BOXES = boxes({ 'slot:from': [10, 40, 20, 20], 'slot:branch:0': [120, 10, 22, 18], 'slot:branch:1': [120, 70, 22, 18], from: [6, 64, 30, 8], 'branch:0': [146, 14, 40, 8], 'branch:1': [146, 74, 40, 8] });
 const REGIONS = [{ name: 'A', snippets: ['one', 'two'] }, { name: 'B', snippets: ['three', 'four'] }];
 const seekAt = (to: readonly string[]): Seek => ({ id: 'q', x: 0, y: 0, from: [0, 0], to, fromTo: to, at: 0, near: 2 });
@@ -189,6 +206,7 @@ const PAINTERS: Readonly<Record<string, (night: boolean, moving: boolean, starte
 	branches: (night, moving, started = 0) => createBranches({ ...stage(night, moving, started), boxes: BRANCHES_BOXES, branches: 2 }),
 	prompts: (night, moving, started = 0) => createPrompts({ ...stage(night, moving, started), boxes: PROMPTS_BOXES, tasks: [{ edit: true }], edits: () => ({ on: true, since: 0 }) }),
 	match: (night, moving, started = 0) => createMatch({ ...stage(night, moving, started), boxes: MATCH_BOXES, links: [[0, 0], [1, 0], [1, 1]], left: 2, right: 2 }),
+	schedule: (night, moving, started = 0) => createSchedule({ ...stage(night, moving, started), boxes: SCHEDULE_BOXES, kinds: ['talk', 'panel', 'drinks'] }),
 	numbers: (night, moving, started = 0) => createNumbers({ ...stage(night, moving, started), boxes: boxes({ 'slot:bar:0': [10, 10, 100, 6], 'slot:bar:1': [10, 30, 100, 9], 'slot:bar:2:from': [10, 60, 100, 5], 'slot:bar:2:to': [10, 70, 100, 5] }), figures: [{ share: 0.56 }, { count: 70 }, { ends: [1000, 52100], under: [true, false] }] }),
 };
 const play = (painter: Explainer, until: number): Explainer => {
@@ -229,7 +247,7 @@ describe('the scenes\' painters', () => {
 	}
 
 	it('lifts a thing under the pointer a pixel, and no more', () => {
-		const laid = { pipeline: PIPELINE_BOXES, match: MATCH_BOXES, prompts: PROMPTS_BOXES, branches: BRANCHES_BOXES };
+		const laid = { pipeline: PIPELINE_BOXES, match: MATCH_BOXES, prompts: PROMPTS_BOXES, branches: BRANCHES_BOXES, schedule: SCHEDULE_BOXES };
 		for (const [name, things] of Object.entries(laid)) {
 			const painter = play(PAINTERS[name]!(false, true), 30);
 			const under = [...things()].filter(([key]) => !key.startsWith('slot:') && painter.anchors.has(key));
@@ -387,6 +405,31 @@ describe('the scenes\' painters', () => {
 		assert.ok(marks(0) > marks(1) && marks(1) > 0, 'the first answers two items, the second one');
 	});
 
+	it('strings the bunting from the left, reaches each item of a schedule in turn, fills the stein last, and rests at the last item', () => {
+		const painter = PAINTERS['schedule']!(false, true, 0);
+		const inked = (x0: number, y0: number, w: number, h: number, colour?: number): number => {
+			let n = 0;
+			for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) if (colour === undefined ? painter.pixels[y * W + x] !== 0 : painter.pixels[y * W + x] === colour) n++;
+			return n;
+		};
+		const alphas = (): number[] => [0, 1, 2].map((k) => painter.anchors.get(`item:${String(k)}`)!.alpha);
+		play(painter, 0.5);
+		assert.ok(inked(4, 2, 60, 12) > 0 && inked(136, 2, 60, 12) === 0, 'the bunting is part way across');
+		assert.deepEqual(alphas(), [0, 0, 0], 'no item before the marker reaches it');
+		play(painter, 2);
+		assert.deepEqual(alphas(), [1, 0, 0], 'the first item, once the marker is there');
+		assert.ok(inked(20, 19, 26, 18) > 0 && inked(20, 41, 26, 18) === 0, 'and its picture, and not the next');
+		play(painter, scheduleLength(3));
+		assert.deepEqual(alphas(), [1, 1, 1]);
+		const beer = inked(20, 63, 26, 18, inksOf(false).accent);
+		const still = PAINTERS['schedule']!(false, false, null);
+		still.frame(0, 0);
+		assert.ok(beer > 20, `the stein is full of beer: ${String(beer)} pixels`);
+		// The marker stands to the left of the last stop, and nowhere by the first.
+		const marker = (p: Explainer, y: number): number => { let n = 0; for (let j = y - 3; j <= y + 3; j++) for (let x = 5; x < 9; x++) if (p.pixels[j * W + x] !== 0) n++; return n; };
+		assert.ok(marker(still, 72) > 0 && marker(still, 28) === 0, 'still, the marker rests at the last item');
+	});
+
 	it('shows an admin\'s edit over its default while edits are live, and the default once they are not', () => {
 		let on = true;
 		const painter = createPrompts({ ...stage(false, true), boxes: boxes({ 'task:0': [6, 10, 50, 8], 'prompt:0': [96, 10, 90, 8] }), tasks: [{ edit: true }], edits: () => ({ on, since: 0 }) });
@@ -404,6 +447,7 @@ describe('the scenes\' painters', () => {
 			stillFrame({ kind: 'prompts', tasks: [{ edit: true }, { edit: false }] }),
 			stillFrame({ kind: 'match', links: [[0, 0]], left: 1, right: 1 }),
 			stillFrame({ kind: 'numbers', figures: [{ share: 0.5 }] }),
+			stillFrame({ kind: 'schedule', kinds: ['talk', 'panel', 'panel', 'drinks'] }),
 			stillFrame({ kind: 'map', regions: REGIONS, seeks: [seekAt(['A'])] }),
 			stillFrame({ kind: 'deploy', pages: 8, changed: [1, 5] }),
 		];
@@ -425,6 +469,7 @@ describe('a scene as the build writes it into a post', () => {
 		match: readScene('match', 'caption: Asked and answered\nleft:\n  label: Asks\n  items: [one, two]\nright:\n  label: Answers\n  items:\n    - text: a\n      answers: [one, two]\n'),
 		prompts: readScene('toggle', 'caption: Prompts\nkind: prompts\nfirst: Edits\nsecond: Defaults\ntasks:\n  - name: Write\n    prompt: Write it.\n    edit: Write it well.\n'),
 		numbers: readScene('numbers', 'caption: Commits\nfigures:\n  - label: of the commits\n    value: 56%\n'),
+		schedule: readScene('schedule', SCHEDULE),
 		map: readScene('cluster', CLUSTER),
 		deploy: readScene('toggle', 'caption: A deploy\nkind: deploy\nfirst: All\nsecond: Changed\nstore: S\npages: "8"\nchanged: "2"\n'),
 	};
@@ -455,7 +500,7 @@ describe('a scene as the build writes it into a post', () => {
 			assert.ok(width < 726 && Math.abs(left - right) <= 1, `${name}: ${String(width)}px wide, ${String(left)}px from the left and ${String(right)}px from the right`);
 			assert.deepEqual(canvas, [0, 0], `${name}: its canvas at its stage's corner`);
 		}
-		for (const name of ['prompts', 'numbers', 'map', 'deploy']) assert.equal(wide[name]!.width, 726, `${name} takes the whole column`);
+		for (const name of ['prompts', 'numbers', 'schedule', 'map', 'deploy']) assert.equal(wide[name]!.width, 726, `${name} takes the whole column`);
 		const stacked = (await placed(520))['prompts']!;
 		assert.ok(stacked.width < 520 && Math.abs(stacked.left - stacked.right) <= 1, `prompts stacked: ${String(stacked.width)}px wide, ${String(stacked.left)}px from the left and ${String(stacked.right)}px from the right`);
 	});

@@ -844,6 +844,13 @@ export const siteTheme: Definitions = {
 	scene_ends: { display: 'grid', gridTemplateColumns: 'max-content minmax(0, 1fr)', columnGap: '10px', rowGap: '6px', alignItems: 'center' },
 	scene_end: { fontFamily: '$fontMono', fontSize: '0.9em', color: '$ink2' },
 
+	// schedule: bunting across the top, and under it the program, each item beside the rail.
+	scene_slot_bunting: { width: '100%', height: 'calc(var(--px) * 14)' },
+	scene_program: { listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 'calc(var(--px) * 3)' },
+	scene_event: { display: 'flex', alignItems: 'center', gap: 'calc(var(--px) * 3)', minWidth: 0 },
+	scene_slot_rail: { width: 'calc(var(--px) * 14)', alignSelf: 'stretch' },
+	scene_slot_event: { width: 'calc(var(--px) * 26)', height: 'calc(var(--px) * 18)' },
+
 	// Under every scene: Play again, quiet as a link, a two-way switch where the scene has one,
 	// and what is an invented example.
 	scene_controls: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px 18px' },

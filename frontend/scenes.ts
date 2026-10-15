@@ -950,6 +950,136 @@ export const createNumbers = (options: Laid & { readonly figures: readonly Figur
 	});
 };
 
+// --- schedule ----------------------------------------------------------------------------------------
+
+/** A talk: a lectern with a sloped top and a badge on its front, and a microphone leaning over it. */
+const drawPodium = (pen: Pen, cx: number, bottom: number, inks: Inks): void => {
+	const top = bottom - 8;
+	for (let i = -6; i <= 7; i++) pen.put(cx + i, top - 2, inks.ink2);
+	for (let i = -7; i <= 7; i++) { pen.put(cx + i, top - 1, inks.ink2); pen.put(cx + i, bottom, inks.ink2); }
+	for (let j = top; j < bottom; j++) for (let i = -5; i <= 5; i++) pen.put(cx + i, j, i === -5 || i === 5 ? inks.ink2 : i === -4 ? inks.surface : inks.fill2);
+	pen.rect(cx - 1, top + 2, 3, 2, inks.accent);
+	pen.line(cx + 4, top - 3, cx + 2, top - 6, inks.ink2);
+	pen.rect(cx, top - 9, 3, 3, inks.accent);
+	pen.put(cx, top - 9, inks.glow);
+};
+
+/** A panel: three people side by side behind a table. */
+const drawPanel = (pen: Pen, cx: number, bottom: number, inks: Inks): void => {
+	for (const dx of [-7, 0, 7]) {
+		const x = cx + dx, y = bottom - 12;
+		for (let j = 0; j < 4; j++) for (let i = 0; i < 4; i++) if ((i > 0 && i < 3) || (j > 0 && j < 3)) pen.put(x - 2 + i, y + j, dx === 0 ? inks.accent : inks.ink2);
+		for (let j = 0; j < 4; j++) for (let i = -2 - Math.min(j, 1); i <= 1 + Math.min(j, 1); i++) pen.put(x + i, y + 5 + j, dx === 0 ? inks.accent : inks.soft);
+	}
+	pen.rect(cx - 11, bottom - 3, 23, 3, inks.fill2);
+	for (let i = -11; i <= 11; i++) { pen.put(cx + i, bottom - 3, inks.ink2); pen.put(cx + i, bottom, inks.ink2); }
+	pen.put(cx - 11, bottom - 2, inks.ink2); pen.put(cx - 11, bottom - 1, inks.ink2); pen.put(cx + 11, bottom - 2, inks.ink2); pen.put(cx + 11, bottom - 1, inks.ink2);
+};
+
+/** Drinks: a stein, `full` of beer from the bottom up, its foam over the rim once it is full. */
+const drawStein = (pen: Pen, cx: number, bottom: number, inks: Inks, full: number): void => {
+	const x = cx - 6, top = bottom - 13, inside = 11, level = Math.round(full * inside);
+	// The beer's left side catches the light.
+	for (let j = 1; j <= inside; j++) for (let i = 1; i < 9; i++) {
+		pen.put(x + i, bottom - j, j > level ? inks.fill : i < 3 ? inks.glow : inks.accent);
+	}
+	for (let j = top; j <= bottom; j++) { pen.put(x, j, inks.ink2); pen.put(x + 9, j, inks.ink2); }
+	for (let i = 0; i <= 9; i++) pen.put(x + i, bottom, inks.ink2);
+	// The handle.
+	for (let j = top + 3; j <= top + 9; j++) pen.put(x + 12, j, inks.ink2);
+	for (const j of [top + 2, top + 10]) { pen.put(x + 10, j, inks.ink2); pen.put(x + 11, j, inks.ink2); }
+	if (full >= 1) for (let i = -1; i <= 10; i++) {
+		const head = i === -1 || i === 10 ? 0 : (i % 3 === 1 ? 2 : 1);
+		for (let j = 0; j <= head; j++) pen.put(x + i, top - j, inks.surface);
+		pen.put(x + i, top - head - 1, inks.ink2);
+	}
+};
+
+/** How long a schedule takes to reach each item, from one to the next, in seconds. */
+const STOP = 1.1;
+const stopTime = (k: number): number => 1.3 + k * STOP;
+
+/** How long a schedule's story runs, in seconds. */
+export const scheduleLength = (items: number): number => stopTime(items - 1) + 1.8;
+
+/**
+ * An event's program as it went: bunting strung across the top, then the items down a rail, a
+ * marker travelling down it and each item's picture and words coming in as it arrives. A stein
+ * fills once the marker reaches it. Things: `item:<k>`. Boxes for pictures: `slot:bunting`,
+ * `slot:rail:<k>`, where the rail runs and the marker stops, and `slot:item:<k>`.
+ */
+export const createSchedule = (options: Laid & { readonly kinds: readonly string[] }): Explainer => {
+	const { inks, pen, show, painter } = laidOut(options);
+	const n = options.kinds.length;
+	const middle = (box: Box): readonly [number, number] => [Math.round(box.x + box.width / 2), Math.round(box.y + box.height / 2)];
+	return painter((_dt, t) => {
+		const s = storyAt(options, t), boxes = options.boxes();
+		const at = (from: number, length: number): number => (s === Infinity ? 1 : through(s, from, length));
+		pen.pixels.fill(0);
+
+		// The bunting unrolls from the left: its string in swags, a pennant hung as the string reaches it.
+		const flags = boxes.get('slot:bunting');
+		if (flags !== undefined && flags.width > 4) {
+			const unrolled = at(0.1, 1.1), swags = Math.max(1, Math.round(flags.width / 70)), across = flags.width - 2;
+			const sag = (i: number): number => flags.y + 1 + Math.round(Math.sin(Math.PI * ((i * swags / across) % 1)) * 5);
+			for (let i = 0; i <= across * unrolled; i++) pen.put(flags.x + 1 + i, sag(i), inks.ink2);
+			for (let i = 3, k = 0; i + 6 < across; i += 9, k++) {
+				const hung = Math.min(1, Math.max(0, (unrolled * across - i) / 12)), depth = Math.round(hung * 7);
+				const tone = k % 2 === 0 ? inks.accent : inks.glow;
+				for (let j = 0; j < depth; j++) for (let w = 0; w < 7; w++) if (Math.abs(w - 3) <= 3 - j / 2) pen.put(flags.x + 1 + i + w, sag(i + 3) + 1 + j, tone);
+			}
+		}
+
+		// The rail: dotted the whole way, solid as far as the marker has come.
+		const rails = Array.from({ length: n }, (_, k) => boxes.get(`slot:rail:${String(k)}`));
+		const stops = rails.map((rail) => (rail === undefined ? undefined : middle(rail)));
+		const first = stops[0], last = stops[n - 1];
+		if (first !== undefined && last !== undefined) {
+			pen.fade = options.feed === true ? 1 : at(0.9, 0.5);
+			pen.line(first[0], first[1], last[0], last[1], inks.soft, 2);
+			pen.fade = 1;
+		}
+		let marker: readonly [number, number] | undefined = first;
+		for (let k = 1; k < n; k++) {
+			const a = stops[k - 1], b = stops[k], g = at(stopTime(k) - 0.6, 0.6);
+			if (a === undefined || b === undefined || g <= 0) continue;
+			pen.line(a[0], a[1], b[0], b[1], inks.accent, 1, g);
+			marker = [a[0], a[1] + (b[1] - a[1]) * g];
+		}
+
+		options.kinds.forEach((kind, k) => {
+			const here = at(stopTime(k), 0.5), stop = stops[k];
+			show(`item:${String(k)}`, here, -4);
+			if (stop !== undefined) {
+				// A stop on the rail, a ring until the marker has been there.
+				const reached = here > 0;
+				for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) pen.put(stop[0] + i, stop[1] + j, i === 0 && j === 0 ? (reached ? inks.accent : inks.page) : reached ? inks.accent : inks.ink2);
+			}
+			const slot = boxes.get(`slot:item:${String(k)}`);
+			if (slot === undefined || slot.width <= 0) return;
+			const cx = Math.round(slot.x + slot.width / 2), bottom = Math.min(slot.y + slot.height - 1, Math.round(slot.y + slot.height / 2) + 8);
+			pen.fade = options.feed === true ? 1 : here;
+			if (kind === 'panel') drawPanel(pen, cx, bottom, inks);
+			else if (kind === 'drinks') drawStein(pen, cx, bottom, inks, options.feed === true ? 1 : at(stopTime(k) + 0.3, 1.2));
+			else drawPodium(pen, cx, bottom, inks);
+			pen.fade = 1;
+			if (options.feed === true) {
+				const words = boxes.get(`item:${String(k)}`);
+				if (words !== undefined) drawCard(pen, words, inks, null, 'card');
+			}
+		});
+
+		// The marker: an arrow beside the rail, pointing at the stop it has reached.
+		const arrived = at(stopTime(0) - 0.4, 0.4);
+		if (marker !== undefined && arrived > 0) {
+			pen.fade = options.feed === true ? 1 : arrived;
+			const x = Math.round(marker[0]), y = Math.round(marker[1]);
+			for (let j = -4; j <= 4; j++) for (let i = 0; i <= 4 - Math.abs(j); i++) pen.put(x - 7 + i, y + j, i === 0 && j < 0 ? inks.glow : inks.accent);
+			pen.fade = 1;
+		}
+	});
+};
+
 // --- still frames, for a feed --------------------------------------------------------------------------
 
 /**
@@ -1008,6 +1138,16 @@ export const stillFrame = (scene: StillScene, night = false): { readonly width: 
 			paint = createNumbers({ ...base, height: H, figures: scene.figures });
 			break;
 		}
+		case 'schedule': {
+			H = 22 + scene.kinds.length * 20;
+			box('slot:bunting', 4, 2, W - 8, 14);
+			scene.kinds.forEach((_, k) => {
+				const y = 20 + k * 20;
+				box(`slot:rail:${String(k)}`, 4, y, 14, 18); box(`slot:item:${String(k)}`, 20, y, 26, 18); box(`item:${String(k)}`, 54, y + 5, 120, 8);
+			});
+			paint = createSchedule({ ...base, height: H, kinds: scene.kinds });
+			break;
+		}
 		case 'map': {
 			H = 110;
 			const regions = scene.regions, seeks = scene.seeks;
@@ -1031,5 +1171,6 @@ export type StillScene =
 	| { readonly kind: 'prompts'; readonly tasks: readonly { readonly edit: boolean }[] }
 	| { readonly kind: 'match'; readonly links: readonly (readonly [number, number])[]; readonly left: number; readonly right: number }
 	| { readonly kind: 'numbers'; readonly figures: readonly FigureShape[] }
+	| { readonly kind: 'schedule'; readonly kinds: readonly string[] }
 	| { readonly kind: 'map'; readonly regions: readonly { readonly name: string; readonly snippets: readonly string[] }[]; readonly seeks: readonly Seek[] }
 	| { readonly kind: 'deploy'; readonly pages: number; readonly changed: readonly number[] };
