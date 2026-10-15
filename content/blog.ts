@@ -21,13 +21,13 @@ import { fileURLToPath } from 'node:url';
 import { Markdown, context, h, render } from '@aweftjs/ui';
 import { parse as parseYaml } from 'yaml';
 
-import { OG, PROFILE, cardHtml, openCards, profileHtml, templatesOf } from './cards.ts';
+import { OG, PROFILE, cardHtml, openCards, profileHtml } from './cards.ts';
 import { highlight } from './highlight.ts';
 import type { Fence } from './highlight.ts';
 import { pngOf } from '../favicons.ts';
 import { changedOf, stillFrame } from '../frontend/scenes.ts';
 import type { StillScene } from '../frontend/scenes.ts';
-import { pack } from '../frontend/strip.ts';
+import { HERO_SEED, pack, seedOf } from '../frontend/strip.ts';
 import { PAPER } from '../frontend/theme.ts';
 import { SceneError, readScene, sceneOf, wordsOf } from './scenes.ts';
 import type { Scene, Term } from './scenes.ts';
@@ -606,8 +606,8 @@ export interface BuildOptions {
 	readonly data: string;
 	/** The directory vite copies as it is: frontend/public. */
 	readonly public: string;
-	/** The studio checkout holding the card template, or null to render no card. */
-	readonly studio: string | null;
+	/** Whether to render the cards a link unfurls to. */
+	readonly cards: boolean;
 	/** How a poster is fetched; the platform's `fetch` outside a test. */
 	readonly fetch?: typeof fetch;
 }
@@ -636,14 +636,12 @@ const byDate = (a: { date: string }, b: { date: string }): number => Date.parse(
  * would show as text, a link to a draft or to no post, or a poster that cannot be fetched, fails
  * the build with the reason. An image that climbs out of the post's folder fails it either way.
  *
- * Throws: `PostError` for a post the build refuses; an error naming the studio checkout when the
- * card template is not where `studio` says.
+ * Throws: `PostError` for a post the build refuses.
  */
 export const buildBlog = async (options: BuildOptions): Promise<Built> => {
 	const warnings: string[] = [];
 	const fetchPoster = options.fetch ?? fetch;
 	const sources = readPosts(options.content).sort((a, b) => byDate(a.front, b.front));
-	const templates = options.studio === null ? null : templatesOf(options.studio);
 	const live = new Set(sources.filter((source) => !source.front.draft).map((source) => source.slug));
 	const drafts = new Set(sources.filter((source) => source.front.draft).map((source) => source.slug));
 
@@ -719,12 +717,13 @@ export const buildBlog = async (options: BuildOptions): Promise<Built> => {
 		const own = fences(body);
 		const count = words(body);
 		let og: string | null = null;
-		if (!isDraft && templates !== null) {
-			const html = cardHtml(templates, {
+		if (!isDraft && options.cards) {
+			const html = cardHtml({
 				eyebrow: 'blog',
-				title: source.front.image ?? source.front.title,
-				handle: 'torrin.me',
-				date: source.front.date.slice(0, 10),
+				title: source.front.title,
+				description: source.front.description,
+				footer: `${source.front.date.slice(0, 10)} · ${String(minutesOf(count))} min read`,
+				seed: seedOf(source.slug),
 			});
 			const name = `og.${hashOf(Buffer.from(html))}.png`;
 			const out = join(options.public, 'media', source.slug, name);
@@ -774,9 +773,9 @@ export const buildBlog = async (options: BuildOptions): Promise<Built> => {
 	}
 
 	// The site's own two images, named by head.tsx.
-	if (templates !== null) {
+	if (options.cards) {
 		cards.push({
-			html: cardHtml(templates, { eyebrow: 'product engineer', title: 'Torrin Leonard', handle: 'torrin.me', date: '' }),
+			html: cardHtml({ eyebrow: 'product engineer', title: 'Torrin Leonard', description: 'Full stack and applied AI, in Waterloo, Ontario.', footer: '', seed: HERO_SEED }),
 			out: join(options.public, 'site-card.png'),
 		});
 	}
@@ -801,7 +800,7 @@ export const buildBlog = async (options: BuildOptions): Promise<Built> => {
 		}
 	}
 
-	if (cards.length > 0 || templates !== null) {
+	if (options.cards) {
 		const shooter = await openCards();
 		try {
 			for (const card of cards) {
@@ -809,11 +808,9 @@ export const buildBlog = async (options: BuildOptions): Promise<Built> => {
 				await shooter.shoot(card.html, OG, card.out);
 				files.push(card.out);
 			}
-			if (templates !== null) {
-				const out = join(options.public, 'profile.dark.png');
-				await shooter.shoot(profileHtml(join(options.public, 'headshot.webp')), PROFILE, out);
-				files.push(out);
-			}
+			const profile = join(options.public, 'profile.dark.png');
+			await shooter.shoot(profileHtml(join(options.public, 'headshot.webp')), PROFILE, profile);
+			files.push(profile);
 		} finally {
 			await shooter.close();
 		}
@@ -841,7 +838,7 @@ if (isMain) {
 		content: join(repo, 'content', 'blog'),
 		data: join(repo, 'frontend', 'data'),
 		public: join(repo, 'frontend', 'public'),
-		studio: process.env['STUDIO_DIR'] ?? join(repo, '..', 'studio'),
+		cards: true,
 	});
 	for (const warning of built.warnings) console.warn(`warning: ${warning}`);
 	const published = built.posts.filter((post) => !post.draft).length;

@@ -14,9 +14,8 @@ npm install                 # links aweft/packages/* as workspaces
 npm run dev                 # the blog's build step, then vite on port 3000
 ```
 
-The blog's build step renders the card a link to a post unfurls to from the studio kit's template
-(`kit/templates/og.html` in [studio](https://github.com/torrinworx/studio), beside the brand's
-fonts), so it wants that repository checked out beside this one, or `STUDIO_DIR` pointing at it.
+The blog's build step renders the card a link to a post unfurls to (content/cards.ts): the
+post's title and description beside its own tree, drawn by the same engine as the page.
 Playwright's Chromium renders the cards; `npx playwright install chromium` once if it is missing.
 
 A checkout that predates the submodule takes it with `git submodule update --init`. Moving the pin

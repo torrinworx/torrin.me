@@ -201,7 +201,7 @@ describe('the build', () => {
 			'Intro [ref][1].\n\n![A caption](pic.png)\n\n![Demo](https://youtu.be/D2d7aqB4eHY)\n\n## Section\n\n```bash\necho "$HOME"\n```\n\n[1]: https://example.com\n');
 		write(where.content, 'second.md', 'title: Second\ndescription: Two\ndate: 2026-01-01\ndraft: true', 'Has ![gone](missing.png) in it.\n');
 		let fetched = 0;
-		const built = await buildBlog({ ...where, studio: null, fetch: ((url: string) => { fetched += 1; assert.equal(url, 'https://i.ytimg.com/vi/D2d7aqB4eHY/hqdefault.jpg'); return okFetch(); }) as unknown as typeof fetch });
+		const built = await buildBlog({ ...where, cards: false, fetch: ((url: string) => { fetched += 1; assert.equal(url, 'https://i.ytimg.com/vi/D2d7aqB4eHY/hqdefault.jpg'); return okFetch(); }) as unknown as typeof fetch });
 
 		assert.deepEqual(built.posts.map((post) => [post.slug, post.draft]), [['first', false], ['second', true]]);
 		assert.deepEqual(built.warnings.length, 1);
@@ -236,78 +236,72 @@ describe('the build', () => {
 
 		// A second run fetches nothing: the poster is beside the post now.
 		fetched = 0;
-		await buildBlog({ ...where, studio: null, fetch: (() => { fetched += 1; return okFetch(); }) as unknown as typeof fetch });
+		await buildBlog({ ...where, cards: false, fetch: (() => { fetched += 1; return okFetch(); }) as unknown as typeof fetch });
 		assert.equal(fetched, 0);
 	});
 
 	it('fails a published post whose image is missing, naming it', async () => {
 		const where = scratch();
 		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', '![x](nope.png)\n');
-		await assert.rejects(buildBlog({ ...where, studio: null }), /a\.md: the image nope\.png is not at/);
+		await assert.rejects(buildBlog({ ...where, cards: false }), /a\.md: the image nope\.png is not at/);
 	});
 
 	it('fails a published post whose poster cannot be fetched, with the reason', async () => {
 		const where = scratch();
 		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', '![x](https://youtu.be/D2d7aqB4eHY)\n');
 		const refused = (() => Promise.resolve(new Response('', { status: 404 }))) as typeof fetch;
-		await assert.rejects(buildBlog({ ...where, studio: null, fetch: refused }), /poster for YouTube video D2d7aqB4eHY answered 404/);
+		await assert.rejects(buildBlog({ ...where, cards: false, fetch: refused }), /poster for YouTube video D2d7aqB4eHY answered 404/);
 		const down = (() => Promise.reject(new Error('ENOTFOUND i.ytimg.com'))) as typeof fetch;
-		await assert.rejects(buildBlog({ ...where, studio: null, fetch: down }), /could not be fetched .*ENOTFOUND/);
-	});
-
-	it('names a studio checkout that is not there', async () => {
-		const where = scratch();
-		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', 'x\n');
-		await assert.rejects(buildBlog({ ...where, studio: join(where.content, 'no-studio') }), /kit\/templates\/og\.html/);
+		await assert.rejects(buildBlog({ ...where, cards: false, fetch: down }), /could not be fetched .*ENOTFOUND/);
 	});
 
 	it('refuses an image whose path climbs out of the post\'s folder, draft or not', async () => {
 		const where = scratch();
 		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', '![x](../../../etc/hostname)\n');
-		await assert.rejects(buildBlog({ ...where, studio: null }), /a\.md: the image \.\.\/\.\.\/\.\.\/etc\/hostname reaches outside the post's folder/);
+		await assert.rejects(buildBlog({ ...where, cards: false }), /a\.md: the image \.\.\/\.\.\/\.\.\/etc\/hostname reaches outside the post's folder/);
 		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01\ndraft: true', '![x](/../b/pic.png)\n');
-		await assert.rejects(buildBlog({ ...where, studio: null }), /reaches outside the post's folder/);
+		await assert.rejects(buildBlog({ ...where, cards: false }), /reaches outside the post's folder/);
 	});
 
 	it('refuses a published post that links a draft or no post; a draft\'s links go unchecked', async () => {
 		const where = scratch();
 		write(where.content, 'live.md', 'title: L\ndescription: d\ndate: 2026-01-01', 'See [the other](/blog/other) and [the index](/blog).\n');
 		write(where.content, 'other.md', 'title: O\ndescription: d\ndate: 2026-01-02\ndraft: true', 'Links [nowhere](/blog/nowhere) and [live](/blog/live).\n');
-		await assert.rejects(buildBlog({ ...where, studio: null }), /live\.md: links \/blog\/other, which is a draft: publish it first, or drop the link/);
+		await assert.rejects(buildBlog({ ...where, cards: false }), /live\.md: links \/blog\/other, which is a draft: publish it first, or drop the link/);
 		write(where.content, 'live.md', 'title: L\ndescription: d\ndate: 2026-01-01', 'See [nothing](/blog/nowhere#top).\n');
-		await assert.rejects(buildBlog({ ...where, studio: null }), /live\.md: links \/blog\/nowhere, which is no post/);
+		await assert.rejects(buildBlog({ ...where, cards: false }), /live\.md: links \/blog\/nowhere, which is no post/);
 		write(where.content, 'live.md', 'title: L\ndescription: d\ndate: 2026-01-01', 'See [me](/blog/live), [the index](/blog) and the span `[x](/blog/nowhere)`.\n');
-		const built = await buildBlog({ ...where, studio: null });
+		const built = await buildBlog({ ...where, cards: false });
 		assert.deepEqual(built.warnings, []);
 	});
 
 	it('refuses a published post whose image line would show as text, and warns for a draft', async () => {
 		const where = scratch();
 		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', '![x](my pic.png)\n');
-		await assert.rejects(buildBlog({ ...where, studio: null }), /a\.md: the image line !\[x\]\(my pic\.png\) would show as text, not a figure: one image alone on its line, no space in its source, and a size as =WxH with two numbers/);
+		await assert.rejects(buildBlog({ ...where, cards: false }), /a\.md: the image line !\[x\]\(my pic\.png\) would show as text, not a figure: one image alone on its line, no space in its source, and a size as =WxH with two numbers/);
 		mkdirSync(join(where.content, 'a'));
 		writeFileSync(join(where.content, 'a', 'pic.png'), Buffer.from('not really a png'));
 		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', '![x](pic.png =800xauto)\n');
-		await assert.rejects(buildBlog({ ...where, studio: null }), /the image line !\[x\]\(pic\.png =800xauto\) would show as text/);
+		await assert.rejects(buildBlog({ ...where, cards: false }), /the image line !\[x\]\(pic\.png =800xauto\) would show as text/);
 		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01\ndraft: true', '![x](pic.png =800xauto)\n');
-		const built = await buildBlog({ ...where, studio: null });
+		const built = await buildBlog({ ...where, cards: false });
 		assert.equal(built.warnings.length, 1);
 		assert.match(built.warnings[0]!, /a\.md: the image line .* would show as text/);
 		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', '![x](pic.png "a title" =800x600)\n\nA sentence with ![x](my pic.png) inside is text as written.\n');
-		assert.deepEqual((await buildBlog({ ...where, studio: null })).warnings, []);
+		assert.deepEqual((await buildBlog({ ...where, cards: false })).warnings, []);
 	});
 
 	it('lists in the index the headings the page has: a # line folded into a list item is none', async () => {
 		const where = scratch();
 		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', '## One\n\n- an item\n## folded\n\n## Two\n');
-		const built = await buildBlog({ ...where, studio: null });
+		const built = await buildBlog({ ...where, cards: false });
 		assert.deepEqual(built.posts[0]!.headings.map((heading) => heading.id), ['one', 'two']);
 	});
 
 	it('renders the built twin: a callout from a quote only, and a fence named constructor as plain code', async () => {
 		const where = scratch();
 		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', '> Note: read this.\n\nNote: a paragraph.\n\n```constructor\nx = 1\n```\n');
-		const built = await buildBlog({ ...where, studio: null });
+		const built = await buildBlog({ ...where, cards: false });
 		const post = built.posts[0]! as unknown as Listed;
 		const fences = built.fences.get('a')!;
 		assert.deepEqual(fences[0]!.lines, [[['x = 1']]], 'a fence shiki has no grammar for is one plain token per line');
@@ -327,7 +321,7 @@ describe('the build', () => {
 		const where = scratch();
 		const prose = Array.from({ length: 190 }, () => 'word').join(' ');
 		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', `${prose}\n\n\`\`\`scene:pipeline\n${PIPELINE}\`\`\`\n\n\`\`\`bash\necho hi\n\`\`\`\n`);
-		const built = await buildBlog({ ...where, studio: null });
+		const built = await buildBlog({ ...where, cards: false });
 		const post = built.posts[0]!;
 		assert.equal(post.words, 190 + 4, 'the prose and the code fence, and not the scene');
 		assert.equal(post.minutes, 1, 'the scene\'s YAML would take it over 200 words and two minutes');
@@ -343,7 +337,7 @@ describe('the build', () => {
 	it('writes each scene\'s still frame for the feeds, and the feed shows it with the scene\'s words as a list', async () => {
 		const where = scratch();
 		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', `Text.\n\n\`\`\`scene:pipeline\n${PIPELINE}\`\`\`\n`);
-		const built = await buildBlog({ ...where, studio: null });
+		const built = await buildBlog({ ...where, cards: false });
 		const scene = built.fences.get('a')!.find((fence) => fence.scene !== undefined)!.scene!;
 		assert.match(scene.data.frame ?? '', /^\/media\/a\/scene-1\.[0-9a-f]{8}\.png$/);
 		const png = readFileSync(join(where.public, scene.data.frame!));
@@ -360,17 +354,17 @@ describe('the build', () => {
 		// The front matter is lines 1 to 5, the blank line 6, the paragraph 7, the fence opens on 9.
 		const bad = (yaml: string, draft = false): string => write(where.content, 'a.md', `title: A\ndescription: d\ndate: 2026-01-01${draft ? '\ndraft: true' : ''}`, `First paragraph.\n\n\`\`\`scene:pipeline\n${yaml}\`\`\`\n`);
 		bad(PIPELINE.replace('line: kept', 'lin: kept'));
-		await assert.rejects(buildBlog({ ...where, studio: null }), /a\.md: line 18: scene:pipeline: lane 1, step 2: there is no field "lin"; the fields are kind, name, line, badge, text, shows, reach, items/);
+		await assert.rejects(buildBlog({ ...where, cards: false }), /a\.md: line 18: scene:pipeline: lane 1, step 2: there is no field "lin"; the fields are kind, name, line, badge, text, shows, reach, items/);
 		bad(PIPELINE.replace('caption: How it goes', 'caption: ""'));
-		await assert.rejects(buildBlog({ ...where, studio: null }), /a\.md: line 10: scene:pipeline: caption is empty/);
+		await assert.rejects(buildBlog({ ...where, cards: false }), /a\.md: line 10: scene:pipeline: caption is empty/);
 		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', 'Text.\n\n```scene:maze\ncaption: x\n```\n');
-		await assert.rejects(buildBlog({ ...where, studio: null }), /a\.md: line 9: scene:maze: there is no scene called "maze"; the scenes are pipeline, cluster, fanout, toggle, match, numbers, schedule/);
+		await assert.rejects(buildBlog({ ...where, cards: false }), /a\.md: line 9: scene:maze: there is no scene called "maze"; the scenes are pipeline, cluster, fanout, toggle, match, numbers, schedule/);
 		bad(PIPELINE.replace('line: kept', `line: kept\n${'      - kind: cloud\n        name: x\n'.repeat(4)}`));
-		await assert.rejects(buildBlog({ ...where, studio: null }), /line 13: scene:pipeline: lane 1: steps holds 6 steps, and it holds 1 to 5/);
+		await assert.rejects(buildBlog({ ...where, cards: false }), /line 13: scene:pipeline: lane 1: steps holds 6 steps, and it holds 1 to 5/);
 		bad(PIPELINE.replace('kind: database', 'kind: datbase'));
-		await assert.rejects(buildBlog({ ...where, studio: null }), /line 16: scene:pipeline: lane 1, step 2: kind is "datbase", and it is one of files, model, database/);
+		await assert.rejects(buildBlog({ ...where, cards: false }), /line 16: scene:pipeline: lane 1, step 2: kind is "datbase", and it is one of files, model, database/);
 		bad(PIPELINE.replace('line: kept', 'lin: kept'), true);
-		const built = await buildBlog({ ...where, studio: null });
+		const built = await buildBlog({ ...where, cards: false });
 		assert.equal(built.warnings.length, 1);
 		assert.match(built.warnings[0]!, /a\.md: line 19: scene:pipeline: lane 1, step 2: there is no field "lin"/);
 	});
@@ -381,20 +375,20 @@ describe('the build', () => {
 		const fanout = (map: string, at = 'A'): string => `caption: f\nmap: ${map}\nfrom:\n  name: ask\ninto:\n  - name: x\n    at: [${at}]\n  - name: y\n    at: [B]\n`;
 		const post = (body: string): string => write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', body);
 		post(`The words.\n\n\`\`\`scene:cluster\n${cluster}\`\`\`\n\n\`\`\`scene:fanout\n${fanout('meaning')}\`\`\`\n`);
-		await assert.rejects(buildBlog({ ...where, studio: null }), /line 22: scene:fanout: map names "meaning", which is the id of no cluster in this post/);
+		await assert.rejects(buildBlog({ ...where, cards: false }), /line 22: scene:fanout: map names "meaning", which is the id of no cluster in this post/);
 		post(`The words.\n\n\`\`\`scene:cluster\n${cluster}\`\`\`\n\n\`\`\`scene:fanout\n${fanout('meanings', 'C')}\`\`\`\n`);
-		await assert.rejects(buildBlog({ ...where, studio: null }), /scene:fanout: a branch lands at "C", which is no region of the map "meanings"; its regions are A, B/);
+		await assert.rejects(buildBlog({ ...where, cards: false }), /scene:fanout: a branch lands at "C", which is no region of the map "meanings"; its regions are A, B/);
 		post(`The words.\n\n\`\`\`scene:cluster\n${cluster.replace('id: meanings', 'terms:\n  - text: the wordz\n    as: found')}\`\`\`\n`);
-		await assert.rejects(buildBlog({ ...where, studio: null }), /line 9: scene:cluster: term "the wordz" is not in the post's own words/);
+		await assert.rejects(buildBlog({ ...where, cards: false }), /line 9: scene:cluster: term "the wordz" is not in the post's own words/);
 		post(`The words.\n\n\`\`\`scene:cluster\n${cluster.replace('id: meanings', 'terms:\n  - text: The words\n    as: found')}\`\`\`\n\n\`\`\`scene:fanout\n${fanout('meanings').replace('caption: f', 'caption: f\nterms:\n  - text: words\n    as: search')}\`\`\`\n`);
-		await assert.rejects(buildBlog({ ...where, studio: null }), /map names "meanings", which is the id of no cluster/, 'a cluster with no id is no map');
+		await assert.rejects(buildBlog({ ...where, cards: false }), /map names "meanings", which is the id of no cluster/, 'a cluster with no id is no map');
 		post(`The words.\n\n\`\`\`scene:cluster\n${cluster.replace('caption: c', 'caption: c\nterms:\n  - text: The words\n    as: found')}\`\`\`\n\n\`\`\`scene:fanout\n${fanout('meanings')}\`\`\`\n`);
-		const built = await buildBlog({ ...where, studio: null });
+		const built = await buildBlog({ ...where, cards: false });
 		assert.deepEqual(built.posts[0]!.terms, [{ text: 'The words', as: 'found' }]);
 		const fanoutScene = built.fences.get('a')!.find((fence) => fence.scene?.name === 'fanout')!.scene!;
 		assert.deepEqual(fanoutScene.name === 'fanout' ? fanoutScene.data.regions : null, [{ name: 'A', snippets: ['one'] }, { name: 'B', snippets: ['two'] }], 'the fanout carries its map\'s regions');
 		post(`The words.\n\n\`\`\`scene:cluster\n${cluster}\`\`\`\n\n\`\`\`scene:cluster\n${cluster.replace('snippets: [one]', 'snippets: [three]')}\`\`\`\n`);
-		await assert.rejects(buildBlog({ ...where, studio: null }), /line 9: scene:cluster: id "meanings" names another cluster in this post too/);
+		await assert.rejects(buildBlog({ ...where, cards: false }), /line 9: scene:cluster: id "meanings" names another cluster in this post too/);
 	});
 
 	it('refuses a figure a scene shows that the post never states, unless the scene says it is an example, and a term or a figure only in a link or in code', async () => {
@@ -403,7 +397,7 @@ describe('the build', () => {
 		const deploy = 'caption: A deploy\nkind: deploy\nfirst: Every page\nsecond: Changed pages\nstore: Storage\npages: "48"\nchanged: "5"\n';
 		const post = (prose: string, fence: string, yaml: string): Promise<unknown> => {
 			write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', `${prose}\n\n\`\`\`scene:${fence}\n${yaml}\`\`\`\n`);
-			return buildBlog({ ...where, studio: null });
+			return buildBlog({ ...where, cards: false });
 		};
 		await post('Clicks grew from under 1000 to 52,100.', 'numbers', numbers);
 		await assert.rejects(post('Clicks grew from under 1,000 to 52,000.', 'numbers', numbers), /line 9: scene:numbers: the figure 52,100 is not in the post's own words/);
@@ -420,7 +414,7 @@ describe('the build', () => {
 		const where = scratch();
 		const numbers = 'caption: Commits\nfigures:\n  - label: of the commits\n    value: 56%\n';
 		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', `I made 56% of the commits.\n\n\`\`\`scene:numbers\n${numbers}\`\`\`\n\nAgain.\n\n\`\`\`scene:numbers\n${numbers}\`\`\`\n`);
-		const built = await buildBlog({ ...where, studio: null });
+		const built = await buildBlog({ ...where, cards: false });
 		const html = await render(
 			h(Theme, { value: siteTheme }, h(Markdown, { source: built.twins.get('a')!, code: codeOf(built.fences.get('a')!), modifiers: modifiersOf(built.posts[0]! as unknown as Listed) })),
 			{ context: context() },
@@ -434,7 +428,7 @@ describe('the build', () => {
 describe('the posts in content/blog', () => {
 	it('every one parses, and every image a published post names is there', async () => {
 		const where = scratch();
-		const built = await buildBlog({ content: `${repo}content/blog`, data: where.data, public: where.public, studio: null });
+		const built = await buildBlog({ content: `${repo}content/blog`, data: where.data, public: where.public, cards: false });
 		assert.equal(built.posts.length, 10, 'the ten published posts');
 		const published = built.posts.filter((post) => !post.draft);
 		assert.deepEqual(published.map((post) => post.slug).sort(), ['aweft-for-agents', 'builderloo-rebrand', 'builderloo-with-claude-code', 'harvest-to-kimai', 'jev-commit-rules', 'kik-v-rim', 'kimai-setup', 'nrth-day-one', 'techtoberfest-2026-day-one', 'when-to-open-source']);
