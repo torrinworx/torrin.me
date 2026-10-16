@@ -11,7 +11,7 @@ import { chromium } from 'playwright';
 import { SceneError, readFigure, readScene, sceneOf, wordsOf } from '../content/scenes.ts';
 import type { Fanout, Numbers, Pipeline, Schedule } from '../content/scenes.ts';
 import {
-	changedOf, createBranches, createDeploy, createMap, createMatch, createNumbers, createPipeline, createPrompts, createSchedule, deployLayout, inksOf, landing,
+	EMBLEM_LENGTH, changedOf, createBranches, createDeploy, createEmblem, createMap, createMatch, createNumbers, createPipeline, createPrompts, createSchedule, deployLayout, inksOf, landing,
 	mapArea, mapOf, narrowMap, pipelineLength, scheduleLength, stillFrame, uploadsOf,
 } from '../frontend/scenes.ts';
 import type { Box, Explainer, Seek, Size } from '../frontend/scenes.ts';
@@ -428,6 +428,43 @@ describe('the scenes\' painters', () => {
 		// The marker stands to the left of the last stop, and nowhere by the first.
 		const marker = (p: Explainer, y: number): number => { let n = 0; for (let j = y - 3; j <= y + 3; j++) for (let x = 5; x < 9; x++) if (p.pixels[j * W + x] !== 0) n++; return n; };
 		assert.ok(marker(still, 72) > 0 && marker(still, 28) === 0, 'still, the marker rests at the last item');
+	});
+
+	it('plays an animated heading: its emblem moves and a curtain covers the words, then the emblem rests and the words are bare', () => {
+		const mark = 20, W = 120, H = 22;
+		for (const style of ['atoms', 'qubits', 'bits']) {
+			let started: number | null = null;
+			const painter = createEmblem({ width: W, height: H, night: false, moving: true, started: () => started, style, mark });
+			const count = (from: number, to: number): number => { let n = 0; for (let y = 0; y < H; y++) for (let x = from; x < to; x++) if (painter.pixels[y * W + x] !== 0) n++; return n; };
+			painter.frame(0, 5);
+			assert.ok(count(mark + 2, W) > (W - mark - 2) * H * 0.9, `${style}: waiting, the curtain covers the words`);
+			started = 5;
+			painter.frame(0, 5.4);
+			const early = painter.pixels.slice();
+			painter.frame(0, 5.9);
+			assert.ok(early.some((c, i) => c !== painter.pixels[i]), `${style}: it moves`);
+			painter.frame(0, 5 + EMBLEM_LENGTH);
+			assert.equal(count(mark + 2, W), 0, `${style}: at the end the words are bare`);
+			assert.ok(count(0, mark) > 15, `${style}: and the emblem stands beside them`);
+			const end = painter.pixels.slice();
+			const still = createEmblem({ width: W, height: H, night: false, moving: false, started: () => null, style, mark });
+			still.frame(0, 0);
+			assert.deepEqual([...still.pixels], [...end], `${style}: with motion off it shows that end`);
+		}
+	});
+
+	it('runs a schedule\'s rail across when the page puts its stops in a row, and rests the marker over the last one', () => {
+		const across = boxes(Object.fromEntries([0, 1, 2].flatMap((k) => [
+			[`slot:rail:${String(k)}`, [4 + k * 64, 20, 60, 10]], [`slot:item:${String(k)}`, [21 + k * 64, 32, 26, 18]], [`item:${String(k)}`, [10 + k * 64, 54, 48, 10]],
+		])) as Record<string, [number, number, number, number]>);
+		const still = createSchedule({ ...stage(false, false, null), boxes: across, kinds: ['talk', 'panel', 'drinks'] });
+		still.frame(0, 0);
+		const above = (x: number): number => { let n = 0; for (let y = 18; y <= 22; y++) for (let i = x - 3; i <= x + 3; i++) if (still.pixels[y * W + i] !== 0) n++; return n; };
+		assert.ok(above(162) > 0, 'the marker points down at the last stop');
+		assert.equal(above(34), 0, 'and is nowhere over the first');
+		let rail = 0;
+		for (let x = 34; x <= 162; x++) if (still.pixels[25 * W + x] !== 0) rail++;
+		assert.equal(rail, 129, 'the rail runs the whole way across between the stops');
 	});
 
 	it('shows an admin\'s edit over its default while edits are live, and the default once they are not', () => {

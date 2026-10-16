@@ -1003,8 +1003,9 @@ const stopTime = (k: number): number => 1.3 + k * STOP;
 export const scheduleLength = (items: number): number => stopTime(items - 1) + 1.8;
 
 /**
- * An event's program as it went: bunting strung across the top, then the items down a rail, a
- * marker travelling down it and each item's picture and words coming in as it arrives. A stein
+ * An event's program as it went: bunting strung across the top, then the items along a rail, a
+ * marker travelling along it and each item's picture and words coming in as it arrives. The rail
+ * runs down a narrow scene and across a wide one, wherever the page put its stops. A stein
  * fills once the marker reaches it. Things: `item:<k>`. Boxes for pictures: `slot:bunting`,
  * `slot:rail:<k>`, where the rail runs and the marker stops, and `slot:item:<k>`.
  */
@@ -1044,7 +1045,7 @@ export const createSchedule = (options: Laid & { readonly kinds: readonly string
 			const a = stops[k - 1], b = stops[k], g = at(stopTime(k) - 0.6, 0.6);
 			if (a === undefined || b === undefined || g <= 0) continue;
 			pen.line(a[0], a[1], b[0], b[1], inks.accent, 1, g);
-			marker = [a[0], a[1] + (b[1] - a[1]) * g];
+			marker = [a[0] + (b[0] - a[0]) * g, a[1] + (b[1] - a[1]) * g];
 		}
 
 		options.kinds.forEach((kind, k) => {
@@ -1069,15 +1070,130 @@ export const createSchedule = (options: Laid & { readonly kinds: readonly string
 			}
 		});
 
-		// The marker: an arrow beside the rail, pointing at the stop it has reached.
+		// The marker: an arrow beside the rail, pointing at the stop it has reached, from the left of a
+		// rail that runs down and from above one that runs across.
 		const arrived = at(stopTime(0) - 0.4, 0.4);
 		if (marker !== undefined && arrived > 0) {
 			pen.fade = options.feed === true ? 1 : arrived;
-			const x = Math.round(marker[0]), y = Math.round(marker[1]);
-			for (let j = -4; j <= 4; j++) for (let i = 0; i <= 4 - Math.abs(j); i++) pen.put(x - 7 + i, y + j, i === 0 && j < 0 ? inks.glow : inks.accent);
+			const x = Math.round(marker[0]), y = Math.round(marker[1]), across = first !== undefined && last !== undefined && last[0] - first[0] > last[1] - first[1];
+			for (let j = -4; j <= 4; j++) for (let i = 0; i <= 4 - Math.abs(j); i++) {
+				const tone = i === 0 && j < 0 ? inks.glow : inks.accent;
+				if (across) pen.put(x + j, y - 7 + i, tone); else pen.put(x - 7 + i, y + j, tone);
+			}
 			pen.fade = 1;
 		}
 	});
+};
+
+// --- animated headings ---------------------------------------------------------------------------
+
+/** How long an animated heading's story runs, in seconds. */
+export const EMBLEM_LENGTH = 2.2;
+
+// The digits a bits heading draws, three pixels across and five down, one row to a number.
+const DIGITS: Readonly<Record<'0' | '1', readonly number[]>> = { 0: [7, 5, 5, 5, 7], 1: [2, 6, 2, 2, 7] };
+const drawDigit = (pen: Pen, x: number, y: number, digit: '0' | '1', c: number, by = 1): void => {
+	DIGITS[digit].forEach((row, j) => { for (let i = 0; i < 3; i++) if ((row >> (2 - i)) & 1) pen.rect(x + i * by, y + j * by, by, by, c); });
+};
+const noise = (a: number, b: number): number => { const v = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return v - Math.floor(v); };
+
+/**
+ * An animated heading: its emblem in the square at its left, `mark` pixels across, and over its
+ * words a curtain of pixels in the same style that dissolves into them. `atoms` spins electrons
+ * round a nucleus on three orbits, `qubits` flips a Bloch sphere's state arrow between its poles
+ * until it settles up, and `bits` flips two digits. Waiting, the emblem stands at its start and
+ * the curtain covers the words; at the end, and with motion off, the emblem stands still and the
+ * words are bare.
+ */
+export const createEmblem = (options: Stage & { readonly style: string; readonly mark: number }): Painter => {
+	const inks = inksOf(options.night), pen = penOf(options.width, options.height);
+	const W = options.width, H = options.height, E = Math.min(options.mark, H), x0 = Math.min(W, options.mark + 2);
+	const cx = (E - 1) / 2, cy = (H - 1) / 2;
+	return {
+		width: W, height: H, pixels: pen.pixels,
+		frame: (_dt, t) => {
+			const s = storyAt(options, t), u = s === Infinity ? 1 : Math.max(0, Math.min(1, s / 1.8));
+			// Fast at first and slowing to a stop, like the cog in a build step settling.
+			const spun = 1 - (1 - u) ** 3;
+			pen.pixels.fill(0);
+			switch (options.style) {
+				case 'atoms': {
+					const rx = E * 0.46, ry = E * 0.18;
+					for (let k = 0; k < 3; k++) {
+						const tilt = (k * Math.PI) / 3, c = Math.cos(tilt), n = Math.sin(tilt);
+						for (let a = 0; a < Math.PI * 2; a += 0.08) {
+							const ex = Math.cos(a) * rx, ey = Math.sin(a) * ry;
+							pen.put(cx + ex * c - ey * n, cy + ex * n + ey * c, inks.soft);
+						}
+						const a = k * 2.1 + spun * 9;
+						const ex = Math.cos(a) * rx, ey = Math.sin(a) * ry, px = cx + ex * c - ey * n, py = cy + ex * n + ey * c;
+						pen.rect(Math.round(px) - 1, Math.round(py) - 1, 2, 2, inks.accent);
+						pen.put(Math.round(px) - 1, Math.round(py) - 1, inks.glow);
+					}
+					pen.rect(Math.round(cx) - 1, Math.round(cy) - 1, 3, 3, inks.ink2);
+					pen.put(Math.round(cx) - 1, Math.round(cy) - 1, inks.accent);
+					break;
+				}
+				case 'qubits': {
+					const r = E * 0.44;
+					for (let a = 0; a < Math.PI * 2; a += 0.05) pen.put(cx + Math.cos(a) * r, cy + Math.sin(a) * r, inks.ink2);
+					for (let a = 0; a < Math.PI * 2; a += 0.16) pen.put(cx + Math.cos(a) * r, cy + Math.sin(a) * r * 0.32, inks.soft);
+					for (let j = -Math.round(r); j <= Math.round(r); j += 2) pen.put(cx, cy + j, inks.soft);
+					// The state swings between the poles, less each time, and settles up, at |0>.
+					const swing = (1 - spun) * Math.PI * (0.5 - 0.5 * Math.cos(u * Math.PI * 7)), phi = spun * 8;
+					const tx = cx + r * 0.92 * Math.sin(swing) * Math.cos(phi), ty = cy - r * 0.92 * Math.cos(swing) + r * 0.3 * Math.sin(swing) * Math.sin(phi);
+					pen.line(cx, cy, tx, ty, inks.accent);
+					pen.rect(Math.round(tx) - 1, Math.round(ty) - 1, 2, 2, inks.accent);
+					pen.put(Math.round(tx) - 1, Math.round(ty) - 1, inks.glow);
+					pen.put(Math.round(cx), Math.round(cy), inks.ink2);
+					break;
+				}
+				case 'bits': {
+					const by = E >= 16 ? 2 : 1, w = 3 * by, gap = by, left = Math.round(cx - w - gap / 2), top = Math.round(cy - (5 * by) / 2);
+					const flip = (k: number): '0' | '1' => (u >= 1 ? (k === 0 ? '0' : '1') : noise(k, Math.floor((s === Infinity ? 0 : Math.max(0, s)) * 10)) < 0.5 ? '0' : '1');
+					drawDigit(pen, left, top, flip(0), inks.accent, by);
+					drawDigit(pen, left + w + gap, top, flip(1), inks.ink2, by);
+					break;
+				}
+			}
+
+			// The curtain over the words: whole while the story waits, then dissolving into them.
+			const gone = s === Infinity ? 1 : s < 0 ? 0 : through(s, 0.9, 1.3);
+			if (gone >= 1) return;
+			for (let y = 0; y < H; y++) for (let x = x0; x < W; x++) {
+				const across = (x - x0) / Math.max(1, W - x0);
+				// Bits decode left to right; the others dissolve all over in the dither's order.
+				const left = options.style === 'bits' ? gone * 1.4 - 0.4 + bayer(x, y) * 0.4 > across : bayer(x, y) < gone;
+				if (left) continue;
+				pen.put(x, y, inks.page);
+			}
+			const at = s < 0 ? 0 : s;
+			if (options.style === 'atoms') {
+				// Particles drifting in toward the line the words sit on.
+				for (let k = 0; k < Math.floor((W - x0) / 3); k++) {
+					const x = x0 + Math.floor(noise(k, 1) * (W - x0)), home = cy + (noise(k, 2) - 0.5) * H * 0.5;
+					const y = home + (noise(k, 3) - 0.5) * H * (1 - through(at, 0, 1.2));
+					if (bayer(x, Math.round(y)) >= gone) pen.put(x, y, k % 3 === 0 ? inks.glow : inks.accent);
+				}
+			} else if (options.style === 'qubits') {
+				// Two states at once: a checker that swaps every tenth of a second.
+				const phase = Math.floor(at * 10) % 2;
+				for (let y = 1; y < H - 1; y += 2) for (let x = x0 + ((y >> 1) + phase) % 2 * 2; x < W; x += 4) {
+					if (bayer(x, y) >= gone) pen.put(x, y, (x + y) % 3 === 0 ? inks.accent : inks.soft);
+				}
+			} else if (options.style === 'bits') {
+				// Rows of digits streaming left, flipping as they go.
+				const rows = Math.max(1, Math.floor((H - 1) / 6));
+				for (let row = 0; row < rows; row++) for (let k = 0; ; k++) {
+					const x = x0 + k * 4 - Math.floor(at * 24) % 4, y = Math.round(cy - (rows * 6) / 2) + row * 6 + 1;
+					if (x >= W) break;
+					const across = (x - x0) / Math.max(1, W - x0);
+					if (gone * 1.4 - 0.4 > across) continue;
+					drawDigit(pen, x, y, noise(k + row * 50, Math.floor(at * 8)) < 0.5 ? '0' : '1', (k + row) % 4 === 0 ? inks.accent : inks.ink2);
+				}
+			}
+		},
+	};
 };
 
 // --- still frames, for a feed --------------------------------------------------------------------------

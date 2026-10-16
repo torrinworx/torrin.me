@@ -221,7 +221,7 @@ describe('the build', () => {
 		const twin = readFileSync(join(where.public, 'blog', 'first.md'), 'utf8');
 		assert.ok(twin.includes('Intro [ref](https://example.com).'), 'the reference is inline');
 		assert.ok(!twin.includes('[1]: https'), 'and its definition gone');
-		assert.match(twin, /!\[A caption\]\(\/media\/first\/pic\.[0-9a-f]{8}\.png\)/, 'the image points at its hashed copy');
+		assert.match(twin, /\n\[A caption\]\(\/media\/first\/pic\.[0-9a-f]{8}\.png\)\n/, 'the image is a link to its hashed copy, for the viewer');
 		assert.ok(twin.includes('\n[Demo](https://www.youtube.com/watch?v=D2d7aqB4eHY)\n'), 'the video is the marker');
 		const media = twin.match(/\/media\/first\/pic\.[0-9a-f]{8}\.png/)![0];
 		assert.ok(existsSync(join(where.public, media)));
@@ -425,20 +425,166 @@ describe('the build', () => {
 	});
 });
 
+describe('a gallery', () => {
+	const GALLERY = 'caption: The stage and a slide\nimages:\n  - file: stage.jpg\n    alt: The founder on stage\n  - file: slide.jpg\n    alt: "One orchard in 2025, 13 in 2026"\n';
+	const post = (where: ReturnType<typeof scratch>, front = '', gallery = GALLERY, files = ['stage.jpg', 'slide.jpg']): void => {
+		mkdirSync(join(where.content, 'a'), { recursive: true });
+		for (const file of files) writeFileSync(join(where.content, 'a', file), Buffer.from(`not really ${file}`));
+		write(where.content, 'a.md', `title: A\ndescription: d\ndate: 2026-01-01${front}`, `Text.\n\n\`\`\`gallery\n${gallery}\`\`\`\n`);
+	};
+
+	it('publishes each image under its hash, writes where it went beside the post, and leaves the YAML out of the reading time', async () => {
+		const where = scratch();
+		post(where);
+		const built = await buildBlog({ ...where, cards: false });
+		assert.deepEqual(built.warnings, []);
+		assert.equal(built.posts[0]!.words, 1, 'the paragraph alone');
+		const gallery = built.fences.get('a')!.find((fence) => fence.gallery !== undefined)?.gallery;
+		assert.equal(gallery?.caption, 'The stage and a slide');
+		assert.deepEqual(gallery?.images.map((image) => image.alt), ['The founder on stage', 'One orchard in 2025, 13 in 2026']);
+		for (const image of gallery!.images) {
+			assert.match(image.src ?? '', new RegExp(`^/media/a/${image.file.replace('.jpg', '')}\\.[0-9a-f]{8}\\.jpg$`));
+			assert.ok(existsSync(join(where.public, image.src!)), `${image.file} is published`);
+		}
+		const tokens = JSON.parse(readFileSync(join(where.public, 'blog', 'a.tokens.json'), 'utf8')) as { language: string; gallery?: unknown }[];
+		assert.ok(tokens.some((fence) => fence.language === 'gallery' && fence.gallery !== undefined), 'the browser gets it too');
+	});
+
+	it('renders the photos as a grid of links to each whole photo, each with its alt text, and in a feed as plain images', async () => {
+		const where = scratch();
+		post(where);
+		const built = await buildBlog({ ...where, cards: false });
+		const fences = built.fences.get('a')!, src = fences.find((fence) => fence.gallery !== undefined)!.gallery!.images.map((image) => image.src!);
+		const html = (await render(
+			h(Theme, { value: siteTheme }, h(Markdown, { source: built.twins.get('a')!, code: codeOf(fences), modifiers: modifiersOf(built.posts[0]! as unknown as Listed) })),
+			{ context: context() },
+		)).replace(/<!--[^>]*-->/g, '');
+		assert.match(html, /<figure[^>]*data-gallery[ >]/);
+		assert.match(html, new RegExp(`<a[^>]*href="${src[0]!}"[^>]*><img[^>]*src="${src[0]!}"[^>]*alt="The founder on stage"`));
+		assert.match(html, new RegExp(`<a[^>]*href="${src[1]!}"[^>]*><img[^>]*src="${src[1]!}"[^>]*alt="One orchard in 2025, 13 in 2026"`));
+		assert.match(html, /<figcaption[^>]*>.*The stage and a slide/);
+		assert.ok(!html.includes('stage.jpg'), 'no YAML shows as code');
+		const feed = await renderBody(built.posts[0]! as unknown as Listed, built.twins.get('a')!, fences);
+		assert.match(feed, new RegExp(`<img src="https://torrin\\.me${src[0]!}" alt="The founder on stage"`));
+		assert.match(feed, new RegExp(`<img src="https://torrin\\.me${src[1]!}" alt="One orchard in 2025, 13 in 2026"`));
+		assert.ok(!feed.includes('<a '), 'nothing to click in a feed');
+	});
+
+	it('fails a published post whose gallery image is missing, naming it; a draft\'s is a warning', async () => {
+		const where = scratch();
+		post(where, '', GALLERY, ['stage.jpg']);
+		await assert.rejects(buildBlog({ ...where, cards: false }), /a\.md: the image slide\.jpg is not at/);
+		post(where, '\ndraft: true', GALLERY, ['stage.jpg']);
+		const built = await buildBlog({ ...where, cards: false });
+		assert.equal(built.warnings.length, 1);
+		assert.match(built.warnings[0]!, /a\.md: the image slide\.jpg is not at/);
+	});
+
+	it('refuses a gallery image whose path climbs out of the post\'s folder, draft or not', async () => {
+		const where = scratch();
+		const climbing = GALLERY.replace('file: slide.jpg', 'file: ../../etc/hostname');
+		post(where, '', climbing);
+		await assert.rejects(buildBlog({ ...where, cards: false }), /a\.md: the image \.\.\/\.\.\/etc\/hostname reaches outside the post's folder/);
+		post(where, '\ndraft: true', climbing);
+		await assert.rejects(buildBlog({ ...where, cards: false }), /reaches outside the post's folder/);
+	});
+
+	it('refuses a gallery that does not check, naming the line in the file', async () => {
+		const where = scratch();
+		// The front matter is lines 1 to 5, the blank line 6, the paragraph 7, the fence opens on 9.
+		post(where, '', 'images:\n  - file: stage.jpg\n    alt: The founder on stage\n');
+		await assert.rejects(buildBlog({ ...where, cards: false }), /a\.md: line 10: gallery: images holds 1 image, and it holds 2 to 8/);
+		post(where, '', GALLERY.replace('alt: The founder on stage', 'alt: ""'));
+		await assert.rejects(buildBlog({ ...where, cards: false }), /a\.md: line 13: gallery: image 1: alt is empty/);
+		post(where, '', GALLERY.replace('file: stage.jpg', 'file: https://example.com/stage.jpg'));
+		await assert.rejects(buildBlog({ ...where, cards: false }), /a\.md: line 12: gallery: image 1: file is a file in the post's folder, not a URL/);
+	});
+});
+
+describe('a photo', () => {
+	it('is a link to its whole file the viewer opens, at its own size when the post gives one, and a plain image in a feed', async () => {
+		const where = scratch();
+		mkdirSync(join(where.content, 'a'));
+		writeFileSync(join(where.content, 'a', 'wide.jpg'), Buffer.from('not really a jpeg'));
+		writeFileSync(join(where.content, 'a', 'pin.jpg'), Buffer.from('not really a pin'));
+		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', 'Text.\n\n![The stage](wide.jpg)\n\n![The pin](pin.jpg =360x289)\n');
+		const built = await buildBlog({ ...where, cards: false });
+		const twin = built.twins.get('a')!, post = built.posts[0]! as unknown as Listed;
+		assert.match(twin, /\n\[The pin\]\(\/media\/a\/pin\.[0-9a-f]{8}\.jpg#360x289\)\n/, 'the size rides on the link');
+		const html = (await render(h(Theme, { value: siteTheme }, h(Markdown, { source: twin, modifiers: modifiersOf(post) })), { context: context() })).replace(/<!--[^>]*-->/g, '');
+		const wide = /<a[^>]*href="(\/media\/a\/wide\.[0-9a-f]{8}\.jpg)"[^>]*>(<img[^>]*>)<\/a>/.exec(html), pin = /<a[^>]*href="(\/media\/a\/pin\.[0-9a-f]{8}\.jpg)"[^>]*>(<img[^>]*>)<\/a>/.exec(html);
+		assert.ok(wide !== null && pin !== null, `each photo is a link to its file: ${html}`);
+		for (const found of [wide, pin]) {
+			assert.match(found[0], /data-no-route/, 'which the router leaves to the browser');
+			assert.ok(found[2]!.includes(`src="${found[1]!}"`));
+		}
+		assert.ok(!/width=/.test(wide[2]!) && !/style=/.test(wide[2]!), 'a photo with no size fills the column');
+		assert.match(pin[2]!, /width="360"/);
+		assert.match(pin[2]!, /style="width: ?360px;?"/, 'one with a size is that wide');
+		assert.match(html, /The stage<\/span>/, 'its alt text under it');
+		const feed = await renderBody(post, twin, []);
+		assert.match(feed, /<img src="https:\/\/torrin\.me\/media\/a\/wide\.[0-9a-f]{8}\.jpg" alt="The stage">/);
+		assert.ok(!feed.includes('<a '), 'nothing to click in a feed');
+	});
+});
+
+describe('an animated heading', () => {
+	const BODY = 'Intro.\n\n## Atoms {animate: atoms}\n\nText.\n\n### Bits and bytes {animate: bits}\n\nMore.\n\n```md\n## In code {animate: nothing}\n```\n';
+
+	it('is the heading with its own text and id in the twin and the contents, and the index says how it plays', async () => {
+		const where = scratch();
+		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', BODY);
+		const built = await buildBlog({ ...where, cards: false });
+		assert.deepEqual(built.warnings, []);
+		const post = built.posts[0]!;
+		assert.deepEqual(post.headings, [{ level: 2, text: 'Atoms', id: 'atoms' }, { level: 3, text: 'Bits and bytes', id: 'bits-and-bytes' }]);
+		assert.deepEqual(post.animated, [{ text: 'Atoms', style: 'atoms' }, { text: 'Bits and bytes', style: 'bits' }]);
+		const twin = built.twins.get('a')!;
+		assert.ok(twin.includes('\n## Atoms\n') && twin.includes('\n### Bits and bytes\n'), 'the marker is gone from the twin');
+		assert.ok(twin.includes('## In code {animate: nothing}'), 'and a fence is left as written');
+	});
+
+	it('refuses a name that is no animation in a published post, and warns for a draft', async () => {
+		const where = scratch();
+		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', '## Atoms {animate: atom}\n');
+		await assert.rejects(buildBlog({ ...where, cards: false }), /a\.md: a heading animates as "atom", which is no animation; the animations are atoms, qubits, bits/);
+		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01\ndraft: true', '## Atoms {animate: atom}\n');
+		assert.match((await buildBlog({ ...where, cards: false })).warnings[0]!, /a\.md: a heading animates as "atom"/);
+	});
+
+	it('renders as the same heading with its words once, the box its emblem stands in and a canvas, and as a plain heading in a feed', async () => {
+		const where = scratch();
+		write(where.content, 'a.md', 'title: A\ndescription: d\ndate: 2026-01-01', BODY);
+		const built = await buildBlog({ ...where, cards: false });
+		const post = built.posts[0]! as unknown as Listed, twin = built.twins.get('a')!;
+		const html = (await render(h(Theme, { value: siteTheme }, h(Markdown, { source: twin, modifiers: modifiersOf(post) })), { context: context() })).replace(/<!--[^>]*-->/g, '');
+		const atoms = /<h2 id="atoms"[^>]*>(.*?)<\/h2>/.exec(html)?.[1] ?? '';
+		assert.match(atoms, /data-animated="atoms"/);
+		assert.match(atoms, /<span[^>]*>Atoms<\/span>/, 'its words, as text');
+		assert.match(atoms, /<canvas[^>]*aria-hidden="true"/, 'and a canvas hidden from a screen reader');
+		assert.match(atoms, /<span[^>]*data-mark[^>]*><\/span>/, 'beside the empty box its emblem is painted over');
+		assert.equal(atoms.match(/Atoms/g)?.length, 1, 'the words once');
+		assert.match(html, /<h3 id="bits-and-bytes"[^>]*><span[^>]*data-animated="bits"/);
+		const feed = await renderBody(post, twin, []);
+		assert.match(feed, /<h2 id="atoms"[^>]*>Atoms<\/h2>/);
+		assert.ok(!feed.includes('data-animated'), 'a feed has the plain heading');
+	});
+});
+
 describe('the posts in content/blog', () => {
 	it('every one parses, and every image a published post names is there', async () => {
 		const where = scratch();
 		const built = await buildBlog({ content: `${repo}content/blog`, data: where.data, public: where.public, cards: false });
-		assert.equal(built.posts.length, 11, 'the eleven published posts');
+		assert.equal(built.posts.length, 12, 'the twelve published posts');
 		const published = built.posts.filter((post) => !post.draft);
-		assert.deepEqual(published.map((post) => post.slug).sort(), ['aweft-for-agents', 'builderloo-rebrand', 'builderloo-with-claude-code', 'equator-ai-proposal-writer', 'harvest-to-kimai', 'jev-commit-rules', 'kik-v-rim', 'kimai-setup', 'nrth-day-one', 'techtoberfest-2026-day-one', 'when-to-open-source']);
+		assert.deepEqual(published.map((post) => post.slug).sort(), ['aweft-for-agents', 'builderloo-rebrand', 'builderloo-with-claude-code', 'equator-ai-proposal-writer', 'harvest-to-kimai', 'jev-commit-rules', 'kik-v-rim', 'kimai-setup', 'nrth-day-one', 'techtoberfest-2026-day-one', 'techtoberfest-2026-day-two', 'when-to-open-source']);
 		assert.deepEqual(built.warnings, []);
 	});
 });
 
 describe('what the modifiers render', () => {
 	const post: Listed = {
-		slug: 'p', title: 'P', description: '', date: '2026-01-01', words: 1, minutes: 1, headings: [], og: null, code: false, scenes: 0, terms: [],
+		slug: 'p', title: 'P', description: '', date: '2026-01-01', words: 1, minutes: 1, headings: [], og: null, code: false, scenes: 0, terms: [], animated: [],
 		posters: { D2d7aqB4eHY: '/media/p/youtube-D2d7aqB4eHY.abcdef12.jpg' },
 	};
 	// The render's own markers between nodes are dropped, so a pattern reads the elements alone.
@@ -524,6 +670,23 @@ describe('the pages and feeds the build wrote', () => {
 		}
 	});
 
+	it('a post with galleries links every photo from the page the server wrote, and the feed shows each one', () => {
+		const feed = readFileSync(`${dist}feed.xml`, 'utf8');
+		const galleries = posts().filter((post) => post.code).map((post) => ({
+			post,
+			fences: (JSON.parse(readFileSync(`${dist}blog/${post.slug}.tokens.json`, 'utf8')) as { gallery?: { images: { src: string }[] } }[]).filter((fence) => fence.gallery !== undefined),
+		})).filter((found) => found.fences.length > 0);
+		assert.ok(galleries.length > 0, 'a published post has a gallery');
+		for (const { post, fences } of galleries) {
+			const html = readFileSync(`${dist}blog/${post.slug}/index.html`, 'utf8');
+			for (const image of fences.flatMap((fence) => fence.gallery!.images)) {
+				assert.ok(html.includes(`href="${image.src}"`), `${post.slug}: the page links ${image.src}`);
+				assert.ok(existsSync(`${dist}${image.src}`), `${post.slug}: ${image.src} is published`);
+				assert.ok(feed.includes(`src=&quot;https://torrin.me${image.src}&quot;`), `${post.slug}: the feed shows ${image.src}`);
+			}
+		}
+	});
+
 	it('the site card and the dark profile image head.tsx names are real PNGs', () => {
 		for (const [file, width, height] of [['site-card.png', 1200, 630], ['profile.dark.png', 1080, 1080]] as const) {
 			const png = readFileSync(`${dist}${file}`);
@@ -598,6 +761,136 @@ describe('the page when its twin cannot be read', () => {
 			await view.waitForSelector('a[href="/contact"]', { state: 'visible', timeout: 5000 });
 			assert.ok(said.some((line) => line.includes(`${newest.slug}: the twin could not be read`)), `the console names the twin: ${said.join(' | ')}`);
 			assert.deepEqual(said.filter((line) => !line.includes('the twin could not be read') && !line.includes('503')), [], 'and nothing else went wrong');
+			await view.close();
+		} finally {
+			await browser.close();
+			await site.stop();
+		}
+	});
+});
+
+describe('a post\'s photos in the browser', () => {
+	const listed = (): Listed[] => JSON.parse(readFileSync(`${repo}frontend/data/posts.json`, 'utf8')) as Listed[];
+	const opened = (view: import('playwright').Page): Promise<boolean> => view.evaluate(() => document.querySelector('dialog[open]') !== null);
+
+	it('open in the viewer on a click, large with their words, and close by the button, the backdrop or Escape, back to the photo', async () => {
+		assert.ok(existsSync(`${dist}blog/index.html`), 'run the build before this suite');
+		const post = listed().find((found) => found.code && readFileSync(`${dist}blog/${found.slug}.tokens.json`, 'utf8').includes('"gallery"'));
+		assert.ok(post !== undefined, 'a published post has a gallery');
+		const site = await boot({ 'static/Files': { dir: dist, unknown: '404' } });
+		const browser = await chromium.launch();
+		try {
+			const view = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+			await view.goto(`${site.url}/blog/${post.slug}`, { waitUntil: 'networkidle' });
+			const photos = [view.locator('[data-gallery] a').first(), view.locator('p a[data-photo]').first()];
+			for (const photo of photos) {
+				const href = (await photo.getAttribute('href'))!, alt = (await photo.locator('img').getAttribute('alt'))!;
+				const plain = await view.request.get(`${site.url}${href}`);
+				assert.equal(plain.status(), 200, `${href} is there without the viewer`);
+				for (const close of ['Escape', 'button', 'backdrop'] as const) {
+					await photo.click();
+					await view.waitForSelector('dialog[open]', { timeout: 5000 });
+					assert.equal(new URL(view.url()).pathname, `/blog/${post.slug}`, 'the page stays');
+					assert.equal(await view.getAttribute('dialog[open] img', 'src'), href, 'the whole photo, large');
+					assert.ok(((await view.textContent('dialog[open]')) ?? '').includes(alt), 'with its words under it');
+					assert.ok(await view.evaluate(() => document.activeElement?.closest('dialog[open]') !== null), 'the keyboard is in the viewer');
+					assert.equal(await view.evaluate(() => getComputedStyle(document.documentElement).overflow), 'hidden', 'the page behind does not scroll');
+					if (close === 'Escape') await view.keyboard.press('Escape');
+					else if (close === 'button') await view.click('dialog[open] [aria-label="Close"]');
+					else await view.mouse.click(10, 450);
+					// The platform fires the dialog's close event a task after it shuts, and that event puts the page back.
+					await view.waitForFunction(() => document.querySelector('dialog[open]') === null && getComputedStyle(document.documentElement).overflow !== 'hidden', undefined, { timeout: 5000 });
+					assert.equal(await view.evaluate(() => document.activeElement?.getAttribute('href')), href, `${close}: the keyboard is back on the photo, and the page scrolls again`);
+				}
+			}
+
+			await view.setViewportSize({ width: 390, height: 844 });
+			await photos[0]!.click();
+			await view.waitForSelector('dialog[open]', { timeout: 5000 });
+			const image = (await view.locator('dialog[open] img').boundingBox())!, button = (await view.locator('dialog[open] [aria-label="Close"]').boundingBox())!;
+			assert.ok(image.x >= 0 && image.y >= 0 && image.x + image.width <= 390 && image.y + image.height <= 844, `the photo fits a phone: ${JSON.stringify(image)}`);
+			assert.ok(button.width >= 44 && button.height >= 44, 'and the close button is big enough to tap');
+			await view.keyboard.press('Escape');
+			assert.equal(await opened(view), false);
+			await view.close();
+		} finally {
+			await browser.close();
+			await site.stop();
+		}
+	});
+
+	it('shows a figure written with a size at that width, in the middle of the column, and no wider than a phone', async () => {
+		const post = listed().find((found) => /\]\(\/media\/[^)]*#\d+x\d+\)/.test(readFileSync(`${dist}blog/${found.slug}.md`, 'utf8')));
+		assert.ok(post !== undefined, 'a published post has a figure with a size');
+		const width = Number(/\]\(\/media\/[^)]*#(\d+)x\d+\)/.exec(readFileSync(`${dist}blog/${post.slug}.md`, 'utf8'))![1]);
+		const site = await boot({ 'static/Files': { dir: dist, unknown: '404' } });
+		const browser = await chromium.launch();
+		try {
+			const view = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+			await view.goto(`${site.url}/blog/${post.slug}`, { waitUntil: 'networkidle' });
+			const sized = view.locator(`p a[data-photo] img[width="${String(width)}"]`).first();
+			const column = (await view.locator('p a[data-photo]').first().locator('xpath=ancestor::p').boundingBox())!;
+			const box = (await sized.boundingBox())!;
+			assert.equal(Math.round(box.width), width, 'as wide as the post says');
+			assert.ok(Math.abs(box.x + box.width / 2 - (column.x + column.width / 2)) <= 1, 'in the middle of the column');
+			const filled = (await view.locator('p a[data-photo] img:not([width])').first().boundingBox())!;
+			assert.ok(Math.abs(filled.width - column.width) <= 1, 'and a photo with no size still fills it');
+			await view.setViewportSize({ width: 320, height: 700 });
+			const narrow = (await sized.boundingBox())!, page = (await view.locator('p a[data-photo]').first().locator('xpath=ancestor::p').boundingBox())!;
+			assert.ok(narrow.width <= page.width + 0.5 && narrow.width < width, `on a phone it shrinks to the column: ${String(narrow.width)} of ${String(page.width)}`);
+			assert.equal(await view.evaluate(() => document.documentElement.scrollWidth), 320, 'with no sideways scroll');
+			await view.close();
+		} finally {
+			await browser.close();
+			await site.stop();
+		}
+	});
+
+	it('plays an animated heading once a reader scrolls it into view, a curtain of pixels over its words that clears, then an emblem beside the bare words', async () => {
+		const post = listed().find((found) => found.animated.length > 0);
+		assert.ok(post !== undefined, 'a published post has an animated heading');
+		const site = await boot({ 'static/Files': { dir: dist, unknown: '404' } });
+		const browser = await chromium.launch();
+		try {
+			const view = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+			await view.goto(`${site.url}/blog/${post.slug}`, { waitUntil: 'networkidle' });
+			const heading = view.locator('h2:has([data-animated]), h3:has([data-animated])').first();
+			// What the canvas paints over the words and over the emblem's box, in pixels that are not see-through.
+			const painted = (): Promise<{ words: number; mark: number }> => heading.evaluate((el) => {
+				const canvas = el.querySelector('canvas')!, context = canvas.getContext('2d')!, scale = canvas.getBoundingClientRect().width / canvas.width;
+				const mark = Math.ceil(el.querySelector('[data-mark]')!.getBoundingClientRect().width / scale) + 2;
+				const data = context.getImageData(0, 0, canvas.width, canvas.height).data;
+				let words = 0, emblem = 0;
+				for (let y = 0; y < canvas.height; y++) for (let x = 0; x < canvas.width; x++) if (data[(y * canvas.width + x) * 4 + 3]! > 0) { if (x >= mark) words += 1; else emblem += 1; }
+				return { words, mark: emblem };
+			});
+			// A reader's scroll, a wheel notch at a time, until the heading is a third of the way down.
+			let notches = 0;
+			while ((await heading.evaluate((el) => el.getBoundingClientRect().top)) > 300 && notches < 400) { await view.mouse.wheel(0, 100); await view.waitForTimeout(20); notches += 1; }
+			await view.waitForTimeout(300);
+			const playing = await painted();
+			assert.ok(playing.words > 50, `the words are under the curtain while it plays: ${JSON.stringify(playing)}`);
+			assert.ok(playing.mark > 20, 'and the emblem is drawn');
+			await view.waitForTimeout(2600);
+			const rested = await painted();
+			assert.equal(rested.words, 0, 'then the words are bare');
+			assert.ok(rested.mark > 20, 'beside the still emblem');
+			assert.equal(await view.evaluate(() => document.documentElement.scrollWidth), 1280);
+
+			const still = await browser.newPage({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' });
+			await still.goto(`${site.url}/blog/${post.slug}`, { waitUntil: 'networkidle' });
+			const quiet = still.locator('h2:has([data-animated]), h3:has([data-animated])').first();
+			await quiet.scrollIntoViewIfNeeded();
+			await still.waitForTimeout(400);
+			const shown = await quiet.evaluate((el) => {
+				const canvas = el.querySelector('canvas')!, data = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data, scale = canvas.getBoundingClientRect().width / canvas.width;
+				const mark = Math.ceil(el.querySelector('[data-mark]')!.getBoundingClientRect().width / scale) + 2;
+				let words = 0;
+				for (let y = 0; y < canvas.height; y++) for (let x = mark; x < canvas.width; x++) if (data[(y * canvas.width + x) * 4 + 3]! > 0) words += 1;
+				return words;
+			});
+			assert.equal(shown, 0, 'with reduced motion the words are bare from the start');
+			await still.close();
 			await view.close();
 		} finally {
 			await browser.close();

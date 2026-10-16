@@ -678,15 +678,35 @@ export const siteTheme: Definitions = {
 		borderRadius: '$radiusLg',
 		maxWidth: '100%',
 		boxSizing: 'border-box',
-		// A scene's fence is a code box too, and the scene is drawn without one.
-		'_cssProp_has(> [data-scene])': { padding: 0, border: 0, background: 'transparent', overflowX: 'visible', whiteSpace: 'normal', fontFamily: '$font', color: '$foreground' },
+		// A scene's or a gallery's fence is a code box too, and each is drawn without one.
+		'_cssProp_has(> [data-scene], > [data-gallery])': { padding: 0, border: 0, background: 'transparent', overflowX: 'visible', whiteSpace: 'normal', fontFamily: '$font', color: '$foreground' },
 	},
 	markdown_inline: { fontFamily: '$fontMono', fontSize: '0.9em', background: '$surface', border: '1px solid $border', padding: '0 4px', borderRadius: '$radius' },
 	// A figure fills the measure and no more; its caption is the second ink, in the paragraph
 	// face at the label size, so it reads as a caption and not as the next paragraph.
 	markdown_figure: { margin: 0, width: '100%' },
-	markdown_image: { width: '100%', border: '1px solid $border' },
+	markdown_image: { boxSizing: 'border-box', width: '100%', border: '1px solid $border' },
 	markdown_video: { width: '100%' },
+	// A figure written with a size shows at that size (its own width, set on it), in the middle, and
+	// shrinks on a narrow page.
+	markdown_image_sized: { maxWidth: '100%', height: 'auto' },
+	// A post's photo: the figure's image inside the link the viewer opens (utils/viewer.tsx).
+	photo: { display: 'block' },
+	photo_link: { display: 'block', '_cssProp_focus-visible': { outline: '2px solid $ring', outlineOffset: '2px' } },
+	photo_link_sized: { width: 'fit-content', maxWidth: '100%', margin: '0 auto' },
+	photo_caption: { display: 'block', fontFamily: '$font', fontSize: '$sizeLabel', lineHeight: '$lhBody', color: '$ink2', marginTop: '8px' },
+	photo_caption_sized: { textAlign: 'center' },
+	// A gallery: its photos in a grid, as many to a row as theme `gallery_grid_<n>` says, two on a
+	// phone. Each is cropped to 4:3, a phone camera's own shape, so a row lines up whatever was shot.
+	// No border: the photos carry their own pixel frame, inside that 4:3.
+	gallery: { margin: 0, width: '100%', containerType: 'inline-size' },
+	gallery_grid: { listStyle: 'none', margin: 0, padding: 0, display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '8px' },
+	gallery_grid_3: { gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', [phone]: { gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' } },
+	gallery_grid_4: { gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', [phone]: { gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' } },
+	// On a phone an odd photo out takes the whole last row rather than leaving half of it empty.
+	gallery_item: { margin: 0, minWidth: 0, [phone]: { '_cssProp_last-child:nth-child(odd)': { gridColumn: '1 / -1' } } },
+	gallery_link: { display: 'block', '_cssProp_focus-visible': { outline: '2px solid $ring', outlineOffset: '2px' } },
+	gallery_image: { display: 'block', width: '100%', aspectRatio: '4 / 3', objectFit: 'cover' },
 	markdown_caption: { fontFamily: '$font', fontSize: '$sizeLabel', lineHeight: '$lhBody', color: '$ink2', marginTop: '8px' },
 	// A quote takes the moss bar; a callout (a quote whose first word is `Note:`) is a paper-a box
 	// with the bar, and the modifier's label is its eyebrow.
@@ -844,11 +864,19 @@ export const siteTheme: Definitions = {
 	scene_ends: { display: 'grid', gridTemplateColumns: 'max-content minmax(0, 1fr)', columnGap: '10px', rowGap: '6px', alignItems: 'center' },
 	scene_end: { fontFamily: '$fontMono', fontSize: '0.9em', color: '$ink2' },
 
-	// schedule: bunting across the top, and under it the program, each item beside the rail.
+	// schedule: bunting across the top, and under it the program. In a wide scene the items stand in
+	// a row across the whole column, each under its stop on a rail that runs across. In a narrow one
+	// they stack, each beside a rail that runs down.
 	scene_slot_bunting: { width: '100%', height: 'calc(var(--px) * 14)' },
-	scene_program: { listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 'calc(var(--px) * 3)' },
-	scene_event: { display: 'flex', alignItems: 'center', gap: 'calc(var(--px) * 3)', minWidth: 0 },
-	scene_slot_rail: { width: 'calc(var(--px) * 14)', alignSelf: 'stretch' },
+	scene_program: {
+		listStyle: 'none', margin: 0, padding: 0, display: 'grid', gridAutoFlow: 'column', gridAutoColumns: 'minmax(0, 1fr)', columnGap: 'calc(var(--px) * 3)',
+		[narrow]: { display: 'flex', flexDirection: 'column', gap: 'calc(var(--px) * 3)' },
+	},
+	scene_event: {
+		display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 'calc(var(--px) * 3)', minWidth: 0,
+		[narrow]: { flexDirection: 'row', textAlign: 'left' },
+	},
+	scene_slot_rail: { width: '100%', height: 'calc(var(--px) * 10)', [narrow]: { width: 'calc(var(--px) * 14)', height: 'auto', alignSelf: 'stretch' } },
 	scene_slot_event: { width: 'calc(var(--px) * 26)', height: 'calc(var(--px) * 18)' },
 
 	// Under every scene: Play again, quiet as a link, a two-way switch where the scene has one,
@@ -876,6 +904,14 @@ export const siteTheme: Definitions = {
 	term_found: { background: '$highlight', color: '$highlightForeground', boxShadow: '0 -2px 0 0 $highlight, 0 2px 0 0 $highlight' },
 	term_thing: { padding: 0, borderBottom: '2px solid $ink2' },
 	term_changed: { padding: 0, borderBottom: '3px solid $accent' },
+
+	// An animated heading (utils/heading.tsx): the box its pixel emblem stands in, then its words,
+	// and over both the canvas the emblem and the curtain over the words are painted on. Each part
+	// says the heading's face again, since `*` puts the paragraph face on every themed element.
+	animated: { position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '0.3em', fontFamily: 'inherit' },
+	animated_paint: { position: 'absolute', left: 0, top: 0, zIndex: 1, display: 'block', imageRendering: 'pixelated', pointerEvents: 'none' },
+	animated_mark: { flex: '0 0 auto', width: '1.5em', height: '1.5em' },
+	animated_text: { fontFamily: 'inherit' },
 
 	// The contents list: a paper-a box before the body, a numbered list of the second-level
 	// headings in the paragraph face.
@@ -916,6 +952,21 @@ export const siteTheme: Definitions = {
 		fontWeight: 500,
 		textTransform: 'uppercase',
 		letterSpacing: '$tracking',
+	},
+	// The photo viewer: the window in the forest green, the photo as large as it fits, its words
+	// under it in the paper ink, and a close button big enough to tap. Shut, the platform hides it.
+	viewer: {
+		boxSizing: 'border-box', width: '100vw', height: '100dvh', maxWidth: 'none', maxHeight: 'none', margin: 0, padding: 0, border: 0,
+		background: FOREST, color: PAPER, overscrollBehavior: 'contain',
+		'_cssProp_is([open])': { display: 'flex' },
+	},
+	viewer_figure: { flex: '1 1 auto', minWidth: 0, minHeight: 0, margin: 0, padding: '64px 16px 20px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px' },
+	viewer_image: { display: 'block', maxWidth: '100%', maxHeight: 'calc(100dvh - 160px)', objectFit: 'contain' },
+	viewer_caption: { maxWidth: '$measure', fontFamily: '$font', fontSize: '$sizeLabel', lineHeight: '$lhBody', color: PAPER, textAlign: 'center' },
+	viewer_close: {
+		position: 'absolute', top: '10px', right: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '48px', height: '48px',
+		padding: 0, border: `2px solid ${PAPER}`, borderRadius: '$radius', background: 'transparent', color: PAPER, cursor: 'pointer',
+		'_cssProp_focus-visible': { outline: `2px solid ${PAPER}`, outlineOffset: '3px' },
 	},
 	video_frame: { display: 'block', width: '100%', aspectRatio: '16 / 9', border: '2px solid $accent', borderRadius: '$radiusLg', background: FOREST },
 };

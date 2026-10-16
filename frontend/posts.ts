@@ -9,7 +9,8 @@ import { createContext } from '@aweftjs/ui';
 
 import type { Block } from '../content/blog.ts';
 import type { Token } from '../content/highlight.ts';
-import type { Scene, Term } from '../content/scenes.ts';
+import type { Gallery, Scene, Term } from '../content/scenes.ts';
+import type { Animation } from './utils/heading.tsx';
 import index from './data/posts.json' with { type: 'json' };
 
 /** A heading of a post, with the id the page gives it. */
@@ -36,11 +37,12 @@ export interface Listed {
 	readonly code: boolean;
 	readonly scenes: number;
 	readonly terms: readonly Term[];
+	readonly animated: readonly { readonly text: string; readonly style: Animation }[];
 }
 
-/** A fenced block of a post: its tokens, or for a scene, the data the build checked. */
+/** A fenced block of a post: its tokens, or for a scene or a gallery, the data the build checked. */
 export type Fence = Block;
-export type { Scene, Term, Token };
+export type { Gallery, Scene, Term, Token };
 
 /** Every published post, newest first. */
 export const posts: readonly Listed[] = index as readonly Listed[];

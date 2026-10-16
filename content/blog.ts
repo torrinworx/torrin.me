@@ -7,6 +7,7 @@
 // post's media under a hashed name (frontend/public/media/<slug>/), the card a link to the post
 // unfurls to, and the site's own card and dark profile image. A fence named `scene:<name>` is a
 // pixel scene: its YAML is checked here (content/scenes.ts) and its data goes in the tokens file.
+// A fence named `gallery` is a photo grid: its images are checked and published as any image is.
 //
 // A post is `content/blog/<slug>.md` with YAML front matter (`title`, `description`, `date`,
 // `updated`, `draft`, `future`, `discuss`, `image`) and its media in `content/blog/<slug>/`. The
@@ -29,8 +30,10 @@ import { changedOf, stillFrame } from '../frontend/scenes.ts';
 import type { StillScene } from '../frontend/scenes.ts';
 import { HERO_SEED, pack, seedOf } from '../frontend/strip.ts';
 import { PAPER } from '../frontend/theme.ts';
-import { SceneError, readScene, sceneOf, wordsOf } from './scenes.ts';
-import type { Scene, Term } from './scenes.ts';
+import { ANIMATIONS } from '../frontend/utils/heading.tsx';
+import type { Animation } from '../frontend/utils/heading.tsx';
+import { SceneError, isGallery, readGallery, readScene, sceneOf, wordsOf } from './scenes.ts';
+import type { Gallery, Scene, Term } from './scenes.ts';
 
 /** A heading of a post, with the id `Markdown` gives it. */
 export interface Heading {
@@ -68,6 +71,8 @@ export interface Post {
 	 */
 	readonly scenes: number;
 	readonly terms: readonly Term[];
+	/** The headings that play when they come into view, by their text, and how. */
+	readonly animated: readonly { readonly text: string; readonly style: Animation }[];
 }
 
 /** A post as read from its file, before any rewrite. */
@@ -375,6 +380,26 @@ export const markNotes = (markdown: string): string => mapProse(markdown, (prose
 	}).join('\n');
 });
 
+// A heading line that ends in `{animate: <name>}`: the hashes, the text, the name.
+const ANIMATED = /^( {0,3}#{1,6}\s+)(.*?)\s+\{animate:\s*([^}\s]*)\s*\}\s*$/;
+
+/**
+ * Every heading line's `{animate: <name>}` dropped, so the heading's text and id are its own, and
+ * what each heading plays, by its text. `unknown` lists a name that is no animation.
+ */
+export const markAnimated = (markdown: string): { markdown: string; animated: { text: string; style: Animation }[]; unknown: string[] } => {
+	const animated: { text: string; style: Animation }[] = [], unknown: string[] = [];
+	const marked = mapProse(markdown, (prose) => prose.split('\n').map((line) => {
+		const found = ANIMATED.exec(line);
+		if (found === null) return line;
+		const style = found[3]!;
+		if ((ANIMATIONS as readonly string[]).includes(style)) animated.push({ text: found[2]!, style: style as Animation });
+		else unknown.push(style);
+		return `${found[1]!}${found[2]!}`;
+	}).join('\n'));
+	return { markdown: marked, animated, unknown };
+};
+
 // A line that reads as an image but is not one the page would show as a figure: a space in the
 // source, a size that is not two numbers, two images on the line. `Markdown` shows such a line
 // as the characters written.
@@ -424,6 +449,19 @@ export const localImages = (markdown: string): string[] => {
 	return found;
 };
 
+/**
+ * Every image line whose source is a published file, as a link to that file on its own line:
+ * `[alt](/media/<slug>/<file>)`, with `#WxH` after it for a size, which the site's modifier turns
+ * into the photo the viewer opens. A figure it would be otherwise, and a figure is a block no
+ * modifier sees.
+ */
+export const markPhotos = (markdown: string): string => mapProse(markdown, (prose) => prose.split('\n').map((line) => {
+	const found = IMAGE_LINE.exec(line.trim());
+	if (found === null || !found[2]!.startsWith('/media/')) return line;
+	const size = /=(\d+)x(\d+)/.exec(found[3]!);
+	return `[${found[1]!.trim()}](${found[2]!}${size === null ? '' : `#${size[1]!}x${size[2]!}`})`;
+}).join('\n'));
+
 /** The body with every local image source replaced, by the map handed in. */
 export const rewriteImages = (markdown: string, to: ReadonlyMap<string, string>): string =>
 	mapProse(markdown, (prose) => prose.replace(IMAGE, (whole: string, alt: string, src: string, rest: string) => {
@@ -449,16 +487,19 @@ export const headings = async (markdown: string): Promise<Heading[]> => {
 	}));
 };
 
-/** The words of a body, code fences included: they are read too. A scene's YAML is not, so it is left out. */
+/** The words of a body, code fences included: they are read too. A scene's or a gallery's YAML is not, so it is left out. */
 export const words = (markdown: string): number => runs(markdown)
-	.filter((run) => run.kind === 'prose' || sceneOf(FENCE.exec(run.text)?.[2] || null) === null)
+	.filter((run) => {
+		const language = FENCE.exec(run.text)?.[2] || null;
+		return run.kind === 'prose' || (sceneOf(language) === null && !isGallery(language));
+	})
 	.map((run) => run.text)
 	.join('\n')
 	.split(/\s+/)
 	.filter((word) => word !== '').length;
 
-/** A fenced block as the page gets it: its tokens, or for a scene, its checked data. */
-export type Block = Fence & { readonly scene?: Scene };
+/** A fenced block as the page gets it: its tokens, or for a scene or a gallery, its checked data. */
+export type Block = Fence & { readonly scene?: Scene; readonly gallery?: Gallery };
 
 // How a fence is looked up: what it is called with, and its text, as blog.tsx's `code` hook does.
 const fenceKey = (language: string | null, text: string): string => `${language ?? ''}\u0000${text}`;
@@ -535,6 +576,31 @@ export const scenesOf = (body: string, first: number): { scenes: Map<string, Sce
 		scenes.set(entry.key, scene);
 	}
 	return { scenes, refused };
+};
+
+/**
+ * Every gallery fence of a body, checked, by `fenceKey`, and a refusal per gallery that is not,
+ * naming the line of the file at fault. `first` is the line of the file the body starts on.
+ */
+export const galleriesOf = (body: string, first: number): { galleries: Map<string, Gallery>; refused: string[] } => {
+	const galleries = new Map<string, Gallery>();
+	const refused: string[] = [];
+	let line = first;
+	for (const run of runs(body)) {
+		const held = run.text.split('\n');
+		if (run.kind === 'fence' && isGallery(FENCE.exec(held[0]!)![2]!)) {
+			const closed = held.length > 1 && /^(`{3,}|~{3,})$/.test(held[held.length - 1]!.trim());
+			const text = held.slice(1, closed ? -1 : undefined).join('\n');
+			try {
+				galleries.set(fenceKey('gallery', text), readGallery(text));
+			} catch (error) {
+				if (!(error instanceof SceneError)) throw error;
+				refused.push(`line ${String(line + error.line)}: gallery: ${error.message}`);
+			}
+		}
+		line += held.length;
+	}
+	return { galleries, refused };
 };
 
 /** A scene's data in the form `stillFrame` reads, to draw its still frame. */
@@ -663,7 +729,11 @@ export const buildBlog = async (options: BuildOptions): Promise<Built> => {
 		// Before the rewrites, which drop lines and would move every line a refusal names.
 		const checked = scenesOf(source.body, source.line);
 		for (const refusal of checked.refused) say(refusal);
-		let body = markNotes(inlineReferences(source.body));
+		const shown = galleriesOf(source.body, source.line);
+		for (const refusal of shown.refused) say(refusal);
+		const lively = markAnimated(markNotes(inlineReferences(source.body)));
+		for (const name of lively.unknown) say(`a heading animates as "${name}", which is no animation; the animations are ${ANIMATIONS.join(', ')}`);
+		let body = lively.markdown;
 		for (const line of brokenImageLines(body)) say(`the image line ${line} would show as text, not a figure: one image alone on its line, no space in its source, and a size as =WxH with two numbers`);
 		// A link to a draft is a 404 on the live site until the draft is published.
 		if (!isDraft) {
@@ -677,9 +747,10 @@ export const buildBlog = async (options: BuildOptions): Promise<Built> => {
 		const marked = markYoutube(body);
 		body = marked.markdown;
 
-		// Local images: each one has to exist; a published one is copied under its hash.
+		// Local images, a gallery's among them: each one has to exist; a published one is copied under its hash.
 		const moved = new Map<string, string>();
-		for (const src of localImages(body)) {
+		const gallery = [...shown.galleries.values()].flatMap((held) => held.images.map((image) => image.file));
+		for (const src of new Set([...localImages(body), ...gallery])) {
 			const file = mediaPath(folder, src);
 			if (file === null) throw new PostError(source.file, `the image ${src} reaches outside the post's folder ${folder}; media lives beside the post`);
 			if (!existsSync(file)) { say(`the image ${src} is not at ${file}`); continue; }
@@ -689,7 +760,7 @@ export const buildBlog = async (options: BuildOptions): Promise<Built> => {
 			put(join(options.public, 'media', source.slug, name), () => bytes);
 			moved.set(src, `/media/${source.slug}/${name}`);
 		}
-		body = rewriteImages(body, moved);
+		body = markPhotos(rewriteImages(body, moved));
 
 		// A poster per embedded video, fetched once into the post's folder, so the page shows
 		// nothing from YouTube until the reader clicks.
@@ -750,6 +821,7 @@ export const buildBlog = async (options: BuildOptions): Promise<Built> => {
 			code: own.length > 0,
 			scenes: checked.scenes.size,
 			terms: [...checked.scenes.values()].flatMap((scene) => scene.data.terms ?? []),
+			animated: lively.animated,
 		};
 		posts.push(post);
 		if (isDraft) continue;
@@ -759,7 +831,12 @@ export const buildBlog = async (options: BuildOptions): Promise<Built> => {
 		if (own.length > 0) {
 			const scene = (fence: { language: string | null }): boolean => sceneOf(fence.language) !== null;
 			const tokens: Block[] = [
-				...await highlight(own.filter((fence) => !scene(fence))),
+				...await highlight(own.filter((fence) => !scene(fence) && !isGallery(fence.language))),
+				// Each gallery with every image's published path.
+				...own.filter((fence) => isGallery(fence.language)).map((fence) => {
+					const held = shown.galleries.get(fenceKey(fence.language, fence.text))!;
+					return { ...fence, lines: [], gallery: { ...held, images: held.images.map((image) => ({ ...image, src: moved.get(image.file)! })) } };
+				}),
 				// Each scene with its still frame and its words, for the feeds.
 				...own.filter(scene).map((fence, n) => {
 					const found = checked.scenes.get(fenceKey(fence.language, fence.text))!, bytes = framePng(found);

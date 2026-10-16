@@ -3,7 +3,7 @@
 // Both are rendered from the index the build step wrote (frontend/data/posts.json) and, for a
 // post, from its markdown twin through `Markdown`. The site adds around the markdown what the
 // markdown cannot say: the head tags, the structured data, the date line, the contents list,
-// and three modifiers (the YouTube poster, superscript, the callout). The same components render
+// and four modifiers (a photo the viewer opens, the YouTube poster, superscript, the callout). The same components render
 // the post's body for the feeds, in `feed` mode, where nothing can be clicked.
 //
 // Each post has its own drawn tree, generated from its slug: beside the post on the index and above
@@ -16,10 +16,12 @@ import type { Act, TextModifier } from '@aweftjs/ui';
 import resume from '../data/resume.json' with { type: 'json' };
 import { AUTHOR_ID, SITE_URL, WEBSITE_ID } from '../head.tsx';
 import { ContentContext, posts, postAt } from '../posts.ts';
-import type { Body, Content, Fence, Listed } from '../posts.ts';
+import type { Body, Content, Fence, Gallery, Listed } from '../posts.ts';
 import { seedOf } from '../strip.ts';
 import { Canopy, Plot, Tile } from '../utils/forest.tsx';
 import { SceneBlock } from '../utils/scenes.tsx';
+import { AnimatedText, Animations } from '../utils/heading.tsx';
+import { Photo, Viewer } from '../utils/viewer.tsx';
 
 const BLOG_URL = `${SITE_URL}/blog`;
 const BLOG_ID = `${BLOG_URL}#blog`;
@@ -46,12 +48,44 @@ const PostMeta = (props: { post: Listed }): unknown => (
 
 // --- the fences ---------------------------------------------------------------------------
 
+// How many photos a gallery shows in a row on a wide page, by how many it has: all of them up to
+// four, then rows of three or four. On a phone every gallery is two to a row (theme.ts).
+const COLUMNS = [2, 2, 2, 3, 4, 3, 3, 4, 4];
+
+/**
+ * A gallery: its photos small and together, cropped to one shape so the grid stays tidy, each a
+ * link to the whole photo. In a feed, each photo with its alt text under it.
+ */
+const GalleryBlock = (props: { gallery: Gallery; feed: boolean }): unknown => {
+	const gallery = props.gallery;
+	if (props.feed) {
+		return (
+			<figure>
+				{gallery.images.map((image) => <figure><img src={image.src} alt={image.alt} /><figcaption>{image.alt}</figcaption></figure>)}
+				{gallery.caption === undefined ? null : <figcaption>{gallery.caption}</figcaption>}
+			</figure>
+		);
+	}
+	return (
+		<figure theme="gallery" data-gallery="">
+			<ul theme={['gallery_grid', String(COLUMNS[gallery.images.length])]}>
+				{gallery.images.map((image) => (
+					<li theme="gallery_item">
+						<Photo theme="gallery_link" src={image.src!} alt={image.alt}><img theme="gallery_image" src={image.src} alt={image.alt} loading="lazy" decoding="async" /></Photo>
+					</li>
+				))}
+			</ul>
+			{gallery.caption === undefined ? null : <figcaption><Typography type="p2" theme="markdown_caption" label={gallery.caption} /></figcaption>}
+		</figure>
+	);
+};
+
 /**
  * The `code` hook for a post: each fence's tokens, looked up by what the block says, or for a
  * `scene:<name>` fence, the scene, named after its text so the server and the browser agree. A
  * second scene with the same text is told apart by how many came before it, which is the same on
  * both, since each renders the body once and in order. In a feed a scene is its still frame and
- * its words.
+ * its words. A `gallery` fence is the photo grid.
  */
 export const codeOf = (fences: readonly Fence[], feed = false) => {
 	const held = new Map(fences.map((fence) => [`${fence.language ?? ''}\u0000${fence.text}`, fence]));
@@ -59,6 +93,7 @@ export const codeOf = (fences: readonly Fence[], feed = false) => {
 	return (text: string, language: string | null): unknown => {
 		const fence = held.get(`${language ?? ''}\u0000${text}`);
 		if (fence === undefined) return <code>{text}</code>;
+		if (fence.gallery !== undefined) return <GalleryBlock gallery={fence.gallery} feed={feed} />;
 		if (fence.scene !== undefined) {
 			const id = `scene-${String(seedOf(text))}`, before = named.get(id) ?? 0;
 			named.set(id, before + 1);
@@ -81,6 +116,9 @@ export const codeOf = (fences: readonly Fence[], feed = false) => {
 // A paragraph that is one link to a YouTube video, which is what the build step turns an image
 // line with a YouTube source into (content/blog.ts).
 const VIDEO = /^\[([^\]\n]*)\]\(https:\/\/www\.youtube\.com\/watch\?v=([\w-]{11})\)$/g;
+// A paragraph that is one link to a published photo, which is what the build step turns an image
+// line into (content/blog.ts), with `#WxH` for a size.
+const PHOTO = /^\[([^\]\n]*)\]\((\/media\/[^)\s#]+)(?:#(\d+)x(\d+))?\)$/g;
 const SUPERSCRIPT = /\^([^\s^][^^\n]*?)\^/g;
 // What the build step puts where a quote's first word was `Note:` (content/blog.ts). A modifier
 // sees text alone, so the word itself would make a callout of any paragraph starting with it.
@@ -101,7 +139,8 @@ const linked = (text: string): unknown[] => {
 };
 
 /**
- * The site's modifiers for a post's markdown, run ahead of the markdown's own.
+ * The site's modifiers for a post's markdown, run ahead of the markdown's own: a photo, an
+ * animated heading, the terms, the video, superscript and the callout.
  *
  * Params:
  *   post: the index line, for the posters the build fetched
@@ -109,6 +148,26 @@ const linked = (text: string): unknown[] => {
  *         a click
  */
 export const modifiersOf = (post: Listed, feed = false): TextModifier[] => [
+	// Ahead of the terms, which would split a photo's alt text out of the paragraph it fills.
+	{
+		check: PHOTO,
+		return: (match) => {
+			const [, alt = '', src = '', width, height] = /^\[([^\]\n]*)\]\((\/media\/[^)\s#]+)(?:#(\d+)x(\d+))?\)$/.exec(match)!;
+			const sized = width === undefined ? null : 'sized';
+			if (feed) return <span><img src={src} alt={alt} width={width} height={height} />{alt === '' ? null : [<br />, alt]}</span>;
+			return (
+				<span theme="photo">
+					<Photo theme={['photo_link', sized]} src={src} alt={alt}><img theme={['markdown_image', sized]} src={src} alt={alt} width={width} height={height} style={width === undefined ? undefined : { width: `${width}px` }} /></Photo>
+					{alt === '' ? null : <span theme={['photo_caption', sized]}>{alt}</span>}
+				</span>
+			);
+		},
+	},
+	// Ahead of the terms too: a heading that plays is matched by the whole of its text.
+	...post.animated.map((heading): TextModifier => ({
+		check: new RegExp(`^${heading.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'g'),
+		return: (match: string) => (feed ? match : <AnimatedText text={match} style={heading.style} />),
+	})),
 	...termsOf(post),
 	{
 		check: VIDEO,
@@ -304,6 +363,8 @@ const Article = (props: { post: Listed; body: Body }): unknown => {
 			</header>
 			<Contents post={post} />
 			<Markdown source={props.body.markdown} code={codeOf(props.body.fences)} modifiers={modifiersOf(post)} theme="post" />
+			<Viewer />
+			<Animations />
 			<aside theme="post_author">
 				<img theme="post_author_photo" src="/portrait.webp" width="64" height="64" alt="" />
 				<div theme="column">

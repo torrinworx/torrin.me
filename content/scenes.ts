@@ -3,7 +3,8 @@
 // A post writes one as a fence named `scene:<name>`. content/blog.ts finds those fences and
 // hands each one here: the YAML is read with its line numbers, checked against the scene's
 // fields, and comes back as plain data for the page (frontend/utils/scenes.tsx). A scene added to
-// SCENES below is a new name a post may use, with nothing else in the build to change.
+// SCENES below is a new name a post may use, with nothing else in the build to change. A fence
+// named `gallery`, a photo grid, is read with the same field reader.
 
 import { LineCounter, isMap, isScalar, isSeq, parseDocument } from 'yaml';
 
@@ -422,16 +423,13 @@ export const sceneOf = (language: string | null): string | null =>
 	(language !== null && language.startsWith('scene:') ? language.slice('scene:'.length) : null);
 
 /**
- * Read and check one scene's YAML.
+ * Read YAML against the fields it may have, with the line of each node for a refusal.
  *
- * Throws: `SceneError` at the line at fault, for a name that is no scene, YAML that does not
- * parse, a field the scene does not have, a field it needs and lacks, text that is empty, a
- * list with too few or too many items, or what the scene's own check refuses.
+ * Throws: `SceneError` at the line at fault, for YAML that does not parse, a field that is not
+ * one of `fields`, a field it needs and lacks, text that is empty, or a list with too few or too
+ * many items. `what` names the whole, for the message when it is not fields at all.
  */
-export const readScene = (name: string, yaml: string): Scene => {
-	// Own keys only: `constructor` is no scene.
-	if (!Object.hasOwn(SCENES, name)) throw new SceneError(0, `there is no scene called "${name}"; the scenes are ${sceneNames.join(', ')}`);
-	const kind = SCENES[name as Scene['name']];
+const readFields = (yaml: string, fields: Fields, what: string): { data: Record<string, unknown>; at: (path: readonly (string | number)[]) => number } => {
 	const lines = new LineCounter();
 	const doc = parseDocument(yaml, { lineCounter: lines, uniqueKeys: true });
 	const lineOf = (node: unknown): number => {
@@ -450,7 +448,7 @@ export const readScene = (name: string, yaml: string): Scene => {
 	const read = (node: unknown, fields: Fields, where: string): Record<string, unknown> => {
 		const say = (what: string): string => (where === '' ? what : `${where}: ${what}`);
 		const names = Object.keys(fields).join(', ');
-		if (!isMap(node)) throw new SceneError(lineOf(node), `${where === '' ? 'the scene' : where} has to be fields, as name: value lines; the fields are ${names}`);
+		if (!isMap(node)) throw new SceneError(lineOf(node), `${where === '' ? what : where} has to be fields, as name: value lines; the fields are ${names}`);
 		const out: Record<string, unknown> = {};
 		for (const pair of node.items) {
 			const key = isScalar(pair.key) ? String(pair.key.value) : '';
@@ -484,10 +482,51 @@ export const readScene = (name: string, yaml: string): Scene => {
 		return out;
 	};
 
-	const data = read(doc.contents, kind.fields, '');
+	return { data: read(doc.contents, fields, ''), at: (path) => (path.length === 0 ? 1 : lineOf(doc.getIn(path, true) ?? doc.contents)) };
+};
+
+/**
+ * Read and check one scene's YAML.
+ *
+ * Throws: `SceneError` at the line at fault, for a name that is no scene, what `readFields`
+ * refuses, or what the scene's own check refuses.
+ */
+export const readScene = (name: string, yaml: string): Scene => {
+	// Own keys only: `constructor` is no scene.
+	if (!Object.hasOwn(SCENES, name)) throw new SceneError(0, `there is no scene called "${name}"; the scenes are ${sceneNames.join(', ')}`);
+	const kind = SCENES[name as Scene['name']];
+	const { data, at } = readFields(yaml, kind.fields, 'the scene');
 	const fault = kind.check?.(data as never) ?? null;
-	if (fault !== null) throw new SceneError(fault.at.length === 0 ? 1 : lineOf(doc.getIn(fault.at, true) ?? doc.contents), fault.what);
+	if (fault !== null) throw new SceneError(at(fault.at), fault.what);
 	return { name, data: kind.derive?.(data as never) ?? data } as unknown as Scene;
+};
+
+// --- the photo grid ------------------------------------------------------------------------
+
+/**
+ * A few photos shown small and together, from a fence named `gallery`. `file` is a file in the
+ * post's folder as the post writes it, and `src` where the build published it.
+ */
+export interface Gallery {
+	readonly caption?: string;
+	readonly images: readonly { readonly file: string; readonly alt: string; readonly src?: string }[];
+}
+
+/** Whether a fence is a photo grid. */
+export const isGallery = (language: string | null): boolean => language === 'gallery';
+
+/**
+ * Read and check one gallery's YAML: 2 to 8 images, each a `file` and its `alt`, and an
+ * optional `caption`. Whether each file is there is the build's to check.
+ *
+ * Throws: `SceneError` at the line at fault, for what `readFields` refuses or a file given as a URL.
+ */
+export const readGallery = (yaml: string): Gallery => {
+	const { data, at } = readFields(yaml, { caption: 'text?', images: { each: 'image', min: 2, max: 8, fields: { file: 'text', alt: 'text' } } }, 'the gallery');
+	const gallery = data as unknown as Gallery;
+	const url = gallery.images.findIndex((image) => /^[a-z][a-z0-9+.-]*:/i.test(image.file));
+	if (url >= 0) throw new SceneError(at(['images', url, 'file']), `image ${String(url + 1)}: file is a file in the post's folder, not a URL`);
+	return gallery;
 };
 
 /** The words of a scene in reading order, for a feed, which shows them as a list under the still frame. */

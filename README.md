@@ -141,6 +141,26 @@ callout (a quote whose first word is `Note:`), and a YouTube video: write it as 
 source is the video's URL, `![What it shows](https://youtu.be/<id>)`, and the page shows the
 poster with a Play button; the player loads from `youtube-nocookie.com` only after the click.
 
+An image fills the column. One written with a size, `![The pin](pin.jpg =360x289)`, shows at that
+width in the middle of the column, and shrinks on a phone. A click on any photo in a post, a figure
+or one in a gallery, opens the viewer (`frontend/utils/viewer.tsx`): the photo as large as the
+window allows, its alt text under it, closed by the X, a click beside the photo or Escape, with the
+keyboard back on the photo after. Each photo is a link to its file, so a feed, a page without
+script and a click that opens a new tab still reach the whole photo. The build writes each image
+line in the twin as that link, `[The pin](/media/<slug>/pin.<hash>.jpg#360x289)`.
+
+A heading can carry a small pixel emblem that plays once: end its line with `{animate: <name>}`,
+as `## Atoms {animate: atoms}`. The names are `atoms` (electrons on three orbits round a nucleus),
+`qubits` (a Bloch sphere whose state arrow flips between its poles and settles up) and `bits` (two
+flipping digits, and rows of 0s and 1s over the words that decode left to right). When the whole
+heading is in the top two thirds of the window, the emblem plays for about two seconds and a
+curtain of pixels over the words dissolves into them. Then the emblem stands still beside the
+plain heading. The build drops the marker, so the heading keeps its level, its text, its id and
+its place in the contents list, and refuses a name that is no animation. The words are real text
+from the start, under the canvas. With motion off the emblem is still and the words are bare, and
+in a feed it is the plain heading. A new style is a name in `ANIMATIONS`
+(`frontend/utils/heading.tsx`) and a case in `createEmblem` (`frontend/scenes.ts`).
+
 `npm run content` (`content/blog.ts`) reads every post and refuses one with no title or date, a
 published one with no description, a published one dated after today without `future: true`, or
 two files that would share a URL. It rewrites `[text][n]` references to inline links, copies each
@@ -151,8 +171,33 @@ the fence tokens per post (`frontend/public/blog/`). A published post fails the 
 image is missing, when an image line would show as text (a space in the source, a size that is
 not `=WxH`), or when it links `/blog/<slug>` to a draft or to no post; for a draft the first two
 are warnings and the links go unchecked. An image whose path climbs out of the post's folder
-fails the build either way. Everything it writes is generated and ignored by git; the sources
-under `content/` are what is committed.
+fails the build either way. The same goes for each image of a gallery (below). Everything it
+writes is generated and ignored by git; the sources under `content/` are what is committed.
+
+### Photo grids
+
+Several photos can go together, smaller, in a grid: write a fence named `gallery`, with YAML
+inside, on its own between paragraphs:
+
+````markdown
+```gallery
+caption: Optional one line under the grid
+images:
+  - file: finite-stage.jpg
+    alt: Matt Stevens of Finite Robotics on stage
+  - file: finite-orchards.jpg
+    alt: One orchard in 2025, 13 in 2026
+```
+````
+
+`images` holds 2 to 8, each a `file` in the post's folder and its `alt`, the words a screen
+reader reads for it. `caption` is optional and shows under the grid. A file is checked, hashed and
+copied as any image is, and a URL is refused. Up to four photos stand in one row, five or six in
+rows of three, seven or eight in rows of four. On a phone there are two to a row. Each photo is
+cropped to 4:3, a phone camera's own shape, so a row lines up whatever was shot. Crop a photo
+yourself when its subject is near an edge. The page draws no border round a grid photo, so bake
+its frame into the file, as day two's are. A tap opens it in the viewer. In a feed each photo is a
+plain image with its alt text under it. A gallery's YAML is left out of the post's reading time.
 
 ### Pixel scenes
 
@@ -350,7 +395,9 @@ figures:
 **`schedule`**: an event's program as it went, 2 to 6 `items`, each a `name`, an optional `line`
 under it and an optional `kind`: `talk` (a podium, the default), `panel` (three people at a
 table) or `drinks` (a stein that fills). Bunting unrolls across the top, then a marker travels
-down a rail, and each item's picture and words come in as it arrives. There is no field for a
+along a rail, and each item's picture and words come in as it arrives. On a wide page the items
+stand in a row across the column under a rail that runs across. On a phone they stack beside a
+rail that runs down. There is no field for a
 time. A time the post states can go in a `line`.
 
 ```yaml
